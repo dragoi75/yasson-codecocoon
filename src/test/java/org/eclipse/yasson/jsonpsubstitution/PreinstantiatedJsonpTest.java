@@ -71,7 +71,7 @@ public class PreinstantiatedJsonpTest {
 
     @Before
     public void setUp() {
-        // Create Jsonb and serialize
+        // Create Jsonb and serializeValue
         JsonBindingProvider provider = new JsonBindingProvider();
         JsonbBuilder builder = provider.create();
         jsonb = (YassonJsonb) builder.build();

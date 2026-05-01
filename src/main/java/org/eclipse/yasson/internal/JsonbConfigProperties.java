@@ -22,7 +22,7 @@ import org.eclipse.yasson.internal.model.customization.ordering.LexicographicalO
 import org.eclipse.yasson.internal.model.customization.ordering.PropOrderStrategy;
 import org.eclipse.yasson.internal.model.customization.ordering.PropertyOrdering;
 import org.eclipse.yasson.internal.model.customization.ordering.ReverseOrderStrategy;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.NullSerializer;
@@ -125,7 +125,7 @@ public class JsonbConfigProperties {
         }
         Object result = property.get();
         if (!(result instanceof Map)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonProperties.USER_TYPE_MAPPING, Map.class.getSimpleName()));
+            throw new JsonbException(Messages.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonProperties.USER_TYPE_MAPPING, Map.class.getSimpleName()));
         }
         return (Map<Class<?>, Class<?>>) result;
     }
@@ -150,7 +150,7 @@ public class JsonbConfigProperties {
         final Optional<Object> formatProperty = jsonbConfig.getProperty(JsonbConfig.DATE_FORMAT);
         return formatProperty.map(f -> {
             if (!(f instanceof String)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.DATE_FORMAT, String.class.getSimpleName()));
+                throw new JsonbException(Messages.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.DATE_FORMAT, String.class.getSimpleName()));
             }
             return (String) f;
         }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
@@ -167,7 +167,7 @@ public class JsonbConfigProperties {
                 case PropertyOrderStrategy.ANY:
                     return new AnyOrderStrategy();
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.PROPERTY_ORDER, strategy));
             }
         }
         //default by spec
@@ -179,7 +179,7 @@ public class JsonbConfigProperties {
         if (property.isPresent()) {
             final Object strategy = property.get();
             if (!(strategy instanceof String)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+                throw new JsonbException(Messages.getMessage(MessageConstants.PROPERTY_ORDER, strategy));
             }
             switch ((String)strategy) {
                 case PropertyOrderStrategy.LEXICOGRAPHICAL:
@@ -187,7 +187,7 @@ public class JsonbConfigProperties {
                 case PropertyOrderStrategy.ANY:
                     return Optional.of((String)strategy);
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.PROPERTY_ORDER, strategy));
             }
         }
         return Optional.empty();
@@ -208,7 +208,7 @@ public class JsonbConfigProperties {
             return foundNamingStrategy;
         }
         if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
+            throw new JsonbException(Messages.getMessage(MessageConstants.PROPERTY_NAMING_STRATEGY_INVALID));
         }
         return (PropertyNamingStrategy) property.get();
     }
@@ -282,7 +282,7 @@ public class JsonbConfigProperties {
         if (property.isPresent()) {
             final Object result = property.get();
             if (!(result instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, Boolean.class.getSimpleName()));
+                throw new JsonbException(Messages.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, Boolean.class.getSimpleName()));
             }
             return (boolean) result;
         }
@@ -320,7 +320,7 @@ public class JsonbConfigProperties {
         final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
         return  localeProperty.map(loc -> {
             if (!(loc instanceof Locale)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
+                throw new JsonbException(Messages.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
             }
             return (Locale) loc;
         }).orElseGet(Locale::getDefault);

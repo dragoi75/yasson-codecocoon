@@ -19,7 +19,7 @@ import javax.json.JsonValue;
  * Common serializer functionality.
  *
  * @author Roman Grigoriadi
- * @param <T> Type to serialize.
+ * @param <T> Type to serializeValue.
  */
 public abstract class AbstractJsonpSerializer<T extends JsonValue> extends AbstractContainerSerializer<T> {
 

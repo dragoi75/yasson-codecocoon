@@ -13,7 +13,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
@@ -117,7 +117,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             final ValueWrapper valueWrapper = values.get(param.getName());
             //required by spec
             if (valueWrapper == null){
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
+                throw new JsonbException(Messages.getMessage(MessageConstants.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
             }
             paramValues.add(valueWrapper.getValue());
         }
@@ -180,7 +180,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
      */
     private void skipJsonProperty(JsonbParser parser, JsonbContext jsonbContext) {
         if (jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
+            throw new JsonbException(Messages.getMessage(MessageConstants.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
         }
         parser.skipJsonStructure();
     }

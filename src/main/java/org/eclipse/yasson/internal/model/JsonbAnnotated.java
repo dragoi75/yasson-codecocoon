@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -71,7 +71,7 @@ public class JsonbAnnotated implements AnnotatedElement {
      */
     public void putAnnotation(Annotation annotation) {
         if (annotations.containsKey(annotation.annotationType())) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Annotation already present: " + annotation));
+            throw new JsonbException(Messages.getMessage(MessageConstants.INTERNAL_ERROR, "Annotation already present: " + annotation));
         }
         annotations.put(annotation.annotationType(), annotation);
     }

@@ -35,7 +35,7 @@ import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 /**
@@ -131,7 +131,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
                 if (jsonEvent == JsonParser.Event.VALUE_NULL) {
                     return NullDeserializer.INSTANCE;
                 }
-                throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
+                throw new JsonbException(Messages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
             }
             return wrapAdapted(adapterInfoOptional, supportedTypeDeserializer.get());
         }
@@ -158,7 +158,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             } else if (rawType.isInterface()) {
                 Class<?> mappedType = getInterfaceMappedType(rawType);
                 if (mappedType == null) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
                 }
                 runtimeType = mappedType;
                 classModel = getClassModel(mappedType);
@@ -258,7 +258,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             }
             if (implementationClass != null) {
                 if (!interfaceType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
                 }
                 return implementationClass;
             }

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.jsonstructure;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonStructure;
@@ -132,7 +132,7 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
         JsonStructureBuilder current = builders.peek();
         if (!(current instanceof JsonObjectBuilder)) {
             throw new JsonbException(Messages.getMessage(
-                    MessageKeys.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
+                    MessageConstants.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
             + "because "+current.getClass() + " is not an instance of "+ JsonObjectBuilder.class));
         }
         return (JsonObjectBuilder) current;

@@ -24,7 +24,7 @@ import javax.json.stream.JsonGenerator;
  *
  * @author Roman Grigoriadi
  */
-public class JsonValueSerializer extends AbstractValueTypeSerializer<JsonValue> {
+public class JsonValueSerializer extends AbstractValueSerializer<JsonValue> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class JsonValueSerializer extends AbstractValueTypeSerializer<JsonValue> 
     }
 
     @Override
-    protected void serialize(JsonValue obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(JsonValue obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj);
     }
 }

@@ -161,7 +161,7 @@ public class CollectionsTest {
     @SuppressWarnings("unchecked")
     public void testMarshallArray() {
 
-        //support of arrays of types that JSON Binding is able to serialize
+        //support of arrays of types that JSON Binding is able to serializeValue
         //Byte[], Short[], Integer[] Long[], Float[], Double[], BigInteger[], BigDecimal[], Number[]
         //Object[], JsonArray[], JsonObject[], JsonStructure[]
         //String[], Character[]

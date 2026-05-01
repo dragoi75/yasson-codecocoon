@@ -24,7 +24,7 @@ import java.time.Period;
  * 
  * @author David Kral
  */
-public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
+public class PeriodTypeSerializer extends AbstractValueSerializer<Period> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
     }
 
     @Override
-    protected void serialize(Period obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Period obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj.toString());
     }
 }

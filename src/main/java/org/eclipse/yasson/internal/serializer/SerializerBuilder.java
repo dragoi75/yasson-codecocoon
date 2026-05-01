@@ -82,7 +82,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
             }
         }
 
-        final Optional<AbstractValueTypeSerializer<?>> supportedTypeSerializer = getSupportedTypeSerializer(objectClass);
+        final Optional<AbstractValueSerializer<?>> supportedTypeSerializer = getSupportedTypeSerializer(objectClass);
         if (supportedTypeSerializer.isPresent()) {
             return supportedTypeSerializer.get();
         }
@@ -112,7 +112,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
             return new OptionalObjectSerializer<>(this);
         } else {
             jsonbContext.getMappingContext().addSerializerProvider(objectClass, new ObjectSerializerProvider());
-            return new ObjectSerializer<>(this);
+            return new ObjectMarshaller<>(this);
         }
 
     }
@@ -145,7 +145,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
         }
     }
 
-    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
+    private Optional<AbstractValueSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
         final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers.getInstance().findValueSerializerProvider(rawType);
         if (supportedTypeSerializerOptional.isPresent()) {
             return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(customization));

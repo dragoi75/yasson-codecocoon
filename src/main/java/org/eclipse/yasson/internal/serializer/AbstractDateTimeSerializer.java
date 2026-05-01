@@ -30,9 +30,9 @@ import java.util.Locale;
  * Abstract class for converting date objects.
  *
  * @author Roman Grigoriadi
- * @param <T> Type to serialize.
+ * @param <T> Type to serializeValue.
  */
-public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractDateTimeSerializer<T> extends AbstractValueSerializer<T> {
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
@@ -146,7 +146,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     }
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, Marshaller marshaller) {
         throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
     }
 }

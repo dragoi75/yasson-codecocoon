@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -99,7 +99,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
                 case END_ARRAY:
                     return;
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.NOT_VALUE_TYPE, event));
             }
         }
     }

@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.AbstractItem;
 import org.eclipse.yasson.internal.serializer.EmbeddedItem;
@@ -74,7 +74,7 @@ public class ReflectionUtils {
      */
     public static Class<?> getRawType(Type type) {
         return getOptionalRawType(type)
-                .orElseThrow(()->new JsonbException(Messages.getMessage(MessageKeys.TYPE_RESOLUTION_ERROR, type)));
+                .orElseThrow(()->new JsonbException(Messages.getMessage(MessageConstants.TYPE_RESOLUTION_ERROR, type)));
     }
 
     /**
@@ -139,7 +139,7 @@ public class ReflectionUtils {
     public static Type resolveItemVariableType(RuntimeTypeInfo item, TypeVariable<?> typeVariable) {
         if (item == null) {
             //Bound not found, treat it as an Object.class
-            logger.warning(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND, typeVariable, typeVariable.getGenericDeclaration()));
+            logger.warning(Messages.getMessage(MessageConstants.GENERIC_BOUND_NOT_FOUND, typeVariable, typeVariable.getGenericDeclaration()));
             return Object.class;
         }
 
@@ -179,7 +179,7 @@ public class ReflectionUtils {
                 resolvedArgs[i] = new VariableTypeInheritanceSearch().searchParametrizedType(typeToSearch, (TypeVariable<?>) unresolvedArgs[i]);
                 if (resolvedArgs[i] == null) {
                     //No generic information available
-                    throw new IllegalStateException(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND, unresolvedArgs[i], typeToSearch));
+                    throw new IllegalStateException(Messages.getMessage(MessageConstants.GENERIC_BOUND_NOT_FOUND, unresolvedArgs[i], typeToSearch));
                 }
             }
             if (resolvedArgs[i] instanceof ParameterizedType) {
@@ -223,7 +223,7 @@ public class ReflectionUtils {
                 return declaredConstructor;
             } catch (NoSuchMethodException e) {
                 if (required) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, clazz), e);
+                    throw new JsonbException(Messages.getMessage(MessageConstants.NO_DEFAULT_CONSTRUCTOR, clazz), e);
                 }
                 return null;
             }
@@ -258,7 +258,7 @@ public class ReflectionUtils {
             }
             current = current.getSuperclass();
         }
-        throw new JsonbException(Messages.getMessage(MessageKeys.NON_PARAMETRIZED_TYPE, parameterizedInterface));
+        throw new JsonbException(Messages.getMessage(MessageConstants.NON_PARAMETRIZED_TYPE, parameterizedInterface));
     }
 
     /**

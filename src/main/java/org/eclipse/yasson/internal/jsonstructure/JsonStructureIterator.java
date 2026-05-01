@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.jsonstructure;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonString;
@@ -71,7 +71,7 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
             case NULL:
                 return JsonParser.Event.VALUE_NULL;
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "unknown json value: " + value.getValueType()));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.INTERNAL_ERROR, "unknown json value: " + value.getValueType()));
         }
 
     }

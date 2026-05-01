@@ -16,7 +16,7 @@ package org.eclipse.yasson.internal.serializer;
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbConfig;
@@ -29,7 +29,7 @@ import java.io.UnsupportedEncodingException;
  * 
  * @author Roman Grigoriadi
  */
-public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
+public class StringTypeSerializer extends AbstractValueSerializer<String> {
 
     /**
      * Creates a new instance.
@@ -45,7 +45,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
             try {
                 String newString = new String(object.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(object)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(Messages.getMessage(MessageConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -55,7 +55,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
     }
 
     @Override
-    protected void serialize(String obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(String obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(toJson(obj, marshaller.getJsonbContext()));
     }
 }

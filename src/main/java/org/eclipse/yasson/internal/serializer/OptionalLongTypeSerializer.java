@@ -28,7 +28,7 @@ import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.ha
  * 
  * @author David Kral
  */
-public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<OptionalLong> {
+public class OptionalLongTypeSerializer extends AbstractValueSerializer<OptionalLong> {
 
     /**
      * Creates a new instance.
@@ -40,7 +40,7 @@ public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<Opti
     }
 
     @Override
-    protected void serialize(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
         if (!handleEmpty(obj, OptionalLong::isPresent, customization, generator, marshaller)) {
             generator.write(obj.getAsLong());
         }

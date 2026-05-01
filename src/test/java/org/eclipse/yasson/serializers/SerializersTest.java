@@ -325,7 +325,7 @@ public class SerializersTest {
         Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withSerializers(new RecursiveSerializer()).withDeserializers(new RecursiveDeserializer()));
 
         Box box = new Box();
-        box.boxStr = "Box to serialize";
+        box.boxStr = "Box to serializeValue";
         try {
             jsonb.toJson(box);
             fail();

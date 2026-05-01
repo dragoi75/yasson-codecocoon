@@ -14,9 +14,9 @@
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.internal.serializer.AbstractValueTypeSerializer;
+import org.eclipse.yasson.internal.serializer.AbstractValueSerializer;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
 import org.eclipse.yasson.internal.serializer.SerializerBuilder;
@@ -79,7 +79,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
             throw e;
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(Messages.getMessage(MessageConstants.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
                 if (close) {
@@ -142,8 +142,8 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         }
         final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
         if (jsonbContext.getConfigProperties().isStrictIJson() &&
-                rootSerializer instanceof AbstractValueTypeSerializer) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+                rootSerializer instanceof AbstractValueSerializer) {
+            throw new JsonbException(Messages.getMessage(MessageConstants.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSerializer.serialize(root, generator, this);
     }

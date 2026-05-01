@@ -25,7 +25,7 @@ import java.net.URI;
  * 
  * @author David Kral
  */
-public class URITypeSerializer extends AbstractValueTypeSerializer<URI> {
+public class URITypeSerializer extends AbstractValueSerializer<URI> {
 
     /**
      * Creates a new instance.
@@ -37,7 +37,7 @@ public class URITypeSerializer extends AbstractValueTypeSerializer<URI> {
     }
 
     @Override
-    protected void serialize(URI obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(URI obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj.toString());
     }
 }

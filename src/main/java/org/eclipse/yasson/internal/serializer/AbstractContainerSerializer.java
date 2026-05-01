@@ -50,7 +50,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
     /**
      * Creates a new instance.
      *
-     * @param wrapper Item to serialize.
+     * @param wrapper Item to serializeValue.
      * @param runtimeType Runtime type of the item.
      * @param classModel Class model.
      */

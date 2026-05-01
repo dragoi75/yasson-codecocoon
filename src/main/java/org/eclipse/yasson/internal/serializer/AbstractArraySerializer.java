@@ -24,7 +24,7 @@ import java.lang.reflect.Type;
  * Common serializer for arrays.
  *
  * @author Roman Grigoriadi
- * @param <T> Type to serialize.
+ * @param <T> Type to serializeValue.
  */
 public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedItem {
 

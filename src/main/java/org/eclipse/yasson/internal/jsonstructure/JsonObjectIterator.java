@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.jsonstructure;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonObject;
@@ -51,7 +51,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     private void nextKey() {
         if (!keyIterator.hasNext()) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Object is empty"));
+            throw new JsonbException(Messages.getMessage(MessageConstants.INTERNAL_ERROR, "Object is empty"));
         }
         currentKey = keyIterator.next();
     }
@@ -110,7 +110,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     JsonbException createIncompatibleValueError() {
-        return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
+        return new JsonbException(Messages.getMessage(MessageConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
     }
 
     private void setState(State state) {

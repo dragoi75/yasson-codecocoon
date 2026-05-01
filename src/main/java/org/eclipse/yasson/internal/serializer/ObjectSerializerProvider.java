@@ -23,6 +23,6 @@ public class ObjectSerializerProvider implements ContainerSerializerProvider {
 
     @Override
     public JsonbSerializer<?> provideSerializer(JsonbPropertyInfo propertyInfo) {
-        return new ObjectSerializer<>(propertyInfo.getWrapper(), propertyInfo.getRuntimeType(), propertyInfo.getClassModel());
+        return new ObjectMarshaller<>(propertyInfo.getWrapper(), propertyInfo.getRuntimeType(), propertyInfo.getClassModel());
     }
 }

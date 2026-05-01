@@ -25,31 +25,31 @@ import javax.json.stream.JsonGenerator;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<T> {
+public abstract class AbstractValueSerializer<T> implements JsonbSerializer<T> {
 
     protected final Customization customization;
 
     /**
      * Creates a new instance.
      *
-     * @param customization Model customization.
+     * @param configOptions Model customization.
      */
-    public AbstractValueTypeSerializer(Customization customization) {
-        this.customization = customization;
+    public AbstractValueSerializer(Customization configOptions) {
+        this.customization = configOptions;
     }
 
     /**
      * Serializes an object to JSON.
      *
-     * @param obj Object to serialize.
-     * @param generator JSON generator to use.
-     * @param ctx JSON-B mapper context.
+     * @param value Object to serializeValue.
+     * @param writer JSON generator to use.
+     * @param context JSON-B mapper context.
      */
     @Override
-    public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        Marshaller marshaller = (Marshaller) ctx;
-        serialize(obj, generator, marshaller);
+    public void serialize(T value, JsonGenerator writer, SerializationContext context) {
+        Marshaller serializer = (Marshaller) context;
+        serializeValue(value, writer, serializer);
     }
 
-    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
+    protected abstract void serializeValue(T value, JsonGenerator writer, Marshaller serializer);
 }
