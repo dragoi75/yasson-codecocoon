@@ -60,6 +60,6 @@ public class JsonBindingBuilder implements JsonbBuilder {
 
     @Override
     public Jsonb build() {
-        return new JsonBinding(this);
+        return new JsonBinder(this);
     }
 }

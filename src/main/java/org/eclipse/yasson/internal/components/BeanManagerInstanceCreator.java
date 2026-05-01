@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.components;
 
-import org.eclipse.yasson.internal.JsonBinding;
+import org.eclipse.yasson.internal.JsonBinder;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * CDI instance manager.
- * Instances are created and stored per instance of {@link JsonBinding}.
- * Calling close on JsonBinding, cleans up Jsonb CDI instances and in case of "dependant" scope its dependencies.
+ * Instances are created and stored per instance of {@link JsonBinder}.
+ * Calling close on JsonBinder, cleans up Jsonb CDI instances and in case of "dependant" scope its dependencies.
  *
  * CDI API dependency is optional, this class is never referenced / loaded if CDI API is not resolvable.
  *

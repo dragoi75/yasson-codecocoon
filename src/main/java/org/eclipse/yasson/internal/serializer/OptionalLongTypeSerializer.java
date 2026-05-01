@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.Serializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -36,7 +36,7 @@ public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<Opti
     }
 
     @Override
-    protected void serialize(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(OptionalLong obj, JsonGenerator generator, Serializer marshaller) {
         if (obj.isPresent()) {
             generator.write(obj.getAsLong());
         } else if (customization.isNillable()) {

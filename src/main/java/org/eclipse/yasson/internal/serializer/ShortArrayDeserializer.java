@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
     }
 
     @Override
-    public short[] getInstance(Unmarshaller unmarshaller) {
+    public short[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final short[] shortArray = new short[size];
         for(int i=0; i<size; i++) {

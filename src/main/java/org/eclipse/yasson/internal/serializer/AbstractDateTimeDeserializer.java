@@ -14,8 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -49,7 +48,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
     }
 
     @Override
-    public T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public T deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(unmarshaller.getJsonbContext());
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return fromInstant(Instant.ofEpochMilli(Long.parseLong(jsonValue)));

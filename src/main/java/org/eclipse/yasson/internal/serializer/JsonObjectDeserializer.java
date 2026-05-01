@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 import javax.json.JsonObject;
 
@@ -28,7 +28,7 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
     private JsonObject jsonObject;
 
     @Override
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeInternal(JsonbParser parser, JsonbUnmarshaller context) {
         this.jsonObject = parser.getObject();
     }
 
@@ -43,7 +43,7 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
 
 
     @Override
-    public JsonObject getInstance(Unmarshaller unmarshaller) {
+    public JsonObject getInstance(JsonbUnmarshaller unmarshaller) {
         return jsonObject;
     }
 }

@@ -14,12 +14,10 @@ package org.eclipse.yasson.internal;
 
 
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.serializer.CurrentItem;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
 import org.eclipse.yasson.internal.serializer.DeserializerBuilder;
 
 import javax.json.bind.serializer.DeserializationContext;
-import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.Type;
 
@@ -29,50 +27,50 @@ import java.lang.reflect.Type;
  *
  * @author Roman Grigoriadi
  */
-public class Unmarshaller extends ProcessingContext implements DeserializationContext {
+public class JsonbUnmarshaller extends ProcessingContext implements DeserializationContext {
 
     /**
      * Creates instance of unmarshaller.
      *
-     * @param jsonbContext context to use
+     * @param bindingContext context to use
      */
-    public Unmarshaller(JsonbContext jsonbContext) {
-        super(jsonbContext);
+    public JsonbUnmarshaller(JsonbContext bindingContext) {
+        super(bindingContext);
     }
 
     @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonStream) {
+        return deserializeItem(targetClass, jsonStream);
     }
 
     @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
+    public <T> T deserialize(Type valueType, JsonParser jsonStream) {
+        return deserializeItem(valueType, jsonStream);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T deserializeItem(Type type, JsonParser parser) {
-        DeserializerBuilder deserializerBuilder = new DeserializerBuilder(jsonbContext)
-                .withType(type).withJsonValueType(getRootEvent(parser));
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        if (!DefaultSerializers.getInstance().isKnownType(rawType)) {
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
-            deserializerBuilder.withCustomization(classModel.getCustomization());
+    private <T> T deserializeItem(Type valueType, JsonParser jsonStream) {
+        DeserializerBuilder unmarshallerBuilder = new DeserializerBuilder(jsonbContext)
+                .withType(valueType).withJsonValueType(getRootEvent(jsonStream));
+        Class<?> rawClass = ReflectionUtils.getRawType(valueType);
+        if (!DefaultSerializers.getInstance().isKnownType(rawClass)) {
+            ClassModel typeModel = getMappingContext().getOrCreateClassModel(rawClass);
+            unmarshallerBuilder.withCustomization(typeModel.getCustomization());
         }
 
-        return (T) deserializerBuilder.build().deserialize(parser, this, type);
+        return (T) unmarshallerBuilder.build().deserialize(jsonStream, this, valueType);
     }
 
     /**
      * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
      * custom user deserializer.
      */
-    private JsonParser.Event getRootEvent(JsonParser parser) {
-        if (parser.getLocation().getStreamOffset() == 0) {
-            return parser.next();
+    private JsonParser.Event getRootEvent(JsonParser jsonStream) {
+        if (jsonStream.getLocation().getStreamOffset() == 0) {
+            return jsonStream.next();
         }
-        final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
-        return lastEvent == JsonParser.Event.KEY_NAME ? parser.next() : lastEvent;
+        final JsonParser.Event rootEvent = ((JsonbParser) jsonStream).getCurrentLevel().getLastEvent();
+        return rootEvent == JsonParser.Event.KEY_NAME ? jsonStream.next() : rootEvent;
     }
 
 }

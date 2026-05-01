@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.Serializer;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.PropertyModel;
@@ -56,7 +56,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
     @Override
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+        final PropertyModel[] allProperties = ((Serializer) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
         for (PropertyModel model : allProperties) {
             marshallProperty(object, generator, ctx, model);
         }
@@ -74,7 +74,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
     @SuppressWarnings("unchecked")
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
-        Marshaller marshaller = (Marshaller) ctx;
+        Serializer marshaller = (Serializer) ctx;
 
         if (propertyModel.isReadable()) {
             final Object propertyValue = propertyModel.getValue(object);

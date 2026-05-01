@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.Serializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -47,7 +47,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        final JsonbContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
+        final JsonbContext jsonbContext = ((Serializer) ctx).getJsonbContext();
         final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
         generator.write(toJson(obj, formatter, jsonbContext));
     }
@@ -146,7 +146,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     }
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(T obj, JsonGenerator generator, Serializer marshaller) {
         throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
     }
 }

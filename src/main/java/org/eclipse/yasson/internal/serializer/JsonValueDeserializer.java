@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -60,7 +60,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
     }
 
     @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonValue deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
 }

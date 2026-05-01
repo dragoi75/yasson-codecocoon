@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -48,11 +48,11 @@ public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<O
             return OptionalInt.empty();
         }
         final String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        return deserialize(value, (JsonbUnmarshaller) ctx, rtType);
     }
 
     @Override
-    protected OptionalInt deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalInt deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         try {
             return OptionalInt.of(Integer.parseInt(jsonValue));
         } catch (NumberFormatException e) {

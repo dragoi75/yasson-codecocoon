@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.bind.serializer.DeserializationContext;
@@ -48,13 +48,13 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      * Extracts single string value for conversion.
      *
      * @param parser Parser to get value from.
-     * @param ctx Unmarshaller.
+     * @param ctx JsonbUnmarshaller.
      * @param rtType return type.
      * @return Deserialized object.
      */
     @Override
     public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        Unmarshaller unmarshaller = (Unmarshaller) ctx;
+        JsonbUnmarshaller unmarshaller = (JsonbUnmarshaller) ctx;
         final JsonParser.Event event = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
         if (event == JsonParser.Event.VALUE_NULL) {
             return null;
@@ -68,11 +68,11 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      * Convert string value to object.
      *
      * @param jsonValue Json value.
-     * @param unmarshaller Unmarshaller instance.
+     * @param unmarshaller JsonbUnmarshaller instance.
      * @param rtType Runtime type.
      * @return Deserialized object.
      */
-    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected T deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException("Operation not supported in " + getClass());
     }
 

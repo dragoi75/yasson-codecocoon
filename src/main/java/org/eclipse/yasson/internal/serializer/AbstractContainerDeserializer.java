@@ -56,9 +56,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      */
     @Override
     public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
+        JsonbUnmarshaller ctx = (JsonbUnmarshaller) context;
         deserializeInternal((JsonbParser) parser, ctx);
-        return getInstance((Unmarshaller) context);
+        return getInstance((JsonbUnmarshaller) context);
     }
 
     /**
@@ -67,9 +67,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param unmarshaller Current deserialization context.
      * @return An instance of deserializing item.
      */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
+    protected abstract T getInstance(JsonbUnmarshaller unmarshaller);
 
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeInternal(JsonbParser parser, JsonbUnmarshaller context) {
         parserContext = moveToFirst(parser);
         while (parser.hasNext()) {
             final JsonParser.Event event = parser.next();
@@ -103,7 +103,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser Json parser.
      * @param context Current unmarshalling context.
      */
-    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
+    protected abstract void deserializeNext(JsonParser parser, JsonbUnmarshaller context);
 
     /**
      * Move to first event for current deserializer structure.

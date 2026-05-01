@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.Serializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -50,7 +50,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(T obj, JsonGenerator generator, Serializer marshaller) {
         if (formatter != null) {
             final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
             ((DecimalFormat)format).applyPattern(formatter.getFormat());

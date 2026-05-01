@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.UserDeserializerParser;
 
@@ -52,13 +52,13 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     @Override
     @SuppressWarnings("unchecked")
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
         return deserializerResult;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    public void deserializeInternal(JsonbParser parser, JsonbUnmarshaller context) {
         parserContext = moveToFirst(parser);
         JsonParser.Event lastEvent = parserContext.getLastEvent();
         final UserDeserializerParser userDeserializerParser = new UserDeserializerParser(parser);
@@ -70,7 +70,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
         throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 

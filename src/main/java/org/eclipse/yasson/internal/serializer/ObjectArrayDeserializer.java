@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public T[] getInstance(Unmarshaller unmarshaller) {
+    public T[] getInstance(JsonbUnmarshaller unmarshaller) {
         if (arrayInstance == null || arrayInstance.length != items.size()) {
             arrayInstance = (T[]) Array.newInstance(componentClass, items.size());
         }
