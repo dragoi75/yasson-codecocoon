@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -55,7 +55,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
     }
 
     @Override
-    protected void serialize(String obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(String obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(toJson(obj, marshaller.getJsonbContext()));
     }
 }

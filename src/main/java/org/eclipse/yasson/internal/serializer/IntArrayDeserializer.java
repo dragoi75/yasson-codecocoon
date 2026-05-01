@@ -26,7 +26,7 @@ import java.util.List;
 public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
     private final List<Integer> items = new ArrayList<>();
 
-    protected IntArrayDeserializer(DeserializerBuilder builder) {
+    protected IntArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

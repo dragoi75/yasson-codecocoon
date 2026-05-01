@@ -29,7 +29,7 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
-    protected ObjectArrayDeserializer(DeserializerBuilder builder) {
+    protected ObjectArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

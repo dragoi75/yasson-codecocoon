@@ -27,7 +27,7 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
 
     private final List<Character> items = new ArrayList<>();
 
-    protected CharArrayDeserializer(DeserializerBuilder builder) {
+    protected CharArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

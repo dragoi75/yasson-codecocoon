@@ -38,7 +38,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     protected final ClassModel componentClassModel;
 
-    protected AbstractArrayDeserializer(DeserializerBuilder builder) {
+    protected AbstractArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
         if (getRuntimeType() instanceof GenericArrayType) {
             componentClass = ReflectionUtils.resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());

@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.YassonProperties;
+import org.eclipse.yasson.YassonConfiguration;
 import org.eclipse.yasson.internal.model.ReverseTreeMap;
 import org.eclipse.yasson.internal.model.customization.naming.DefaultNamingStrategies;
 import org.eclipse.yasson.internal.model.customization.naming.IdentityStrategy;
@@ -47,7 +47,7 @@ import java.util.TreeMap;
  *
  * @author Roman Grigoriadi
  */
-public class JsonbConfigProperties {
+public class JsonbConfigurationProperties {
 
     private final JsonbConfig jsonbConfig;
 
@@ -75,23 +75,23 @@ public class JsonbConfigProperties {
 
     private final Class<?> defaultMapImplType;
 
-    public JsonbConfigProperties(JsonbConfig jsonbConfig) {
+    public JsonbConfigurationProperties(JsonbConfig jsonbConfig) {
         this.jsonbConfig = jsonbConfig;
-        this.binaryDataStrategy = initBinaryDataStrategy();
-        this.propertyNamingStrategy = initPropertyNamingStrategy();
-        this.propertyVisibilityStrategy = initPropertyVisibilityStrategy();
-        this.propertyOrdering = new PropertyOrdering(initOrderStrategy());
-        this.locale = initConfigLocale();
-        this.dateFormatter = initDateFormatter(this.locale);
-        this.nullable = initConfigNullable();
-        this.failOnUnknownProperties = initConfigFailOnUnknownProperties();
-        this.strictIJson = initStrictJson();
+        this.binaryDataStrategy = resolveBinaryDataStrategy();
+        this.propertyNamingStrategy = resolvePropertyNamingStrategy();
+        this.propertyVisibilityStrategy = resolvePropertyVisibilityStrategy();
+        this.propertyOrdering = new PropertyOrdering(resolveOrderStrategy());
+        this.locale = getLocaleFromConfig();
+        this.dateFormatter = initJsonbDateFormatter(this.locale);
+        this.nullable = isNullValuesEnabled();
+        this.failOnUnknownProperties = getFailOnUnknownProperties();
+        this.strictIJson = isStrictJson();
         this.userTypeMapping = initUserTypeMapping();
-        this.zeroTimeDefaulting = initZeroTimeDefaultingForJavaTime();
-        this.defaultMapImplType = initDefaultMapImplType();
+        this.zeroTimeDefaulting = isZeroTimeParseDefaultingEnabled();
+        this.defaultMapImplType = determineDefaultMapImplType();
     }
 
-    private Class<?> initDefaultMapImplType() {
+    private Class<?> determineDefaultMapImplType() {
         Optional<String> os = getPropertyOrderStrategy();
         if (os.isPresent()) {
             switch (os.get()) {
@@ -106,24 +106,24 @@ public class JsonbConfigProperties {
         return HashMap.class;
     }
 
-    private boolean initZeroTimeDefaultingForJavaTime() {
-        return getBooleanConfigProperty(YassonProperties.ZERO_TIME_PARSE_DEFAULTING, false);
+    private boolean isZeroTimeParseDefaultingEnabled() {
+        return getBooleanConfigProperty(YassonConfiguration.ZERO_TIME_PARSE_DEFAULTING, false);
     }
 
     @SuppressWarnings("unchecked")
     private Map<Class<?>,Class<?>> initUserTypeMapping() {
-        Optional<Object> property = jsonbConfig.getProperty(YassonProperties.USER_TYPE_MAPPING);
+        Optional<Object> property = jsonbConfig.getProperty(YassonConfiguration.USER_TYPE_MAPPING);
         if (!property.isPresent()) {
             return Collections.emptyMap();
         }
         Object result = property.get();
         if (!(result instanceof Map)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonProperties.USER_TYPE_MAPPING, Map.class.getSimpleName()));
+            throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonConfiguration.USER_TYPE_MAPPING, Map.class.getSimpleName()));
         }
         return (Map<Class<?>, Class<?>>) result;
     }
 
-    private JsonbDateFormatter initDateFormatter(Locale locale) {
+    private JsonbDateFormatter initJsonbDateFormatter(Locale locale) {
         final String dateFormat = getGlobalConfigJsonbDateFormat();
         if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
             return new JsonbDateFormatter(dateFormat, locale.toLanguageTag());
@@ -149,7 +149,7 @@ public class JsonbConfigProperties {
         }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
     }
 
-    private PropOrderStrategy initOrderStrategy() {
+    private PropOrderStrategy resolveOrderStrategy() {
         Optional<String> strategy = getPropertyOrderStrategy();
         if (strategy.isPresent()) {
             switch (strategy.get()) {
@@ -186,7 +186,7 @@ public class JsonbConfigProperties {
         return Optional.empty();
     }
 
-    private PropertyNamingStrategy initPropertyNamingStrategy() {
+    private PropertyNamingStrategy resolvePropertyNamingStrategy() {
         final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
         if (!property.isPresent()) {
             return new IdentityStrategy();
@@ -206,7 +206,7 @@ public class JsonbConfigProperties {
         return (PropertyNamingStrategy) property.get();
     }
 
-    private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
+    private PropertyVisibilityStrategy resolvePropertyVisibilityStrategy() {
         final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_VISIBILITY_STRATEGY);
         if (!property.isPresent()) {
             return null;
@@ -218,7 +218,7 @@ public class JsonbConfigProperties {
         return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
     }
 
-    private String initBinaryDataStrategy() {
+    private String resolveBinaryDataStrategy() {
         final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj->(Boolean)obj));
         if (iJson.isPresent() && iJson.get()) {
             return BinaryDataStrategy.BASE_64_URL;
@@ -227,12 +227,12 @@ public class JsonbConfigProperties {
         return strategy.orElse(BinaryDataStrategy.BYTE);
     }
 
-    private boolean initConfigNullable() {
+    private boolean isNullValuesEnabled() {
         return getBooleanConfigProperty(JsonbConfig.NULL_VALUES, false);
     }
 
-    private boolean initConfigFailOnUnknownProperties() {
-        return getBooleanConfigProperty(YassonProperties.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private boolean getFailOnUnknownProperties() {
+        return getBooleanConfigProperty(YassonConfiguration.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
@@ -297,7 +297,7 @@ public class JsonbConfigProperties {
      *
      * @return Configured locale.
      */
-    private Locale initConfigLocale() {
+    private Locale getLocaleFromConfig() {
         final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
         return  localeProperty.map(loc -> {
             if (!(loc instanceof Locale)) {
@@ -307,7 +307,7 @@ public class JsonbConfigProperties {
         }).orElseGet(Locale::getDefault);
     }
 
-    private boolean initStrictJson() {
+    private boolean isStrictJson() {
         return getBooleanConfigProperty(JsonbConfig.STRICT_IJSON, false);
     }
 

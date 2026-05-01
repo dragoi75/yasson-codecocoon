@@ -30,32 +30,32 @@ import java.util.OptionalDouble;
  * 
  * @author David Kral
  */
-public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
+public class OptionalDoubleDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
 
     /**
      * Creates a new instance.
      *
-     * @param customization Model customization.
+     * @param customOptions Model customization.
      */
-    public OptionalDoubleTypeDeserializer(Customization customization) {
-        super(OptionalDouble.class, customization);
+    public OptionalDoubleDeserializer(Customization customOptions) {
+        super(OptionalDouble.class, customOptions);
     }
 
     @Override
-    public OptionalDouble deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbParser) parser).moveToValue();
-        if (next == JsonParser.Event.VALUE_NULL) {
+    public OptionalDouble deserialize(JsonParser jsonReader, DeserializationContext deserializationContext, Type runtimeType) {
+        final JsonParser.Event upcomingEvent = ((JsonbParser) jsonReader).moveToValue();
+        if (upcomingEvent == JsonParser.Event.VALUE_NULL) {
             return OptionalDouble.empty();
         }
-        String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        String textContent = jsonReader.getString();
+        return deserialize(textContent, (Unmarshaller) deserializationContext, runtimeType);
     }
 
     @Override
-    protected OptionalDouble deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalDouble deserialize(String rawJson, Unmarshaller dataConverter, Type runtimeType) {
         try {
-            return OptionalDouble.of(Double.parseDouble(jsonValue));
-        } catch (NumberFormatException e) {
+            return OptionalDouble.of(Double.parseDouble(rawJson));
+        } catch (NumberFormatException parseException) {
             throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
         }
     }

@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -37,7 +37,7 @@ public class URITypeSerializer extends AbstractValueTypeSerializer<URI> {
     }
 
     @Override
-    protected void serialize(URI obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(URI obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

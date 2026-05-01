@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -36,7 +36,7 @@ public class NumberTypeSerializer extends AbstractValueTypeSerializer<Number> {
     }
 
     @Override
-    protected void serialize(Number obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(Number obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         BigDecimal bigDecimalValue = new BigDecimal(String.valueOf(obj));
         if (BigNumberUtil.isIEEE754(bigDecimalValue)) {
             generator.write(bigDecimalValue);

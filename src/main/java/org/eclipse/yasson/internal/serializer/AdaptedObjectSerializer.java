@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.model.ClassModel;
@@ -63,7 +63,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
                     generator.writeNull();
                     return;
                 }
-                final JsonbSerializer<A> serializer = resolveSerializer((Marshaller) ctx, adapted);
+                final JsonbSerializer<A> serializer = resolveSerializer((JsonbMarshaller) ctx, adapted);
                 serializer.serialize(adapted, generator, ctx);
             } else {
                 throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
@@ -76,7 +76,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     }
 
     @SuppressWarnings("unchecked")
-    private JsonbSerializer<A> resolveSerializer(Marshaller ctx, A adapted) {
+    private JsonbSerializer<A> resolveSerializer(JsonbMarshaller ctx, A adapted) {
         final ContainerSerializerProvider cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
         if (cached != null) {
             return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo()

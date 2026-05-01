@@ -27,7 +27,7 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
 
     private final List<Byte> items = new ArrayList<>();
 
-    protected ByteArrayDeserializer(DeserializerBuilder builder) {
+    protected ByteArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

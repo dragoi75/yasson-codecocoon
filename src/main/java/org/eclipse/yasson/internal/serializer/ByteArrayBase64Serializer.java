@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -40,7 +40,7 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
     }
 
     @Override
-    protected void serialize(byte[] obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serialize(byte[] obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
     }
 

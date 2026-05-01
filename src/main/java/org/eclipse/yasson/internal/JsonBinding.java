@@ -95,7 +95,7 @@ public class JsonBinding implements YassonJsonb {
     public String toJson(Object object) throws JsonbException {
         StringWriter writer = new StringWriter();
         final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext).marshall(object, generator);
+        new JsonbMarshaller(jsonbContext).marshal(object, generator);
         return writer.toString();
     }
 
@@ -103,20 +103,20 @@ public class JsonBinding implements YassonJsonb {
     public String toJson(Object object, Type type) throws JsonbException {
         StringWriter writer = new StringWriter();
         final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext, type).marshall(object, generator);
+        new JsonbMarshaller(jsonbContext, type).marshal(object, generator);
         return writer.toString();
     }
 
     @Override
     public void toJson(Object object, Writer writer) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, writerGenerator(writer));
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext);
+        marshaller.marshal(object, writerGenerator(writer));
     }
 
     @Override
     public void toJson(Object object, Type type, Writer writer) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, type);
-        marshaller.marshall(object, writerGenerator(writer));
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext, type);
+        marshaller.marshal(object, writerGenerator(writer));
     }
 
     private JsonGenerator writerGenerator(Writer writer) {
@@ -129,14 +129,14 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public void toJson(Object object, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, streamGenerator(stream));
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext);
+        marshaller.marshal(object, streamGenerator(stream));
     }
 
     @Override
     public void toJson(Object object, Type type, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, type);
-        marshaller.marshall(object, streamGenerator(stream));
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext, type);
+        marshaller.marshal(object, streamGenerator(stream));
     }
 
     @Override
@@ -153,14 +153,14 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext);
+        marshaller.marshallNoClose(object, jsonGenerator);
     }
 
     @Override
     public void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, runtimeType);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
+        final JsonbMarshaller marshaller = new JsonbMarshaller(jsonbContext, runtimeType);
+        marshaller.marshallNoClose(object, jsonGenerator);
     }
 
     private JsonGenerator streamGenerator(OutputStream stream) {

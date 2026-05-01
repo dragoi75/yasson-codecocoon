@@ -84,9 +84,9 @@ public class DefaultSerializers {
         serializers.put(Number.class, new SerializerProviderWrapper(NumberTypeSerializer::new, NumberTypeDeserializer::new));
         serializers.put(OffsetDateTime.class, new SerializerProviderWrapper(OffsetDateTimeTypeSerializer::new, OffsetDateTimeTypeDeserializer::new));
         serializers.put(OffsetTime.class, new SerializerProviderWrapper(OffsetTimeTypeSerializer::new, OffsetTimeTypeDeserializer::new));
-        serializers.put(OptionalDouble.class, new SerializerProviderWrapper(OptionalDoubleTypeSerializer::new, OptionalDoubleTypeDeserializer::new));
-        serializers.put(OptionalInt.class, new SerializerProviderWrapper(OptionalIntTypeSerializer::new, OptionalIntTypeDeserializer::new));
-        serializers.put(OptionalLong.class, new SerializerProviderWrapper(OptionalLongTypeSerializer::new, OptionalLongTypeDeserializer::new));
+        serializers.put(OptionalDouble.class, new SerializerProviderWrapper(OptionalDoubleSerializer::new, OptionalDoubleDeserializer::new));
+        serializers.put(OptionalInt.class, new SerializerProviderWrapper(OptionalIntSerializer::new, OptionalIntTypeDeserializer::new));
+        serializers.put(OptionalLong.class, new SerializerProviderWrapper(OptionalLongSerializer::new, OptionalLongTypeDeserializer::new));
         serializers.put(Short.class, new SerializerProviderWrapper(ShortTypeSerializer::new, ShortTypeDeserializer::new));
         serializers.put(Short.TYPE, new SerializerProviderWrapper(ShortTypeSerializer::new, ShortTypeDeserializer::new));
         serializers.put(String.class, new SerializerProviderWrapper(StringTypeSerializer::new, StringTypeDeserializer::new));

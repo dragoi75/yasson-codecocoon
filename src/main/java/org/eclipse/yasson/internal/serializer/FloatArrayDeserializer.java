@@ -26,7 +26,7 @@ import java.util.List;
 public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     private final List<Float> items = new ArrayList<>();
 
-    protected FloatArrayDeserializer(DeserializerBuilder builder) {
+    protected FloatArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

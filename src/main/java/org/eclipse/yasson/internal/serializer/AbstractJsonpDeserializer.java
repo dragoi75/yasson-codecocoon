@@ -30,9 +30,9 @@ public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends Abs
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonbDeserializerBuilder} used to build this instance
      */
-    protected AbstractJsonpDeserializer(DeserializerBuilder builder) {
+    protected AbstractJsonpDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

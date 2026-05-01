@@ -109,7 +109,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
                 return new JsonArraySerializer(this);
             }
         } else if (Optional.class.isAssignableFrom(objectClass)) {
-            return new OptionalObjectSerializer<>(this);
+            return new OptionalValueSerializer<>(this);
         } else {
             jsonbContext.getMappingContext().addSerializerProvider(objectClass, new ObjectSerializerProvider());
             return new ObjectSerializer<>(this);

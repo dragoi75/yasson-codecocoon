@@ -79,7 +79,7 @@ public class EncodingTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         jsonb.toJson(strings, baos);
         String marshallerResult = baos.toString(encoding);
-        logger.finest("Marshaller JSON result: "+marshallerResult);
+        logger.finest("JsonbMarshaller JSON result: "+marshallerResult);
         assertEquals(diacriticsToJsonArray(input), marshallerResult);
     }
 

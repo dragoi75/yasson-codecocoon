@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
@@ -134,7 +134,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
             Type instanceValueType = getValueType(getRuntimeType());
             instanceValueType = instanceValueType.equals(Object.class) ? itemClass : instanceValueType;
 
-            SerializerBuilder builder = new SerializerBuilder(((Marshaller) ctx).getJsonbContext());
+            SerializerBuilder builder = new SerializerBuilder(((JsonbMarshaller) ctx).getJsonbContext());
             builder.withObjectClass(itemClass);
             builder.withWrapper(this);
             builder.withType(instanceValueType);
@@ -142,7 +142,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
 
             if (!DefaultSerializers.getInstance().isKnownType(itemClass)) {
                 //Need for class level annotations + user adapters/serializers bound to type
-                ClassModel classModel = ((Marshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
+                ClassModel classModel = ((JsonbMarshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
                 builder.withCustomization(new ContainerCustomization(classModel.getCustomization()));
             } else {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers

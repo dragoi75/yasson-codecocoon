@@ -49,7 +49,7 @@ public class JsonbContext {
 
     private final AnnotationIntrospector annotationIntrospector;
 
-    private final JsonbConfigProperties configProperties;
+    private final JsonbConfigurationProperties configProperties;
 
     private final InstanceCreator instanceCreator;
 
@@ -68,7 +68,7 @@ public class JsonbContext {
         this.componentMatcher = new ComponentMatcher(this);
         this.annotationIntrospector = new AnnotationIntrospector(this);
         this.jsonProvider = jsonProvider;
-        this.configProperties = new JsonbConfigProperties(jsonbConfig);
+        this.configProperties = new JsonbConfigurationProperties(jsonbConfig);
     }
 
     /**
@@ -127,7 +127,7 @@ public class JsonbContext {
     }
 
 
-    public JsonbConfigProperties getConfigProperties() {
+    public JsonbConfigurationProperties getConfigProperties() {
         return configProperties;
     }
 

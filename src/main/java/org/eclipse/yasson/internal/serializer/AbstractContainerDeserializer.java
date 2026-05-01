@@ -40,9 +40,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonbDeserializerBuilder} used to build this instance
      */
-    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
+    protected AbstractContainerDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -113,15 +113,15 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      */
     protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
 
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
-        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
+    protected JsonbDeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
+        return new JsonbDeserializerBuilder(ctx).withWrapper(this).withJsonEvent(parserContext.getLastEvent());
     }
 
     protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
         Type actualValueType = ReflectionUtils.resolveType(this, valueType);
-        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
+        JsonbDeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
         if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
             ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
             deserializerBuilder.withCustomization(classModel == null ? null : classModel.getCustomization());

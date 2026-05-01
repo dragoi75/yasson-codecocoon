@@ -26,7 +26,7 @@ import java.util.List;
 public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]> {
     private final List<Double> items = new ArrayList<>();
 
-    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
+    protected DoubleArrayDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
     }
 

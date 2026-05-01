@@ -47,10 +47,10 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonbDeserializerBuilder} used to build this instance
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected MapDeserializer(DeserializerBuilder builder) {
+    protected MapDeserializer(JsonbDeserializerBuilder builder) {
         super(builder);
         mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ?
                 ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
@@ -60,13 +60,13 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     }
 
     @SuppressWarnings("unchecked")
-    private T createInstance(DeserializerBuilder builder) {
+    private T createInstance(JsonbDeserializerBuilder builder) {
         Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
         return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
                 : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
     }
 
-    private Map getMapImpl(Class ifcType, DeserializerBuilder builder) {
+    private Map getMapImpl(Class ifcType, JsonbDeserializerBuilder builder) {
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
             Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();

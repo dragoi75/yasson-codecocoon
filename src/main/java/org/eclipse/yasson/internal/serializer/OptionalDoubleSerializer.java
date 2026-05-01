@@ -13,34 +13,34 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
-import java.util.OptionalLong;
+import java.util.OptionalDouble;
 
 /**
- * Serializer for {@link OptionalLong} type.
+ * Serializer for {@link OptionalDouble} type.
  * 
  * @author David Kral
  */
-public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<OptionalLong> {
+public class OptionalDoubleSerializer extends AbstractValueTypeSerializer<OptionalDouble> {
 
     /**
      * Creates a new instance.
      *
-     * @param customization Model customization.
+     * @param config Model customization.
      */
-    public OptionalLongTypeSerializer(Customization customization) {
-        super(customization);
+    public OptionalDoubleSerializer(Customization config) {
+        super(config);
     }
 
     @Override
-    protected void serialize(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
-        if (obj.isPresent()) {
-            generator.write(obj.getAsLong());
+    protected void serialize(OptionalDouble optionalDouble, JsonGenerator jsonWriter, JsonbMarshaller jsonbSerializer) {
+        if (optionalDouble.isPresent()) {
+            jsonWriter.write(optionalDouble.getAsDouble());
         } else if (customization.isNillable()) {
-            generator.writeNull();
+            jsonWriter.writeNull();
         }
     }
 }
