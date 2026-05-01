@@ -199,8 +199,8 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeDeserializerOptional = DefaultSerializers
-                .findValueSerializerProvider(rawType);
+        final Optional<? extends SerializerProviderWrapper> supportedTypeDeserializerOptional = DefaultSerializerRegistry
+                .lookupValueSerializerProvider(rawType);
         if (supportedTypeDeserializerOptional.isPresent()) {
             return Optional.of(supportedTypeDeserializerOptional.get().getDeserializerProvider()
                                        .provideDeserializer(getCustomization()));

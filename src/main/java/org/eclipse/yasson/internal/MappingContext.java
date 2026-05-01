@@ -22,7 +22,7 @@ import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
-import org.eclipse.yasson.internal.serializer.DefaultSerializers;
+import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 
 /**
  * JSONB mappingContext. Created once per {@link jakarta.json.bind.Jsonb} instance. Represents a global scope.
@@ -37,7 +37,7 @@ public class MappingContext {
 
     private final ConcurrentHashMap<Class<?>, ContainerSerializerProvider> serializers = new ConcurrentHashMap<>();
 
-    private final ClassParser classParser;
+    private final ClassModelParser classParser;
 
     /**
      * Create mapping context which is scoped to jsonb runtime.
@@ -47,7 +47,7 @@ public class MappingContext {
     public MappingContext(JsonbContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
-        this.classParser = new ClassParser(jsonbContext);
+        this.classParser = new ClassModelParser(jsonbContext);
     }
 
     /**
@@ -84,7 +84,7 @@ public class MappingContext {
     }
 
     private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
-                                                                                ClassParser classParser,
+                                                                                ClassModelParser classParser,
                                                                                 JsonbContext jsonbContext) {
         return aClass -> {
             JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
@@ -93,8 +93,8 @@ public class MappingContext {
                                                       customization,
                                                       parentClassModel,
                                                       jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-            if (!DefaultSerializers.isKnownType(aClass)) {
-                classParser.parseProperties(newClassModel, clsElement);
+            if (!DefaultSerializerRegistry.isKnownType(aClass)) {
+                classParser.parseClassProperties(newClassModel, clsElement);
             }
             return newClassModel;
         };

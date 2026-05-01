@@ -26,20 +26,20 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Test for ClassParser component.
+ * Test for ClassModelParser component.
  *
  * @author Roman Grigoriadi
  */
 public class ClassParserTest {
     private static final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
-    private static final ClassParser classParser = new ClassParser(jsonbContext);
+    private static final ClassModelParser classParser = new ClassModelParser(jsonbContext);
     private static final AnnotationIntrospector introspector = new AnnotationIntrospector(jsonbContext);
 
     @Test
     public void testDefaultMappingFieldModifiers() {
         final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(FieldModifiersClass.class);
         ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement), null, null);
-        classParser.parseProperties(model, clsElement);
+        classParser.parseClassProperties(model, clsElement);
         assertTrue(model.getPropertyModel("finalString").isReadable());
         assertFalse(model.getPropertyModel("finalString").isWritable());
         assertFalse(model.getPropertyModel("staticString").isReadable());
@@ -52,7 +52,7 @@ public class ClassParserTest {
     public void testDefaultMappingMethodModifiers() {
         final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(MethodModifiersClass.class);
         ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement), null, null);
-        classParser.parseProperties(model, clsElement);
+        classParser.parseClassProperties(model, clsElement);
         assertFalse(model.getPropertyModel("publicFieldWithPrivateMethods").isReadable());
         assertFalse(model.getPropertyModel("publicFieldWithPrivateMethods").isWritable());
         assertTrue(model.getPropertyModel("publicFieldWithoutMethods").isReadable());
