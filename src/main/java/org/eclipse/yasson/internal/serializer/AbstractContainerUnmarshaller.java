@@ -34,64 +34,64 @@ import java.util.OptionalLong;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> implements JsonbDeserializer<T> {
+public abstract class AbstractContainerUnmarshaller<T> extends AbstractItem<T> implements JsonbDeserializer<T> {
     protected JsonbRiParser.LevelContext parserContext;
 
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param deserializerFactory {@link DeserializerBuilder} used to build this instance
      */
-    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
-        super(builder);
+    protected AbstractContainerUnmarshaller(DeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
     }
 
     /**
      * Drives JSONP {@link JsonParser} to deserialize json document.
      *
-     * @param parser JSON parser.
-     * @param context Deseriaization context.
-     * @param rtType Runtime type.
+     * @param jsonStream JSON parser.
+     * @param deserializationState Deseriaization context.
+     * @param runtimeType Runtime type.
      * @return Instance of a type for this item.
      */
     @Override
-    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
-        deserializeInternal((JsonbParser) parser, ctx);
-        return getInstance((Unmarshaller) context);
+    public final T deserialize(JsonParser jsonStream, DeserializationContext deserializationState, Type runtimeType) {
+        Unmarshaller itemUnmarshaller = (Unmarshaller) deserializationState;
+        deserializeContainerContents((JsonbParser) jsonStream, itemUnmarshaller);
+        return getInstance((Unmarshaller) deserializationState);
     }
 
     /**
      * Creates and initializes an instance of deserializing item.
      *
-     * @param unmarshaller Current deserialization context.
+     * @param instanceProvider Current deserialization context.
      * @return An instance of deserializing item.
      */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
+    protected abstract T getInstance(Unmarshaller instanceProvider);
 
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
-        parserContext = moveToFirst(parser);
-        while (parser.hasNext()) {
-            final JsonParser.Event event = parser.next();
-            switch (event) {
+    protected void deserializeContainerContents(JsonbParser jsonStream, Unmarshaller deserializationState) {
+        parserContext = moveToFirstElement(jsonStream);
+        while (jsonStream.hasNext()) {
+            final JsonParser.Event currentToken = jsonStream.next();
+            switch (currentToken) {
                 case START_OBJECT:
                 case START_ARRAY:
                 case VALUE_STRING:
                 case VALUE_NUMBER:
                 case VALUE_FALSE:
                 case VALUE_TRUE:
-                    deserializeNext(parser, context);
+                    deserializeNextElement(jsonStream, deserializationState);
                     break;
                 case KEY_NAME:
                     break;
                 case VALUE_NULL:
-                    appendResult(null);
+                    addResult(null);
                     break;
                 case END_OBJECT:
                 case END_ARRAY:
                     return;
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, currentToken));
             }
         }
     }
@@ -100,33 +100,33 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * Determine class mappings and create an instance of a new deserializer.
      * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
      *
-     * @param parser Json parser.
-     * @param context Current unmarshalling context.
+     * @param jsonStream Json parser.
+     * @param deserializationState Current unmarshalling context.
      */
-    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
+    protected abstract void deserializeNextElement(JsonParser jsonStream, Unmarshaller deserializationState);
 
     /**
      * Move to first event for current deserializer structure.
      *
-     * @param parser Json parser.
+     * @param jsonStream Json parser.
      * @return First event.
      */
-    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
+    protected abstract JsonbRiParser.LevelContext moveToFirstElement(JsonbParser jsonStream);
 
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
-        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
+    protected DeserializerBuilder newItemUnmarshallerBuilder(JsonbContext itemUnmarshaller) {
+        return new DeserializerBuilder(itemUnmarshaller).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
     }
 
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+    protected JsonbDeserializer<?> createCollectionOrMapItemDeserializer(Type elementType, JsonbContext itemUnmarshaller) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectionUtils.resolveType(this, valueType);
-        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
-            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
-            deserializerBuilder.withCustomization(classModel == null ? null : classModel.getCustomization());
+        Type resolvedValueType = ReflectionUtils.resolveType(this, elementType);
+        DeserializerBuilder deserializerFactory = newItemUnmarshallerBuilder(itemUnmarshaller).withType(resolvedValueType);
+        if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(resolvedValueType))) {
+            ClassModel typeModel = itemUnmarshaller.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(resolvedValueType));
+            deserializerFactory.withCustomization(typeModel == null ? null : typeModel.getCustomization());
         }
-        return deserializerBuilder.build();
+        return deserializerFactory.build();
     }
 
     /**
@@ -134,26 +134,26 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * {@link OptionalInt}, or {@link OptionalLong}, value of corresponding {@code Optional#empty()}
      * is returned.
      *
-     * @param propertyType property type
-     * @param value value to set
+     * @param fieldType property type
+     * @param input value to set
      * @return empty optional if applies
      */
-    protected Object convertNullToOptionalEmpty(Type propertyType, Object value) {
-        if (value != null) {
-            return value;
+    protected Object convertNullToEmptyOptional(Type fieldType, Object input) {
+        if (input != null) {
+            return input;
         }
 
-        if (!(propertyType instanceof Class)) {
-            propertyType = ReflectionUtils.getRawType(ReflectionUtils.resolveType(this, propertyType));
+        if (!(fieldType instanceof Class)) {
+            fieldType = ReflectionUtils.getRawType(ReflectionUtils.resolveType(this, fieldType));
         }
 
-        if (propertyType == Optional.class) {
+        if (fieldType == Optional.class) {
             return Optional.empty();
-        } else if (propertyType == OptionalInt.class) {
+        } else if (fieldType == OptionalInt.class) {
             return OptionalInt.empty();
-        } else if (propertyType == OptionalLong.class) {
+        } else if (fieldType == OptionalLong.class) {
             return OptionalLong.empty();
-        } else if (propertyType == OptionalDouble.class) {
+        } else if (fieldType == OptionalDouble.class) {
             return OptionalDouble.empty();
         } else {
             return null;
@@ -165,7 +165,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * In case of a field set value to field, in case of collections
      * or other embedded objects use methods provided.
      *
-     * @param result An instance result of an item.
+     * @param output An instance result of an item.
      */
-    public abstract void appendResult(Object result);
+    public abstract void addResult(Object output);
 }

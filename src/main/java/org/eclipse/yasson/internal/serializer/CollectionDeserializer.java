@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @author Roman Grigoriadi
  */
-class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerUnmarshaller<T> implements EmbeddedItem {
 
     /**
      * Generic bound parameter of List.
@@ -89,8 +89,8 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(collectionValueType, result));
+    public void addResult(Object result) {
+        appendCaptor(convertNullToEmptyOptional(collectionValueType, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -99,13 +99,13 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, collectionValueType));
+    protected void deserializeNextElement(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = createCollectionOrMapItemDeserializer(collectionValueType, context.getJsonbContext());
+        addResult(deserializer.deserialize(parser, context, collectionValueType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiParser.LevelContext moveToFirstElement(JsonbParser parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

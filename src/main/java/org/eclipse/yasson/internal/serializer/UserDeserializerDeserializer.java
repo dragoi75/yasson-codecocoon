@@ -25,7 +25,7 @@ import javax.json.stream.JsonParser;
  *
  * @author Roman Grigoriadi
  */
-public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializer<T> {
+public class UserDeserializerDeserializer<T> extends AbstractContainerUnmarshaller<T> {
 
     private DeserializerBinding<?> deserializerBinding;
 
@@ -46,7 +46,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     }
 
     @Override
-    public void appendResult(Object result) {
+    public void addResult(Object result) {
         //ignore internal deserialize() call in custom deserializer
     }
 
@@ -58,8 +58,8 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     @SuppressWarnings("unchecked")
     @Override
-    public void deserializeInternal(JsonbParser parser, Unmarshaller context) {
-        parserContext = moveToFirst(parser);
+    public void deserializeContainerContents(JsonbParser parser, Unmarshaller context) {
+        parserContext = moveToFirstElement(parser);
         JsonParser.Event lastEvent = parserContext.getLastEvent();
         final UserDeserializerParser userDeserializerParser = new UserDeserializerParser(parser);
         deserializerResult = (T) deserializerBinding.getJsonbDeserializer().deserialize(userDeserializerParser, context, getRuntimeType());
@@ -70,7 +70,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNextElement(JsonParser parser, Unmarshaller context) {
         throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 
@@ -78,7 +78,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
      * Don't move anywhere in case of user deserializer.
      */
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiParser.LevelContext moveToFirstElement(JsonbParser parser) {
         return parser.getCurrentLevel();
     }
 

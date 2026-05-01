@@ -28,7 +28,7 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
     private JsonObject jsonObject;
 
     @Override
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeContainerContents(JsonbParser parser, Unmarshaller context) {
         this.jsonObject = parser.getObject();
     }
 

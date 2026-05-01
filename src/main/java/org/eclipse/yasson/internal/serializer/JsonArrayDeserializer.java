@@ -37,7 +37,7 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
     }
 
     @Override
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeContainerContents(JsonbParser parser, Unmarshaller context) {
         this.jsonArray = parser.getArray();
     }
 

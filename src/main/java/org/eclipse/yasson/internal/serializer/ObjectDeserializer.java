@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author Roman Grigoriadi
  */
-class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
+class ObjectDeserializer<T> extends AbstractContainerUnmarshaller<T> {
 
     /**
      * Last property model cache to avoid lookup by jsonKey on every access.
@@ -131,24 +131,24 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
      * @param result An instance result of an item.
      */
     @Override
-    public void appendResult(Object result) {
+    public void addResult(Object result) {
         final PropertyModel model = getModel();
         //missing property for null values
         if (model == null) {
             return;
         }
-        values.put(model.getReadName(), new ValueWrapper(model, convertNullToOptionalEmpty(model.getPropertyType(), result)));
+        values.put(model.getReadName(), new ValueWrapper(model, convertNullToEmptyOptional(model.getPropertyType(), result)));
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNextElement(JsonParser parser, Unmarshaller context) {
 
         final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
         //first check jsonb creator param, since it can be different from property name
         if (creator != null) {
             final CreatorModel param = creator.findByName(parserContext.getLastKeyName());
             if (param != null) {
-                final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext())
+                final JsonbDeserializer<?> deserializer = newItemUnmarshallerBuilder(context.getJsonbContext())
                         .withType(param.getType())
                         .withCustomization(param.getCustomization())
                         .build();
@@ -162,7 +162,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         PropertyModel newPropertyModel = getModel();
         if (newPropertyModel != null && newPropertyModel.isWritable()) {
             //create current item instance of identified object field
-            final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext())
+            final JsonbDeserializer<?> deserializer = newItemUnmarshallerBuilder(context.getJsonbContext())
                     .withCustomization(newPropertyModel.getCustomization())
                     .withType(newPropertyModel.getPropertyDeserializationType())
                     .build();
@@ -186,7 +186,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiParser.LevelContext moveToFirstElement(JsonbParser parser) {
         parser.moveTo(JsonParser.Event.START_OBJECT);
         return parser.getCurrentLevel();
     }

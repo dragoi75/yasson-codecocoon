@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public abstract class AbstractArrayDeserializer<T> extends AbstractContainerUnmarshaller<T> implements EmbeddedItem {
 
     /**
      * Runtime type class of an array.
@@ -53,8 +53,8 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     }
 
     @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(componentClass, result));
+    public void addResult(Object result) {
+        appendCaptor(convertNullToEmptyOptional(componentClass, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -63,16 +63,16 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass)
+    protected void deserializeNextElement(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newItemUnmarshallerBuilder(context.getJsonbContext()).withType(componentClass)
                 .withCustomization(componentClassModel == null ? null : componentClassModel.getCustomization()).build();
-        appendResult(deserializer.deserialize(parser, context, componentClass));
+        addResult(deserializer.deserialize(parser, context, componentClass));
     }
 
     protected abstract List<?> getItems();
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiParser.LevelContext moveToFirstElement(JsonbParser parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

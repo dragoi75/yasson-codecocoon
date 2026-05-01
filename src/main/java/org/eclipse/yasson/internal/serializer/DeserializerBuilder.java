@@ -99,7 +99,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             if (adapterBinding.isPresent()) {
                 adapterInfoOptional = adapterBinding;
                 runtimeType = adapterInfoOptional.get().getToType();
-                wrapper = new AdaptedObjectDeserializer<>(adapterInfoOptional.get(), (AbstractContainerDeserializer<?>) wrapper);
+                wrapper = new AdaptedObjectDeserializer<>(adapterInfoOptional.get(), (AbstractContainerUnmarshaller<?>) wrapper);
                 rawType = ReflectionUtils.getRawType(getRuntimeType());
             }
         }

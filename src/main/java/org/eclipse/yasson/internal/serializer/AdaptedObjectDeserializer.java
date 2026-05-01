@@ -38,7 +38,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
 
     private final AdapterBinding adapterInfo;
 
-    private final AbstractContainerDeserializer<?> wrapperItem;
+    private final AbstractContainerUnmarshaller<?> wrapperItem;
 
     /**
      * Creates decoration instance wrapping real adapted object item.
@@ -46,7 +46,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
      * @param adapterInfo components type info
      * @param wrapperItem wrapper item to get instance from
      */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerUnmarshaller<?> wrapperItem) {
         this.adapterInfo = adapterInfo;
         this.wrapperItem = wrapperItem;
     }
@@ -63,8 +63,8 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
 
     @Override
     public Type getRuntimeType() {
-        if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
-            return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
+        if (adaptedTypeDeserializer instanceof AbstractContainerUnmarshaller) {
+            return ((AbstractContainerUnmarshaller) adaptedTypeDeserializer).getRuntimeType();
         }
         throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }

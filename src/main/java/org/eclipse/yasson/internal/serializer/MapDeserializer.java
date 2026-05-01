@@ -35,7 +35,7 @@ import org.eclipse.yasson.internal.Unmarshaller;
  *
  * @author Roman Grigoriadi
  */
-public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerUnmarshaller<T> implements EmbeddedItem {
 
     /**
      * Type of value in the map. (Keys must always be Strings, because of JSON spec)
@@ -83,8 +83,8 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     }
 
     @Override
-    public void appendResult(Object result) {
-        appendCaptor(parserContext.getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
+    public void addResult(Object result) {
+        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -93,13 +93,13 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
+    protected void deserializeNextElement(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = createCollectionOrMapItemDeserializer(mapValueRuntimeType, context.getJsonbContext());
+        addResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiParser.LevelContext moveToFirstElement(JsonbParser parser) {
         parser.moveTo(JsonParser.Event.START_OBJECT);
         return parser.getCurrentLevel();
     }
