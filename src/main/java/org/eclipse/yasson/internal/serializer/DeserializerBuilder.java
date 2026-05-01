@@ -154,7 +154,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             if (JsonValue.class.isAssignableFrom(rawType)) {
                 return wrapAdapted(adapterInfoOptional, new JsonObjectDeserializer(this));
             } else if (Map.class.isAssignableFrom(rawType)) {
-                final JsonbDeserializer<?> mapDeserializer = new MapDeserializer<>(this);
+                final JsonbDeserializer<?> mapDeserializer = new MapUnmarshaller<>(this);
                 return wrapAdapted(adapterInfoOptional, mapDeserializer);
             } else if (rawType.isInterface()) {
                 Class<?> mappedType = getInterfaceMappedType(rawType);

@@ -34,7 +34,7 @@ import org.eclipse.yasson.internal.Unmarshaller;
  *
  * @param <T> map type
  */
-public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public class MapUnmarshaller<T extends Map<?, ?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
 
     /**
      * Type of value in the map. (Keys must always be Strings, because of JSON spec)
@@ -49,7 +49,7 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
      * @param builder {@link DeserializerBuilder} used to build this instance
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected MapDeserializer(DeserializerBuilder builder) {
+    protected MapUnmarshaller(DeserializerBuilder builder) {
         super(builder);
         mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
                 ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
