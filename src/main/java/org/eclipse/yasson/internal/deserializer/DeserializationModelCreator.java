@@ -242,10 +242,10 @@ public class DeserializationModelCreator {
         Set<String> ignoredProperties = collectIgnoredProperties(typeInheritanceConfiguration);
         boolean failOnUnknownProperties = jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties();
         if (hasCreator) {
-            instanceCreator = new JsonbCreatorDeserializer(processors, defaultCreatorValues, creator, rawType, renamer,
+            instanceCreator = new JsonbCreatorBasedDeserializer(processors, defaultCreatorValues, creator, rawType, renamer,
                                                            failOnUnknownProperties, ignoredProperties);
         } else {
-            ModelDeserializer<JsonParser> typeWrapper = new ObjectDeserializer(processors, renamer, rawType,
+            ModelDeserializer<JsonParser> typeWrapper = new PojoDeserializer(processors, renamer, rawType,
                                                                                failOnUnknownProperties, ignoredProperties);
             instanceCreator = new DefaultObjectInstanceCreator(typeWrapper, rawType,
                                                                classModel.getDefaultConstructor());
