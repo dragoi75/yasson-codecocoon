@@ -39,7 +39,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
      *
      * @param builder Builder to initialize the instance.
      */
-    public ObjectSerializer(SerializerBuilder builder) {
+    public ObjectSerializer(ObjectSerializerBuilder builder) {
         super(builder);
     }
 
@@ -95,11 +95,11 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
             Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, propertyModel.getPropertyType());
             Type genericType = runtimeTypeOptional.orElse(null);
-            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
+            final JsonbSerializer<?> serializer = new ObjectSerializerBuilder(marshaller.getJsonbContext())
                     .withWrapper(this)
-                    .withObjectClass(propertyValue.getClass())
+                    .setObjectClass(propertyValue.getClass())
                     .withCustomization(propertyModel.getCustomization())
-                    .withType(genericType).build();
+                    .withType(genericType).buildSerializer();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }

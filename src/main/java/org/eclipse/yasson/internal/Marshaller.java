@@ -18,7 +18,7 @@ import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.AbstractValueTypeSerializer;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
-import org.eclipse.yasson.internal.serializer.SerializerBuilder;
+import org.eclipse.yasson.internal.serializer.ObjectSerializerBuilder;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
 
 import javax.json.bind.JsonbException;
@@ -122,15 +122,15 @@ public class Marshaller extends ProcessingContext implements SerializationContex
                     .provideSerializer(new JsonbPropertyInfo()
                             .withRuntimeType(runtimeType));
         }
-        SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext)
-                .withObjectClass(rootClazz)
+        ObjectSerializerBuilder serializerBuilder = new ObjectSerializerBuilder(jsonbContext)
+                .setObjectClass(rootClazz)
                 .withType(runtimeType);
 
         if (!DefaultSerializers.getInstance().isKnownType(rootClazz)) {
             ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
             serializerBuilder.withCustomization(classModel.getCustomization());
         }
-        return serializerBuilder.build();
+        return serializerBuilder.buildSerializer();
     }
 
 }

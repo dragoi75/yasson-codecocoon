@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class ShortArraySerializer extends AbstractArraySerializer<short[]> {
 
-    protected ShortArraySerializer(SerializerBuilder builder) {
+    protected ShortArraySerializer(ObjectSerializerBuilder builder) {
         super(builder);
     }
 

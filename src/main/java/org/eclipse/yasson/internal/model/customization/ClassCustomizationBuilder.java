@@ -17,7 +17,7 @@ import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
- * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
+ * The customization builder that would be used to buildSerializer an instance of {@link ClassCustomization} to ensure its immutability.
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */

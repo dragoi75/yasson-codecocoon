@@ -28,7 +28,7 @@ public class CollectionSerializer<T extends Collection> extends AbstractContaine
 
     protected final JsonbContext jsonbContext;
 
-    protected CollectionSerializer(SerializerBuilder builder) {
+    protected CollectionSerializer(ObjectSerializerBuilder builder) {
         super(builder);
         this.jsonbContext = builder.getJsonbContext();
     }

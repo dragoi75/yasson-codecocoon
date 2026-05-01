@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9a16f758-7e45-4fb2-b8b2-a4884b09ff2e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Marshaller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Marshaller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Unmarshaller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Unmarshaller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassCustomizationBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassCustomizationBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/PropertyCustomizationBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/PropertyCustomizationBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractJsonpDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractJsonpDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractJsonpSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractJsonpSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ByteArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ByteArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ByteArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ByteArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CollectionDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CollectionDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CollectionSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CollectionSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/DeserializerBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonDeserializerBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/DoubleArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/DoubleArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/DoubleArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/DoubleArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/FloatArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/FloatArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/FloatArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/FloatArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/IntArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/IntArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/IntArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/IntArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonObjectDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonObjectDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/JsonObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LongArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LongArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LongArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LongArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/MapDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/MapDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/MapSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/MapSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/SerializerBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectSerializerBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ShortArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ShortArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ShortArraySerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ShortArraySerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/UserDeserializerDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/UserDeserializerDeserializer.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectId" id="3D71QYYMey1GlbYagtYApEv2Ng4" />
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.git.unshallow": "true",
+    "kotlin-language-version-configured": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9a16f758-7e45-4fb2-b8b2-a4884b09ff2e" name="Changes" comment="" />
+      <created>1777618279334</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1777618279334</updated>
+    </task>
+    <servers />
+  </component>
+</project>

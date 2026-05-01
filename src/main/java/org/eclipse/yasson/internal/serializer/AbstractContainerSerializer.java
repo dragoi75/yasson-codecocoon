@@ -41,9 +41,9 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link SerializerBuilder} used to build this instance
+     * @param builder {@link ObjectSerializerBuilder} used to buildSerializer this instance
      */
-    protected AbstractContainerSerializer(SerializerBuilder builder) {
+    protected AbstractContainerSerializer(ObjectSerializerBuilder builder) {
         super(builder);
     }
 
@@ -134,8 +134,8 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
             Type instanceValueType = getValueType(getRuntimeType());
             instanceValueType = instanceValueType.equals(Object.class) ? itemClass : instanceValueType;
 
-            SerializerBuilder builder = new SerializerBuilder(((Marshaller) ctx).getJsonbContext());
-            builder.withObjectClass(itemClass);
+            ObjectSerializerBuilder builder = new ObjectSerializerBuilder(((Marshaller) ctx).getJsonbContext());
+            builder.setObjectClass(itemClass);
             builder.withWrapper(this);
             builder.withType(instanceValueType);
 
@@ -149,7 +149,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
                 //to preserve collections and array null elements
                 builder.withCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
             }
-            serializer = builder.build();
+            serializer = builder.buildSerializer();
 
             //Cache last used value serializer in case of next item is the same type.
             addValueSerializer(serializer, itemClass);

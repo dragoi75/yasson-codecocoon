@@ -68,9 +68,9 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
 
     /**
      * Creates instance of an item.
-     * @param builder builder to build from
+     * @param builder builder to buildSerializer from
      */
-    protected ObjectDeserializer(DeserializerBuilder builder) {
+    protected ObjectDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 

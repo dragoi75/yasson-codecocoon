@@ -32,7 +32,7 @@ public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializ
 
     private final boolean nullable;
 
-    protected MapSerializer(SerializerBuilder builder) {
+    protected MapSerializer(ObjectSerializerBuilder builder) {
         super(builder);
         nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
     }

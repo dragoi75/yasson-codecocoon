@@ -83,11 +83,11 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
                     .withWrapper(this)
                     .withRuntimeType(classModel == null ? null : classModel.getType()));
         }
-        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
-                .withObjectClass(adapted.getClass())
+        return (JsonbSerializer<A>) new ObjectSerializerBuilder(ctx.getJsonbContext())
+                .setObjectClass(adapted.getClass())
                 .withCustomization(classModel == null ? null : classModel.getCustomization())
                 .withWrapper(this)
-                .build();
+                .buildSerializer();
     }
 
     @Override

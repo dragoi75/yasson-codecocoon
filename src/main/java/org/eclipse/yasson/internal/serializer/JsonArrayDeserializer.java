@@ -32,7 +32,7 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
      *
      * @param builder Builder to initialize from.
      */
-    protected JsonArrayDeserializer(DeserializerBuilder builder) {
+    protected JsonArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 

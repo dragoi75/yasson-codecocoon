@@ -37,10 +37,10 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
      * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
      * in wrong position after returning from deserializerBinding.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to buildSerializer this instance
      * @param deserializerBinding Deserializer.
      */
-    protected UserDeserializerDeserializer(DeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
+    protected UserDeserializerDeserializer(JsonDeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
         super(builder);
         this.deserializerBinding = deserializerBinding;
     }

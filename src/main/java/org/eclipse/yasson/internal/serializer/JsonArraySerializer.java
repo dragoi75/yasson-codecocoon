@@ -25,7 +25,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
 
-    protected JsonArraySerializer(SerializerBuilder builder) {
+    protected JsonArraySerializer(ObjectSerializerBuilder builder) {
         super(builder);
     }
 

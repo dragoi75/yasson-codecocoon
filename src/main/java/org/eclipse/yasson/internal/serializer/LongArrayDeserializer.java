@@ -27,7 +27,7 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
 
     private final List<Long> items = new ArrayList<>();
 
-    protected LongArrayDeserializer(DeserializerBuilder builder) {
+    protected LongArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 

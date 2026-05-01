@@ -27,7 +27,7 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
 
     private final List<Short> items = new ArrayList<>();
 
-    protected ShortArrayDeserializer(DeserializerBuilder builder) {
+    protected ShortArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 

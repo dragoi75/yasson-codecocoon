@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
 
-    protected JsonObjectSerializer(SerializerBuilder builder) {
+    protected JsonObjectSerializer(ObjectSerializerBuilder builder) {
         super(builder);
     }
 

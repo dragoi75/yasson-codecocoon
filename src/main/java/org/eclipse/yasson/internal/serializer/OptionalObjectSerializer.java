@@ -43,7 +43,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
      *
      * @param builder Builder to initialize the instance.
      */
-    public OptionalObjectSerializer(SerializerBuilder builder) {
+    public OptionalObjectSerializer(ObjectSerializerBuilder builder) {
         this.wrapper = builder.getWrapper();
         this.customization = builder.getCustomization();
         this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
@@ -86,8 +86,8 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
             return;
         }
         Object optionalValue = obj.get();
-        final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass())
-                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
+        final JsonbSerializer<?> serializer = new ObjectSerializerBuilder(jsonbContext).setObjectClass(optionalValue.getClass())
+                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).buildSerializer();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 

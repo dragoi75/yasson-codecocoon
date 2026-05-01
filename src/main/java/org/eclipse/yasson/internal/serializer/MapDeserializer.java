@@ -53,10 +53,10 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to buildSerializer this instance
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected MapDeserializer(DeserializerBuilder builder) {
+    protected MapDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
 
         Class<? extends Map> mapImplType = builder.getMapImplType();

@@ -38,9 +38,9 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     private T instance;
 
     /**
-     * @param builder {@link DeserializerBuilder) used to build this instance
+     * @param builder {@link JsonDeserializerBuilder ) used to buildSerializer this instance
      */
-    protected CollectionDeserializer(DeserializerBuilder builder) {
+    protected CollectionDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         collectionValueType = getRuntimeType() instanceof ParameterizedType ?
                 ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])

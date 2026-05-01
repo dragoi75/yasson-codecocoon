@@ -30,7 +30,7 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
 
     protected final Type arrayValType;
 
-    protected AbstractArraySerializer(SerializerBuilder builder) {
+    protected AbstractArraySerializer(ObjectSerializerBuilder builder) {
         super(builder);
         arrayValType = resolveArrayType();
     }

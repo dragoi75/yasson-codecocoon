@@ -35,9 +35,9 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to buildSerializer this instance
      */
-    protected JsonObjectDeserializer(DeserializerBuilder builder) {
+    protected JsonObjectDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
