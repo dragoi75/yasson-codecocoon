@@ -19,10 +19,10 @@ import java.util.Optional;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Common serializer for numbers, using number format.
@@ -49,7 +49,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @param jsonbContext context
      * @return formatted number value
      */
-    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContext jsonbContext) {
+    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContextManager jsonbContext) {
         if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
             return Optional.empty();
         }
@@ -63,7 +63,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
         try {
             return Optional.of(format.parse(jsonValue));
         } catch (ParseException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
         }
     }
 }

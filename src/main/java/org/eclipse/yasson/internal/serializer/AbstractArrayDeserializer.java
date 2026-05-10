@@ -22,7 +22,7 @@ import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 /**
  * Common array unmarshalling item implementation.
@@ -35,7 +35,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
      * Runtime type class of an array.
      */
     private final Class<?> componentClass;
-    private final ClassModel componentClassModel;
+    private final ClassDescriptor componentClassModel;
 
     /**
      * Creates new class instance.
@@ -50,7 +50,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         } else {
             componentClass = ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
         }
-        if (!DefaultSerializers.isKnownType(componentClass)) {
+        if (!StandardSerializerRegistry.isKnownType(componentClass)) {
             componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         } else {
             componentClassModel = null;

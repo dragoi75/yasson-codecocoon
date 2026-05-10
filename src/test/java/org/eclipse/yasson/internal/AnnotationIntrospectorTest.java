@@ -12,6 +12,7 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.JsonbInstantiator;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +26,6 @@ import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWith
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithNoArgAndJsonbCreatorAnnotatedProtectedConstructor;
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithTwoJsonbCreatorAnnotatedSpots;
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithoutAnnotatedConstructor;
-import org.eclipse.yasson.internal.model.JsonbCreator;
 
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.JsonbException;
@@ -33,36 +33,36 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.spi.JsonProvider;
 
 /**
- * Tests the {@link AnnotationIntrospector}.
+ * Tests the {@link JsonbAnnotationIntrospector}.
  * 
  * @see AnnotationIntrospectorTestFixtures
  * @see AnnotationIntrospectorTestAsserts
  */
 public class AnnotationIntrospectorTest {
-    private final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private final JsonbContextManager jsonbContext = new JsonbContextManager(new JsonbConfig(), JsonProvider.provider());
 
     /**
      * class under test.
      */
-    private AnnotationIntrospector instrospector = new AnnotationIntrospector(jsonbContext);
+    private JsonbAnnotationIntrospector instrospector = new JsonbAnnotationIntrospector(jsonbContext);
 
     @Test
     public void testObjectShouldBeCreateableFromJsonbAnnotatedConstructor() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedConstructor.class);
+        JsonbInstantiator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedConstructor.class);
         assertParameters(ObjectWithJsonbCreatorAnnotatedConstructor.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAnnotatedConstructor.example(), creator);
     }
 
     @Test
     public void testObjectShouldBeCreateableFromJsonbAnnotatedStaticFactoryMethod() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedFactoryMethod.class);
+        JsonbInstantiator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedFactoryMethod.class);
         assertParameters(ObjectWithJsonbCreatorAnnotatedFactoryMethod.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAnnotatedFactoryMethod.example(), creator);
     }
 
     @Test
     public void testObjectShouldBeCreateableFromJsonbAnnotatedStaticFactoryMethodIgnoringConstructorPorperties() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAndConstructorPropertiesAnnotation.class);
+        JsonbInstantiator creator = instrospector.getCreator(ObjectWithJsonbCreatorAndConstructorPropertiesAnnotation.class);
         assertParameters(ObjectWithJsonbCreatorAndConstructorPropertiesAnnotation.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAndConstructorPropertiesAnnotation.example(), creator);
     }
@@ -70,7 +70,7 @@ public class AnnotationIntrospectorTest {
     @Test
     public void testJsonbAnnotatedProtectedConstructorLeadsToAnException() {
         assertThrows(JsonbException.class, () -> {
-	        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedProtectedConstructor.class);
+	        JsonbInstantiator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedProtectedConstructor.class);
 	        assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAnnotatedProtectedConstructor.example(), creator);
         });
     }
@@ -79,7 +79,7 @@ public class AnnotationIntrospectorTest {
     @Disabled
     @Test
     public void testNoArgConstructorShouldBePreferredOverUnusableJsonbAnnotatedProtectedConstructor() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithNoArgAndJsonbCreatorAnnotatedProtectedConstructor.class);
+        JsonbInstantiator creator = instrospector.getCreator(ObjectWithNoArgAndJsonbCreatorAnnotatedProtectedConstructor.class);
         assertParameters(ObjectWithNoArgAndJsonbCreatorAnnotatedProtectedConstructor.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithNoArgAndJsonbCreatorAnnotatedProtectedConstructor.example(), creator);
     }
@@ -88,7 +88,7 @@ public class AnnotationIntrospectorTest {
     public void testMoreThanOneAnnotatedCreatorMethodShouldLeadToAnException() {
         assertThrows(JsonbException.class, 
         			() -> instrospector.getCreator(ObjectWithTwoJsonbCreatorAnnotatedSpots.class),
-        			() -> "More than one @" + JsonbCreator.class.getSimpleName());
+        			() -> "More than one @" + JsonbInstantiator.class.getSimpleName());
     }
 
     @Test

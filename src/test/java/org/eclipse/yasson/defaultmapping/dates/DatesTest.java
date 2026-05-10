@@ -29,7 +29,7 @@ import org.eclipse.yasson.defaultmapping.dates.model.OffsetDateTimePojo;
 import org.eclipse.yasson.defaultmapping.dates.model.OffsetTimePojo;
 import org.eclipse.yasson.defaultmapping.dates.model.ZonedDateTimePojo;
 import org.eclipse.yasson.defaultmapping.generics.model.ScalarValueWrapper;
-import org.eclipse.yasson.internal.serializer.SqlDateTypeDeserializer;
+import org.eclipse.yasson.internal.serializer.SqlDateDeserializer;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -87,7 +87,7 @@ public class DatesTest {
 	public static class SqlDateObj implements Serializable {
         public java.sql.Date sqlDate = java.sql.Date.valueOf("2018-01-31");
         //no way for runtime to choose java.sql.Date deserializer here without a hint
-        @JsonbTypeDeserializer(SqlDateTypeDeserializer.class)
+        @JsonbTypeDeserializer(SqlDateDeserializer.class)
         public java.util.Date utilDate = java.sql.Date.valueOf("2018-01-31");
 
     }

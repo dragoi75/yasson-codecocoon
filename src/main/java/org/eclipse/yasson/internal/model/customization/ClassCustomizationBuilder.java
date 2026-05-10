@@ -14,16 +14,16 @@ package org.eclipse.yasson.internal.model.customization;
 
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.model.JsonbInstantiator;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
- * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
+ * The customization builder that would be used to build an instance of {@link ClassConfiguration} to ensure its immutability.
  */
 public class ClassCustomizationBuilder extends CustomizationBuilder {
 
-    private JsonbCreator jsonbCreator;
+    private JsonbInstantiator jsonbCreator;
 
     /**
      * The class level number formatter that would be used by default for all number properties that don't have a dedicated
@@ -48,8 +48,8 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      *
      * @return A new instance of {@link PropertyCustomization}
      */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
+    public ClassConfiguration buildClassCustomization() {
+        return new ClassConfiguration(this);
     }
 
     /**
@@ -98,7 +98,7 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      *
      * @return Custom creator.
      */
-    public JsonbCreator getCreator() {
+    public JsonbInstantiator getCreator() {
         return jsonbCreator;
     }
 
@@ -107,7 +107,7 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      *
      * @param jsonbCreator Creator to set.
      */
-    public void setCreator(JsonbCreator jsonbCreator) {
+    public void setCreator(JsonbInstantiator jsonbCreator) {
         this.jsonbCreator = jsonbCreator;
     }
 

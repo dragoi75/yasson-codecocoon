@@ -27,8 +27,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Decorator for JSONP parser used by JSONB.
@@ -196,7 +196,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
             return;
         }
 
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                                                      "Event " + required + " not found." + getLastDataMsg()));
     }
 
@@ -220,7 +220,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
             return next;
         }
 
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                                                      "Parser event [" + Arrays
                                                              .toString(events) + "] not found." + getLastDataMsg()));
     }

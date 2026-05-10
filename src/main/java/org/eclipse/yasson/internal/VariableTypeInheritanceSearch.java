@@ -20,8 +20,8 @@ import java.util.Deque;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Search for type variable in inheritance hierarchy and resolve if possible.
@@ -118,7 +118,7 @@ public class VariableTypeInheritanceSearch {
             return (ParameterizedType) type;
         }
         if (!(type instanceof Class)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.RESOLVE_PARAMETRIZED_TYPE, type));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.RESOLVE_PARAMETRIZED_TYPE, type));
         }
         return findParameterizedSuperclass(((Class) type).getGenericSuperclass());
     }

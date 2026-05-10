@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.model.customization;
 /**
  * Customization for container like types (Maps, Collections, Arrays).
  */
-public class ContainerCustomization extends ClassCustomization {
+public class ContainerCustomization extends ClassConfiguration {
 
     /**
      * Creates a new instance.
@@ -31,7 +31,7 @@ public class ContainerCustomization extends ClassCustomization {
      *
      * @param other Class customization to initialize from.
      */
-    public ContainerCustomization(ClassCustomization other) {
+    public ContainerCustomization(ClassConfiguration other) {
         super(other);
     }
 

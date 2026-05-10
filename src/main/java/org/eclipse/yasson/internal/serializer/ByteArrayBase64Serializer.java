@@ -20,8 +20,8 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Serializes byte array with Base64.
@@ -50,7 +50,7 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
         case BinaryDataStrategy.BASE_64_URL:
             return Base64.getUrlEncoder();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                                                          "Invalid strategy: " + strategy));
         }
     }

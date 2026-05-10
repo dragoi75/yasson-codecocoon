@@ -23,10 +23,10 @@ import jakarta.json.stream.JsonGenerator;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Serializer for adapted object.
@@ -37,7 +37,7 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSerializer<T> {
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     private final AdapterBinding adapterInfo;
 
@@ -47,7 +47,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
      * @param classModel Class model.
      * @param adapter    Adapter.
      */
-    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
+    public AdaptedObjectSerializer(ClassDescriptor classModel, AdapterBinding adapter) {
         this.classModel = classModel;
         this.adapterInfo = adapter;
     }
@@ -67,10 +67,10 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
                 final JsonbSerializer<A> serializer = resolveSerializer((Marshaller) ctx, adapted);
                 serializer.serialize(adapted, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION,
                                                          adapterInfo.getBindingType(),
                                                          adapterInfo.getToType(),
                                                          adapterInfo.getAdapter().getClass()), e);
@@ -97,7 +97,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 

@@ -20,8 +20,8 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Iterates over {@link JsonArray}.
@@ -67,7 +67,7 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     @Override
     JsonbException createIncompatibleValueError() {
-        return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
+        return new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
                                                       getValue().getValueType()));
     }
 

@@ -20,8 +20,8 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.spi.JsonProvider;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Builds {@link jakarta.json.JsonObject} delegates to {@link jakarta.json.JsonObjectBuilder}, caches key when
@@ -207,7 +207,7 @@ class JsonObjectBuilder extends JsonStructureBuilder {
 
     private String getNextKey() {
         if (nextKey == null) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                                                          "Can't write a value without key name"));
         }
         String key = nextKey;

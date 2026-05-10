@@ -22,11 +22,11 @@ import java.util.Locale;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Abstract class for converting date objects from java.time.
@@ -71,7 +71,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseDefault(jsonValue, unmarshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
      * @param context context
      * @return date formatter
      */
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContextManager context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }
@@ -132,7 +132,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 }

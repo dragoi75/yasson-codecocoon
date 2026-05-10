@@ -17,11 +17,11 @@ import java.util.Set;
 
 /**
  * Jsonb processing (serializing/deserializing) context.
- * Instance is thread bound (in contrast to {@link JsonbContext}.
+ * Instance is thread bound (in contrast to {@link JsonbContextManager}.
  */
 public abstract class ProcessingContext {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbContextManager jsonbContext;
 
     /**
      * Used to avoid StackOverflowError, when adapted / serialized object
@@ -34,7 +34,7 @@ public abstract class ProcessingContext {
      *
      * @param jsonbContext context of Jsonb
      */
-    public ProcessingContext(JsonbContext jsonbContext) {
+    public ProcessingContext(JsonbContextManager jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 
@@ -43,7 +43,7 @@ public abstract class ProcessingContext {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbContextManager getJsonbContext() {
         return jsonbContext;
     }
 

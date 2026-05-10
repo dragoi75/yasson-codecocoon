@@ -22,10 +22,10 @@ import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -59,7 +59,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 
@@ -79,7 +79,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        JsonbContextManager jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
         if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller) ctx)) {
             return;
         }

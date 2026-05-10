@@ -23,10 +23,10 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.serializer.AbstractValueTypeSerializer;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
 import org.eclipse.yasson.internal.serializer.SerializerBuilder;
@@ -46,7 +46,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      * @param jsonbContext    Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public Marshaller(JsonbContextManager jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -56,7 +56,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      *
      * @param jsonbContext Current context.
      */
-    public Marshaller(JsonbContext jsonbContext) {
+    public Marshaller(JsonbContextManager jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
     }
@@ -76,7 +76,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
             throw e;
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
                 if (close) {
@@ -142,7 +142,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
         if (getJsonbContext().getConfigProperties().isStrictIJson()
                 && rootSerializer instanceof AbstractValueTypeSerializer) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSerializer.serialize(root, generator, this);
     }
@@ -158,7 +158,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
                 .withObjectClass(rootClazz)
                 .withType(runtimeType);
 
-        ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
+        ClassDescriptor classModel = getMappingContext().getOrCreateClassModel(rootClazz);
         serializerBuilder.withCustomization(classModel.getClassCustomization());
         return serializerBuilder.build();
     }

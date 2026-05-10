@@ -24,7 +24,7 @@ import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
@@ -41,7 +41,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      *
      * @param jsonbContext JSON-B context.
      */
-    public SerializerBuilder(JsonbContext jsonbContext) {
+    public SerializerBuilder(JsonbContextManager jsonbContext) {
         super(jsonbContext);
     }
 
@@ -148,8 +148,8 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
     }
 
     private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers
-                .findValueSerializerProvider(rawType);
+        final Optional<? extends SerializerProviderAdapter> supportedTypeSerializerOptional = StandardSerializerRegistry
+                .locateValueSerializerProvider(rawType);
         if (supportedTypeSerializerOptional.isPresent()) {
             return Optional
                     .of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(getCustomization()));
