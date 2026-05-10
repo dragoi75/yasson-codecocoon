@@ -16,7 +16,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.eclipse.yasson.Jsonbs.*;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -109,7 +109,7 @@ public class DefaultGetterInInterface {
 
     @Test
     public void testWithInheritedAndDefault() throws NoSuchMethodException {
-        JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+        JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
 
         // direct implementation only (no default implementation)
         Method pojoGetter = jsonbContext.getMappingContext().getOrCreateClassModel(Pojo.class).getPropertyModel("getterI").getPropagation().getGetter();

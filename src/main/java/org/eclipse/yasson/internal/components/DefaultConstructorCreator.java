@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.components;
 
 import java.io.IOException;
 
-import org.eclipse.yasson.internal.InstanceCreator;
+import org.eclipse.yasson.internal.InstanceFactory;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
 /**
@@ -22,20 +22,20 @@ import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
  */
 public class DefaultConstructorCreator implements JsonbComponentInstanceCreator {
 
-    private final InstanceCreator creator;
+    private final InstanceFactory creator;
 
     /**
      * Constructs default constructor creator.
      *
      * @param creator instance creator
      */
-    DefaultConstructorCreator(InstanceCreator creator) {
+    DefaultConstructorCreator(InstanceFactory creator) {
         this.creator = creator;
     }
 
     @Override
     public <T> T getOrCreateComponent(Class<T> componentClass) {
-        return creator.createInstance(componentClass);
+        return creator.newInstance(componentClass);
     }
 
     @Override

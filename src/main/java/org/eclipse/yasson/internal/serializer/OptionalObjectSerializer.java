@@ -22,9 +22,9 @@ import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
+import org.eclipse.yasson.internal.ProcessingSessionContext;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -79,13 +79,13 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        JsonbRuntimeContext jsonbContext = ((ProcessingSessionContext) ctx).getJsonbContext();
         if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller) ctx)) {
             return;
         }
         Object optionalValue = obj.get();
         final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass())
-                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
+                .setType(optionalValueType).setWrapper(wrapper).setCustomization(customization).build();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 

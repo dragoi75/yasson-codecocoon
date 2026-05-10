@@ -33,7 +33,7 @@ import jakarta.json.spi.JsonProvider;
 
 public class ConstructorPropertiesAnnotationIntrospectorTest {
 
-    private final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private final JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
     private final AnnotationFinder constructorPropertiesFinder = AnnotationFinder.findConstructorProperties();
 
     /**

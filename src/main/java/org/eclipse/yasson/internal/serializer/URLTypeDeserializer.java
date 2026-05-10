@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -34,7 +34,7 @@ public class URLTypeDeserializer extends AbstractValueTypeDeserializer<URL> {
     }
 
     @Override
-    protected URL deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URL deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         URL url = null;
         try {
             url = new URL(jsonValue);

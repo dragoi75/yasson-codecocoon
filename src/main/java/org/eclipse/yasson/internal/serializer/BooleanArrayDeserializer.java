@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 
 /**
  * Array unmarshaller item implementation for booleans.
@@ -29,7 +29,7 @@ public class BooleanArrayDeserializer extends AbstractArrayDeserializer<boolean[
      *
      * @param builder deserializer builder
      */
-    protected BooleanArrayDeserializer(DeserializerBuilder builder) {
+    protected BooleanArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -39,7 +39,7 @@ public class BooleanArrayDeserializer extends AbstractArrayDeserializer<boolean[
     }
 
     @Override
-    public boolean[] getInstance(Unmarshaller unmarshaller) {
+    public boolean[] getInstance(JsonbDeserializer unmarshaller) {
         final int size = items.size();
         final boolean[] byteArray = new boolean[size];
         for (int i = 0; i < size; i++) {

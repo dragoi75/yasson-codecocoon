@@ -28,22 +28,22 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private static final Logger LOG = Logger.getLogger(ConstructorPropertiesAnnotationIntrospector.class.getName());
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
         return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
     /**
      * Only for testing and internal purposes.
      * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonbContext)}.
+     * Please use static factory methods e.g. {@link #forContext(JsonbRuntimeContext)}.
      *
-     * @param context          {@link JsonbContext}
+     * @param context          {@link JsonbRuntimeContext}
      * @param annotationFinder {@link AnnotationFinder}
      */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonbContext context, AnnotationFinder annotationFinder) {
+    protected ConstructorPropertiesAnnotationIntrospector(JsonbRuntimeContext context, AnnotationFinder annotationFinder) {
         this.jsonbContext = context;
         this.constructorProperties = annotationFinder;
     }

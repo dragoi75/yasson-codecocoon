@@ -17,7 +17,7 @@ import java.math.BigInteger;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -37,7 +37,7 @@ public class BigIntegerTypeDeserializer extends AbstractNumberDeserializer<BigIn
     }
 
     @Override
-    public BigInteger deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public BigInteger deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
                 .map(num -> new BigInteger(num.toString()))
                 .orElseGet(() -> {

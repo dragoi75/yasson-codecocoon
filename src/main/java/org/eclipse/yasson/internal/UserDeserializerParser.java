@@ -24,21 +24,21 @@ import jakarta.json.stream.JsonLocation;
 /**
  * Decorator for JSONP parser. Adds some checks for parser cursor manipulation methods.
  */
-public class UserDeserializerParser implements JsonbParser {
+public class UserDeserializerParser implements JsonbNavigator {
 
-    private final JsonbParser jsonbParser;
+    private final JsonbNavigator jsonbParser;
 
     /**
      * Remembered parser level, which is applied to user deserializer structure.
      */
-    private final JsonbRiParser.LevelContext level;
+    private final JsonbRiEventParser.ParsingLevelContext level;
 
     /**
      * Constructs an instance with parser and context.
      *
      * @param parser jsonb parser to decorate
      */
-    public UserDeserializerParser(JsonbParser parser) {
+    public UserDeserializerParser(JsonbNavigator parser) {
         this.jsonbParser = parser;
         level = jsonbParser.getCurrentLevel();
     }
@@ -133,7 +133,7 @@ public class UserDeserializerParser implements JsonbParser {
      * @return current level
      */
     @Override
-    public JsonbRiParser.LevelContext getCurrentLevel() {
+    public JsonbRiEventParser.ParsingLevelContext getCurrentLevel() {
         return jsonbParser.getCurrentLevel();
     }
 

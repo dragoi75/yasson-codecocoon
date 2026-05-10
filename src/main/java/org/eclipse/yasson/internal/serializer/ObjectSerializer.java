@@ -24,7 +24,7 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionHelper;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -61,7 +61,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
         Marshaller context = (Marshaller) ctx;
         try {
-            if (context.addProcessedObject(object)) {
+            if (context.registerProcessedObject(object)) {
                 final PropertyModel[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass())
                         .getSortedProperties();
                 for (PropertyModel model : allProperties) {
@@ -76,7 +76,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                 throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, object.getClass()));
             }
         } finally {
-            context.removeProcessedObject(object);
+            context.unregisterProcessedObject(object);
         }
     }
 
@@ -110,14 +110,14 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                 return;
             }
 
-            Optional<Type> runtimeTypeOptional = ReflectionUtils
-                    .resolveOptionalType(this, propertyModel.getPropertySerializationType());
+            Optional<Type> runtimeTypeOptional = ReflectionHelper
+                    .getOptionalType(this, propertyModel.getPropertySerializationType());
             Type genericType = runtimeTypeOptional.orElse(null);
             final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
-                    .withWrapper(this)
+                    .setWrapper(this)
                     .withObjectClass(propertyValue.getClass())
-                    .withCustomization(propertyModel.getCustomization())
-                    .withType(genericType).build();
+                    .setCustomization(propertyModel.getCustomization())
+                    .setType(genericType).build();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }

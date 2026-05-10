@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -24,110 +24,110 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  *
  * @param <T> serialization builder type
  */
-public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
+public class GenericSerializerBuilder<T extends GenericSerializerBuilder> {
 
     /**
      * Not null with an exception of a root item.
      */
-    private CurrentItem<?> wrapper;
+    private CurrentItem<?> currentItem;
 
     /**
      * In case of unknown object genericType.
      * Null for embedded objects such as collections, or known conversion types.
      */
-    private ClassModel classModel;
+    private ClassModel classDescriptor;
 
     /**
      * Runtime type resolved after expanding type variables and wildcards.
      */
-    private Type runtimeType;
+    private Type actualType;
 
     /**
      * Type is used when field model is not present.
      * In case of root, or embedded objects such as collections.
      */
-    private Type genericType;
+    private Type typeParameter;
 
     /**
      * Class customization.
      */
-    private Customization customization;
+    private Customization customConfig;
 
     /**
      * Jsonb context.
      */
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbRuntime;
 
     /**
      * Crates a builder.
      *
-     * @param jsonbContext Not null.
+     * @param jsonbRuntime Not null.
      */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
+    public GenericSerializerBuilder(JsonbRuntimeContext jsonbRuntime) {
+        Objects.requireNonNull(jsonbRuntime);
+        this.jsonbRuntime = jsonbRuntime;
     }
 
     /**
      * Wrapper item for this item.
      *
-     * @param wrapper not null.
+     * @param currentItem not null.
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public T setWrapper(CurrentItem<?> currentItem) {
+        this.currentItem = currentItem;
         return (T) this;
     }
 
     /**
      * Customization of the class.
      *
-     * @param customization Class customization
+     * @param customConfig Class customization
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
+    public T setCustomization(Customization customConfig) {
+        this.customConfig = customConfig;
         return (T) this;
     }
 
     /**
      * Class model for this item.
      *
-     * @param classModel class model
+     * @param classDescriptor class model
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withClassModel(ClassModel classModel) {
-        this.classModel = classModel;
+    public T setClassModel(ClassModel classDescriptor) {
+        this.classDescriptor = classDescriptor;
         return (T) this;
     }
 
     /**
      * Runtime type for this item.
      *
-     * @param runtimeType runtime type
+     * @param actualType runtime type
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
+    public T setRuntimeType(Type actualType) {
+        this.actualType = actualType;
         return (T) this;
     }
 
     /***
      * Gets or load class model for a class an its superclasses.
      *
-     * @param rawType Class to get model for.
+     * @param rawClass Class to get model for.
      * @return Class model.
      */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (classModel == null) {
-            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+    protected ClassModel getClassModel(Class<?> rawClass) {
+        ClassModel classDescriptor = jsonbRuntime.getMappingContext().getClassModel(rawClass);
+        if (classDescriptor == null) {
+            classDescriptor = jsonbRuntime.getMappingContext().getOrCreateClassModel(rawClass);
         }
-        return classModel;
+        return classDescriptor;
     }
 
     /**
@@ -136,7 +136,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return Wrapper item.
      */
     public CurrentItem<?> getWrapper() {
-        return wrapper;
+        return currentItem;
     }
 
     /**
@@ -146,7 +146,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return model of a class
      */
     public ClassModel getClassModel() {
-        return classModel;
+        return classDescriptor;
     }
 
     /**
@@ -157,19 +157,19 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return runtime type
      */
     public Type getRuntimeType() {
-        return runtimeType;
+        return actualType;
     }
 
     /**
      * Type for underlying instance to be created from.
      * In case of type variable or wildcard, will be resolved recursively from parent items.
      *
-     * @param type type of instance not null
+     * @param declaredType type of instance not null
      * @return builder instance for call chaining
      */
     @SuppressWarnings("unchecked")
-    public T withType(Type type) {
-        this.genericType = type;
+    public T setType(Type declaredType) {
+        this.typeParameter = declaredType;
         return (T) this;
     }
 
@@ -178,8 +178,8 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
-        return jsonbContext;
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbRuntime;
     }
 
     /**
@@ -188,7 +188,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return customization
      */
     public Customization getCustomization() {
-        return customization;
+        return customConfig;
     }
 
     /**
@@ -197,6 +197,6 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return generic type
      */
     public Type getGenericType() {
-        return genericType;
+        return typeParameter;
     }
 }

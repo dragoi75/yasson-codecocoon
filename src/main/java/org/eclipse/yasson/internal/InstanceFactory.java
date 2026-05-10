@@ -26,27 +26,27 @@ import java.util.function.Supplier;
  * Creates instances for known types, caches constructors of unknown.
  * (Constructors of parsed types are stored in {@link org.eclipse.yasson.internal.model.ClassModel}).
  */
-public class InstanceCreator {
+public class InstanceFactory {
 
-    private static final InstanceCreator INSTANCE = new InstanceCreator();
+    private static final InstanceFactory DEFAULT_FACTORY = new InstanceFactory();
 
-    static InstanceCreator getSingleton() {
-        return INSTANCE;
+    static InstanceFactory getSingleton() {
+        return DEFAULT_FACTORY;
     }
 
-    private static final Map<Class, Supplier> CREATORS = new HashMap<>();
+    private static final Map<Class, Supplier> CLASS_TO_SUPPLIER_MAP = new HashMap<>();
 
     static {
-        CREATORS.put(ArrayList.class, ArrayList::new);
-        CREATORS.put(LinkedList.class, LinkedList::new);
-        CREATORS.put(HashSet.class, HashSet::new);
-        CREATORS.put(TreeSet.class, TreeSet::new);
-        CREATORS.put(HashMap.class, HashMap::new);
-        CREATORS.put(TreeMap.class, TreeMap::new);
+        CLASS_TO_SUPPLIER_MAP.put(ArrayList.class, ArrayList::new);
+        CLASS_TO_SUPPLIER_MAP.put(LinkedList.class, LinkedList::new);
+        CLASS_TO_SUPPLIER_MAP.put(HashSet.class, HashSet::new);
+        CLASS_TO_SUPPLIER_MAP.put(TreeSet.class, TreeSet::new);
+        CLASS_TO_SUPPLIER_MAP.put(HashMap.class, HashMap::new);
+        CLASS_TO_SUPPLIER_MAP.put(TreeMap.class, TreeMap::new);
     }
 
-    private InstanceCreator() {
-        if (INSTANCE != null) {
+    private InstanceFactory() {
+        if (DEFAULT_FACTORY != null) {
             throw new IllegalStateException("This class should never be instantiated");
         }
     }
@@ -54,21 +54,21 @@ public class InstanceCreator {
     /**
      * Create an instance of the given class with its default constructor.
      *
-     * @param tClass class to create instance
+     * @param targetClass class to create instance
      * @param <T>    Type of the class/instance
      * @return crated instance
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createInstance(Class<T> tClass) {
-        Supplier<T> creator = CREATORS.get(tClass);
+    public static <T> T newInstance(Class<T> targetClass) {
+        Supplier<T> supplier = CLASS_TO_SUPPLIER_MAP.get(targetClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (creator == null) {
-            Constructor<T> constructor = ReflectionUtils.getDefaultConstructor(tClass, true);
-            creator = () -> ReflectionUtils.createNoArgConstructorInstance(constructor);
-            CREATORS.put(tClass, creator);
+        if (supplier == null) {
+            Constructor<T> ctor = ReflectionHelper.getDefaultConstructor(targetClass, true);
+            supplier = () -> ReflectionHelper.createInstanceUsingNoArgCtor(ctor);
+            CLASS_TO_SUPPLIER_MAP.put(targetClass, supplier);
         }
 
-        return creator.get();
+        return supplier.get();
     }
 
 }

@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -36,7 +36,7 @@ public class FloatTypeDeserializer extends AbstractNumberDeserializer<Float> {
     }
 
     @Override
-    protected Float deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Float deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, false, unmarshaller.getJsonbContext())
                 .map(num -> Float.parseFloat(num.toString()))
                 .orElseGet(() -> {

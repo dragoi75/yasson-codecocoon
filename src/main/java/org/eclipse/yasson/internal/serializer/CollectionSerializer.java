@@ -22,7 +22,7 @@ import jakarta.json.stream.JsonGenerator;
  *
  * @param <V> type of {@code Collection} value
  */
-public class CollectionSerializer<V> extends AbstractContainerSerializer<Collection<V>> implements EmbeddedItem {
+public class CollectionSerializer<V> extends AbstractContainerSerializer<Collection<V>> implements EmbeddedElement {
 
     /**
      * Creates new collection serializer.

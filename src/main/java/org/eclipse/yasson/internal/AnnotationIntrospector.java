@@ -82,7 +82,7 @@ import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
  */
 public class AnnotationIntrospector {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
     private final ConstructorPropertiesAnnotationIntrospector constructorPropertiesIntrospector;
 
     /**
@@ -93,11 +93,11 @@ public class AnnotationIntrospector {
                           JsonbTypeAdapter.class, JsonbTypeSerializer.class, JsonbTypeDeserializer.class);
 
     /**
-     * Creates annotation introspecting component passing {@link JsonbContext} inside.
+     * Creates annotation introspecting component passing {@link JsonbRuntimeContext} inside.
      *
      * @param jsonbContext mandatory
      */
-    public AnnotationIntrospector(JsonbContext jsonbContext) {
+    public AnnotationIntrospector(JsonbRuntimeContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.constructorPropertiesIntrospector = ConstructorPropertiesAnnotationIntrospector.forContext(jsonbContext);
@@ -215,7 +215,7 @@ public class AnnotationIntrospector {
             return null;
         }
 
-        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectionUtils.getOptionalRawType(property.getPropertyType()));
+        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectionHelper.getOptionalRawType(property.getPropertyType()));
     }
 
     /**
@@ -240,7 +240,7 @@ public class AnnotationIntrospector {
         final AdapterBinding adapterBinding = jsonbContext.getComponentMatcher().introspectAdapterBinding(adapterClass, null);
 
         if (expectedClass.isPresent() && !(
-                ReflectionUtils.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
+                ReflectionHelper.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_INCOMPATIBLE,
                                                          adapterBinding.getBindingType(),
                                                          expectedClass.get()));
@@ -320,7 +320,7 @@ public class AnnotationIntrospector {
     }
 
     private <T extends Annotation> T getAnnotationFromPropertyType(Property property, Class<T> annotationClass) {
-        final Optional<Class<?>> optionalRawType = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> optionalRawType = ReflectionHelper.getOptionalRawType(property.getPropertyType());
         if (!optionalRawType.isPresent()) {
             //will not work for type variable properties, which are bound to class that is annotated.
             return null;
@@ -420,7 +420,7 @@ public class AnnotationIntrospector {
 
         // No date format on property, try class level
         // if property is not TypeVariable and its class is not date skip it
-        final Optional<Class<?>> propertyRawTypeOptional = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> propertyRawTypeOptional = ReflectionHelper.getOptionalRawType(property.getPropertyType());
         if (propertyRawTypeOptional.isPresent()) {
             Class<?> rawType = propertyRawTypeOptional.get();
             if (!(
@@ -484,7 +484,7 @@ public class AnnotationIntrospector {
                 JsonbNumberFormat.class,
                 property);
         if (annotationFromPropertyCategorized.size() == 0) {
-            final Optional<Class<?>> propertyRawTypeOptional = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+            final Optional<Class<?>> propertyRawTypeOptional = ReflectionHelper.getOptionalRawType(property.getPropertyType());
             if (propertyRawTypeOptional.isPresent()) {
                 Class<?> rawType = propertyRawTypeOptional.get();
                 if (!Number.class.isAssignableFrom(rawType)) {
@@ -548,7 +548,7 @@ public class AnnotationIntrospector {
             return new JsonbDateFormatter(format, locale);
         }
 
-        final Optional<Class<?>> optionalRawType = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> optionalRawType = ReflectionHelper.getOptionalRawType(property.getPropertyType());
         final Class<?> propertyRawType = optionalRawType.orElse(null);
 
         if (propertyRawType != null
@@ -581,8 +581,8 @@ public class AnnotationIntrospector {
             visibilityAnnotation = findAnnotation(clazz.getPackage().getDeclaredAnnotations(), JsonbVisibility.class);
         }
         if (visibilityAnnotation != null) {
-            return ReflectionUtils.createNoArgConstructorInstance(
-                    ReflectionUtils.getDefaultConstructor(visibilityAnnotation.value(), true));
+            return ReflectionHelper.createInstanceUsingNoArgCtor(
+                    ReflectionHelper.getDefaultConstructor(visibilityAnnotation.value(), true));
         }
         return jsonbContext.getConfigProperties().getPropertyVisibilityStrategy();
     }

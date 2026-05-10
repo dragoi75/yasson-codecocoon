@@ -24,7 +24,7 @@ import jakarta.json.stream.JsonGenerator;
  * @param <K> {@link Map} key type to serialize
  * @param <V> {@link Map} value type to serialize
  */
-public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> implements EmbeddedItem {
+public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> implements EmbeddedElement {
 
     /**
      * Internal Map serializing delegate interface.

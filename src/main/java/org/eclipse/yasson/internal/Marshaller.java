@@ -34,7 +34,7 @@ import org.eclipse.yasson.internal.serializer.SerializerBuilder;
 /**
  * JSONB marshaller. Created each time marshalling operation called.
  */
-public class Marshaller extends ProcessingContext implements SerializationContext {
+public class Marshaller extends ProcessingSessionContext implements SerializationContext {
 
     private static final Logger LOGGER = Logger.getLogger(Marshaller.class.getName());
 
@@ -46,7 +46,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      * @param jsonbContext    Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -56,7 +56,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      *
      * @param jsonbContext Current context.
      */
-    public Marshaller(JsonbContext jsonbContext) {
+    public Marshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
     }
@@ -156,10 +156,10 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         }
         SerializerBuilder serializerBuilder = new SerializerBuilder(getJsonbContext())
                 .withObjectClass(rootClazz)
-                .withType(runtimeType);
+                .setType(runtimeType);
 
         ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
-        serializerBuilder.withCustomization(classModel.getClassCustomization());
+        serializerBuilder.setCustomization(classModel.getClassCustomization());
         return serializerBuilder.build();
     }
     

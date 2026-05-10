@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * @author Roman Grigoriadi
  */
 public class ClassParserTest {
-    private static final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private static final JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
     private static final ClassParser classParser = new ClassParser(jsonbContext);
     private static final AnnotationIntrospector introspector = new AnnotationIntrospector(jsonbContext);
 

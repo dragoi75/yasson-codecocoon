@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -49,7 +49,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @param jsonbContext context
      * @return formatted number value
      */
-    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContext jsonbContext) {
+    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbRuntimeContext jsonbContext) {
         if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
             return Optional.empty();
         }

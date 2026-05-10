@@ -20,8 +20,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -42,16 +42,16 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
 
     @Override
     public OptionalDouble deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbParser) parser).moveToValue();
+        final JsonParser.Event next = ((JsonbNavigator) parser).moveToValue();
         if (next == JsonParser.Event.VALUE_NULL) {
             return OptionalDouble.empty();
         }
         String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        return deserialize(value, (JsonbDeserializer) ctx, rtType);
     }
 
     @Override
-    protected OptionalDouble deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalDouble deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         try {
             return OptionalDouble.of(Double.parseDouble(jsonValue));
         } catch (NumberFormatException e) {

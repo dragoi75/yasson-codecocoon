@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.InstanceCreator;
+import org.eclipse.yasson.internal.InstanceFactory;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
@@ -56,7 +56,7 @@ public class JsonbComponentInstanceCreatorFactory {
      * @param creator Instance creator
      * @return Component instance creator, either CDI or default constructor.
      */
-    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceCreator creator) {
+    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceFactory creator) {
         Object beanManager = getCdiBeanManager();
         if (beanManager == null) {
             beanManager = getJndiBeanManager();

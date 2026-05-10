@@ -18,7 +18,7 @@ import java.util.Base64;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -38,7 +38,7 @@ public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<b
     }
 
     @Override
-    protected byte[] deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected byte[] deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         return getDecoder(unmarshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonValue);
     }
 

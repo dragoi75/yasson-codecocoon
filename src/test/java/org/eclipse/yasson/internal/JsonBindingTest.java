@@ -58,7 +58,7 @@ public class JsonBindingTest {
         JsonBinding yasson = (JsonBinding) jsonb;
         Field jsonbContext = yasson.getClass().getDeclaredField("jsonbContext");
         jsonbContext.setAccessible(true);
-        JsonbContext ctx = (JsonbContext) jsonbContext.get(yasson);
+        JsonbRuntimeContext ctx = (JsonbRuntimeContext) jsonbContext.get(yasson);
         return ctx.getMappingContext().getClassModel(clazz);
     }
 

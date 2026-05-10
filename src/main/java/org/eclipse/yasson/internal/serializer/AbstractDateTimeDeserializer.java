@@ -22,8 +22,8 @@ import java.util.Locale;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -51,7 +51,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
     }
 
     @Override
-    public T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public T deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(unmarshaller.getJsonbContext());
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return fromInstant(Instant.ofEpochMilli(Long.parseLong(jsonValue)));
@@ -81,7 +81,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
      * @param context context
      * @return date formatter
      */
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }

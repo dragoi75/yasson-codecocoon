@@ -22,7 +22,7 @@ import jakarta.json.bind.annotation.JsonbDateFormat;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -49,7 +49,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        final JsonbContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
+        final JsonbRuntimeContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
         final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
         generator.write(toJson(obj, formatter, jsonbContext));
     }
@@ -62,7 +62,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      * @param jsonbContext JSON-B context.
      * @return JSON representation of given object.
      */
-    public String toJson(T object, JsonbDateFormatter formatter, JsonbContext jsonbContext) {
+    public String toJson(T object, JsonbDateFormatter formatter, JsonbRuntimeContext jsonbContext) {
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return String.valueOf(toInstant(object).toEpochMilli());
         } else if (formatter.getDateTimeFormatter() != null) {
@@ -86,7 +86,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      * @param context context
      * @return jsonb formatter
      */
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         Customization customization = getCustomization();
         if (customization != null && customization.getSerializeDateFormatter() != null) {
             return customization.getSerializeDateFormatter();

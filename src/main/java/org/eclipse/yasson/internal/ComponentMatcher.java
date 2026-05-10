@@ -38,7 +38,7 @@ import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomizati
  */
 public class ComponentMatcher {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     /**
      * Flag for searching for generic serializers and adapters in runtime.
@@ -52,7 +52,7 @@ public class ComponentMatcher {
      *
      * @param context mandatory
      */
-    ComponentMatcher(JsonbContext context) {
+    ComponentMatcher(JsonbRuntimeContext context) {
         Objects.requireNonNull(context);
         this.jsonbContext = context;
         userComponents = new ConcurrentHashMap<>();
@@ -220,7 +220,7 @@ public class ComponentMatcher {
         }
 
         return runtimeType instanceof ParameterizedType && componentBindingType instanceof ParameterizedType
-                && ReflectionUtils.getRawType(componentBindingType).isAssignableFrom(ReflectionUtils.getRawType(runtimeType))
+                && ReflectionHelper.getRawType(componentBindingType).isAssignableFrom(ReflectionHelper.getRawType(runtimeType))
                 && matchTypeArguments((ParameterizedType) runtimeType, (ParameterizedType) componentBindingType);
     }
 
@@ -250,7 +250,7 @@ public class ComponentMatcher {
      * @return introspected info with resolved typevar types.
      */
     AdapterBinding introspectAdapterBinding(Class<? extends JsonbAdapter> adapterClass, JsonbAdapter instance) {
-        final ParameterizedType adapterRuntimeType = ReflectionUtils.findParameterizedType(adapterClass, JsonbAdapter.class);
+        final ParameterizedType adapterRuntimeType = ReflectionHelper.locateParameterizedType(adapterClass, JsonbAdapter.class);
         final Type[] adapterTypeArguments = adapterRuntimeType.getActualTypeArguments();
         Type adaptFromType = resolveTypeArg(adapterTypeArguments[0], adapterClass);
         Type adaptToType = resolveTypeArg(adapterTypeArguments[1], adapterClass);
@@ -276,8 +276,8 @@ public class ComponentMatcher {
     @SuppressWarnings("unchecked")
     DeserializerBinding introspectDeserializerBinding(Class<? extends JsonbDeserializer> deserializerClass,
                                                       JsonbDeserializer instance) {
-        final ParameterizedType deserializerRuntimeType = ReflectionUtils
-                .findParameterizedType(deserializerClass, JsonbDeserializer.class);
+        final ParameterizedType deserializerRuntimeType = ReflectionHelper
+                .locateParameterizedType(deserializerClass, JsonbDeserializer.class);
         Type deserializerBindingType = resolveTypeArg(deserializerRuntimeType.getActualTypeArguments()[0], deserializerClass);
         final ComponentBindings componentBindings = getBindingInfo(deserializerBindingType);
         if (componentBindings.getDeserializer() != null && componentBindings.getDeserializer().getClass()
@@ -300,8 +300,8 @@ public class ComponentMatcher {
      */
     @SuppressWarnings("unchecked")
     SerializerBinding introspectSerializerBinding(Class<? extends JsonbSerializer> serializerClass, JsonbSerializer instance) {
-        final ParameterizedType serializerRuntimeType = ReflectionUtils
-                .findParameterizedType(serializerClass, JsonbSerializer.class);
+        final ParameterizedType serializerRuntimeType = ReflectionHelper
+                .locateParameterizedType(serializerClass, JsonbSerializer.class);
         Type serBindingType = resolveTypeArg(serializerRuntimeType.getActualTypeArguments()[0], serializerClass.getClass());
         final ComponentBindings componentBindings = getBindingInfo(serBindingType);
         if (componentBindings.getSerializer() != null && componentBindings.getSerializer().getClass().equals(serializerClass)) {
@@ -316,10 +316,10 @@ public class ComponentMatcher {
 
     private Type resolveTypeArg(Type adapterTypeArg, Type adapterType) {
         if (adapterTypeArg instanceof ParameterizedType) {
-            return ReflectionUtils.resolveTypeArguments((ParameterizedType) adapterTypeArg, adapterType);
+            return ReflectionHelper.resolveActualTypeArguments((ParameterizedType) adapterTypeArg, adapterType);
         } else if (adapterTypeArg instanceof TypeVariable) {
-            return ReflectionUtils
-                    .resolveItemVariableType(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg, true);
+            return ReflectionHelper
+                    .resolveItemTypeVariable(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg, true);
         } else {
             return adapterTypeArg;
         }

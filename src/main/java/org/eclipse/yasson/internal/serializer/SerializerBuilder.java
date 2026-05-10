@@ -24,7 +24,7 @@ import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
@@ -32,7 +32,7 @@ import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomizati
 /**
  * Builder for serializers.
  */
-public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuilder> {
+public class SerializerBuilder extends GenericSerializerBuilder<SerializerBuilder> {
 
     private Class<?> objectClass;
 
@@ -41,7 +41,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      *
      * @param jsonbContext JSON-B context.
      */
-    public SerializerBuilder(JsonbContext jsonbContext) {
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -62,7 +62,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      * @return JsonbSerializer.
      */
     public JsonbSerializer<?> build() {
-        withRuntimeType(resolveRuntimeType());
+        setRuntimeType(resolveRuntimeType());
 
         if (getCustomization() instanceof ComponentBoundCustomization) {
             ComponentBoundCustomization customization = (ComponentBoundCustomization) this.getCustomization();

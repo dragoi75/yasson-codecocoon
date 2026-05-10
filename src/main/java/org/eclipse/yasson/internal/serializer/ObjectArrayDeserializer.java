@@ -16,7 +16,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 
 /**
  * Item for handling arrays of objects.
@@ -34,7 +34,7 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
      *
      * @param builder deserializer builder
      */
-    protected ObjectArrayDeserializer(DeserializerBuilder builder) {
+    protected ObjectArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -45,7 +45,7 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public T[] getInstance(Unmarshaller unmarshaller) {
+    public T[] getInstance(JsonbDeserializer unmarshaller) {
         if (arrayInstance == null || arrayInstance.length != items.size()) {
             arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
         }

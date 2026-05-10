@@ -39,7 +39,7 @@ import jakarta.json.spi.JsonProvider;
  * @see AnnotationIntrospectorTestAsserts
  */
 public class AnnotationIntrospectorTest {
-    private final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private final JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
 
     /**
      * class under test.

@@ -21,7 +21,7 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
+import org.eclipse.yasson.internal.ProcessingSessionContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
@@ -55,9 +55,9 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     @Override
     @SuppressWarnings("unchecked")
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (ProcessingContext) ctx;
+        ProcessingSessionContext context = (ProcessingSessionContext) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.registerProcessedObject(obj)) {
                 final JsonbAdapter<T, A> adapter = (JsonbAdapter<T, A>) adapterInfo.getAdapter();
                 A adapted = adapter.adaptToJson(obj);
                 if (adapted == null) {
@@ -75,7 +75,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
                                                          adapterInfo.getToType(),
                                                          adapterInfo.getAdapter().getClass()), e);
         } finally {
-            context.removeProcessedObject(obj);
+            context.unregisterProcessedObject(obj);
         }
     }
 
@@ -91,8 +91,8 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         }
         return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
                 .withObjectClass(adapted.getClass())
-                .withCustomization(classModel == null ? null : classModel.getClassCustomization())
-                .withWrapper(this)
+                .setCustomization(classModel == null ? null : classModel.getClassCustomization())
+                .setWrapper(this)
                 .build();
     }
 

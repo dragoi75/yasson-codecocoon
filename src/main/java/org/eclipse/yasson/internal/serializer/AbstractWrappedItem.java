@@ -23,58 +23,58 @@ import org.eclipse.yasson.internal.model.ClassModel;
  *
  * @param <T> Instantiated object type
  */
-public abstract class AbstractItem<T> implements CurrentItem<T> {
+public abstract class AbstractWrappedItem<T> implements CurrentItem<T> {
 
     /**
      * Item containing instance of wrapping object and its metadata.
      * Null in case of a root object.
      */
-    private final CurrentItem<?> wrapper;
+    private final CurrentItem<?> currentItem;
 
-    private final Type runtimeType;
+    private final Type resolvedType;
 
     /**
      * Cached reference to mapping model of an item.
      */
-    private final ClassModel classModel;
+    private final ClassModel typeModel;
 
     /**
      * Creates and populates an instance from given builder.
      *
-     * @param builder Builder to initialize from.
+     * @param serializerFactory Builder to initialize from.
      */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.classModel = builder.getClassModel();
-        this.runtimeType = builder.getRuntimeType();
+    protected AbstractWrappedItem(GenericSerializerBuilder serializerFactory) {
+        this.currentItem = serializerFactory.getWrapper();
+        this.typeModel = serializerFactory.getClassModel();
+        this.resolvedType = serializerFactory.getRuntimeType();
     }
 
     /**
      * Creates an instance.
      *
-     * @param wrapper     Item wrapper.
-     * @param runtimeType Runtime type.
-     * @param classModel  Class model.
+     * @param currentItem     Item wrapper.
+     * @param resolvedType Runtime type.
+     * @param typeModel  Class model.
      */
-    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        this.wrapper = wrapper;
-        this.runtimeType = runtimeType;
-        this.classModel = classModel;
+    public AbstractWrappedItem(CurrentItem<?> currentItem, Type resolvedType, ClassModel typeModel) {
+        this.currentItem = currentItem;
+        this.resolvedType = resolvedType;
+        this.typeModel = typeModel;
     }
 
     @Override
     public ClassModel getClassModel() {
-        return classModel;
+        return typeModel;
     }
 
     @Override
     public CurrentItem<?> getWrapper() {
-        return wrapper;
+        return currentItem;
     }
 
     @Override
     public Type getRuntimeType() {
-        return runtimeType;
+        return resolvedType;
     }
 
 }

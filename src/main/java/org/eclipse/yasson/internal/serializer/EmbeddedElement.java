@@ -15,6 +15,6 @@ package org.eclipse.yasson.internal.serializer;
 /**
  * Tagging interface for embedded object items, such as List, Maps or Arrays.
  */
-public interface EmbeddedItem {
+public interface EmbeddedElement {
 
 }

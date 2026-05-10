@@ -17,25 +17,25 @@ import java.util.Set;
 
 /**
  * Jsonb processing (serializing/deserializing) context.
- * Instance is thread bound (in contrast to {@link JsonbContext}.
+ * Instance is thread bound (in contrast to {@link JsonbRuntimeContext}.
  */
-public abstract class ProcessingContext {
+public abstract class ProcessingSessionContext {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext runtimeContext;
 
     /**
      * Used to avoid StackOverflowError, when adapted / serialized object
      * contains contains instance of its type inside it or when object has recursive reference.
      */
-    private final Set<Object> currentlyProcessedObjects = new HashSet<>();
+    private final Set<Object> processedObjects = new HashSet<>();
 
     /**
      * Parent instance for marshaller and unmarshaller.
      *
-     * @param jsonbContext context of Jsonb
+     * @param runtimeContext context of Jsonb
      */
-    public ProcessingContext(JsonbContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
+    public ProcessingSessionContext(JsonbRuntimeContext runtimeContext) {
+        this.runtimeContext = runtimeContext;
     }
 
     /**
@@ -43,8 +43,8 @@ public abstract class ProcessingContext {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
-        return jsonbContext;
+    public JsonbRuntimeContext getJsonbContext() {
+        return runtimeContext;
     }
 
     /**
@@ -59,21 +59,21 @@ public abstract class ProcessingContext {
     /**
      * Adds currently processed object to the {@link Set}.
      *
-     * @param object processed object
+     * @param itemToRegister processed object
      * @return if object was added
      */
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
+    public boolean registerProcessedObject(Object itemToRegister) {
+        return this.processedObjects.add(itemToRegister);
     }
 
     /**
      * Removes processed object from the {@link Set}.
      *
-     * @param object processed object
+     * @param itemToRegister processed object
      * @return if object was removed
      */
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
+    public boolean unregisterProcessedObject(Object itemToRegister) {
+        return processedObjects.remove(itemToRegister);
     }
 
 }

@@ -22,7 +22,7 @@ import java.util.TimeZone;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -42,7 +42,7 @@ public class TimeZoneTypeDeserializer extends AbstractValueTypeDeserializer<Time
     }
 
     @Override
-    protected TimeZone deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected TimeZone deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         try {
             final ZoneId zoneId = ZoneId.of(jsonValue);
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
