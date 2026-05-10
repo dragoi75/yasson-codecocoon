@@ -26,37 +26,37 @@ import java.util.Objects;
  *
  * @author Roman Grigoriadi
  */
-public class JsonbContext {
+public class JsonbConfigurationContext {
 
-    private final JsonbConfig jsonbConfig;
+    private final JsonbConfig jsonbSettings;
 
-    private final MappingContext mappingContext;
+    private final MappingRegistry mappingRegistry;
 
-    private final JsonbComponentInstanceCreator componentInstanceCreator;
+    private final JsonbComponentInstanceCreator componentFactory;
 
-    private final JsonProvider jsonProvider;
+    private final JsonProvider jsonService;
 
-    private final ComponentMatcher componentMatcher;
+    private final ComponentMatcher componentSelector;
 
-    private final AnnotationIntrospector annotationIntrospector;
+    private final AnnotationIntrospector annotationInspector;
 
-    private final JsonbConfigProperties configProperties;
+    private final JsonbConfigurationProperties configurationProperties;
 
     /**
      * Creates and initialize context.
      *
-     * @param jsonbConfig jsonb jsonbConfig not null
-     * @param jsonProvider provider of JSONP
+     * @param jsonbSettings jsonb jsonbConfig not null
+     * @param jsonService provider of JSONP
      */
-    public JsonbContext(JsonbConfig jsonbConfig, JsonProvider jsonProvider) {
-        Objects.requireNonNull(jsonbConfig);
-        this.jsonbConfig = jsonbConfig;
-        this.mappingContext = new MappingContext(this);
-        this.componentInstanceCreator = JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator();
-        this.componentMatcher = new ComponentMatcher(this);
-        this.annotationIntrospector = new AnnotationIntrospector(this);
-        this.jsonProvider = jsonProvider;
-        this.configProperties = new JsonbConfigProperties(jsonbConfig);
+    public JsonbConfigurationContext(JsonbConfig jsonbSettings, JsonProvider jsonService) {
+        Objects.requireNonNull(jsonbSettings);
+        this.jsonbSettings = jsonbSettings;
+        this.mappingRegistry = new MappingRegistry(this);
+        this.componentFactory = JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator();
+        this.componentSelector = new ComponentMatcher(this);
+        this.annotationInspector = new AnnotationIntrospector(this);
+        this.jsonService = jsonService;
+        this.configurationProperties = new JsonbConfigurationProperties(jsonbSettings);
     }
 
     /**
@@ -65,7 +65,7 @@ public class JsonbContext {
      * @return Configuration.
      */
     public JsonbConfig getConfig() {
-        return jsonbConfig;
+        return jsonbSettings;
     }
 
     /**
@@ -73,8 +73,8 @@ public class JsonbContext {
      *
      * @return Mapping context.
      */
-    public MappingContext getMappingContext() {
-        return mappingContext;
+    public MappingRegistry getMappingContext() {
+        return mappingRegistry;
     }
 
 
@@ -84,7 +84,7 @@ public class JsonbContext {
      * @return JSONP provider.
      */
     public JsonProvider getJsonProvider() {
-        return jsonProvider;
+        return jsonService;
     }
 
     /**
@@ -93,7 +93,7 @@ public class JsonbContext {
      * @return Instance creator.
      */
     public JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        return componentInstanceCreator;
+        return componentFactory;
     }
 
     /**
@@ -102,7 +102,7 @@ public class JsonbContext {
      * @return Component matcher.
      */
     public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
+        return componentSelector;
     }
 
     /**
@@ -111,12 +111,12 @@ public class JsonbContext {
      * @return Annotation introspector.
      */
     public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationIntrospector;
+        return annotationInspector;
     }
 
 
-    public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
+    public JsonbConfigurationProperties getConfigProperties() {
+        return configurationProperties;
     }
 
 }

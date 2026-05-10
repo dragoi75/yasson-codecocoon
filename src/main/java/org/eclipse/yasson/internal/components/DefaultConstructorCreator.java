@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.components;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionHelper;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ public class DefaultConstructorCreator implements JsonbComponentInstanceCreator 
 
     @Override
     public <T> T getOrCreateComponent(Class<T> componentClass) {
-        return ReflectionUtils.createNoArgConstructorInstance(componentClass);
+        return ReflectionHelper.createInstanceNoArgs(componentClass);
     }
 
     @Override

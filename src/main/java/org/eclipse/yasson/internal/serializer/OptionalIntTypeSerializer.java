@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -24,7 +24,7 @@ import java.util.OptionalInt;
  * 
  * @author David Kral
  */
-public class OptionalIntTypeSerializer extends AbstractValueTypeSerializer<OptionalInt> {
+public class OptionalIntTypeSerializer extends ValueTypeSerializerBase<OptionalInt> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class OptionalIntTypeSerializer extends AbstractValueTypeSerializer<Optio
     }
 
     @Override
-    protected void serialize(OptionalInt obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalInt obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         if (obj.isPresent()) {
             generator.write(obj.getAsInt());
         } else if (customization != null && customization.isNillable()) {

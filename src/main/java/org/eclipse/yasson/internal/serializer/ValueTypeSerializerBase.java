@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.bind.serializer.JsonbSerializer;
@@ -25,31 +25,31 @@ import javax.json.stream.JsonGenerator;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<T> {
+public abstract class ValueTypeSerializerBase<T> implements JsonbSerializer<T> {
 
     protected final Customization customization;
 
     /**
      * Creates a new instance.
      *
-     * @param customization Model customization.
+     * @param customConfig Model customization.
      */
-    public AbstractValueTypeSerializer(Customization customization) {
-        this.customization = customization;
+    public ValueTypeSerializerBase(Customization customConfig) {
+        this.customization = customConfig;
     }
 
     /**
      * Serializes an object to JSON.
      *
-     * @param obj Object to serialize.
-     * @param generator JSON generator to use.
-     * @param ctx JSON-B mapper context.
+     * @param value Object to serialize.
+     * @param jsonWriter JSON generator to use.
+     * @param context JSON-B mapper context.
      */
     @Override
-    public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        Marshaller marshaller = (Marshaller) ctx;
-        serialize(obj, generator, marshaller);
+    public void serialize(T value, JsonGenerator jsonWriter, SerializationContext context) {
+        ObjectMarshaller objectConverter = (ObjectMarshaller) context;
+        serializeValue(value, jsonWriter, objectConverter);
     }
 
-    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
+    protected abstract void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller);
 }

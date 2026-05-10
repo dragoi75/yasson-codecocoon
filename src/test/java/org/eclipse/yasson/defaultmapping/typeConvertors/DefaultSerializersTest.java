@@ -15,7 +15,7 @@ package org.eclipse.yasson.defaultmapping.typeConvertors;
 import org.eclipse.yasson.TestTypeToken;
 import org.eclipse.yasson.defaultmapping.generics.model.ScalarValueWrapper;
 import org.eclipse.yasson.defaultmapping.typeConvertors.model.ByteArrayWrapper;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Test;
 
 import javax.json.bind.Jsonb;
@@ -48,7 +48,7 @@ public class DefaultSerializersTest {
     @Test
     public void testByteArray() {
         byte[] array = {1, 2, 3};
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
 
         assertEquals("[1,2,3]", jsonb.toJson(array));
     }
@@ -56,7 +56,7 @@ public class DefaultSerializersTest {
     @Test
     public void testByteArrayWithBinaryStrategy() {
         byte[] array = {127, -128, 127};
-        Jsonb jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
+        Jsonb jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
 
         assertEquals("[127,-128,127]", jsonb.toJson(array));
         assertArrayEquals(array, jsonb.fromJson("[127,-128,127]", byte[].class));
@@ -67,11 +67,11 @@ public class DefaultSerializersTest {
         byte[] array = {1, 2, 3};
         ByteArrayWrapper byteArrayWrapper = new ByteArrayWrapper();
         byteArrayWrapper.array = array;
-        Jsonb jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(true))).build();
+        Jsonb jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(true))).build();
 
         assertEquals("{\"array\":\"" + Base64.getUrlEncoder().encodeToString(array) + "\"}", jsonb.toJson(byteArrayWrapper));
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(false))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(false))).build();
 
         assertEquals("{\"array\":[1,2,3]}", jsonb.toJson(byteArrayWrapper));
     }
@@ -81,34 +81,34 @@ public class DefaultSerializersTest {
         byte[] array = {1, 2, 3};
         ByteArrayWrapper byteArrayWrapper = new ByteArrayWrapper();
         byteArrayWrapper.array = array;
-        Jsonb jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
+        Jsonb jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
         final String base64UrlEncodedJson = "{\"array\":\"" + Base64.getUrlEncoder().encodeToString(array) + "\"}";
         assertEquals(base64UrlEncodedJson, jsonb.toJson(byteArrayWrapper));
         ByteArrayWrapper result = jsonb.fromJson(base64UrlEncodedJson, ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BASE_64))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BASE_64))).build();
         assertEquals(base64UrlEncodedJson, jsonb.toJson(byteArrayWrapper));
         result = jsonb.fromJson(base64UrlEncodedJson, ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BASE_64_URL))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(true).withBinaryDataStrategy(BinaryDataStrategy.BASE_64_URL))).build();
         assertEquals(base64UrlEncodedJson, jsonb.toJson(byteArrayWrapper));
         result = jsonb.fromJson(base64UrlEncodedJson, ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BYTE))).build();
         assertEquals("[1,2,3]", jsonb.toJson(array));
         result = jsonb.fromJson("{\"array\":[1,2,3]}", ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BASE_64))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BASE_64))).build();
         final String base64EncodedJson = "{\"array\":\"" + Base64.getEncoder().encodeToString(array) + "\"}";
         assertEquals(base64EncodedJson, jsonb.toJson(byteArrayWrapper));
         result = jsonb.fromJson(base64EncodedJson, ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BASE_64_URL))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withBinaryDataStrategy(BinaryDataStrategy.BASE_64_URL))).build();
         assertEquals(base64UrlEncodedJson, jsonb.toJson(byteArrayWrapper));
         result = jsonb.fromJson(base64UrlEncodedJson, ByteArrayWrapper.class);
         assertArrayEquals(array, result.array);

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -24,7 +24,7 @@ import java.time.ZoneId;
  * 
  * @author David Kral
  */
-public class ZoneIdTypeSerializer extends AbstractValueTypeSerializer<ZoneId> {
+public class ZoneIdTypeSerializer extends ValueTypeSerializerBase<ZoneId> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class ZoneIdTypeSerializer extends AbstractValueTypeSerializer<ZoneId> {
     }
 
     @Override
-    protected void serialize(ZoneId obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(ZoneId obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.getId());
     }
 }

@@ -14,7 +14,7 @@
 package org.eclipse.yasson.defaultmapping.specific;
 
 import org.eclipse.yasson.defaultmapping.specific.model.Customer;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Test;
 
 import javax.json.bind.Jsonb;
@@ -39,13 +39,13 @@ public class ObjectGraphTest extends CustomerTest {
         friends.put("secondFriend", createCustomer("Jasons second friend"));
         customer.setFriends(friends);
 
-        Jsonb jsonb = new JsonBindingBuilder().build();
+        Jsonb jsonb = new JsonBindingConfigurator().build();
         assertEquals(EXPECTED, jsonb.toJson(customer));
     }
 
     @Test
     public void testObjectFromJson() {
-        Jsonb jsonb = new JsonBindingBuilder().build();
+        Jsonb jsonb = new JsonBindingConfigurator().build();
         Customer customer = jsonb.fromJson(EXPECTED, Customer.class);
         assertCustomerValues(customer, "Root Jason Customer");
         assertEquals(2, customer.getFriends().size());

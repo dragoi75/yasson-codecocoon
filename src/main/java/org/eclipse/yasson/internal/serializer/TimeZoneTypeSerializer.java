@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -24,7 +24,7 @@ import java.util.TimeZone;
  * 
  * @author David Kral
  */
-public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone> {
+public class TimeZoneTypeSerializer extends ValueTypeSerializerBase<TimeZone> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone
     }
 
     @Override
-    protected void serialize(TimeZone obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(TimeZone obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.getID());
     }
 }

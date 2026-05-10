@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  *
  * @author David Kral
  */
-public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
+public class EnumTypeSerializer extends ValueTypeSerializerBase<Enum> {
 
     /**
      * Creates a new instance.
@@ -35,7 +35,7 @@ public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
     }
 
     @Override
-    protected void serialize(Enum obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Enum obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.name());
     }
 }

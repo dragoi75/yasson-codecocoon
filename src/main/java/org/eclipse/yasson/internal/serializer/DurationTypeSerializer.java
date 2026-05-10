@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -24,7 +24,7 @@ import java.time.Duration;
  *
  * @author David Kral
  */
-public class DurationTypeSerializer extends AbstractValueTypeSerializer<Duration> {
+public class DurationTypeSerializer extends ValueTypeSerializerBase<Duration> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class DurationTypeSerializer extends AbstractValueTypeSerializer<Duration
     }
 
     @Override
-    protected void serialize(Duration obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Duration obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

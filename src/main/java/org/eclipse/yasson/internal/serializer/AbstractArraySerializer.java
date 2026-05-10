@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionHelper;
 
 import javax.json.stream.JsonGenerator;
 import java.lang.reflect.GenericArrayType;
@@ -30,7 +30,7 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
 
     protected final Type arrayValType;
 
-    protected AbstractArraySerializer(SerializerBuilder builder) {
+    protected AbstractArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
         arrayValType = resolveArrayType();
     }
@@ -39,11 +39,11 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
         if (getRuntimeType() == null || getRuntimeType() == Object.class) {
             return Object.class;
         } else if (getRuntimeType() instanceof ParameterizedType) {
-            return ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
+            return ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
         } else if (getRuntimeType() instanceof GenericArrayType) {
-            return ReflectionUtils.resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            return ReflectionHelper.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            return ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            return ReflectionHelper.getRawType(getRuntimeType()).getComponentType();
         }
     }
 

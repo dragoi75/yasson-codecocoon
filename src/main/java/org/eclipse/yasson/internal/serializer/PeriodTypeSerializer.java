@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.stream.JsonGenerator;
@@ -24,7 +24,7 @@ import java.time.Period;
  * 
  * @author David Kral
  */
-public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
+public class PeriodTypeSerializer extends ValueTypeSerializerBase<Period> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
     }
 
     @Override
-    protected void serialize(Period obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Period obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

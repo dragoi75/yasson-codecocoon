@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbStreamParser;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
@@ -43,20 +43,20 @@ public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<O
 
     @Override
     public OptionalInt deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbParser) parser).moveToValue();
+        final JsonParser.Event next = ((JsonbStreamParser) parser).moveToValue();
         if (next == JsonParser.Event.VALUE_NULL) {
             return OptionalInt.empty();
         }
         final String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        return deserialize(value, (JsonUnmarshaller) ctx, rtType);
     }
 
     @Override
-    protected OptionalInt deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalInt deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         try {
             return OptionalInt.of(Integer.parseInt(jsonValue));
         } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
         }
     }
 

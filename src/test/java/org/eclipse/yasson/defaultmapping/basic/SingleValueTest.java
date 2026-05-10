@@ -1,8 +1,8 @@
 package org.eclipse.yasson.defaultmapping.basic;
 
-import org.eclipse.yasson.internal.JsonBindingBuilder;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class SingleValueTest {
 
     @Test
     public void testMarshallPrimitives() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
 
         // String
         assertEquals("\"some_string\"", jsonb.toJson("some_string"));
@@ -70,15 +70,15 @@ public class SingleValueTest {
 
     @Test
     public void testSingleValue() {
-        Jsonb jsonb = (new JsonBindingBuilder()).build();
+        Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("5", jsonb.toJson(5));
 
-        jsonb = (new JsonBindingBuilder().withConfig(new JsonbConfig().withStrictIJSON(true))).build();
+        jsonb = (new JsonBindingConfigurator().withConfig(new JsonbConfig().withStrictIJSON(true))).build();
         try {
             jsonb.toJson(5);
             Assert.fail();
         } catch (JsonbException exception){
-            Assert.assertEquals(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
+            Assert.assertEquals(LocalizedMessages.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
         }
     }
 

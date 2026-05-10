@@ -18,27 +18,27 @@ import java.util.Set;
 
 /**
  * Jsonb processing (serializing/deserializing) context.
- * Instance is thread bound (in contrast to {@link JsonbContext}.
+ * Instance is thread bound (in contrast to {@link JsonbConfigurationContext}.
  *
  * @author Roman Grigoriadi
  */
-public abstract class ProcessingContext {
+public abstract class ProcessingContextManager {
 
-    protected final JsonbContext jsonbContext;
+    protected final JsonbConfigurationContext jsonbContext;
 
     /**
      * Used to avoid StackOverflowError, when adapted / serialized object
      * contains contains instance of its type inside it or when object has recursive reference.
      */
-    private final Set<Object> currentlyProcessedObjects = new HashSet<>();
+    private final Set<Object> processingObjects = new HashSet<>();
 
     /**
      * Parent instance for marshaller and unmarshaller.
      *
-     * @param jsonbContext context of Jsonb
+     * @param jsonbConfiguration context of Jsonb
      */
-    public ProcessingContext(JsonbContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
+    public ProcessingContextManager(JsonbConfigurationContext jsonbConfiguration) {
+        this.jsonbContext = jsonbConfiguration;
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class ProcessingContext {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbConfigurationContext getJsonbContext() {
         return jsonbContext;
     }
 
@@ -55,17 +55,17 @@ public abstract class ProcessingContext {
      *
      * @return mapping context
      */
-    public MappingContext getMappingContext() {
+    public MappingRegistry getMappingContext() {
         return getJsonbContext().getMappingContext();
     }
 
 
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
+    public boolean registerProcessedObject(Object itemToRegister) {
+        return this.processingObjects.add(itemToRegister);
     }
 
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
+    public boolean unregisterProcessedObject(Object itemToRegister) {
+        return processingObjects.remove(itemToRegister);
     }
 
 }

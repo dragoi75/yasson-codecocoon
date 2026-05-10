@@ -17,7 +17,7 @@ import org.eclipse.yasson.YassonProperties;
 import org.eclipse.yasson.customization.model.DateFormatPojo;
 import org.eclipse.yasson.customization.model.DateFormatPojoWithClassLevelFormatter;
 import org.eclipse.yasson.customization.model.TrimmedDatePojo;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -146,7 +146,7 @@ public class JsonbDateFormatterTest {
         pojo.setZonedDateTimeOverriddenZone(zdt.withZoneSameInstant(ZoneId.of("Europe/Paris")));
         pojo.setZonedInstant(zdt.withZoneSameInstant(ZoneId.of("Europe/Paris")).toInstant());
 
-        Jsonb zeroDefaultingJsonb = new JsonBindingBuilder()
+        Jsonb zeroDefaultingJsonb = new JsonBindingConfigurator()
                 .withConfig(new JsonbConfig().setProperty(YassonProperties.ZERO_TIME_PARSE_DEFAULTING, true))
                 .build();
 

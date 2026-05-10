@@ -14,9 +14,9 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
@@ -35,14 +35,14 @@ import java.util.OptionalLong;
  * @author Roman Grigoriadi
  */
 public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> implements JsonbDeserializer<T> {
-    protected JsonbRiParser.LevelContext parserContext;
+    protected JsonbRiStreamParser.LevelParseState parserContext;
 
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link DeserializationBuilder} used to build this instance
      */
-    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
+    protected AbstractContainerDeserializer(DeserializationBuilder builder) {
         super(builder);
     }
 
@@ -56,9 +56,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      */
     @Override
     public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
-        deserializeInternal((JsonbParser) parser, ctx);
-        return getInstance((Unmarshaller) context);
+        JsonUnmarshaller ctx = (JsonUnmarshaller) context;
+        deserializeInternal((JsonbStreamParser) parser, ctx);
+        return getInstance((JsonUnmarshaller) context);
     }
 
     /**
@@ -67,9 +67,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param unmarshaller Current deserialization context.
      * @return An instance of deserializing item.
      */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
+    protected abstract T getInstance(JsonUnmarshaller unmarshaller);
 
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeInternal(JsonbStreamParser parser, JsonUnmarshaller context) {
         parserContext = moveToFirst(parser);
         while (parser.hasNext()) {
             final JsonParser.Event event = parser.next();
@@ -91,7 +91,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
                 case END_ARRAY:
                     return;
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
             }
         }
     }
@@ -103,7 +103,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser Json parser.
      * @param context Current unmarshalling context.
      */
-    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
+    protected abstract void deserializeNext(JsonParser parser, JsonUnmarshaller context);
 
     /**
      * Move to first event for current deserializer structure.
@@ -111,22 +111,22 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser Json parser.
      * @return First event.
      */
-    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
+    protected abstract JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser);
 
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
-        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
+    protected DeserializationBuilder newUnmarshallerItemBuilder(JsonbConfigurationContext ctx) {
+        return new DeserializationBuilder(ctx).setWrapper(this).withJsonEvent(parserContext.getLastEvent());
     }
 
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbConfigurationContext ctx) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectionUtils.resolveType(this, valueType);
-        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
-            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
-            deserializerBuilder.withCustomization(classModel == null ? null : classModel.getCustomization());
+        Type actualValueType = ReflectionHelper.resolveGenericType(this, valueType);
+        DeserializationBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).setType(actualValueType);
+        if (!DefaultSerializerProvider.getInstance().isKnownType(ReflectionHelper.getRawType(actualValueType))) {
+            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionHelper.getRawType(actualValueType));
+            deserializerBuilder.setCustomization(classModel == null ? null : classModel.getCustomization());
         }
-        return deserializerBuilder.build();
+        return deserializerBuilder.buildDeserializer();
     }
 
     /**
@@ -144,7 +144,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         }
 
         if (!(propertyType instanceof Class)) {
-            propertyType = ReflectionUtils.getRawType(ReflectionUtils.resolveType(this, propertyType));
+            propertyType = ReflectionHelper.getRawType(ReflectionHelper.resolveGenericType(this, propertyType));
         }
 
         if (propertyType == Optional.class) {

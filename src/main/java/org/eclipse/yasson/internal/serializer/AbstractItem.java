@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import java.lang.reflect.Type;
 
@@ -24,27 +24,27 @@ import java.lang.reflect.Type;
  * @param <T> Instantiated object type
  * @author Roman Grigoriadi
  */
-public abstract class AbstractItem<T> implements CurrentItem<T> {
+public abstract class AbstractItem<T> implements CurrentItemProvider<T> {
 
     /**
      * Item containing instance of wrapping object and its metadata.
      * Null in case of a root object.
      */
-    private final CurrentItem<?> wrapper;
+    private final CurrentItemProvider<?> wrapper;
 
     private final Type runtimeType;
 
     /**
      * Cached reference to mapping model of an item.
      */
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Creates and populates an instance from given builder.
      *
      * @param builder Builder to initialize from.
      */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
+    protected AbstractItem(AbstractSerializationBuilder builder) {
         this.wrapper = builder.getWrapper();
         this.classModel = builder.getClassModel();
         this.runtimeType = builder.getRuntimeType();
@@ -57,19 +57,19 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
      * @param runtimeType Runtime type.
      * @param classModel Class model.
      */
-    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public AbstractItem(CurrentItemProvider<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         this.wrapper = wrapper;
         this.runtimeType = runtimeType;
         this.classModel = classModel;
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
     @Override
-    public CurrentItem<?> getWrapper() {
+    public CurrentItemProvider<?> getWrapper() {
         return wrapper;
     }
 

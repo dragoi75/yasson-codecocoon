@@ -13,7 +13,7 @@
 package org.eclipse.yasson.defaultmapping.specific;
 
 import org.eclipse.yasson.defaultmapping.generics.model.ScalarValueWrapper;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Test;
 
 import javax.json.bind.Jsonb;
@@ -34,26 +34,26 @@ import static org.junit.Assert.assertEquals;
 public class SpecificTest {
     @Test
     public void testMarshallBigDecimal() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("{\"value\":100}", jsonb.toJson(new ScalarValueWrapper<>(BigDecimal.valueOf(100L))));
         assertEquals("{\"value\":100.1}", jsonb.toJson(new ScalarValueWrapper<>(BigDecimal.valueOf(100.1D))));
     }
 
     @Test
     public void testMarshallBigInteger() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("{\"value\":100}", jsonb.toJson(new ScalarValueWrapper<>(BigInteger.valueOf(100))));
     }
 
     @Test
     public void testMarshallUri() throws URISyntaxException {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("{\"value\":\"http://www.oracle.com\"}", jsonb.toJson(new ScalarValueWrapper<>(new URI("http://www.oracle.com"))));
     }
 
     @Test
     public void testMarshallUrl() throws MalformedURLException {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("{\"value\":\"http://www.oracle.com\"}", jsonb.toJson(new ScalarValueWrapper<>(new URL("http://www.oracle.com"))));
     }
 }

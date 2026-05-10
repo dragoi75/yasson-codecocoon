@@ -13,7 +13,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbCreator;
@@ -21,8 +21,8 @@ import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.model.ReflectionPropagation;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.annotation.Annotation;
@@ -51,16 +51,16 @@ class ClassParser {
 
     public static final String SET_PREFIX = "set";
 
-    private final JsonbContext jsonbContext;
+    private final JsonbConfigurationContext jsonbContext;
 
-    ClassParser(JsonbContext jsonbContext) {
+    ClassParser(JsonbConfigurationContext jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 
     /**
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
-    public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
+    public void parseProperties(ClassDescriptor classModel, JsonbAnnotatedElement<Class<?>> classElement) {
 
         final Map<String, Property> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
@@ -235,7 +235,7 @@ class ClassParser {
                         && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) ||
                         (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
                                 && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH,
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH,
                             checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(),
                             cls.getName()));
                 }
@@ -254,7 +254,7 @@ class ClassParser {
      * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+    private List<PropertyModel> getSortedParentProperties(ClassDescriptor classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
         List<PropertyModel> sortedProperties = new ArrayList<>();
         //Pull properties from parent
         if (classModel.getParentClassModel() != null) {

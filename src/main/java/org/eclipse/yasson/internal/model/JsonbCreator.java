@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Constructor;
@@ -61,7 +61,7 @@ public class JsonbCreator {
                 return (T) ((Method) executable).invoke(on, params);
             }
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ERROR_CALLING_JSONB_CREATOR, on), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, on), e);
         }
     }
 

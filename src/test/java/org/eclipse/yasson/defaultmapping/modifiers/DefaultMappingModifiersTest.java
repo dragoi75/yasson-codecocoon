@@ -18,7 +18,7 @@ import org.eclipse.yasson.defaultmapping.modifiers.model.FieldModifiersClass;
 import org.eclipse.yasson.defaultmapping.modifiers.model.MethodModifiersClass;
 import org.eclipse.yasson.defaultmapping.modifiers.model.PrivateConstructorClass;
 import org.eclipse.yasson.defaultmapping.modifiers.model.ProtectedConstructorClass;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class DefaultMappingModifiersTest {
 
     @Test
     public void testMultipleInstancesOfSameType() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         Person person = new Person();
         Person personTwo = new Person();
         person.name = "Person 1";

@@ -36,13 +36,13 @@ public class ReflectionUtilsTest {
     @Test
     public void testIsTypeResolved() {
         Types<String> types = new Types<>();
-        assertTrue(ReflectionUtils.isResolvedType(getFieldType("resolvedParameterizedField")));
-        assertTrue(ReflectionUtils.isResolvedType(getFieldType("resolvedNestedParameterizedField")));
-        assertTrue(ReflectionUtils.isResolvedType(getFieldType("resolvedStr")));
-        assertFalse(ReflectionUtils.isResolvedType(getFieldType("unresolvedParameterizedField")));
-        assertFalse(ReflectionUtils.isResolvedType(getFieldType("unresolvedNestedParameterizedField")));
-        assertFalse(ReflectionUtils.isResolvedType(getFieldType("unresolvedField")));
-        assertFalse(ReflectionUtils.isResolvedType(getFieldType("unresolvedWildcardField")));
+        assertTrue(ReflectionHelper.isResolvedType(getFieldType("resolvedParameterizedField")));
+        assertTrue(ReflectionHelper.isResolvedType(getFieldType("resolvedNestedParameterizedField")));
+        assertTrue(ReflectionHelper.isResolvedType(getFieldType("resolvedStr")));
+        assertFalse(ReflectionHelper.isResolvedType(getFieldType("unresolvedParameterizedField")));
+        assertFalse(ReflectionHelper.isResolvedType(getFieldType("unresolvedNestedParameterizedField")));
+        assertFalse(ReflectionHelper.isResolvedType(getFieldType("unresolvedField")));
+        assertFalse(ReflectionHelper.isResolvedType(getFieldType("unresolvedWildcardField")));
     }
 
     private Type getFieldType(String fieldName) {

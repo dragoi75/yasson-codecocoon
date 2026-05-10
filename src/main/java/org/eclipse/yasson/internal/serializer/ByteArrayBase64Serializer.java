@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.config.BinaryDataStrategy;
@@ -28,7 +28,7 @@ import java.util.Base64;
  *
  * @author Roman Grigoriadi
  */
-public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[]> {
+public class ByteArrayBase64Serializer extends ValueTypeSerializerBase<byte[]> {
 
     /**
      * Creates a new instance.
@@ -40,7 +40,7 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
     }
 
     @Override
-    protected void serialize(byte[] obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(byte[] obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
     }
 
@@ -51,7 +51,7 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlEncoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                         "Invalid strategy: " + strategy));
         }
     }

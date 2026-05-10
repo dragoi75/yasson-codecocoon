@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import java.lang.reflect.Type;
@@ -38,7 +38,7 @@ public class URLTypeDeserializer extends AbstractValueTypeDeserializer<URL> {
     }
 
     @Override
-    protected URL deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URL deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         URL url = null;
         try {
             url = new URL(jsonValue);

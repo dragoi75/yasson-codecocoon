@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson;
 
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Test;
 
 import javax.json.bind.Jsonb;
@@ -42,7 +42,7 @@ public class SimpleTest {
 
     @Test
     public void testSimpleSerialize() {
-        Jsonb jsonb = (new JsonBindingBuilder()).build();
+        Jsonb jsonb = (new JsonBindingConfigurator()).build();
         final StringWrapper wrapper = new StringWrapper();
         wrapper.setValue("abc");
         jsonb.toJson(wrapper);

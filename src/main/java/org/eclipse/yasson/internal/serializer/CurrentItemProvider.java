@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
  * which accompanies this distribution.
@@ -10,24 +10,31 @@
  * Contributors:
  * Roman Grigoriadi
  ******************************************************************************/
+
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-
-import javax.json.bind.serializer.JsonbSerializer;
+import org.eclipse.yasson.internal.RuntimeTypeInfo;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 /**
- * Provides container serializer instance.
+ * Currently processing item.
  *
  * @author Roman Grigoriadi
  */
-public interface ContainerSerializerProvider {
+public interface CurrentItemProvider<T> extends RuntimeTypeInfo {
 
     /**
-     * Provides container serializer instance for given property.
+     * Class model containing property for this item.
      *
-     * @param propertyInfo Property to create serializer for.
-     * @return Serializer instance.
+     * @return Class model.
      */
-    JsonbSerializer<?> provideSerializer(JsonbPropertyInfo propertyInfo);
+    ClassDescriptor getClassModel();
+
+    /**
+     * Item wrapper. Null only in case of a root item.
+     *
+     * @return Wrapper item of this item.
+     */
+    CurrentItemProvider<?> getWrapper();
+
 }

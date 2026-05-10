@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import java.lang.reflect.Type;
@@ -36,7 +36,7 @@ public class ZoneOffsetTypeDeserializer extends AbstractValueTypeDeserializer<Zo
     }
 
     @Override
-    protected ZoneOffset deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected ZoneOffset deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         return ZoneOffset.of(jsonValue);
     }
 }

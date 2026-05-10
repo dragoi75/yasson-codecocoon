@@ -12,10 +12,10 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
+import org.eclipse.yasson.internal.JsonbStreamParser;
+import org.eclipse.yasson.internal.JsonbRiStreamParser;
+import org.eclipse.yasson.internal.ReflectionHelper;
 
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
@@ -38,12 +38,12 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     private T instance;
 
     /**
-     * @param builder {@link DeserializerBuilder) used to build this instance
+     * @param builder {@link DeserializationBuilder ) used to build this instance
      */
-    protected CollectionDeserializer(DeserializerBuilder builder) {
+    protected CollectionDeserializer(DeserializationBuilder builder) {
         super(builder);
         collectionValueType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
+                ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
                 : Object.class;
 
         instance = createInstance();
@@ -51,14 +51,14 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
 
     @SuppressWarnings("unchecked")
     private T createInstance() {
-        Class<T> rawType = (Class<T>) ReflectionUtils.getRawType(getRuntimeType());
+        Class<T> rawType = (Class<T>) ReflectionHelper.getRawType(getRuntimeType());
         assert Collection.class.isAssignableFrom(rawType);
 
         if (rawType.isInterface()) {
             final T x = createInterfaceInstance(rawType);
             if (x != null) return x;
         }
-        return ReflectionUtils.createNoArgConstructorInstance(rawType);
+        return ReflectionHelper.createInstanceNoArgs(rawType);
     }
 
     @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonUnmarshaller unmarshaller) {
         return instance;
     }
 
@@ -100,13 +100,13 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
         final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
         appendResult(deserializer.deserialize(parser, context, collectionValueType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

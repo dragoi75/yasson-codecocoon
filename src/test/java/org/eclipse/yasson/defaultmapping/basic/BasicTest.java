@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.defaultmapping.basic;
 
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.junit.Test;
 
 import javax.json.bind.Jsonb;
@@ -32,13 +32,13 @@ public class BasicTest {
 
     @Test
     public void testMarshallEscapedString() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         assertEquals("[\" \\\\ \\\" / \\f\\b\\r\\n\\t 9\"]", jsonb.toJson(new String[] {" \\ \" / \f\b\r\n\t \u0039"}));
     }
 
     @Test
     public void testMarshallWriter() {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
         Writer writer = new StringWriter();
         jsonb.toJson(new Long[]{5L}, writer);
         assertEquals("[5]", writer.toString());
@@ -46,7 +46,7 @@ public class BasicTest {
 
     @Test
     public void testMarshallOutputStream() throws IOException {
-        final Jsonb jsonb = (new JsonBindingBuilder()).build();
+        final Jsonb jsonb = (new JsonBindingConfigurator()).build();
 
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             jsonb.toJson(new Long[]{5L}, baos);
@@ -56,7 +56,7 @@ public class BasicTest {
 
     @Test
     public void testObjectSerialization() {
-        Jsonb jsonb = (new JsonBindingBuilder()).build();
+        Jsonb jsonb = (new JsonBindingConfigurator()).build();
         final String val =  jsonb.toJson(new Object());
         assertEquals("{}", val);
     }

@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.serializer.CurrentItem;
+import org.eclipse.yasson.internal.JsonbConfigurationContext;
+import org.eclipse.yasson.internal.serializer.CurrentItemProvider;
 
 import java.lang.reflect.Type;
 
@@ -22,33 +22,33 @@ import java.lang.reflect.Type;
  *
  * @author Roman Grigoriadi
  */
-public class JsonbPropertyInfo {
+public class JsonbPropertyDescriptor {
 
-    private JsonbContext context;
+    private JsonbConfigurationContext jsonbConfiguration;
 
-    private Type runtimeType;
+    private Type resolvedType;
 
-    private ClassModel classModel;
+    private ClassDescriptor classDescriptor;
 
-    private CurrentItem<?> wrapper;
+    private CurrentItemProvider<?> itemProvider;
 
     /**
      * Gets context.
      *
      * @return Context.
      */
-    public JsonbContext getContext() {
-        return context;
+    public JsonbConfigurationContext getContext() {
+        return jsonbConfiguration;
     }
 
     /**
      * Sets context.
      *
-     * @param context Context to set.
+     * @param jsonbConfiguration Context to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo setContext(JsonbContext context) {
-        this.context = context;
+    public JsonbPropertyDescriptor setContext(JsonbConfigurationContext jsonbConfiguration) {
+        this.jsonbConfiguration = jsonbConfiguration;
         return this;
     }
 
@@ -58,17 +58,17 @@ public class JsonbPropertyInfo {
      * @return Runtime type.
      */
     public Type getRuntimeType() {
-        return runtimeType;
+        return resolvedType;
     }
 
     /**
      * Sets runtime type.
      *
-     * @param runtimeType Runtime type to set.
+     * @param resolvedType Runtime type to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
+    public JsonbPropertyDescriptor setRuntimeType(Type resolvedType) {
+        this.resolvedType = resolvedType;
         return this;
     }
 
@@ -77,18 +77,18 @@ public class JsonbPropertyInfo {
      *
      * @return Class model.
      */
-    public ClassModel getClassModel() {
-        return classModel;
+    public ClassDescriptor getClassModel() {
+        return classDescriptor;
     }
 
     /**
      * Sets class model.
      *
-     * @param classModel Class model to set.
+     * @param classDescriptor Class model to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withClassModel(ClassModel classModel) {
-        this.classModel = classModel;
+    public JsonbPropertyDescriptor withClassModel(ClassDescriptor classDescriptor) {
+        this.classDescriptor = classDescriptor;
         return this;
     }
 
@@ -97,18 +97,18 @@ public class JsonbPropertyInfo {
      *
      * @return Wrapper.
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    public CurrentItemProvider<?> getWrapper() {
+        return itemProvider;
     }
 
     /**
      * Sets wrapper.
      *
-     * @param wrapper Wrapper to set.
+     * @param itemProvider Wrapper to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public JsonbPropertyDescriptor setWrapper(CurrentItemProvider<?> itemProvider) {
+        this.itemProvider = itemProvider;
         return this;
     }
 }

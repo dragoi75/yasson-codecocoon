@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.ReflectionHelper;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.PropertyModel;
 
 import javax.json.bind.serializer.JsonbSerializer;
@@ -39,7 +39,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
      *
      * @param builder Builder to initialize the instance.
      */
-    public ObjectSerializer(SerializerBuilder builder) {
+    public ObjectSerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 
@@ -50,13 +50,13 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
      * @param runtimeType class type
      * @param classModel model of the class
      */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public ObjectSerializer(CurrentItemProvider<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         super(wrapper, runtimeType, classModel);
     }
 
     @Override
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+        final PropertyModel[] allProperties = ((ObjectMarshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
         for (PropertyModel model : allProperties) {
             marshallProperty(object, generator, ctx, model);
         }
@@ -74,7 +74,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
     @SuppressWarnings("unchecked")
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
-        Marshaller marshaller = (Marshaller) ctx;
+        ObjectMarshaller marshaller = (ObjectMarshaller) ctx;
 
         if (propertyModel.isReadable()) {
             final Object propertyValue = propertyModel.getValue(object);
@@ -93,13 +93,13 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                 return;
             }
 
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, propertyModel.getPropertyType());
+            Optional<Type> runtimeTypeOptional = ReflectionHelper.resolveTypeOptional(this, propertyModel.getPropertyType());
             Type genericType = runtimeTypeOptional.orElse(null);
-            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
-                    .withWrapper(this)
-                    .withObjectClass(propertyValue.getClass())
-                    .withCustomization(propertyModel.getCustomization())
-                    .withType(genericType).build();
+            final JsonbSerializer<?> serializer = new TypeSerializerBuilder(marshaller.getJsonbContext())
+                    .setWrapper(this)
+                    .setObjectClass(propertyValue.getClass())
+                    .setCustomization(propertyModel.getCustomization())
+                    .setType(genericType).buildSerializer();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }

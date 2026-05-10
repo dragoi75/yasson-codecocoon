@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbConfigurationContext;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,7 +26,7 @@ public class ReflectionPropagation extends PropertyValuePropagation {
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(Property property, JsonbContext ctx) {
+    public ReflectionPropagation(Property property, JsonbConfigurationContext ctx) {
         super(property, ctx);
     }
 

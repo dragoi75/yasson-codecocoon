@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
+import org.eclipse.yasson.internal.JsonbStreamParser;
+import org.eclipse.yasson.internal.JsonbRiStreamParser;
 
 import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
@@ -30,20 +30,20 @@ public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends Abs
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link DeserializationBuilder} used to build this instance
      */
-    protected AbstractJsonpDeserializer(DeserializerBuilder builder) {
+    protected AbstractJsonpDeserializer(DeserializationBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
         parser.moveToStartStructure();
         return parser.getCurrentLevel();
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
         throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
     }
 

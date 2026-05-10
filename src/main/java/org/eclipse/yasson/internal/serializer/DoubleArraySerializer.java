@@ -22,7 +22,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class DoubleArraySerializer extends AbstractArraySerializer<double[]> {
 
-    protected DoubleArraySerializer(SerializerBuilder builder) {
+    protected DoubleArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

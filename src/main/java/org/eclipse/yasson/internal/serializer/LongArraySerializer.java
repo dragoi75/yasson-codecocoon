@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class LongArraySerializer extends AbstractArraySerializer<long[]> {
 
-    protected LongArraySerializer(SerializerBuilder builder) {
+    protected LongArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

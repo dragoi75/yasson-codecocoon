@@ -13,12 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
+import org.eclipse.yasson.internal.JsonbStreamParser;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
-import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.stream.JsonParser;
@@ -43,7 +42,7 @@ public class BooleanTypeDeserializer extends AbstractValueTypeDeserializer<Boole
 
     @Override
     public Boolean deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonParser.Event event = ((JsonbParser) parser).moveToValue();
+        JsonParser.Event event = ((JsonbStreamParser) parser).moveToValue();
         switch (event) {
             case VALUE_TRUE:
                 return Boolean.TRUE;
@@ -52,7 +51,7 @@ public class BooleanTypeDeserializer extends AbstractValueTypeDeserializer<Boole
             case VALUE_STRING:
                 return Boolean.parseBoolean(parser.getString());
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + event));
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: " + event));
         }
     }
 

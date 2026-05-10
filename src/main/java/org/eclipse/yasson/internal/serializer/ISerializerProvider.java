@@ -28,5 +28,5 @@ public interface ISerializerProvider {
      * @param customization model customization
      * @return deserializer
      */
-    AbstractValueTypeSerializer<?> provideSerializer(Customization customization);
+    ValueTypeSerializerBase<?> provideSerializer(Customization customization);
 }

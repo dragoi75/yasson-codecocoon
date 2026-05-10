@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson;
 
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.spi.JsonbProvider;
@@ -26,6 +26,6 @@ public class JsonBindingProvider extends JsonbProvider {
 
     @Override
     public JsonbBuilder create() {
-        return new JsonBindingBuilder();
+        return new JsonBindingConfigurator();
     }
 }

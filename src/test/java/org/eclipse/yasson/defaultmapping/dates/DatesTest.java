@@ -25,7 +25,7 @@ import org.eclipse.yasson.defaultmapping.dates.model.OffsetDateTimePojo;
 import org.eclipse.yasson.defaultmapping.dates.model.OffsetTimePojo;
 import org.eclipse.yasson.defaultmapping.dates.model.ZonedDateTimePojo;
 import org.eclipse.yasson.defaultmapping.generics.model.ScalarValueWrapper;
-import org.eclipse.yasson.internal.JsonBindingBuilder;
+import org.eclipse.yasson.internal.JsonBindingConfigurator;
 import org.eclipse.yasson.internal.serializer.SqlDateTypeDeserializer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -76,7 +76,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class DatesTest {
 
-    private final Jsonb jsonb = (new JsonBindingBuilder()).build();
+    private final Jsonb jsonb = (new JsonBindingConfigurator()).build();
 
     private static LocalDate localDate = LocalDate.of(2018, 1, 31);
 
@@ -98,7 +98,7 @@ public class DatesTest {
     public void testSqlTimestamp() {
         Timestamp expectedTimestamp = Timestamp.from(Instant.now());
 
-        Jsonb jsonb = new JsonBindingBuilder().build();
+        Jsonb jsonb = new JsonBindingConfigurator().build();
         String json = jsonb.toJson(expectedTimestamp);
 
         Timestamp timestamp = jsonb.fromJson(json, Timestamp.class);
@@ -107,14 +107,14 @@ public class DatesTest {
 
     @Test
     public void testMarshallSqlDate() {
-        Jsonb jsonb = new JsonBindingBuilder().build();
+        Jsonb jsonb = new JsonBindingConfigurator().build();
         String jsonString = jsonb.toJson(new SqlDateObj());
         Assert.assertEquals("{\"sqlDate\":\"2018-01-31Z\",\"utilDate\":\"2018-01-31Z\"}", jsonString);
     }
 
     @Test
     public void testUnmarshallSqlDate() {
-        JsonBindingBuilder builder = new JsonBindingBuilder();
+        JsonBindingConfigurator builder = new JsonBindingConfigurator();
         Jsonb json = builder.build();
         SqlDateObj result = json.fromJson("{\"sqlDate\":\"2018-01-31Z\",\"utilDate\":\"2018-01-31Z\"}", SqlDateObj.class);
         long expectedUtcMillis = localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli();
@@ -124,7 +124,7 @@ public class DatesTest {
 
     @Test
     public void testMarshallLocalDate() {
-        JsonBindingBuilder builder = new JsonBindingBuilder();
+        JsonBindingConfigurator builder = new JsonBindingConfigurator();
         Jsonb json = builder.build();
         String jsonString = json.toJson(new LocalDateObj());
         if (jsonString.contains("T")) {
@@ -134,7 +134,7 @@ public class DatesTest {
 
     @Test
     public void testUnmarshallLocalDate() {
-        JsonBindingBuilder builder = new JsonBindingBuilder();
+        JsonBindingConfigurator builder = new JsonBindingConfigurator();
         Jsonb json = builder.build();
         LocalDateObj localDateObj = json.fromJson("{\"date\":\"2018-01-31\"}", LocalDateObj.class);
         Assert.assertEquals(localDate, localDateObj.date);
