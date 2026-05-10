@@ -13,12 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -49,7 +48,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
     }
 
     @Override
-    public T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public T deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(unmarshaller.getJsonbContext());
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return fromInstant(Instant.ofEpochMilli(Long.parseLong(jsonValue)));
@@ -68,11 +67,11 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseDefault(jsonValue, unmarshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }
@@ -122,7 +121,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 }

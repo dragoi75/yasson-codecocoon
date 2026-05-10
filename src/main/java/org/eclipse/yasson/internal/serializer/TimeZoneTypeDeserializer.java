@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -44,13 +44,13 @@ public class TimeZoneTypeDeserializer extends AbstractValueTypeDeserializer<Time
     }
 
     @Override
-    protected TimeZone deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected TimeZone deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         try {
             final ZoneId zoneId = ZoneId.of(jsonValue);
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
             return new SimpleTimeZone(zonedDateTime.getOffset().getTotalSeconds() * 1000, zoneId.getId());
         } catch (ZoneRulesException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ZONE_PARSE_ERROR, jsonValue), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.ZONE_PARSE_ERROR, jsonValue), e);
         }
     }
 

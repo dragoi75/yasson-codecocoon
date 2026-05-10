@@ -12,9 +12,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.config.PropertyVisibilityStrategy;
@@ -58,7 +57,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
                     throw new IllegalStateException("Unknown mode");
             }
         } catch (IllegalAccessException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.CREATING_HANDLES), e);
         }
     }
 
@@ -76,7 +75,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
                     throw new IllegalStateException("Unknown mode");
             }
         } catch (IllegalAccessException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.CREATING_HANDLES), e);
         }
     }
 
@@ -89,7 +88,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         try {
             setHandle.invoke(object, value);
         } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.SETTING_VALUE_WITH, setHandle), throwable);
         }
     }
 
@@ -101,7 +100,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         try {
             return getHandle.invoke(object);
         } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.GETTING_VALUE_WITH, getHandle), throwable);
         }
     }
 

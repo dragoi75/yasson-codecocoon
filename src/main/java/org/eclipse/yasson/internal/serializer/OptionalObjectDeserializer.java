@@ -14,8 +14,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.JsonbParser;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.JsonbStructureNavigator;
 import org.eclipse.yasson.internal.ProcessingContext;
 
 import javax.json.bind.serializer.DeserializationContext;
@@ -36,20 +36,20 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
 
     private final Type optionalValueType;
 
-    public OptionalObjectDeserializer(DeserializerBuilder deserializerBuilder) {
+    public OptionalObjectDeserializer(JsonDeserializerBuilder deserializerBuilder) {
         this.wrapper = deserializerBuilder.getWrapper();
         this.optionalValueType = resolveOptionalType(deserializerBuilder.getRuntimeType());
     }
 
     @Override
     public Optional<?> deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
-        final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
+        JsonbRuntimeContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        final JsonParser.Event lastEvent = ((JsonbStructureNavigator) parser).getCurrentLevel().getLastEvent();
         if (lastEvent == JsonParser.Event.VALUE_NULL) {
             return Optional.empty();
         }
-        JsonbDeserializer deserializer = new DeserializerBuilder(jsonbContext).withType(optionalValueType)
-                .withWrapper(wrapper).withJsonValueType(lastEvent).build();
+        JsonbDeserializer deserializer = new JsonDeserializerBuilder(jsonbContext).setType(optionalValueType)
+                .setWrapper(wrapper).setJsonValueType(lastEvent).buildDeserializer();
         return Optional.of(deserializer.deserialize(parser, ctx, optionalValueType));
     }
 

@@ -13,8 +13,8 @@
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.YassonJsonb;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKey;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
@@ -35,58 +35,58 @@ import java.util.Optional;
  */
 public class JsonBinding implements YassonJsonb {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+        this.jsonbContext = new JsonbRuntimeContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
     }
 
-    private <T> T deserialize(final Type type, final JsonParser parser, final Unmarshaller unmarshaller) {
+    private <T> T deserialize(final Type type, final JsonParser parser, final JsonbDeserializer unmarshaller) {
         return unmarshaller.deserialize(type, parser);
     }
 
     @Override
     public <T> T fromJson(String str, Class<T> type) throws JsonbException {
-        final JsonParser parser = new JsonbRiParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
-        final Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        final JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
+        final JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(String str, Type type) throws JsonbException {
-        JsonParser parser = new JsonbRiParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
-        JsonParser parser = new JsonbRiParser(jsonbContext.getJsonProvider().createParser(reader));
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Type type) throws JsonbException {
-        JsonParser parser = new JsonbRiParser(jsonbContext.getJsonProvider().createParser(reader));
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Class<T> clazz) throws JsonbException {
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(clazz, inputStreamParser(stream), unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Type type) throws JsonbException {
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
         return deserialize(type, inputStreamParser(stream), unmarshaller);
     }
 
     private JsonParser inputStreamParser(InputStream stream) {
-        return new JsonbRiParser(jsonbContext.getJsonProvider().createParserFactory(createJsonpProperties(jsonbContext.getConfig()))
+        return new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParserFactory(createJsonpProperties(jsonbContext.getConfig()))
                 .createParser(stream,
                         Charset.forName((String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8"))));
     }
@@ -141,14 +141,14 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException {
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
-        return unmarshaller.deserialize(type, new JsonbRiParser(jsonParser));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return unmarshaller.deserialize(type, new JsonbRiStreamParser(jsonParser));
     }
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException {
-        Unmarshaller unmarshaller = new Unmarshaller(jsonbContext);
-        return unmarshaller.deserialize(runtimeType, new JsonbRiParser(jsonParser));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return unmarshaller.deserialize(runtimeType, new JsonbRiStreamParser(jsonParser));
     }
 
     @Override
@@ -187,7 +187,7 @@ public class JsonBinding implements YassonJsonb {
         if (property.isPresent()) {
             final Object value = property.get();
             if (!(value instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
             }
             if ((Boolean) value) {
                 factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);

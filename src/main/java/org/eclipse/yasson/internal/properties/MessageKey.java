@@ -17,7 +17,7 @@ package org.eclipse.yasson.internal.properties;
  *
  * @author David Kral
  */
-public enum MessageKeys {
+public enum MessageKey {
 
     PROCESS_FROM_JSON("processFromJson"),
     PROCESS_TO_JSON("processToJson"),
@@ -89,14 +89,14 @@ public enum MessageKeys {
     ;
 
     /** Message bundle key. */
-    final String key;
+    final String messageId;
 
     /**
      * Creates an instance of message bundle key.
-     * @param key Message key from bundle.
+     * @param messageId Message key from bundle.
      */
-    MessageKeys(final String key) {
-        this.key = key;
+    MessageKey(final String messageId) {
+        this.messageId = messageId;
     }
 
 }

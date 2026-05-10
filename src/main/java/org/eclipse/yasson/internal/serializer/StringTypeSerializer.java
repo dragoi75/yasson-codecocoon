@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
@@ -40,12 +40,12 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
         super(customization);
     }
 
-    private String toJson(String object, JsonbContext jsonbContext) {
+    private String toJson(String object, JsonbRuntimeContext jsonbContext) {
         if ((boolean) jsonbContext.getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
             try {
                 String newString = new String(object.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(object)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(MessageBundle.getMessage(MessageKey.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

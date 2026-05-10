@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKey;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -46,7 +46,7 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
      */
     @Override
     protected OffsetDateTime fromInstant(Instant instant) {
-        log.warning(Messages.getMessage(MessageKeys.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
+        log.warning(MessageBundle.getMessage(MessageKey.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
         return OffsetDateTime.ofInstant(instant, UTC);
     }
 

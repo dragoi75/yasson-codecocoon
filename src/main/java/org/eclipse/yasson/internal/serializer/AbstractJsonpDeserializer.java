@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbRiStreamParser;
+import org.eclipse.yasson.internal.JsonbStructureNavigator;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 
 import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
@@ -25,30 +25,30 @@ import javax.json.stream.JsonParser;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends AbstractContainerDeserializer<T> {
+public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends AbstractCollectionDeserializer<T> {
 
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
      */
-    protected AbstractJsonpDeserializer(DeserializerBuilder builder) {
+    protected AbstractJsonpDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
         parser.moveToStartStructure();
         return parser.getCurrentLevel();
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
         throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
     }
 
     @Override
-    public void appendResult(Object result) {
+    public void appendValueToResult(Object result) {
         throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
     }
 }

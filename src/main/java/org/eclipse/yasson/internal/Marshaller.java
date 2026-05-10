@@ -13,12 +13,12 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 import org.eclipse.yasson.internal.serializer.AbstractValueTypeSerializer;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
-import org.eclipse.yasson.internal.serializer.DefaultSerializers;
+import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 import org.eclipse.yasson.internal.serializer.SerializerBuilder;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
 
@@ -49,7 +49,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      * @param jsonbContext Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -59,7 +59,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      *
      * @param jsonbContext Current context.
      */
-    public Marshaller(JsonbContext jsonbContext) {
+    public Marshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
     }
@@ -79,7 +79,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
             throw e;
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
                 if (close) {
@@ -143,7 +143,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
         if (jsonbContext.getConfigProperties().isStrictIJson() &&
                 rootSerializer instanceof AbstractValueTypeSerializer) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSerializer.serialize(root, generator, this);
     }
@@ -157,11 +157,11 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         }
         SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext)
                 .withObjectClass(rootClazz)
-                .withType(runtimeType);
+                .setType(runtimeType);
 
-        if (!DefaultSerializers.getInstance().isKnownType(rootClazz)) {
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
-            serializerBuilder.withCustomization(classModel.getCustomization());
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClazz)) {
+            ClassDescriptor classModel = getMappingContext().getOrCreateClassModel(rootClazz);
+            serializerBuilder.setCustomization(classModel.getCustomization());
         }
         return serializerBuilder.build();
     }

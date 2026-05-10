@@ -13,12 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbStructureNavigator;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.bind.serializer.DeserializationContext;
-import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.Type;
 
@@ -27,7 +26,7 @@ import java.lang.reflect.Type;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeserializer<T> {
+public abstract class AbstractValueTypeDeserializer<T> implements javax.json.bind.serializer.JsonbDeserializer<T> {
 
     private final Class<T> clazz;
 
@@ -54,8 +53,8 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      */
     @Override
     public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        Unmarshaller unmarshaller = (Unmarshaller) ctx;
-        final JsonParser.Event event = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
+        JsonbDeserializer unmarshaller = (JsonbDeserializer) ctx;
+        final JsonParser.Event event = ((JsonbStructureNavigator) parser).getCurrentLevel().getLastEvent();
         if (event == JsonParser.Event.VALUE_NULL) {
             return null;
         }
@@ -72,7 +71,7 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      * @param rtType Runtime type.
      * @return Deserialized object.
      */
-    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected T deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         throw new UnsupportedOperationException("Operation not supported in " + getClass());
     }
 

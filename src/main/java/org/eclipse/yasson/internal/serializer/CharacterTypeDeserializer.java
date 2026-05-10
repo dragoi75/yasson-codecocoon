@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import java.lang.reflect.Type;
@@ -35,7 +35,7 @@ public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Cha
     }
 
     @Override
-    protected Character deserialize(String value, Unmarshaller unmarshaller, Type rtType) {
+    protected Character deserialize(String value, JsonbDeserializer unmarshaller, Type rtType) {
         return value.charAt(0);
     }
 }

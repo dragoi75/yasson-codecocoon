@@ -1,8 +1,8 @@
 package org.eclipse.yasson.defaultmapping.basic;
 
 import org.eclipse.yasson.internal.JsonBindingBuilder;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKey;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -78,7 +78,7 @@ public class SingleValueTest {
             jsonb.toJson(5);
             Assert.fail();
         } catch (JsonbException exception){
-            Assert.assertEquals(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
+            Assert.assertEquals(MessageBundle.getMessage(MessageKey.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
         }
     }
 

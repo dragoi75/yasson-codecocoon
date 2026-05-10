@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import java.lang.reflect.Type;
 
@@ -24,58 +24,58 @@ import java.lang.reflect.Type;
  * @param <T> Instantiated object type
  * @author Roman Grigoriadi
  */
-public abstract class AbstractItem<T> implements CurrentItem<T> {
+public abstract class BaseItem<T> implements CurrentItem<T> {
 
     /**
      * Item containing instance of wrapping object and its metadata.
      * Null in case of a root object.
      */
-    private final CurrentItem<?> wrapper;
+    private final CurrentItem<?> currentItem;
 
-    private final Type runtimeType;
+    private final Type resolvedType;
 
     /**
      * Cached reference to mapping model of an item.
      */
-    private final ClassModel classModel;
+    private final ClassDescriptor classDescriptor;
 
     /**
      * Creates and populates an instance from given builder.
      *
-     * @param builder Builder to initialize from.
+     * @param serializer Builder to initialize from.
      */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.classModel = builder.getClassModel();
-        this.runtimeType = builder.getRuntimeType();
+    protected BaseItem(AbstractSerializationBuilder serializer) {
+        this.currentItem = serializer.getWrapper();
+        this.classDescriptor = serializer.getClassModel();
+        this.resolvedType = serializer.getRuntimeType();
     }
 
     /**
      * Creates an instance.
      *
-     * @param wrapper Item wrapper.
-     * @param runtimeType Runtime type.
-     * @param classModel Class model.
+     * @param currentItem Item wrapper.
+     * @param resolvedType Runtime type.
+     * @param classDescriptor Class model.
      */
-    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        this.wrapper = wrapper;
-        this.runtimeType = runtimeType;
-        this.classModel = classModel;
+    public BaseItem(CurrentItem<?> currentItem, Type resolvedType, ClassDescriptor classDescriptor) {
+        this.currentItem = currentItem;
+        this.resolvedType = resolvedType;
+        this.classDescriptor = classDescriptor;
     }
 
     @Override
-    public ClassModel getClassModel() {
-        return classModel;
+    public ClassDescriptor getClassModel() {
+        return classDescriptor;
     }
 
     @Override
     public CurrentItem<?> getWrapper() {
-        return wrapper;
+        return currentItem;
     }
 
     @Override
     public Type getRuntimeType() {
-        return runtimeType;
+        return resolvedType;
     }
 
 }

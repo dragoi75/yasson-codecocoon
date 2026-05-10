@@ -15,9 +15,9 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageKey;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbSerializer;
@@ -34,7 +34,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     private final JsonbSerializer<T> userSerializer;
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Create instance of current item with its builder.
@@ -42,7 +42,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
      * @param classModel model
      * @param userSerializer user serializer
      */
-    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
+    public UserSerializerSerializer(ClassDescriptor classModel, JsonbSerializer<T> userSerializer) {
         this.classModel = classModel;
         this.userSerializer = userSerializer;
     }
@@ -54,7 +54,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
             if (context.addProcessedObject(obj)) {
                 userSerializer.serialize(obj, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } finally {
             context.removeProcessedObject(obj);

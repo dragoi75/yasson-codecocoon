@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
+import org.eclipse.yasson.internal.JsonbStructureNavigator;
 
 import javax.json.JsonObject;
 
@@ -28,22 +28,22 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
     private JsonObject jsonObject;
 
     @Override
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeCollection(JsonbStructureNavigator parser, JsonbDeserializer context) {
         this.jsonObject = parser.getObject();
     }
 
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
      */
-    protected JsonObjectDeserializer(DeserializerBuilder builder) {
+    protected JsonObjectDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
 
     @Override
-    public JsonObject getInstance(Unmarshaller unmarshaller) {
+    public JsonObject getInstance(JsonbDeserializer unmarshaller) {
         return jsonObject;
     }
 }

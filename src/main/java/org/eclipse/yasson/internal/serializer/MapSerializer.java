@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
 
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -66,7 +66,7 @@ public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializ
     @Override
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
+            Optional<Type> runtimeTypeOptional = ReflectionTypeResolver.resolveTypeOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

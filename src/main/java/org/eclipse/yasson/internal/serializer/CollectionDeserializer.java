@@ -12,12 +12,11 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
+import org.eclipse.yasson.internal.JsonbStructureNavigator;
+import org.eclipse.yasson.internal.JsonbRiStreamParser;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
 
-import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -28,7 +27,7 @@ import java.util.*;
  *
  * @author Roman Grigoriadi
  */
-class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+class CollectionDeserializer<T extends Collection<?>> extends AbstractCollectionDeserializer<T> implements EmbeddedItem {
 
     /**
      * Generic bound parameter of List.
@@ -38,20 +37,20 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     private T instance;
 
     /**
-     * @param builder {@link DeserializerBuilder) used to build this instance
+     * @param builder {@link JsonDeserializerBuilder ) used to build this instance
      */
-    protected CollectionDeserializer(DeserializerBuilder builder) {
+    protected CollectionDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         collectionValueType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
+                ReflectionTypeResolver.resolveActualType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
                 : Object.class;
 
         instance = createInstance(builder);
     }
 
     @SuppressWarnings("unchecked")
-    private T createInstance(DeserializerBuilder builder) {
-        Class<T> rawType = (Class<T>) ReflectionUtils.getRawType(getRuntimeType());
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<T> rawType = (Class<T>) ReflectionTypeResolver.getRawType(getRuntimeType());
 
         if (rawType.isInterface()) {
             final T x = createInterfaceInstance(rawType);
@@ -84,13 +83,13 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonbDeserializer unmarshaller) {
         return instance;
     }
 
     @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(collectionValueType, result));
+    public void appendValueToResult(Object result) {
+        appendCaptor(convertNullToEmptyOptional(collectionValueType, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -99,13 +98,13 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, collectionValueType));
+    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
+        final javax.json.bind.serializer.JsonbDeserializer<?> deserializer = createCollectionOrMapItemDeserializer(collectionValueType, context.getJsonbContext());
+        appendValueToResult(deserializer.deserialize(parser, context, collectionValueType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

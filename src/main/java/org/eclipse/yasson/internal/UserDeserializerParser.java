@@ -13,9 +13,6 @@
 
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -29,20 +26,20 @@ import java.util.stream.Stream;
  *
  * @author Roman Grigoriadi
  */
-public class UserDeserializerParser implements JsonbParser {
+public class UserDeserializerParser implements JsonbStructureNavigator {
 
-    private final JsonbParser jsonbParser;
+    private final JsonbStructureNavigator jsonbParser;
 
     /**
      * Remembered parser level, which is applied to user deserializer structure.
      */
-    private final JsonbRiParser.LevelContext level;
+    private final JsonbRiStreamParser.ParsingLevelContext level;
 
     /**
      * Constructs an instance with parser and context.
      * @param parser jsonb parser to decorate
      */
-    public UserDeserializerParser(JsonbParser parser) {
+    public UserDeserializerParser(JsonbStructureNavigator parser) {
         this.jsonbParser = parser;
         level = jsonbParser.getCurrentLevel();
     }
@@ -137,7 +134,7 @@ public class UserDeserializerParser implements JsonbParser {
      * @return current level
      */
     @Override
-    public JsonbRiParser.LevelContext getCurrentLevel() {
+    public JsonbRiStreamParser.ParsingLevelContext getCurrentLevel() {
         return jsonbParser.getCurrentLevel();
     }
 

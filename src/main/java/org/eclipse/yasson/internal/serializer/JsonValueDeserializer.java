@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbRiStreamParser;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
@@ -43,7 +43,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
 
     @Override
     public JsonValue deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbRiParser)parser).getLastEvent();
+        final JsonParser.Event next = ((JsonbRiStreamParser)parser).getLastEvent();
         switch (next) {
             case VALUE_TRUE:
                 return JsonValue.TRUE;
@@ -55,12 +55,12 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
             case VALUE_NUMBER:
                 return parser.getValue();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: "+next));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR, "Unknown JSON value: "+next));
         }
     }
 
     @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonValue deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
 }

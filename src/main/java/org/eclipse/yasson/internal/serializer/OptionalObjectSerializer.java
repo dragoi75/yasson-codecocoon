@@ -14,10 +14,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import javax.json.bind.serializer.JsonbSerializer;
@@ -60,7 +60,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 
@@ -80,13 +80,13 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        JsonbRuntimeContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
         if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller)ctx)) {
             return;
         }
         Object optionalValue = obj.get();
         final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass())
-                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
+                .setType(optionalValueType).setWrapper(wrapper).setCustomization(customization).build();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 

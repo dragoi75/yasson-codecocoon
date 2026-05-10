@@ -24,8 +24,8 @@ import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
@@ -81,7 +81,7 @@ import java.util.Set;
  */
 public class AnnotationIntrospector {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
     private final ConstructorPropertiesAnnotationIntrospector constructorPropertiesIntrospector;
 
     /**
@@ -92,11 +92,11 @@ public class AnnotationIntrospector {
                           JsonbTypeAdapter.class, JsonbTypeSerializer.class, JsonbTypeDeserializer.class);
 
     /**
-     * Creates annotation introspecting component passing {@link JsonbContext} inside.
+     * Creates annotation introspecting component passing {@link JsonbRuntimeContext} inside.
      *
      * @param jsonbContext mandatory
      */
-    public AnnotationIntrospector(JsonbContext jsonbContext) {
+    public AnnotationIntrospector(JsonbRuntimeContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.constructorPropertiesIntrospector = ConstructorPropertiesAnnotationIntrospector.forContext(jsonbContext);
@@ -163,7 +163,7 @@ public class AnnotationIntrospector {
             final javax.json.bind.annotation.JsonbCreator annot = findAnnotation(method.getDeclaredAnnotations(), javax.json.bind.annotation.JsonbCreator.class);
             if (annot != null && Modifier.isStatic(method.getModifiers())) {
                 if (!clazz.equals(method.getReturnType())) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE, method, clazz));
+                    throw new JsonbException(MessageBundle.getMessage(MessageKey.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE, method, clazz));
                 }
                 jsonbCreator = createJsonbCreator(method, jsonbCreator, clazz);
             }
@@ -176,7 +176,7 @@ public class AnnotationIntrospector {
 
     private JsonbCreator createJsonbCreator(Executable executable, JsonbCreator existing, Class<?> clazz) {
         if (existing != null) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.MULTIPLE_JSONB_CREATORS, clazz));
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.MULTIPLE_JSONB_CREATORS, clazz));
         }
 
         final Parameter[] parameters = executable.getParameters();
@@ -208,7 +208,7 @@ public class AnnotationIntrospector {
             return null;
         }
 
-        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectionUtils.getOptionalRawType(property.getPropertyType()));
+        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectionTypeResolver.getOptionalRawType(property.getPropertyType()));
     }
 
     /**
@@ -231,8 +231,8 @@ public class AnnotationIntrospector {
         final Class<? extends JsonbAdapter> adapterClass = adapterAnnotation.value();
         final AdapterBinding adapterBinding = jsonbContext.getComponentMatcher().introspectAdapterBinding(adapterClass, null);
 
-        if (expectedClass.isPresent() && !(ReflectionUtils.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_INCOMPATIBLE, adapterBinding.getBindingType(), expectedClass.get()));
+        if (expectedClass.isPresent() && !(ReflectionTypeResolver.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.ADAPTER_INCOMPATIBLE, adapterBinding.getBindingType(), expectedClass.get()));
         }
         return adapterBinding;
     }
@@ -305,7 +305,7 @@ public class AnnotationIntrospector {
     }
 
     private <T extends Annotation> T getAnnotationFromPropertyType(Property property, Class<T> annotationClass) {
-        final Optional<Class<?>> optionalRawType = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> optionalRawType = ReflectionTypeResolver.getOptionalRawType(property.getPropertyType());
         if (!optionalRawType.isPresent()) {
             //will not work for type variable properties, which are bound to class that is annotated.
             return null;
@@ -391,7 +391,7 @@ public class AnnotationIntrospector {
 
         // No date format on property, try class level
         // if property is not TypeVariable and its class is not date skip it
-        final Optional<Class<?>> propertyRawTypeOptional = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> propertyRawTypeOptional = ReflectionTypeResolver.getOptionalRawType(property.getPropertyType());
         if (propertyRawTypeOptional.isPresent()) {
             Class<?> rawType = propertyRawTypeOptional.get();
             if (!(Date.class.isAssignableFrom(rawType) || Calendar.class.isAssignableFrom(rawType)
@@ -448,7 +448,7 @@ public class AnnotationIntrospector {
         Map<AnnotationTarget, JsonbNumberFormatter> result = new HashMap<>();
         Map<AnnotationTarget, JsonbNumberFormat> annotationFromPropertyCategorized = getAnnotationFromPropertyCategorized(JsonbNumberFormat.class, property);
         if(annotationFromPropertyCategorized.size() == 0) {
-            final Optional<Class<?>> propertyRawTypeOptional = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+            final Optional<Class<?>> propertyRawTypeOptional = ReflectionTypeResolver.getOptionalRawType(property.getPropertyType());
             if (propertyRawTypeOptional.isPresent()) {
                 Class<?> rawType = propertyRawTypeOptional.get();
                 if (!Number.class.isAssignableFrom(rawType)) {
@@ -497,14 +497,14 @@ public class AnnotationIntrospector {
             return new JsonbDateFormatter(format, locale);
         }
 
-        final Optional<Class<?>> optionalRawType = ReflectionUtils.getOptionalRawType(property.getPropertyType());
+        final Optional<Class<?>> optionalRawType = ReflectionTypeResolver.getOptionalRawType(property.getPropertyType());
         final Class<?> propertyRawType = optionalRawType.orElse(null);
 
         if (propertyRawType != null
                 && !TemporalAccessor.class.isAssignableFrom(propertyRawType)
                 && !Date.class.isAssignableFrom(propertyRawType)
                 && !Calendar.class.isAssignableFrom(propertyRawType)) {
-            throw new IllegalStateException(Messages.getMessage(MessageKeys.UNSUPPORTED_DATE_TYPE, propertyRawType));
+            throw new IllegalStateException(MessageBundle.getMessage(MessageKey.UNSUPPORTED_DATE_TYPE, propertyRawType));
         }
 
         DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
@@ -529,8 +529,8 @@ public class AnnotationIntrospector {
             visibilityAnnotation = findAnnotation(clazz.getPackage().getDeclaredAnnotations(), JsonbVisibility.class);
         }
         if (visibilityAnnotation != null) {
-            return  ReflectionUtils.createNoArgConstructorInstance(
-                    ReflectionUtils.getDefaultConstructor(visibilityAnnotation.value(), true));
+            return  ReflectionTypeResolver.createNoArgInstance(
+                    ReflectionTypeResolver.getDefaultConstructor(visibilityAnnotation.value(), true));
         }
         return jsonbContext.getConfigProperties().getPropertyVisibilityStrategy();
     }
@@ -621,7 +621,7 @@ public class AnnotationIntrospector {
         for (Class<? extends Annotation> ann : TRANSIENT_INCOMPATIBLE) {
             Annotation annotation = findAnnotation(target.getAnnotations(), ann);
             if (annotation != null) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
             }
         }
     }

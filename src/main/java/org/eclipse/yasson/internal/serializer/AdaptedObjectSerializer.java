@@ -16,10 +16,10 @@ package org.eclipse.yasson.internal.serializer;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.adapter.JsonbAdapter;
@@ -36,7 +36,7 @@ import java.lang.reflect.Type;
  */
 public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSerializer<T> {
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     private final AdapterBinding adapterInfo;
 
@@ -46,7 +46,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
      * @param classModel Class model.
      * @param adapter    Adapter.
      */
-    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
+    public AdaptedObjectSerializer(ClassDescriptor classModel, AdapterBinding adapter) {
         this.classModel = classModel;
         this.adapterInfo = adapter;
     }
@@ -66,10 +66,10 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
                 final JsonbSerializer<A> serializer = resolveSerializer((Marshaller) ctx, adapted);
                 serializer.serialize(adapted, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         } finally {
             context.removeProcessedObject(obj);
         }
@@ -85,13 +85,13 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         }
         return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
                 .withObjectClass(adapted.getClass())
-                .withCustomization(classModel == null ? null : classModel.getCustomization())
-                .withWrapper(this)
+                .setCustomization(classModel == null ? null : classModel.getCustomization())
+                .setWrapper(this)
                 .build();
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 

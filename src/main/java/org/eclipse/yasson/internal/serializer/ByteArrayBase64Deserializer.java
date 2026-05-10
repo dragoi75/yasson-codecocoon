@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.config.BinaryDataStrategy;
@@ -40,7 +40,7 @@ public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<b
     }
 
     @Override
-    protected byte[] deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected byte[] deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         return getDecoder(unmarshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonValue);
     }
 
@@ -51,7 +51,7 @@ public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<b
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlDecoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR, "Invalid strategy: " + strategy));
         }
     }
 }

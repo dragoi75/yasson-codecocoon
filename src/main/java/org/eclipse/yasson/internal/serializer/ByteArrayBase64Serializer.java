@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.config.BinaryDataStrategy;
@@ -51,7 +51,7 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlEncoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+                throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR,
                         "Invalid strategy: " + strategy));
         }
     }

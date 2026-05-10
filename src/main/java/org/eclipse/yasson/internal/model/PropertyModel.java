@@ -13,14 +13,14 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomizationBuilder;
 import org.eclipse.yasson.internal.serializer.AdaptedObjectSerializer;
-import org.eclipse.yasson.internal.serializer.DefaultSerializers;
+import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.serializer.SerializerProviderWrapper;
@@ -66,7 +66,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
     /**
      * Model of the class this field belongs to.
      */
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Customization of this property.
@@ -88,7 +88,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      * @param property Property.
      * @param jsonbContext Context.
      */
-    public PropertyModel(ClassModel classModel, Property property, JsonbContext jsonbContext) {
+    public PropertyModel(ClassDescriptor classModel, Property property, JsonbRuntimeContext jsonbContext) {
         this.classModel = classModel;
         this.propertyName = property.getName();
         this.propertyType = property.getPropertyType();
@@ -110,7 +110,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
     @SuppressWarnings("unchecked")
     private JsonbSerializer<?> resolveCachedSerializer() {
         Type serializationType = getPropertySerializationType();
-        if (!ReflectionUtils.isResolvedType(serializationType)) {
+        if (!ReflectionTypeResolver.isResolvedType(serializationType)) {
             return null;
         }
         if (customization.getAdapterBinding() != null) {
@@ -120,8 +120,8 @@ public class PropertyModel implements Comparable<PropertyModel> {
             return new UserSerializerSerializer<>(classModel, customization.getSerializerBinding().getJsonbSerializer());
         }
 
-        final Class<?> propertyRawType = ReflectionUtils.getRawType(serializationType);
-        final Optional<SerializerProviderWrapper> valueSerializerProvider = DefaultSerializers.getInstance().findValueSerializerProvider(propertyRawType);
+        final Class<?> propertyRawType = ReflectionTypeResolver.getRawType(serializationType);
+        final Optional<SerializerProviderWrapper> valueSerializerProvider = DefaultSerializerRegistry.getInstance().getValueSerializerProvider(propertyRawType);
         if (valueSerializerProvider.isPresent()) {
             return valueSerializerProvider.get().getSerializerProvider().provideSerializer(customization);
         }
@@ -147,7 +147,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return getterMethodType == null ? propertyType : getterMethodType.getMethodType();
     }
 
-    private AdapterBinding getUserAdapterBinding(Property property, JsonbContext jsonbContext) {
+    private AdapterBinding getUserAdapterBinding(Property property, JsonbRuntimeContext jsonbContext) {
         final AdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
         if (adapterBinding != null) {
             return adapterBinding;
@@ -155,7 +155,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return jsonbContext.getComponentMatcher().getAdapterBinding(propertyType, null).orElse(null);
     }
 
-    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbContext jsonbContext) {
+    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbRuntimeContext jsonbContext) {
         final SerializerBinding serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
         if (serializerBinding != null) {
             return serializerBinding;
@@ -163,7 +163,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return jsonbContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
     }
 
-    private PropertyCustomization introspectCustomization(Property property, JsonbContext jsonbContext) {
+    private PropertyCustomization introspectCustomization(Property property, JsonbRuntimeContext jsonbContext) {
         final AnnotationIntrospector introspector = jsonbContext.getAnnotationIntrospector();
         final PropertyCustomizationBuilder builder = new PropertyCustomizationBuilder();
         //drop all other annotations for transient properties
@@ -211,7 +211,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return builder.buildPropertyCustomization();
     }
 
-    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbContext jsonbContext) {
+    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbRuntimeContext jsonbContext) {
         /*
          * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
@@ -339,7 +339,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      * Model of declaring class of this property.
      * @return class model
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 

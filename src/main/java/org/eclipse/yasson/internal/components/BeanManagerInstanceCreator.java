@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.components;
 
 import org.eclipse.yasson.internal.JsonBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKey;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -49,7 +49,7 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
      */
     public BeanManagerInstanceCreator(Object beanManager) {
         if (!(beanManager instanceof BeanManager)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR,
                     "beanManager instance should be of type '" + BeanManager.class + "'"));
         }
         this.beanManager = (BeanManager) beanManager;

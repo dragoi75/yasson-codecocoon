@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
@@ -34,7 +34,7 @@ import java.util.Optional;
  *
  * @author Roman Grigoriadi
  */
-public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuilder> {
+public class SerializerBuilder extends AbstractSerializationBuilder<SerializerBuilder> {
 
     private Class<?> objectClass;
 
@@ -43,7 +43,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      *
      * @param jsonbContext JSON-B context.
      */
-    public SerializerBuilder(JsonbContext jsonbContext) {
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -111,7 +111,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
         } else if (Optional.class.isAssignableFrom(objectClass)) {
             return new OptionalObjectSerializer<>(this);
         } else {
-            jsonbContext.getMappingContext().addSerializerProvider(objectClass, new ObjectSerializerProvider());
+            jsonbContext.getMappingContext().registerSerializerProvider(objectClass, new ObjectSerializerProvider());
             return new ObjectSerializer<>(this);
         }
 
@@ -146,7 +146,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
     }
 
     private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers.getInstance().findValueSerializerProvider(rawType);
+        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializerRegistry.getInstance().getValueSerializerProvider(rawType);
         if (supportedTypeSerializerOptional.isPresent()) {
             return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(customization));
         }
