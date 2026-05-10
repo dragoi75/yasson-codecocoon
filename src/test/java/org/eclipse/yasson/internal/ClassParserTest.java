@@ -36,13 +36,13 @@ public class ClassParserTest {
 
     private ClassParser classParser;
 
-    private JsonbContext jsonbContext;
+    private JsonbRuntimeContext jsonbContext;
 
     private AnnotationIntrospector introspector;
 
     @Before
     public void before() {
-        jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+        jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
         classParser = new ClassParser(jsonbContext);
         introspector = new AnnotationIntrospector(jsonbContext);
     }

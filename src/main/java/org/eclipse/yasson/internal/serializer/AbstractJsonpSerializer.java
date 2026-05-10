@@ -23,7 +23,7 @@ import javax.json.JsonValue;
  */
 public abstract class AbstractJsonpSerializer<T extends JsonValue> extends AbstractContainerSerializer<T> {
 
-    protected AbstractJsonpSerializer(SerializerBuilder builder) {
+    protected AbstractJsonpSerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 }

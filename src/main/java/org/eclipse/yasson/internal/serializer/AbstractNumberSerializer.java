@@ -25,7 +25,7 @@ import java.text.NumberFormat;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractNumberSerializer<T extends Number> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractNumberSerializer<T extends Number> extends ConfigurableValueTypeSerializer<T> {
 
     private final JsonbNumberFormatter formatter;
 
@@ -50,7 +50,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, Marshaller marshaller) {
         if (formatter != null) {
             final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
             ((DecimalFormat)format).applyPattern(formatter.getFormat());

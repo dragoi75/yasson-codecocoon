@@ -26,7 +26,7 @@ import java.net.URL;
  * 
  * @author David Kral
  */
-public class URLTypeDeserializer extends AbstractValueTypeDeserializer<URL> {
+public class URLTypeDeserializer extends BaseValueTypeDeserializer<URL> {
 
     /**
      * Creates a new instance.
@@ -38,7 +38,7 @@ public class URLTypeDeserializer extends AbstractValueTypeDeserializer<URL> {
     }
 
     @Override
-    protected URL deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URL deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         URL url = null;
         try {
             url = new URL(jsonValue);

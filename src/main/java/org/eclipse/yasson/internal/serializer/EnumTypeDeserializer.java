@@ -23,7 +23,7 @@ import java.lang.reflect.Type;
  *
  * @author David Kral
  */
-public class EnumTypeDeserializer extends AbstractValueTypeDeserializer<Enum> {
+public class EnumTypeDeserializer extends BaseValueTypeDeserializer<Enum> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class EnumTypeDeserializer extends AbstractValueTypeDeserializer<Enum> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Enum deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Enum deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         return Enum.valueOf((Class<Enum>) rtType, jsonValue);
     }
 }

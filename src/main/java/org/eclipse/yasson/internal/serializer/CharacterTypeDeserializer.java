@@ -23,7 +23,7 @@ import java.lang.reflect.Type;
  *
  * @author David Kral
  */
-public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Character> {
+public class CharacterTypeDeserializer extends BaseValueTypeDeserializer<Character> {
 
     /**
      * Creates a new instance.
@@ -35,7 +35,7 @@ public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Cha
     }
 
     @Override
-    protected Character deserialize(String value, Unmarshaller unmarshaller, Type rtType) {
+    protected Character deserializeInstance(String value, Unmarshaller unmarshaller, Type rtType) {
         return value.charAt(0);
     }
 }

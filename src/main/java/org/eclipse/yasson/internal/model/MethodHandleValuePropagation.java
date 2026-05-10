@@ -12,9 +12,9 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.invoke.MethodHandle;
@@ -39,7 +39,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
     private MethodHandle setHandle;
 
 
-    MethodHandleValuePropagation(Property property, JsonbContext ctx) {
+    MethodHandleValuePropagation(Property property, JsonbRuntimeContext ctx) {
         super(property, ctx);
     }
 
@@ -57,7 +57,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
                     throw new IllegalStateException("Unknown mode");
             }
         } catch (IllegalAccessException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.CREATING_HANDLES), e);
         }
     }
 
@@ -75,7 +75,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
                     throw new IllegalStateException("Unknown mode");
             }
         } catch (IllegalAccessException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.CREATING_HANDLES), e);
         }
     }
 
@@ -88,7 +88,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         try {
             setHandle.invoke(object, value);
         } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.SETTING_VALUE_WITH, setHandle), throwable);
         }
     }
 
@@ -100,7 +100,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         try {
             return getHandle.invoke(object);
         } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.GETTING_VALUE_WITH, getHandle), throwable);
         }
     }
 

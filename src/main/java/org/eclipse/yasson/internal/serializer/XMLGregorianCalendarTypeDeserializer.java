@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 
 import javax.json.bind.JsonbException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -54,7 +54,7 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         try {
             this.datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATATYPE_FACTORY_CREATION_FAILED), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
         }
     }
 

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 
 import javax.json.bind.config.PropertyVisibilityStrategy;
 import java.lang.reflect.AccessibleObject;
@@ -65,7 +65,7 @@ public abstract class PropertyValuePropagation {
      * @param property Provided property.
      * @param ctx Context.
      */
-    protected PropertyValuePropagation(Property property, JsonbContext ctx) {
+    protected PropertyValuePropagation(Property property, JsonbRuntimeContext ctx) {
         this.field = property.getField();
         this.getter = property.getGetter();
         this.setter = property.getSetter();
@@ -83,11 +83,11 @@ public abstract class PropertyValuePropagation {
      * @param ctx Context.
      * @return Propagation instance.
      */
-    public static PropertyValuePropagation createInstance(Property property, JsonbContext ctx) {
+    public static PropertyValuePropagation createInstance(Property property, JsonbRuntimeContext ctx) {
         return new ReflectionPropagation(property, ctx);
     }
 
-    private void initReadable(Field field, Method getter, JsonbContext ctx) {
+    private void initReadable(Field field, Method getter, JsonbRuntimeContext ctx) {
 
         final boolean fieldReadable = field == null || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) == 0;
         if (!fieldReadable) {
@@ -103,7 +103,7 @@ public abstract class PropertyValuePropagation {
         }
     }
 
-    private void initWritable(Field field, Method setter, JsonbContext ctx) {
+    private void initWritable(Field field, Method setter, JsonbRuntimeContext ctx) {
 
         final boolean fieldWritable = field == null || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL)) == 0;
         if (!fieldWritable) {
@@ -119,7 +119,7 @@ public abstract class PropertyValuePropagation {
         }
     }
 
-    private boolean isFieldVisible(Field field, Method method, JsonbContext ctx) {
+    private boolean isFieldVisible(Field field, Method method, JsonbRuntimeContext ctx) {
         if (field == null) {
             return false;
         }
@@ -131,7 +131,7 @@ public abstract class PropertyValuePropagation {
         return accessible;
     }
 
-    private boolean isMethodVisible(Field field, Method method, JsonbContext ctx) {
+    private boolean isMethodVisible(Field field, Method method, JsonbRuntimeContext ctx) {
         if (method == null || Modifier.isStatic(method.getModifiers())) {
             return false;
         }
@@ -160,7 +160,7 @@ public abstract class PropertyValuePropagation {
      * @param ctx jsonb context
      * @return Optional with result of visibility check, or empty optional if no strategy is found
      */
-    private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityCheckFunction, Class<?> declaringClass, Field field, Method method, JsonbContext ctx) {
+    private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityCheckFunction, Class<?> declaringClass, Field field, Method method, JsonbRuntimeContext ctx) {
         final Optional<PropertyVisibilityStrategy> classLevelStrategy =
                 ctx.getAnnotationIntrospector().getPropertyVisibilityStrategy(declaringClass);
         Optional<PropertyVisibilityStrategy> strategy =

@@ -27,7 +27,7 @@ import java.math.BigDecimal;
  * 
  * @author David Kral
  */
-public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<JsonNumber> {
+public class JsonNumberTypeDeserializer extends BaseValueTypeDeserializer<JsonNumber> {
 
     private final static String NUMBER = "number";
 
@@ -41,7 +41,7 @@ public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<Js
     }
 
     @Override
-    protected JsonNumber deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonNumber deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
         JsonObject jsonObject;
         try {

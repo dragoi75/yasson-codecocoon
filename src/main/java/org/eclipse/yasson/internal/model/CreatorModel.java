@@ -13,7 +13,7 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.*;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
@@ -41,7 +41,7 @@ public class CreatorModel {
      * @param parameter constructor parameter
      * @param context jsonb context
      */
-    public CreatorModel(String name, Parameter parameter, JsonbContext context) {
+    public CreatorModel(String name, Parameter parameter, JsonbRuntimeContext context) {
         this.name = name;
         this.type = parameter.getParameterizedType();
 

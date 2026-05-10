@@ -24,7 +24,7 @@ import java.util.TimeZone;
  * 
  * @author David Kral
  */
-public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone> {
+public class TimeZoneTypeSerializer extends ConfigurableValueTypeSerializer<TimeZone> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone
     }
 
     @Override
-    protected void serialize(TimeZone obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(TimeZone obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj.getID());
     }
 }

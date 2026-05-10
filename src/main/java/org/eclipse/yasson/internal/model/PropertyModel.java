@@ -13,18 +13,18 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
-import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.model.customization.PropertySerializationConfig;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomizationBuilder;
-import org.eclipse.yasson.internal.serializer.AdaptedObjectSerializer;
-import org.eclipse.yasson.internal.serializer.DefaultSerializers;
+import org.eclipse.yasson.internal.serializer.AdapterBasedObjectSerializer;
+import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.serializer.SerializerProviderWrapper;
-import org.eclipse.yasson.internal.serializer.UserSerializerSerializer;
+import org.eclipse.yasson.internal.serializer.SerializerProviderAdapter;
+import org.eclipse.yasson.internal.serializer.UserSerializerWrapper;
 
 import javax.json.bind.config.PropertyNamingStrategy;
 import javax.json.bind.serializer.JsonbSerializer;
@@ -71,7 +71,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
     /**
      * Customization of this property.
      */
-    final private PropertyCustomization customization;
+    final private PropertySerializationConfig customization;
 
     private final PropertyValuePropagation propagation;
 
@@ -88,7 +88,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      * @param property Property.
      * @param jsonbContext Context.
      */
-    public PropertyModel(ClassModel classModel, Property property, JsonbContext jsonbContext) {
+    public PropertyModel(ClassModel classModel, Property property, JsonbRuntimeContext jsonbContext) {
         this.classModel = classModel;
         this.propertyName = property.getName();
         this.propertyType = property.getPropertyType();
@@ -110,18 +110,18 @@ public class PropertyModel implements Comparable<PropertyModel> {
     @SuppressWarnings("unchecked")
     private JsonbSerializer<?> resolveCachedSerializer() {
         Type serializationType = getPropertySerializationType();
-        if (!ReflectionUtils.isResolvedType(serializationType)) {
+        if (!ReflectionTypeResolver.isResolvedType(serializationType)) {
             return null;
         }
         if (customization.getAdapterBinding() != null) {
-            return new AdaptedObjectSerializer<>(classModel, customization.getAdapterBinding());
+            return new AdapterBasedObjectSerializer<>(classModel, customization.getAdapterBinding());
         }
         if (customization.getSerializerBinding() != null) {
-            return new UserSerializerSerializer<>(classModel, customization.getSerializerBinding().getJsonbSerializer());
+            return new UserSerializerWrapper<>(classModel, customization.getSerializerBinding().getJsonbSerializer());
         }
 
-        final Class<?> propertyRawType = ReflectionUtils.getRawType(serializationType);
-        final Optional<SerializerProviderWrapper> valueSerializerProvider = DefaultSerializers.getInstance().findValueSerializerProvider(propertyRawType);
+        final Class<?> propertyRawType = ReflectionTypeResolver.getRawType(serializationType);
+        final Optional<SerializerProviderAdapter> valueSerializerProvider = DefaultSerializerRegistry.getInstance().lookupValueSerializerProvider(propertyRawType);
         if (valueSerializerProvider.isPresent()) {
             return valueSerializerProvider.get().getSerializerProvider().provideSerializer(customization);
         }
@@ -147,23 +147,23 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return getterMethodType == null ? propertyType : getterMethodType.getMethodType();
     }
 
-    private AdapterBinding getUserAdapterBinding(Property property, JsonbContext jsonbContext) {
-        final AdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
+    private TypeAdapterBinding getUserAdapterBinding(Property property, JsonbRuntimeContext jsonbContext) {
+        final TypeAdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
         if (adapterBinding != null) {
             return adapterBinding;
         }
         return jsonbContext.getComponentMatcher().getAdapterBinding(propertyType, null).orElse(null);
     }
 
-    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbContext jsonbContext) {
-        final SerializerBinding serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
+    private SerializerBindingEntry<?> getUserSerializerBinding(Property property, JsonbRuntimeContext jsonbContext) {
+        final SerializerBindingEntry serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
         if (serializerBinding != null) {
             return serializerBinding;
         }
         return jsonbContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
     }
 
-    private PropertyCustomization introspectCustomization(Property property, JsonbContext jsonbContext) {
+    private PropertySerializationConfig introspectCustomization(Property property, JsonbRuntimeContext jsonbContext) {
         final AnnotationIntrospector introspector = jsonbContext.getAnnotationIntrospector();
         final PropertyCustomizationBuilder builder = new PropertyCustomizationBuilder();
         //drop all other annotations for transient properties
@@ -211,7 +211,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return builder.buildPropertyCustomization();
     }
 
-    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbContext jsonbContext) {
+    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbRuntimeContext jsonbContext) {
         /*
          * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
@@ -347,7 +347,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      * Introspected customization of a property.
      * @return immutable property customization
      */
-    public PropertyCustomization getCustomization() {
+    public PropertySerializationConfig getCustomization() {
         return customization;
     }
 

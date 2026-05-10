@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
@@ -28,7 +28,7 @@ import java.lang.reflect.Type;
  * 
  * @author Roman Grigoriadi
  */
-public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String> {
+public class StringTypeDeserializer extends BaseValueTypeDeserializer<String> {
 
     /**
      * Creates a new instance.
@@ -40,12 +40,12 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
     }
 
     @Override
-    protected String deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected String deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         if ((boolean) unmarshaller.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
             try {
                 String newString = new String(jsonValue.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(jsonValue)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

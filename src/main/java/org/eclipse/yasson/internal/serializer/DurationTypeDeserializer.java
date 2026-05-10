@@ -24,7 +24,7 @@ import java.time.Duration;
  *
  * @author David Kral
  */
-public class DurationTypeDeserializer extends AbstractValueTypeDeserializer<Duration> {
+public class DurationTypeDeserializer extends BaseValueTypeDeserializer<Duration> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class DurationTypeDeserializer extends AbstractValueTypeDeserializer<Dura
     }
 
     @Override
-    protected Duration deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Duration deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         return Duration.parse(jsonValue);
     }
 }

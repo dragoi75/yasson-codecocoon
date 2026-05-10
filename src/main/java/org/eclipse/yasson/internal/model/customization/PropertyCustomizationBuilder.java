@@ -17,7 +17,7 @@ import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
- * The property customization builder that would be used to build an instance of {@link PropertyCustomization} to ensure its immutability.
+ * The property customization builder that would be used to build an instance of {@link PropertySerializationConfig} to ensure its immutability.
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */
@@ -44,10 +44,10 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     /**
      * Creates a customization for class properties.
      *
-     * @return A new instance of {@link PropertyCustomization}
+     * @return A new instance of {@link PropertySerializationConfig}
      */
-    public PropertyCustomization buildPropertyCustomization() {
-        return new PropertyCustomization(this);
+    public PropertySerializationConfig buildPropertyCustomization() {
+        return new PropertySerializationConfig(this);
     }
 
     /**

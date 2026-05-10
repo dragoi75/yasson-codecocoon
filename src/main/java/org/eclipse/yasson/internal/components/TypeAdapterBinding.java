@@ -1,0 +1,69 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Oracle and/or its affiliates. All rights reserved.
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ * which accompanies this distribution.
+ * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ * Contributors:
+ * Roman Grigoriadi
+ ******************************************************************************/
+
+package org.eclipse.yasson.internal.components;
+
+import javax.json.bind.adapter.JsonbAdapter;
+import java.lang.reflect.Type;
+import java.util.Objects;
+
+/**
+ * Wrapper for JsonbAdapter generic information and an components itself.
+ *
+ * @author Roman Grigoriadi
+ */
+public class TypeAdapterBinding extends AbstractComponentBinding {
+
+    private final Type targetType;
+
+    private final JsonbAdapter<?,?> jsonbConverter;
+
+    /**
+     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
+     * @param sourceType from not null
+     * @param targetType to not null
+     * @param jsonbConverter components not null
+     */
+    public TypeAdapterBinding(Type sourceType, Type targetType, JsonbAdapter<?, ?> jsonbConverter) {
+        super(sourceType);
+        Objects.requireNonNull(targetType);
+        Objects.requireNonNull(jsonbConverter);
+        this.targetType = targetType;
+        this.jsonbConverter = jsonbConverter;
+    }
+
+    /**
+     * Represents a type to which to adapt into.
+     *
+     * During marshalling object property is adapted to this type and result is marshalled
+     * During unmarshalling object is unmarshalled into this type first, than converted to field type and set.
+     *
+     * @return Type from which to adapt
+     */
+    public Type getToType() {
+        return targetType;
+    }
+
+    /**
+     * Get actual components to adapt object value
+     * @return components
+     */
+    public JsonbAdapter<?, ?> getAdapter() {
+        return jsonbConverter;
+    }
+
+    @Override
+    public Class<?> getComponentClass() {
+        return jsonbConverter.getClass();
+    }
+}

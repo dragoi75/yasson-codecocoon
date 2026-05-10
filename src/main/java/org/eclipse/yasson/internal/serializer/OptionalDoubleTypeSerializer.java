@@ -24,7 +24,7 @@ import java.util.OptionalDouble;
  * 
  * @author David Kral
  */
-public class OptionalDoubleTypeSerializer extends AbstractValueTypeSerializer<OptionalDouble> {
+public class OptionalDoubleTypeSerializer extends ConfigurableValueTypeSerializer<OptionalDouble> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class OptionalDoubleTypeSerializer extends AbstractValueTypeSerializer<Op
     }
 
     @Override
-    protected void serialize(OptionalDouble obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalDouble obj, JsonGenerator generator, Marshaller marshaller) {
         if (obj.isPresent()) {
             generator.write(obj.getAsDouble());
         } else if (customization.isNillable()) {

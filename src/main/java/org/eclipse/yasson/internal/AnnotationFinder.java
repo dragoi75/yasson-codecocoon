@@ -1,7 +1,7 @@
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -85,7 +85,7 @@ class AnnotationFinder {
         try {
             return annotation.annotationType().getMethod("value").invoke(annotation);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = Messages.getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
+            String message = LocalizedMessages.getMessage(MessageConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
             LOGGER.finest(message);
             return null;
         }
@@ -96,7 +96,7 @@ class AnnotationFinder {
         try {
             return (Class<T>) Class.forName(classname);
         } catch (ClassNotFoundException e) {
-            String message = Messages.getMessage(MessageKeys.ANNOTATION_NOT_AVAILABLE, classname);
+            String message = LocalizedMessages.getMessage(MessageConstants.ANNOTATION_NOT_AVAILABLE, classname);
             LOGGER.finest(message);
             return null;
         }

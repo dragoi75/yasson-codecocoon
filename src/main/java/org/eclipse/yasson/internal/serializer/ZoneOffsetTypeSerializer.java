@@ -24,7 +24,7 @@ import java.time.ZoneOffset;
  * 
  * @author David Kral
  */
-public class ZoneOffsetTypeSerializer extends AbstractValueTypeSerializer<ZoneOffset> {
+public class ZoneOffsetTypeSerializer extends ConfigurableValueTypeSerializer<ZoneOffset> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class ZoneOffsetTypeSerializer extends AbstractValueTypeSerializer<ZoneOf
     }
 
     @Override
-    protected void serialize(ZoneOffset obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(ZoneOffset obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj.getId());
     }
 }

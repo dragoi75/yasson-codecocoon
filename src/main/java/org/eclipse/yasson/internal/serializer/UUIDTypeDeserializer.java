@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Deserializer for {@link UUID} type.
  */
-public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
+public class UUIDTypeDeserializer extends BaseValueTypeDeserializer<UUID> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
     }
 
     @Override
-    protected UUID deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected UUID deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         return UUID.fromString(jsonValue);
     }
 }

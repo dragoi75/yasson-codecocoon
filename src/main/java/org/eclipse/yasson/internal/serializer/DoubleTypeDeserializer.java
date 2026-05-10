@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -42,7 +42,7 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
     }
 
     @Override
-    protected Double deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Double deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         switch (jsonValue) {
             case NAN:
                 return Double.NaN;
@@ -57,7 +57,7 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
                     try {
                         return Double.parseDouble(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR,
                                 Double.class));
                     }
                 });

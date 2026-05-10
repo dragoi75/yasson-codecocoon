@@ -39,7 +39,7 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     /**
      * Creates a customization for class properties.
      *
-     * @return A new instance of {@link PropertyCustomization}
+     * @return A new instance of {@link PropertySerializationConfig}
      */
     public ClassCustomization buildClassCustomization() {
         return new ClassCustomization(this);

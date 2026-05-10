@@ -44,7 +44,7 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
      *
      * @param builder Builder to initialize from.
      */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
+    protected AbstractItem(BaseSerializerBuilder builder) {
         this.wrapper = builder.getWrapper();
         this.classModel = builder.getClassModel();
         this.runtimeType = builder.getRuntimeType();

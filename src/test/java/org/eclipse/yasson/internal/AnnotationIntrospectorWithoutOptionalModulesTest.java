@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class AnnotationIntrospectorWithoutOptionalModulesTest {
 
-    private JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
 
     /**
      * class under test.

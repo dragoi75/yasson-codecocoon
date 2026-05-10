@@ -13,10 +13,9 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.components.DeserializerBinder;
 
 /**
  * Abstract base builder for ensuring immutable state of {@link Customization} objects.
@@ -27,11 +26,11 @@ public abstract class CustomizationBuilder {
 
     private boolean nillable;
 
-    private AdapterBinding adapterInfo;
+    private TypeAdapterBinding adapterInfo;
 
-    private SerializerBinding serializerBinding;
+    private SerializerBindingEntry serializerBinding;
 
-    private DeserializerBinding deserializerBinding;
+    private DeserializerBinder deserializerBinding;
 
     private String[] propertyOrder;
 
@@ -58,7 +57,7 @@ public abstract class CustomizationBuilder {
      *
      * @return Adapter.
      */
-    public AdapterBinding getAdapterInfo() {
+    public TypeAdapterBinding getAdapterInfo() {
         return adapterInfo;
     }
 
@@ -67,7 +66,7 @@ public abstract class CustomizationBuilder {
      *
      * @param adapterInfo Adapter.
      */
-    public void setAdapterInfo(AdapterBinding adapterInfo) {
+    public void setAdapterInfo(TypeAdapterBinding adapterInfo) {
         this.adapterInfo = adapterInfo;
     }
 
@@ -76,7 +75,7 @@ public abstract class CustomizationBuilder {
      *
      * @return Serializer info
      */
-    public SerializerBinding getSerializerBinding() {
+    public SerializerBindingEntry getSerializerBinding() {
         return serializerBinding;
     }
 
@@ -85,7 +84,7 @@ public abstract class CustomizationBuilder {
      *
      * @param serializerBinding Serializer info to set.
      */
-    public void setSerializerBinding(SerializerBinding serializerBinding) {
+    public void setSerializerBinding(SerializerBindingEntry serializerBinding) {
         this.serializerBinding = serializerBinding;
     }
 
@@ -94,7 +93,7 @@ public abstract class CustomizationBuilder {
      *
      * @return Deserializer.
      */
-    public DeserializerBinding getDeserializerBinding() {
+    public DeserializerBinder getDeserializerBinding() {
         return deserializerBinding;
     }
 
@@ -103,7 +102,7 @@ public abstract class CustomizationBuilder {
      *
      * @param deserializerBinding Deserializer.
      */
-    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
+    public void setDeserializerBinding(DeserializerBinder deserializerBinding) {
         this.deserializerBinding = deserializerBinding;
     }
 

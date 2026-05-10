@@ -21,8 +21,8 @@ import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.model.ReflectionPropagation;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 
 import javax.json.bind.JsonbException;
 import java.lang.annotation.Annotation;
@@ -51,9 +51,9 @@ class ClassParser {
 
     public static final String SET_PREFIX = "set";
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
-    ClassParser(JsonbContext jsonbContext) {
+    ClassParser(JsonbRuntimeContext jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 
@@ -235,7 +235,7 @@ class ClassParser {
                         && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) ||
                         (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
                                 && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH,
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.PROPERTY_NAME_CLASH,
                             checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(),
                             cls.getName()));
                 }

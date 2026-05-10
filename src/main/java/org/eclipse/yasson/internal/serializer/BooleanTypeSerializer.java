@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  *
  * @author David Kral
  */
-public class BooleanTypeSerializer extends AbstractValueTypeSerializer<Boolean> {
+public class BooleanTypeSerializer extends ConfigurableValueTypeSerializer<Boolean> {
 
     /**
      * Creates a new instance.
@@ -35,7 +35,7 @@ public class BooleanTypeSerializer extends AbstractValueTypeSerializer<Boolean> 
     }
 
     @Override
-    protected void serialize(Boolean obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Boolean obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(obj);
     }
 }

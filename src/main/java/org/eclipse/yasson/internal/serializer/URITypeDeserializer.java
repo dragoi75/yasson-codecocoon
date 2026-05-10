@@ -25,7 +25,7 @@ import java.net.URI;
  * 
  * @author David Kral
  */
-public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
+public class URITypeDeserializer extends BaseValueTypeDeserializer<URI> {
 
     /**
      * Creates a new instance.
@@ -37,7 +37,7 @@ public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
     }
 
     @Override
-    protected URI deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URI deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         return URI.create(jsonValue);
     }
 }

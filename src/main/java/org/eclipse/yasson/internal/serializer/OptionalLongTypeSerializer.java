@@ -24,7 +24,7 @@ import java.util.OptionalLong;
  * 
  * @author David Kral
  */
-public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<OptionalLong> {
+public class OptionalLongTypeSerializer extends ConfigurableValueTypeSerializer<OptionalLong> {
 
     /**
      * Creates a new instance.
@@ -36,7 +36,7 @@ public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<Opti
     }
 
     @Override
-    protected void serialize(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
         if (obj.isPresent()) {
             generator.write(obj.getAsLong());
         } else if (customization.isNillable()) {

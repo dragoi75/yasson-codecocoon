@@ -16,8 +16,8 @@ package org.eclipse.yasson.internal.serializer;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
@@ -30,7 +30,7 @@ import java.util.OptionalDouble;
  * 
  * @author David Kral
  */
-public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
+public class OptionalDoubleTypeDeserializer extends BaseValueTypeDeserializer<OptionalDouble> {
 
     /**
      * Creates a new instance.
@@ -48,15 +48,15 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
             return OptionalDouble.empty();
         }
         String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        return deserializeInstance(value, (Unmarshaller) ctx, rtType);
     }
 
     @Override
-    protected OptionalDouble deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalDouble deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         try {
             return OptionalDouble.of(Double.parseDouble(jsonValue));
         } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
         }
     }
 }

@@ -16,8 +16,8 @@ package org.eclipse.yasson.internal.serializer;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
@@ -30,7 +30,7 @@ import java.util.OptionalLong;
  * 
  * @author David Kral
  */
-public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<OptionalLong> {
+public class OptionalLongTypeDeserializer extends BaseValueTypeDeserializer<OptionalLong> {
 
     /**
      * Creates a new instance.
@@ -47,15 +47,15 @@ public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<
         if (next == JsonParser.Event.VALUE_NULL) {
             return OptionalLong.empty();
         }
-        return deserialize(parser.getString(), (Unmarshaller) ctx, rtType);
+        return deserializeInstance(parser.getString(), (Unmarshaller) ctx, rtType);
     }
 
     @Override
-    protected OptionalLong deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalLong deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         try {
             return OptionalLong.of(Long.parseLong(jsonValue));
         } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
         }
     }
 }

@@ -1,19 +1,19 @@
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
+import org.eclipse.yasson.internal.components.DeserializerBinder;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
 
 /**
- * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
+ * Common properties of {@link ClassCustomization} and {@link PropertySerializationConfig}.
  */
-abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
+abstract class CustomizationBase implements Customization, ComponentBindingCustomization {
 
-    private final AdapterBinding adapterBinding;
+    private final TypeAdapterBinding adapterBinding;
 
-    private final SerializerBinding serializerBinding;
+    private final SerializerBindingEntry serializerBinding;
 
-    private final DeserializerBinding deserializerBinding;
+    private final DeserializerBinder deserializerBinding;
 
     private final boolean nillable;
 
@@ -55,7 +55,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return components wrapper
      */
-    public AdapterBinding getAdapterBinding() {
+    public TypeAdapterBinding getAdapterBinding() {
         return adapterBinding;
     }
 
@@ -64,7 +64,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return serializer wrapper
      */
-    public SerializerBinding getSerializerBinding() {
+    public SerializerBindingEntry getSerializerBinding() {
         return serializerBinding;
     }
 
@@ -73,7 +73,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return deserializer wrapper
      */
-    public DeserializerBinding getDeserializerBinding() {
+    public DeserializerBinder getDeserializerBinding() {
         return deserializerBinding;
     }
 
