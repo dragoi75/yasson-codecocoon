@@ -24,7 +24,7 @@ import javax.json.bind.config.PropertyVisibilityStrategy;
  *
  * @author Roman Grigoriadi
  */
-public class ClassCustomization extends CustomizationBase {
+public class ClassCustomization extends CustomizationBindingBase {
 
     private final JsonbCreator creator;
 

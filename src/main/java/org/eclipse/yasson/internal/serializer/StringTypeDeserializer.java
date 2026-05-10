@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbConfig;
@@ -35,7 +35,7 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
      *
      * @param customization Model customization.
      */
-    public StringTypeDeserializer(Customization customization) {
+    public StringTypeDeserializer(SerializationCustomization customization) {
         super(String.class, customization);
     }
 
@@ -45,7 +45,7 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
             try {
                 String newString = new String(jsonValue.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(jsonValue)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

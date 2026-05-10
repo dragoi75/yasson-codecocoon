@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -33,7 +33,7 @@ public class LongTypeDeserializer extends AbstractNumberDeserializer<Long> {
      *
      * @param customization Model customization.
      */
-    public LongTypeDeserializer(Customization customization) {
+    public LongTypeDeserializer(SerializationCustomization customization) {
         super(Long.class, customization);
     }
 
@@ -45,7 +45,7 @@ public class LongTypeDeserializer extends AbstractNumberDeserializer<Long> {
                     try {
                         return Long.parseLong(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, Long.class));
+                        throw new JsonbException(Messages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, Long.class));
                     }
                 });
     }

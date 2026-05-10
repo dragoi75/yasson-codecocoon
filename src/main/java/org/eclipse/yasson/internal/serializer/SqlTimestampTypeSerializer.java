@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -32,7 +32,7 @@ public class SqlTimestampTypeSerializer extends AbstractDateTimeSerializer<Times
      *
      * @param customization Model customization.
      */
-    public SqlTimestampTypeSerializer(Customization customization) {
+    public SqlTimestampTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

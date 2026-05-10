@@ -39,7 +39,7 @@ public class JsonbContext {
 
     private final JsonbConfig jsonbConfig;
 
-    private final MappingContext mappingContext;
+    private final ClassMappingContext mappingContext;
 
     private final JsonbComponentInstanceCreator componentInstanceCreator;
 
@@ -62,7 +62,7 @@ public class JsonbContext {
     public JsonbContext(JsonbConfig jsonbConfig, JsonProvider jsonProvider) {
         Objects.requireNonNull(jsonbConfig);
         this.jsonbConfig = jsonbConfig;
-        this.mappingContext = new MappingContext(this);
+        this.mappingContext = new ClassMappingContext(this);
         this.instanceCreator = new InstanceCreator();
         this.componentInstanceCreator = initComponentInstanceCreator(instanceCreator);
         this.componentMatcher = new ComponentMatcher(this);
@@ -85,7 +85,7 @@ public class JsonbContext {
      *
      * @return Mapping context.
      */
-    public MappingContext getMappingContext() {
+    public ClassMappingContext getMappingContext() {
         return mappingContext;
     }
 

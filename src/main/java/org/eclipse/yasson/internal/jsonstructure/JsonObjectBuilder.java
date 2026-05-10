@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.jsonstructure;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonStructure;
@@ -193,7 +193,7 @@ class JsonObjectBuilder extends JsonStructureBuilder {
 
     private String getNextKey() {
         if (nextKey == null) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                     "Can't write a value without key name"));
         }
         String key = nextKey;

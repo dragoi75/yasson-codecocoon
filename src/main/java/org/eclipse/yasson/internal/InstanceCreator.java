@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +25,7 @@ import java.util.TreeSet;
 
 /**
  * Creates instances for known types, caches constructors of unknown.
- * (Constructors of parsed types are stored in {@link org.eclipse.yasson.internal.model.ClassModel}).
+ * (Constructors of parsed types are stored in {@link ClassDescriptor}).
  */
 public class InstanceCreator {
 
@@ -43,7 +45,7 @@ public class InstanceCreator {
 
         @Override
         public Object createInstance() {
-            return ReflectionUtils.createNoArgConstructorInstance(constructor);
+            return ReflectiveTypeResolver.instantiateNoArg(constructor);
         }
     }
 
@@ -70,7 +72,7 @@ public class InstanceCreator {
         Creator creator = creators.get(tClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
         if (creator == null) {
-            creator = new ConstructorCreator(ReflectionUtils.getDefaultConstructor(tClass, true));
+            creator = new ConstructorCreator(ReflectiveTypeResolver.getDefaultConstructor(tClass, true));
             creators.put(tClass, creator);
         }
 

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -27,18 +27,18 @@ import java.util.Optional;
  * 
  * @author Roman Grigoriadi
  */
-public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public class MapSerializer<T extends Map<?,?>> extends ContainerSerializerBase<T> implements EmbeddedItem {
 
 
     private final boolean nullable;
 
-    protected MapSerializer(SerializerBuilder builder) {
+    protected MapSerializer(TypeSerializerBuilder builder) {
         super(builder);
         nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
     }
 
     @Override
-    protected void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx) {
+    protected void serializeContents(T obj, JsonGenerator generator, SerializationContext ctx) {
         for (Map.Entry<?,?> entry : obj.entrySet()) {
             final String keysString = String.valueOf(entry.getKey());
             final Object value = entry.getValue();
@@ -49,24 +49,24 @@ public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializ
                 continue;
             }
             generator.writeKey(keysString);
-            serializeItem(value, generator, ctx);
+            serializeElement(value, generator, ctx);
         }
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
+    protected void writeBegin(JsonGenerator generator) {
         generator.writeStartObject();
     }
 
     @Override
-    protected void writeStart(String key, JsonGenerator generator) {
+    protected void writeBegin(String key, JsonGenerator generator) {
         generator.writeStartObject(key);
     }
 
     @Override
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
+            Optional<Type> runtimeTypeOptional = ReflectiveTypeResolver.resolveAsOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

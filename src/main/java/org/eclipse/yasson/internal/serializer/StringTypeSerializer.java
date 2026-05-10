@@ -14,9 +14,9 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbConfig;
@@ -29,14 +29,14 @@ import java.io.UnsupportedEncodingException;
  * 
  * @author Roman Grigoriadi
  */
-public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
+public class StringTypeSerializer extends ConfigurableValueTypeSerializer<String> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public StringTypeSerializer(Customization customization) {
+    public StringTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
@@ -45,7 +45,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
             try {
                 String newString = new String(object.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(object)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -55,7 +55,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
     }
 
     @Override
-    protected void serialize(String obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(String obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(toJson(obj, marshaller.getJsonbContext()));
     }
 }

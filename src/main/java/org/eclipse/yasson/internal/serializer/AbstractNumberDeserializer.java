@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -38,7 +38,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @param clazz         Class to work with.
      * @param customization Model customization.
      */
-    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
+    public AbstractNumberDeserializer(Class<T> clazz, SerializationCustomization customization) {
         super(clazz, customization);
     }
 
@@ -55,7 +55,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
         try {
             return Optional.of(format.parse(jsonValue));
         } catch (ParseException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
         }
     }
 }

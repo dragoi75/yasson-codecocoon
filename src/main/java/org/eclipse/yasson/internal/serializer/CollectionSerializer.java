@@ -24,29 +24,29 @@ import java.util.Collection;
  *
  * @author Roman Grigoriadi
  */
-public class CollectionSerializer<T extends Collection> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public class CollectionSerializer<T extends Collection> extends ContainerSerializerBase<T> implements EmbeddedItem {
 
     protected final JsonbContext jsonbContext;
 
-    protected CollectionSerializer(SerializerBuilder builder) {
+    protected CollectionSerializer(TypeSerializerBuilder builder) {
         super(builder);
         this.jsonbContext = builder.getJsonbContext();
     }
 
     @Override
-    protected void serializeInternal(T collection, JsonGenerator generator, SerializationContext ctx) {
+    protected void serializeContents(T collection, JsonGenerator generator, SerializationContext ctx) {
         for (Object item : collection) {
-            serializeItem(item, generator, ctx);
+            serializeElement(item, generator, ctx);
         }
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
+    protected void writeBegin(JsonGenerator generator) {
         generator.writeStartArray();
     }
 
     @Override
-    protected void writeStart(String key, JsonGenerator generator) {
+    protected void writeBegin(String key, JsonGenerator generator) {
         generator.writeStartArray(key);
     }
 }

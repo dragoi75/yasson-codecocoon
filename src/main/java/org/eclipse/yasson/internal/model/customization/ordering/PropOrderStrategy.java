@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization.ordering;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.PropertyDescriptor;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +31,6 @@ public abstract class PropOrderStrategy {
      * @param properties properties for ordering
      * @return sorted List of properties
      */
-    public abstract List<PropertyModel> sortProperties(Collection<PropertyModel> properties);
+    public abstract List<PropertyDescriptor> sortProperties(Collection<PropertyDescriptor> properties);
 
 }

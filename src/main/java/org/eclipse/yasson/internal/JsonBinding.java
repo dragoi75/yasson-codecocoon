@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal;
 import org.eclipse.yasson.YassonJsonb;
 import org.eclipse.yasson.internal.jsonstructure.JsonGeneratorToStructureAdapter;
 import org.eclipse.yasson.internal.jsonstructure.JsonStructureToParserAdapter;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonStructure;
@@ -115,7 +115,7 @@ public class JsonBinding implements YassonJsonb {
     public String toJson(Object object) throws JsonbException {
         StringWriter writer = new StringWriter();
         final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext).marshall(object, generator);
+        new ObjectMarshaller(jsonbContext).marshal(object, generator);
         return writer.toString();
     }
 
@@ -123,20 +123,20 @@ public class JsonBinding implements YassonJsonb {
     public String toJson(Object object, Type type) throws JsonbException {
         StringWriter writer = new StringWriter();
         final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext, type).marshall(object, generator);
+        new ObjectMarshaller(jsonbContext, type).marshal(object, generator);
         return writer.toString();
     }
 
     @Override
     public void toJson(Object object, Writer writer) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, writerGenerator(writer));
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext);
+        marshaller.marshal(object, writerGenerator(writer));
     }
 
     @Override
     public void toJson(Object object, Type type, Writer writer) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, type);
-        marshaller.marshall(object, writerGenerator(writer));
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext, type);
+        marshaller.marshal(object, writerGenerator(writer));
     }
 
     private JsonGenerator writerGenerator(Writer writer) {
@@ -149,14 +149,14 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public void toJson(Object object, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, streamGenerator(stream));
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext);
+        marshaller.marshal(object, streamGenerator(stream));
     }
 
     @Override
     public void toJson(Object object, Type type, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, type);
-        marshaller.marshall(object, streamGenerator(stream));
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext, type);
+        marshaller.marshal(object, streamGenerator(stream));
     }
 
     @Override
@@ -173,29 +173,29 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext);
+        marshaller.marshalWithoutClose(object, jsonGenerator);
     }
 
     @Override
     public void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, runtimeType);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext, runtimeType);
+        marshaller.marshalWithoutClose(object, jsonGenerator);
     }
 
     @Override
     public JsonStructure toJsonStructure(Object object) throws JsonbException {
         JsonGeneratorToStructureAdapter structureGenerator = new JsonGeneratorToStructureAdapter(jsonbContext.getJsonProvider());
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, structureGenerator);
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext);
+        marshaller.marshal(object, structureGenerator);
         return structureGenerator.getRootStructure();
     }
 
     @Override
     public JsonStructure toJsonStructure(Object object, Type runtimeType) throws JsonbException {
         JsonGeneratorToStructureAdapter structureGenerator = new JsonGeneratorToStructureAdapter(jsonbContext.getJsonProvider());
-        final Marshaller marshaller = new Marshaller(jsonbContext, runtimeType);
-        marshaller.marshall(object, structureGenerator);
+        final ObjectMarshaller marshaller = new ObjectMarshaller(jsonbContext, runtimeType);
+        marshaller.marshal(object, structureGenerator);
         return structureGenerator.getRootStructure();
     }
 
@@ -223,7 +223,7 @@ public class JsonBinding implements YassonJsonb {
         if (property.isPresent()) {
             final Object value = property.get();
             if (!(value instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
             }
             if ((Boolean) value) {
                 factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);

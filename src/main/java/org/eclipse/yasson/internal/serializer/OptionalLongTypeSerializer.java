@@ -14,8 +14,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.util.OptionalDouble;
@@ -28,19 +28,19 @@ import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.ha
  * 
  * @author David Kral
  */
-public class OptionalLongTypeSerializer extends AbstractValueTypeSerializer<OptionalLong> {
+public class OptionalLongTypeSerializer extends ConfigurableValueTypeSerializer<OptionalLong> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public OptionalLongTypeSerializer(Customization customization) {
+    public OptionalLongTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
-    protected void serialize(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalLong obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         if (!handleEmpty(obj, OptionalLong::isPresent, customization, generator, marshaller)) {
             generator.write(obj.getAsLong());
         }

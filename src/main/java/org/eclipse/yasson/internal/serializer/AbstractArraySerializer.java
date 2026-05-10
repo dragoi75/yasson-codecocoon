@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 
 import javax.json.stream.JsonGenerator;
 import java.lang.reflect.GenericArrayType;
@@ -26,11 +26,11 @@ import java.lang.reflect.Type;
  * @author Roman Grigoriadi
  * @param <T> Type to serialize.
  */
-public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public abstract class AbstractArraySerializer<T> extends ContainerSerializerBase<T> implements EmbeddedItem {
 
     protected final Type arrayValType;
 
-    protected AbstractArraySerializer(SerializerBuilder builder) {
+    protected AbstractArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
         arrayValType = resolveArrayType();
     }
@@ -39,21 +39,21 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
         if (getRuntimeType() == null || getRuntimeType() == Object.class) {
             return Object.class;
         } else if (getRuntimeType() instanceof ParameterizedType) {
-            return ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
+            return ReflectiveTypeResolver.resolveActualType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
         } else if (getRuntimeType() instanceof GenericArrayType) {
-            return ReflectionUtils.resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            return ReflectiveTypeResolver.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            return ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            return ReflectiveTypeResolver.getRawType(getRuntimeType()).getComponentType();
         }
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
+    protected void writeBegin(JsonGenerator generator) {
         generator.writeStartArray();
     }
 
     @Override
-    protected void writeStart(String key, JsonGenerator generator) {
+    protected void writeBegin(String key, JsonGenerator generator) {
         generator.writeStartArray(key);
     }
 }

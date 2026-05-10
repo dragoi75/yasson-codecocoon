@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 
@@ -30,7 +30,7 @@ public class EnumTypeDeserializer extends AbstractValueTypeDeserializer<Enum> {
      *
      * @param customization Model customization.
      */
-    public EnumTypeDeserializer(Customization customization) {
+    public EnumTypeDeserializer(SerializationCustomization customization) {
         super(Enum.class, customization);
     }
 

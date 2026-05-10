@@ -42,7 +42,7 @@ public class Messages {
      * @param objects Message parameters.
      * @return Formatted message in string.
      */
-    public static String getMessage(MessageKeys key, Object... objects) {
+    public static String getMessage(MessageKeyConstants key, Object... objects) {
         return getMessage(key, Locale.getDefault(), objects);
     }
 
@@ -54,9 +54,9 @@ public class Messages {
      * @param objects Message parameters.
      * @return Formatted message in string.
      */
-    public static String getMessage(MessageKeys key, Locale locale, Object... objects) {
+    public static String getMessage(MessageKeyConstants key, Locale locale, Object... objects) {
         ResourceBundle messages = getResourceBundle(locale);
-        MessageFormat formatter = new MessageFormat(messages.getString(key.key));
+        MessageFormat formatter = new MessageFormat(messages.getString(key.messageIdentifier));
         return formatter.format(objects);
     }
 

@@ -15,9 +15,9 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
@@ -36,14 +36,14 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
      */
     protected final Class<?> componentClass;
 
-    protected final ClassModel componentClassModel;
+    protected final ClassDescriptor componentClassModel;
 
     protected AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);
         if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectionUtils.resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            componentClass = ReflectiveTypeResolver.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            componentClass = ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            componentClass = ReflectiveTypeResolver.getRawType(getRuntimeType()).getComponentType();
         }
         if (!DefaultSerializers.getInstance().isKnownType(componentClass)) {
             componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
@@ -64,8 +64,8 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     @Override
     protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass)
-                .withCustomization(componentClassModel == null ? null : componentClassModel.getCustomization()).build();
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass)
+                .setCustomization(componentClassModel == null ? null : componentClassModel.getCustomization()).build();
         appendResult(deserializer.deserialize(parser, context, componentClass));
     }
 

@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -34,7 +34,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     private final JsonbSerializer<T> userSerializer;
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Create instance of current item with its builder.
@@ -42,22 +42,22 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
      * @param classModel model
      * @param userSerializer user serializer
      */
-    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
+    public UserSerializerSerializer(ClassDescriptor classModel, JsonbSerializer<T> userSerializer) {
         this.classModel = classModel;
         this.userSerializer = userSerializer;
     }
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (Marshaller) ctx;
+        ObjectProcessingContext context = (ObjectMarshaller) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.registerProcessedObject(obj)) {
                 userSerializer.serialize(obj, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } finally {
-            context.removeProcessedObject(obj);
+            context.unregisterProcessedObject(obj);
         }
     }
 }

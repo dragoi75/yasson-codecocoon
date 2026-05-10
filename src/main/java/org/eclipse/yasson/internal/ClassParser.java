@@ -13,19 +13,18 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.PropertyDescriptor;
 import org.eclipse.yasson.internal.model.ReflectionPropagation;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
-import javax.json.bind.config.PropertyVisibilityStrategy;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -61,7 +60,7 @@ class ClassParser {
     /**
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
-    public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
+    public void parseProperties(ClassDescriptor classModel, JsonbAnnotatedElement<Class<?>> classElement) {
 
         final Map<String, Property> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
@@ -69,20 +68,20 @@ class ClassParser {
 
         //add sorted properties from parent, if they are not overridden in current class
         //parent properties are by default first by alphabet, than properties from a subclass
-        final List<PropertyModel> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
+        final List<PropertyDescriptor> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
 
-        List<PropertyModel> classPropertyModels = classProperties.values().stream()
-                .map(property -> new PropertyModel(classModel, property, jsonbContext))
+        List<PropertyDescriptor> classPropertyModels = classProperties.values().stream()
+                .map(property -> new PropertyDescriptor(classModel, property, jsonbContext))
                 .collect(Collectors.toList());
 
         //check for collision on same property read name
-        List<PropertyModel> unsortedMerged = new ArrayList<>();
+        List<PropertyDescriptor> unsortedMerged = new ArrayList<>();
         unsortedMerged.addAll(sortedParentProperties);
         unsortedMerged.addAll(classPropertyModels);
         checkPropertyNameClash(unsortedMerged, classModel.getType());
 
 
-        List<PropertyModel> sortedPropertyModels = new ArrayList<>();
+        List<PropertyDescriptor> sortedPropertyModels = new ArrayList<>();
         sortedPropertyModels.addAll(sortedParentProperties);
         sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering()
                 .orderProperties(classPropertyModels, classModel));
@@ -227,16 +226,16 @@ class ClassParser {
         }
     }
 
-    private void checkPropertyNameClash(List<PropertyModel> collectedProperties, Class cls) {
-        final List<PropertyModel> checkedProperties = new ArrayList<>();
-        for (PropertyModel collectedPropertyModel : collectedProperties) {
-            for (PropertyModel checkedPropertyModel : checkedProperties) {
+    private void checkPropertyNameClash(List<PropertyDescriptor> collectedProperties, Class cls) {
+        final List<PropertyDescriptor> checkedProperties = new ArrayList<>();
+        for (PropertyDescriptor collectedPropertyModel : collectedProperties) {
+            for (PropertyDescriptor checkedPropertyModel : checkedProperties) {
 
                 if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName())
                         && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) ||
                         (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
                                 && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH,
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH,
                             checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(),
                             cls.getName()));
                 }
@@ -255,11 +254,11 @@ class ClassParser {
      * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        List<PropertyModel> sortedProperties = new ArrayList<>();
+    private List<PropertyDescriptor> getSortedParentProperties(ClassDescriptor classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        List<PropertyDescriptor> sortedProperties = new ArrayList<>();
         //Pull properties from parent
         if (classModel.getParentClassModel() != null) {
-            for (PropertyModel parentProp : classModel.getParentClassModel().getSortedProperties()) {
+            for (PropertyDescriptor parentProp : classModel.getParentClassModel().getSortedProperties()) {
                 final Property current = classProperties.get(parentProp.getPropertyName());
                 //don't replace overridden properties
                 if (current == null) {
@@ -271,7 +270,7 @@ class ClassParser {
                     if (propagation.isReadable()) {
                         classProperties.replace(current.getName(), merged);
                     } else {
-                        sortedProperties.add(new PropertyModel(classModel, merged, jsonbContext));
+                        sortedProperties.add(new PropertyDescriptor(classModel, merged, jsonbContext));
                         classProperties.remove(current.getName());
                     }
 
@@ -306,7 +305,7 @@ class ClassParser {
                 && !parent.isDefault() ? parent : current) : parent);
     }
 
-    private Property mergeProperty(Property current, PropertyModel parentProp, JsonbAnnotatedElement<Class<?>> classElement) {
+    private Property mergeProperty(Property current, PropertyDescriptor parentProp, JsonbAnnotatedElement<Class<?>> classElement) {
         Field field = current.getField() != null
                 ? current.getField() : parentProp.getPropagation().getField();
         Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(),

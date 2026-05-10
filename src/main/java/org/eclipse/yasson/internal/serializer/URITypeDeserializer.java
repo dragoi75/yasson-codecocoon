@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -32,7 +32,7 @@ public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
      *
      * @param customization Binding model.
      */
-    public URITypeDeserializer(Customization customization) {
+    public URITypeDeserializer(SerializationCustomization customization) {
         super(URI.class, customization);
     }
 

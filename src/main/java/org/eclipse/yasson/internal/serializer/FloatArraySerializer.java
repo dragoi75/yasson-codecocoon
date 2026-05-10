@@ -24,12 +24,12 @@ import java.math.BigDecimal;
  */
 public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
 
-    protected FloatArraySerializer(SerializerBuilder builder) {
+    protected FloatArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected void serializeInternal(float[] arr, JsonGenerator generator, SerializationContext ctx) {
+    protected void serializeContents(float[] arr, JsonGenerator generator, SerializationContext ctx) {
         for (float obj : arr) {
             //floats lose precision, after upcasting to doubles in jsonp
             generator.write(new BigDecimal(String.valueOf(obj)));

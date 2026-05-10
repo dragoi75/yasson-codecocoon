@@ -30,12 +30,12 @@ import javax.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 /**
@@ -44,7 +44,7 @@ import org.eclipse.yasson.internal.properties.Messages;
  * @author Roman Grigoriadi
  * @author Sebastien Rius
  */
-public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerBuilder> {
+public class DeserializerBuilder extends AbstractSerializationBuilder<DeserializerBuilder> {
 
     /**
      * Value type of JSON event.
@@ -79,7 +79,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     @SuppressWarnings("unchecked")
     public JsonbDeserializer<?> build() {
         runtimeType = resolveRuntimeType();
-        Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
 
         Optional<AdapterBinding> adapterInfoOptional = Optional.empty();
         if (customization == null
@@ -100,7 +100,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
                 adapterInfoOptional = adapterBinding;
                 runtimeType = adapterInfoOptional.get().getToType();
                 wrapper = new AdaptedObjectDeserializer<>(adapterInfoOptional.get(), (AbstractContainerDeserializer<?>) wrapper);
-                rawType = ReflectionUtils.getRawType(getRuntimeType());
+                rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
             }
         }
 
@@ -131,7 +131,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
                 if (jsonEvent == JsonParser.Event.VALUE_NULL) {
                     return NullDeserializer.INSTANCE;
                 }
-                throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
             }
             return wrapAdapted(adapterInfoOptional, supportedTypeDeserializer.get());
         }
@@ -158,7 +158,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             } else if (rawType.isInterface()) {
                 Class<?> mappedType = getInterfaceMappedType(rawType);
                 if (mappedType == null) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
                 }
                 runtimeType = mappedType;
                 classModel = getClassModel(mappedType);
@@ -166,7 +166,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             } else {
                 if (adapterInfoOptional.isPresent()) {
                     runtimeType = adapterInfoOptional.get().getToType();
-                    rawType = ReflectionUtils.getRawType(getRuntimeType());
+                    rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
                 }
 
                 classModel = getClassModel(rawType);
@@ -220,7 +220,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     private Type resolveRuntimeType() {
-        Type result = ReflectionUtils.resolveType(wrapper, genericType != null ? genericType : runtimeType);
+        Type result = ReflectiveTypeResolver.resolveActualType(wrapper, genericType != null ? genericType : runtimeType);
         //Try to infer best from JSON event.
         if (result == Object.class) {
             switch (jsonEvent) {
@@ -258,7 +258,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             }
             if (implementationClass != null) {
                 if (!interfaceType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
                 }
                 return implementationClass;
             }

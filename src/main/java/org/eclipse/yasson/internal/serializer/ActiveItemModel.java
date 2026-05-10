@@ -14,27 +14,27 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.RuntimeTypeInfo;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 /**
  * Currently processing item.
  *
  * @author Roman Grigoriadi
  */
-public interface CurrentItem<T> extends RuntimeTypeInfo {
+public interface ActiveItemModel<T> extends RuntimeTypeInfo {
 
     /**
      * Class model containing property for this item.
      *
      * @return Class model.
      */
-    ClassModel getClassModel();
+    ClassDescriptor getClassModel();
 
     /**
      * Item wrapper. Null only in case of a root item.
      *
      * @return Wrapper item of this item.
      */
-    CurrentItem<?> getWrapper();
+    ActiveItemModel<?> getWrapper();
 
 }

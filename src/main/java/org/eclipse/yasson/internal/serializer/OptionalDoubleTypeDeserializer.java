@@ -16,8 +16,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -38,7 +38,7 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
      *
      * @param customization Model customization.
      */
-    public OptionalDoubleTypeDeserializer(Customization customization) {
+    public OptionalDoubleTypeDeserializer(SerializationCustomization customization) {
         super(OptionalDouble.class, customization);
     }
 
@@ -57,7 +57,7 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
         try {
             return OptionalDouble.of(Double.parseDouble(jsonValue));
         } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
         }
     }
 }

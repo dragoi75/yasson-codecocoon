@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -35,13 +35,13 @@ public class LocalTimeTypeSerializer extends AbstractDateTimeSerializer<LocalTim
      *
      * @param customization Model customization.
      */
-    public LocalTimeTypeSerializer(Customization customization) {
+    public LocalTimeTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
     protected Instant toInstant(LocalTime value) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
+        throw new JsonbException(Messages.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
 
     @Override

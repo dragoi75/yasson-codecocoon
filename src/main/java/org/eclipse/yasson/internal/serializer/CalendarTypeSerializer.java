@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -35,7 +35,7 @@ public class CalendarTypeSerializer extends AbstractDateTimeSerializer<Calendar>
      *
      * @param customization Model customization.
      */
-    public CalendarTypeSerializer(Customization customization) {
+    public CalendarTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

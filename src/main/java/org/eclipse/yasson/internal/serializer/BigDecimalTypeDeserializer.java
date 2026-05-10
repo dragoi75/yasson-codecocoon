@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -34,7 +34,7 @@ public class BigDecimalTypeDeserializer extends AbstractNumberDeserializer<BigDe
      *
      * @param customization Model customization.
      */
-    public BigDecimalTypeDeserializer(Customization customization) {
+    public BigDecimalTypeDeserializer(SerializationCustomization customization) {
         super(BigDecimal.class, customization);
     }
 
@@ -46,7 +46,7 @@ public class BigDecimalTypeDeserializer extends AbstractNumberDeserializer<BigDe
                     try {
                         return new BigDecimal(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(Messages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR,
                                 BigDecimal.class));
                     }
                 });

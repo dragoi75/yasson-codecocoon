@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -31,7 +31,7 @@ public class NumberTypeDeserializer extends AbstractValueTypeDeserializer<Number
      *
      * @param customization Model customization.
      */
-    public NumberTypeDeserializer(Customization customization) {
+    public NumberTypeDeserializer(SerializationCustomization customization) {
         super(Number.class, customization);
     }
 

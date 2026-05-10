@@ -7,38 +7,38 @@ import org.eclipse.yasson.internal.components.SerializerBinding;
 /**
  * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
  */
-abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
+abstract class CustomizationBindingBase implements SerializationCustomization, ComponentBoundCustomization {
 
-    private final AdapterBinding adapterBinding;
+    private final AdapterBinding adapterBinder;
 
-    private final SerializerBinding serializerBinding;
+    private final SerializerBinding serializerBinder;
 
-    private final DeserializerBinding deserializerBinding;
+    private final DeserializerBinding deserializerBinder;
 
-    private final boolean nillable;
+    private final boolean allowNull;
 
     /**
      * Copies properties from builder an creates immutable instance.
      *
-     * @param builder not null
+     * @param customizer not null
      */
-    public CustomizationBase(CustomizationBuilder builder) {
-        this.nillable = builder.isNillable();
-        this.adapterBinding = builder.getAdapterInfo();
-        this.serializerBinding = builder.getSerializerBinding();
-        this.deserializerBinding = builder.getDeserializerBinding();
+    public CustomizationBindingBase(CustomizationBuilder customizer) {
+        this.allowNull = customizer.isNillable();
+        this.adapterBinder = customizer.getAdapterInfo();
+        this.serializerBinder = customizer.getSerializerBinding();
+        this.deserializerBinder = customizer.getDeserializerBinding();
     }
 
     /**
      * Copy constructor.
      *
-     * @param other other customization instance
+     * @param peerBinding other customization instance
      */
-    public CustomizationBase(CustomizationBase other) {
-        this.nillable = other.isNillable();
-        this.adapterBinding = other.getAdapterBinding();
-        this.serializerBinding = other.getSerializerBinding();
-        this.deserializerBinding = other.getDeserializerBinding();
+    public CustomizationBindingBase(CustomizationBindingBase peerBinding) {
+        this.allowNull = peerBinding.isNillable();
+        this.adapterBinder = peerBinding.getAdapterBinding();
+        this.serializerBinder = peerBinding.getSerializerBinding();
+        this.deserializerBinder = peerBinding.getDeserializerBinding();
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      * @return True if <i>nillable</i> customization is present.
      */
     public boolean isNillable() {
-        return nillable;
+        return allowNull;
     }
 
     /**
@@ -56,7 +56,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      * @return components wrapper
      */
     public AdapterBinding getAdapterBinding() {
-        return adapterBinding;
+        return adapterBinder;
     }
 
     /**
@@ -65,7 +65,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      * @return serializer wrapper
      */
     public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
+        return serializerBinder;
     }
 
     /**
@@ -74,7 +74,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      * @return deserializer wrapper
      */
     public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
+        return deserializerBinder;
     }
 
 

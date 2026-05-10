@@ -13,8 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -33,7 +32,7 @@ public class LocalDateTypeDeserializer extends AbstractDateTimeDeserializer<Loca
      *
      * @param customization Customization model.
      */
-    public LocalDateTypeDeserializer(Customization customization) {
+    public LocalDateTypeDeserializer(SerializationCustomization customization) {
         super(LocalDate.class, customization);
     }
 

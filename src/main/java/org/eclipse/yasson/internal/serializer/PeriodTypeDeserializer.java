@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.Period;
@@ -31,7 +31,7 @@ public class PeriodTypeDeserializer extends AbstractValueTypeDeserializer<Period
      *
      * @param customization Model customization.
      */
-    public PeriodTypeDeserializer(Customization customization) {
+    public PeriodTypeDeserializer(SerializationCustomization customization) {
         super(Period.class, customization);
     }
 

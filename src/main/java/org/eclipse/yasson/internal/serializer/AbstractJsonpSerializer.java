@@ -21,9 +21,9 @@ import javax.json.JsonValue;
  * @author Roman Grigoriadi
  * @param <T> Type to serialize.
  */
-public abstract class AbstractJsonpSerializer<T extends JsonValue> extends AbstractContainerSerializer<T> {
+public abstract class AbstractJsonpSerializer<T extends JsonValue> extends ContainerSerializerBase<T> {
 
-    protected AbstractJsonpSerializer(SerializerBuilder builder) {
+    protected AbstractJsonpSerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 }

@@ -14,9 +14,9 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.adapter.JsonbAdapter;
@@ -32,7 +32,7 @@ import java.lang.reflect.Type;
  * @param <A> adapted type, type to deserialize JSON into
  * @param <T> required type, typically type of the field, which is adapted to another type
  */
-public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDeserializer<T> {
+public class AdaptedObjectDeserializer<A, T> implements ActiveItemModel<T>, JsonbDeserializer<T> {
 
     private JsonbDeserializer<A> adaptedTypeDeserializer;
 
@@ -52,12 +52,12 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CurrentItem<?> getWrapper() {
+    public ActiveItemModel<?> getWrapper() {
         return wrapperItem;
     }
 
@@ -66,7 +66,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
         if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
             return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
         }
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
+        throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }
 
     /**
@@ -86,7 +86,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
             final T adapted = ((JsonbAdapter<T, A>) adapterInfo.getAdapter()).adaptFromJson(result);
             return adapted;
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         }
     }
 }

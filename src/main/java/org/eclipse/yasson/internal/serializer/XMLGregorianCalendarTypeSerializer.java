@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.Instant;
@@ -35,7 +35,7 @@ public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializ
      *
      * @param customization Model customization.
      */
-    public XMLGregorianCalendarTypeSerializer(Customization customization) {
+    public XMLGregorianCalendarTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

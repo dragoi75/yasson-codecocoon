@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonArray;
@@ -198,7 +198,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
             return;
         }
 
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Event " + required + " not found." + getLastDataMsg()));
+        throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + required + " not found." + getLastDataMsg()));
     }
 
     @Override
@@ -221,7 +221,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
             return next;
         }
 
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Parser event ["+Arrays.toString(events)+"] not found." + getLastDataMsg()));
+        throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event ["+Arrays.toString(events)+"] not found." + getLastDataMsg()));
     }
 
     private boolean contains(Event[] events, Event candidate) {

@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.ZoneId;
@@ -31,7 +31,7 @@ public class ZoneIdTypeDeserializer extends AbstractValueTypeDeserializer<ZoneId
      *
      * @param customization Model customization.
      */
-    public ZoneIdTypeDeserializer(Customization customization) {
+    public ZoneIdTypeDeserializer(SerializationCustomization customization) {
         super(ZoneId.class, customization);
     }
 

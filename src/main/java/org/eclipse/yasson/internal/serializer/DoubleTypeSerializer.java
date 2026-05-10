@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 
@@ -29,7 +29,7 @@ public class DoubleTypeSerializer extends AbstractNumberSerializer<Double> {
      *
      * @param customization Model customization.
      */
-    public DoubleTypeSerializer(Customization customization) {
+    public DoubleTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonValue;
@@ -37,7 +37,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
      *
      * @param customization Model customization.
      */
-    public JsonValueDeserializer(Customization customization) {
+    public JsonValueDeserializer(SerializationCustomization customization) {
         super(JsonValue.class, customization);
     }
 
@@ -55,7 +55,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
             case VALUE_NUMBER:
                 return parser.getValue();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: "+next));
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: "+next));
         }
     }
 

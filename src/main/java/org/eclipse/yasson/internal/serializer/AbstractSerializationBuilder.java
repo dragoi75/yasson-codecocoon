@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
@@ -25,18 +25,18 @@ import java.util.Objects;
  *
  * @author Roman Grigoriadi
  */
-public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
+public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder> {
 
     /**
      * Not null with an exception of a root item.
      */
-    protected CurrentItem<?> wrapper;
+    protected ActiveItemModel<?> wrapper;
 
     /**
      * In case of unknown object genericType.
      * Null for embedded objects such as collections, or known conversion types.
      */
-    protected ClassModel classModel;
+    protected ClassDescriptor classModel;
 
     /**
      * Runtime type resolved after expanding type variables and wildcards.
@@ -52,56 +52,56 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     /**
      * Class customization
      */
-    protected Customization customization;
+    protected SerializationCustomization customization;
 
     protected final JsonbContext jsonbContext;
 
     /**
      * Crates a builder.
      *
-     * @param jsonbContext Not null.
+     * @param jsonBindingContext Not null.
      */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
+    public AbstractSerializationBuilder(JsonbContext jsonBindingContext) {
+        Objects.requireNonNull(jsonBindingContext);
+        this.jsonbContext = jsonBindingContext;
     }
 
     /**
      * Wrapper item for this item.
      *
-     * @param wrapper not null.
+     * @param activeItemModel not null.
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public T setWrapper(ActiveItemModel<?> activeItemModel) {
+        this.wrapper = activeItemModel;
         return (T) this;
     }
 
     /**
      * Customization of the class
      *
-     * @param customization Class customization
+     * @param serializationOptions Class customization
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
+    public T setCustomization(SerializationCustomization serializationOptions) {
+        this.customization = serializationOptions;
         return (T) this;
     }
 
     /***
      * Gets or load class model for a class an its superclasses.
      *
-     * @param rawType Class to get model for.
+     * @param baseType Class to get model for.
      * @return Class model.
      */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (classModel == null) {
-            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+    protected ClassDescriptor getClassModel(Class<?> baseType) {
+        ClassDescriptor classDescriptor = jsonbContext.getMappingContext().getClassModel(baseType);
+        if (classDescriptor == null) {
+            classDescriptor = jsonbContext.getMappingContext().getOrCreateClassModel(baseType);
         }
-        return classModel;
+        return classDescriptor;
     }
 
     /**
@@ -109,7 +109,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return Wrapper item.
      */
-    public CurrentItem<?> getWrapper() {
+    public ActiveItemModel<?> getWrapper() {
         return wrapper;
     }
 
@@ -119,7 +119,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return model of a class
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
@@ -137,12 +137,12 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * Type for underlying instance to be created from.
      * In case of type variable or wildcard, will be resolved recursively from parent items.
      *
-     * @param type type of instance not null
+     * @param targetType type of instance not null
      * @return builder instance for call chaining
      */
     @SuppressWarnings("unchecked")
-    public T withType(Type type) {
-        this.genericType = type;
+    public T setType(Type targetType) {
+        this.genericType = targetType;
         return (T) this;
     }
 
@@ -155,7 +155,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
         return jsonbContext;
     }
 
-    public Customization getCustomization() {
+    public SerializationCustomization getCustomization() {
         return customization;
     }
 }

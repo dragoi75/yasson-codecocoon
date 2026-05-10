@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.math.BigDecimal;
@@ -30,7 +30,7 @@ public class FloatTypeSerializer extends AbstractNumberSerializer<Float> {
      *
      * @param customization Model customization.
      */
-    public FloatTypeSerializer(Customization customization) {
+    public FloatTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

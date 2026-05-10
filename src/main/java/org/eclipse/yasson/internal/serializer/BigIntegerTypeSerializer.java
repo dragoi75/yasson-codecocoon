@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.math.BigInteger;
@@ -30,7 +30,7 @@ public class BigIntegerTypeSerializer extends AbstractNumberSerializer<BigIntege
      *
      * @param customization Model customization.
      */
-    public BigIntegerTypeSerializer(Customization customization) {
+    public BigIntegerTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

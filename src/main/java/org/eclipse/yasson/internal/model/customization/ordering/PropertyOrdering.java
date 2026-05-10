@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization.ordering;
 
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.PropertyDescriptor;
 
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.config.PropertyOrderStrategy;
@@ -51,16 +51,16 @@ public class PropertyOrdering {
      * @param classModel Class model.
      * @return Sorted list of properties.
      */
-    public List<PropertyModel> orderProperties(List<PropertyModel> properties, ClassModel classModel) {
-        Map<String, PropertyModel> byReadName = new HashMap<>();
+    public List<PropertyDescriptor> orderProperties(List<PropertyDescriptor> properties, ClassDescriptor classModel) {
+        Map<String, PropertyDescriptor> byReadName = new HashMap<>();
         properties.stream().forEach(propertyModel -> byReadName.put(propertyModel.getPropertyName(), propertyModel));
 
         String[] order = classModel.getClassCustomization().getPropertyOrder();
-        List<PropertyModel> sortedProperties = new ArrayList<>();
+        List<PropertyDescriptor> sortedProperties = new ArrayList<>();
         if (order != null) {
             //if @JsonbPropertyOrder annotation is defined on a class
             for (String propName : order) {
-                final PropertyModel remove = byReadName.remove(propName);
+                final PropertyDescriptor remove = byReadName.remove(propName);
                 if (remove != null) {
                     sortedProperties.add(remove);
                 }

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.jsonstructure;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.JsonArray;
@@ -58,7 +58,7 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     @Override
     JsonbException createIncompatibleValueError() {
-        return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY, getValue().getValueType()));
+        return new JsonbException(Messages.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY, getValue().getValueType()));
     }
 
     @Override

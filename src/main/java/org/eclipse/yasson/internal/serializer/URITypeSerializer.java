@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.net.URI;
@@ -25,19 +25,19 @@ import java.net.URI;
  * 
  * @author David Kral
  */
-public class URITypeSerializer extends AbstractValueTypeSerializer<URI> {
+public class URITypeSerializer extends ConfigurableValueTypeSerializer<URI> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public URITypeSerializer(Customization customization) {
+    public URITypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
-    protected void serialize(URI obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(URI obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

@@ -23,12 +23,12 @@ import javax.json.stream.JsonGenerator;
  */
 public class CharArraySerializer extends AbstractArraySerializer<char[]> {
 
-    protected CharArraySerializer(SerializerBuilder builder) {
+    protected CharArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected void serializeInternal(char[] obj, JsonGenerator generator, SerializationContext ctx) {
+    protected void serializeContents(char[] obj, JsonGenerator generator, SerializationContext ctx) {
         for (char c : obj) {
             generator.write(Character.valueOf(c).toString());
         }

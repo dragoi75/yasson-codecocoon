@@ -13,7 +13,7 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.serializer.CurrentItem;
+import org.eclipse.yasson.internal.serializer.ActiveItemModel;
 
 import java.lang.reflect.Type;
 
@@ -28,9 +28,9 @@ public class JsonbPropertyInfo {
 
     private Type runtimeType;
 
-    private ClassModel classModel;
+    private ClassDescriptor classModel;
 
-    private CurrentItem<?> wrapper;
+    private ActiveItemModel<?> wrapper;
 
     /**
      * Gets context.
@@ -77,7 +77,7 @@ public class JsonbPropertyInfo {
      *
      * @return Class model.
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
@@ -87,7 +87,7 @@ public class JsonbPropertyInfo {
      * @param classModel Class model to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withClassModel(ClassModel classModel) {
+    public JsonbPropertyInfo withClassModel(ClassDescriptor classModel) {
         this.classModel = classModel;
         return this;
     }
@@ -97,7 +97,7 @@ public class JsonbPropertyInfo {
      *
      * @return Wrapper.
      */
-    public CurrentItem<?> getWrapper() {
+    public ActiveItemModel<?> getWrapper() {
         return wrapper;
     }
 
@@ -107,7 +107,7 @@ public class JsonbPropertyInfo {
      * @param wrapper Wrapper to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
+    public JsonbPropertyInfo withWrapper(ActiveItemModel<?> wrapper) {
         this.wrapper = wrapper;
         return this;
     }

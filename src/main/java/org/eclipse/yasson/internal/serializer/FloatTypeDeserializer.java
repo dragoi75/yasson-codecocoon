@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -33,7 +33,7 @@ public class FloatTypeDeserializer extends AbstractNumberDeserializer<Float> {
      *
      * @param customization Model customization.
      */
-    public FloatTypeDeserializer(Customization customization) {
+    public FloatTypeDeserializer(SerializationCustomization customization) {
         super(Float.class, customization);
     }
 
@@ -45,7 +45,7 @@ public class FloatTypeDeserializer extends AbstractNumberDeserializer<Float> {
                     try {
                         return Float.parseFloat(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, Float.class));
+                        throw new JsonbException(Messages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, Float.class));
                     }
                 });
     }

@@ -1,19 +1,19 @@
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.PropertyDescriptor;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
  * Customization for creator (constructor / factory methods) parameters.
  */
-public class CreatorCustomization extends CustomizationBase {
+public class CreatorCustomization extends CustomizationBindingBase {
 
     private JsonbNumberFormatter numberFormatter;
 
     private JsonbDateFormatter dateFormatter;
 
-    private PropertyModel propertyModel;
+    private PropertyDescriptor propertyModel;
 
     public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
         super(customization);
@@ -60,7 +60,7 @@ public class CreatorCustomization extends CustomizationBase {
      * Set property referenced model.
      * @param propertyModel referenced property model
      */
-    public void setPropertyModel(PropertyModel propertyModel) {
+    public void setPropertyModel(PropertyDescriptor propertyModel) {
         this.propertyModel = propertyModel;
     }
 }

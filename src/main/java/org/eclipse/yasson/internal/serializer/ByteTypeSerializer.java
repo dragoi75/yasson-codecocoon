@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 
@@ -29,7 +29,7 @@ public class ByteTypeSerializer extends AbstractNumberSerializer<Byte> {
      *
      * @param customization Model customization.
      */
-    public ByteTypeSerializer(Customization customization) {
+    public ByteTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

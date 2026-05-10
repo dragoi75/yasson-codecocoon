@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -96,7 +96,7 @@ public class VariableTypeInheritanceSearch {
     }
 
     private Type searchRuntimeTypeArgument(ParameterizedType runtimeType, TypeVariable<?> typeVar) {
-        if (ReflectionUtils.getRawType(runtimeType) != typeVar.getGenericDeclaration()) {
+        if (ReflectiveTypeResolver.getRawType(runtimeType) != typeVar.getGenericDeclaration()) {
             return null;
         }
         TypeVariable[] bounds = typeVar.getGenericDeclaration().getTypeParameters();
@@ -119,7 +119,7 @@ public class VariableTypeInheritanceSearch {
             return (ParameterizedType) type;
         }
         if (!(type instanceof Class)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.RESOLVE_PARAMETRIZED_TYPE, type));
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.RESOLVE_PARAMETRIZED_TYPE, type));
         }
         return findParameterizedSuperclass(((Class) type).getGenericSuperclass());
     }

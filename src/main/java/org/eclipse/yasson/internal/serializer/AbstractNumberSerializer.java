@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.text.DecimalFormat;
@@ -25,7 +25,7 @@ import java.text.NumberFormat;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractNumberSerializer<T extends Number> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractNumberSerializer<T extends Number> extends ConfigurableValueTypeSerializer<T> {
 
     private final JsonbNumberFormatter formatter;
 
@@ -34,7 +34,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
      *
      * @param customization Model customization.
      */
-    public AbstractNumberSerializer(Customization customization) {
+    public AbstractNumberSerializer(SerializationCustomization customization) {
         super(customization);
         formatter = customization != null ?
                 customization.getSerializeNumberFormatter() : null;
@@ -50,7 +50,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         if (formatter != null) {
             final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
             ((DecimalFormat)format).applyPattern(formatter.getFormat());

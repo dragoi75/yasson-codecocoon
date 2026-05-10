@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization.ordering;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.PropertyDescriptor;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,15 +25,15 @@ import static java.util.stream.Collectors.toList;
  *
  * @author David Kral
  */
-public class ReverseOrderStrategy extends PropOrderStrategy implements Comparator<PropertyModel> {
+public class ReverseOrderStrategy extends PropOrderStrategy implements Comparator<PropertyDescriptor> {
 
     @Override
-    public List<PropertyModel> sortProperties(Collection<PropertyModel> properties) {
+    public List<PropertyDescriptor> sortProperties(Collection<PropertyDescriptor> properties) {
         return properties.stream().sorted(this).collect(toList());
     }
 
     @Override
-    public int compare(PropertyModel object1, PropertyModel object2) {
+    public int compare(PropertyDescriptor object1, PropertyDescriptor object2) {
         return object2.getWriteName().compareTo(object1.getWriteName());
     }
 }

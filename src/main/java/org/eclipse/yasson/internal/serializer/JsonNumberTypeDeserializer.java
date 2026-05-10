@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonNumber;
@@ -36,7 +36,7 @@ public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<Js
      *
      * @param customization Model customization.
      */
-    public JsonNumberTypeDeserializer(Customization customization) {
+    public JsonNumberTypeDeserializer(SerializationCustomization customization) {
         super(JsonNumber.class, customization);
     }
 

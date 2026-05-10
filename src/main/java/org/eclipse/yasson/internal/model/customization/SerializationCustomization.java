@@ -12,9 +12,6 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
@@ -25,7 +22,7 @@ import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
  *
  * @author Roman Grigoriadi
  */
-public interface Customization {
+public interface SerializationCustomization {
 
     /**
      * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for deserialization

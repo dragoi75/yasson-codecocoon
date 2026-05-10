@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer;
 
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
      *
      * @param customization Model customization.
      */
-    public UUIDTypeDeserializer(Customization customization) {
+    public UUIDTypeDeserializer(SerializationCustomization customization) {
         super(UUID.class, customization);
     }
 

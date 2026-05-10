@@ -2,7 +2,7 @@ package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
@@ -48,7 +48,7 @@ class ConstructorPropertiesAnnotationIntrospector {
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(Messages.getMessage(MessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS, constructor.getDeclaringClass().getName()));
+                LOG.warning(Messages.getMessage(MessageKeyConstants.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS, constructor.getDeclaringClass().getName()));
                 return null;
             }
             jsonbCreator = createJsonbCreator(constructor, (String[]) properties);

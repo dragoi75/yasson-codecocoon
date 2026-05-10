@@ -15,9 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -44,7 +43,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
      * @param clazz Class to create deserializer for.
      * @param customization Model customization.
      */
-    public AbstractDateTimeDeserializer(Class<T> clazz, Customization customization) {
+    public AbstractDateTimeDeserializer(Class<T> clazz, SerializationCustomization customization) {
         super(clazz, customization);
     }
 
@@ -68,7 +67,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseDefault(jsonValue, unmarshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 
@@ -122,7 +121,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 }

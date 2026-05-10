@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 
@@ -29,7 +29,7 @@ public class ShortTypeSerializer extends AbstractNumberSerializer<Short> {
      *
      * @param customization Model customization.
      */
-    public ShortTypeSerializer(Customization customization) {
+    public ShortTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

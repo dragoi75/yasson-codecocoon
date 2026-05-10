@@ -22,7 +22,7 @@ import java.util.Set;
  *
  * @author Roman Grigoriadi
  */
-public abstract class ProcessingContext {
+public abstract class ObjectProcessingContext {
 
     protected final JsonbContext jsonbContext;
 
@@ -30,15 +30,15 @@ public abstract class ProcessingContext {
      * Used to avoid StackOverflowError, when adapted / serialized object
      * contains contains instance of its type inside it or when object has recursive reference.
      */
-    private final Set<Object> currentlyProcessedObjects = new HashSet<>();
+    private final Set<Object> inProgressEntities = new HashSet<>();
 
     /**
      * Parent instance for marshaller and unmarshaller.
      *
-     * @param jsonbContext context of Jsonb
+     * @param jsonBindingContext context of Jsonb
      */
-    public ProcessingContext(JsonbContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
+    public ObjectProcessingContext(JsonbContext jsonBindingContext) {
+        this.jsonbContext = jsonBindingContext;
     }
 
     /**
@@ -55,17 +55,17 @@ public abstract class ProcessingContext {
      *
      * @return mapping context
      */
-    public MappingContext getMappingContext() {
+    public ClassMappingContext getMappingContext() {
         return getJsonbContext().getMappingContext();
     }
 
 
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
+    public boolean registerProcessedObject(Object entity) {
+        return this.inProgressEntities.add(entity);
     }
 
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
+    public boolean unregisterProcessedObject(Object entity) {
+        return inProgressEntities.remove(entity);
     }
 
 }

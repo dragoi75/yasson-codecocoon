@@ -16,10 +16,9 @@ package org.eclipse.yasson.internal.model.customization;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
-import org.eclipse.yasson.internal.model.JsonbCreator;
 
 /**
- * Abstract base builder for ensuring immutable state of {@link Customization} objects.
+ * Abstract base builder for ensuring immutable state of {@link SerializationCustomization} objects.
  *
  * @author Roman Grigoriadi
  */

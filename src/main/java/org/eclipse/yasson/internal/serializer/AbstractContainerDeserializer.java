@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
@@ -99,7 +99,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
                 case END_ARRAY:
                     return;
                 default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
             }
         }
     }
@@ -122,17 +122,17 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
     protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
 
     protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
-        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
+        return new DeserializerBuilder(ctx).setWrapper(this).withJsonValueType(parserContext.getLastEvent());
     }
 
     protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectionUtils.resolveType(this, valueType);
-        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
-            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
-            deserializerBuilder.withCustomization(classModel == null ? null : classModel.getCustomization());
+        Type actualValueType = ReflectiveTypeResolver.resolveActualType(this, valueType);
+        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).setType(actualValueType);
+        if (!DefaultSerializers.getInstance().isKnownType(ReflectiveTypeResolver.getRawType(actualValueType))) {
+            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(actualValueType));
+            deserializerBuilder.setCustomization(classModel == null ? null : classModel.getCustomization());
         }
         return deserializerBuilder.build();
     }
@@ -152,7 +152,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         }
 
         if (!(propertyType instanceof Class)) {
-            propertyType = ReflectionUtils.getRawType(ReflectionUtils.resolveType(this, propertyType));
+            propertyType = ReflectiveTypeResolver.getRawType(ReflectiveTypeResolver.resolveActualType(this, propertyType));
         }
 
         if (propertyType == Optional.class) {

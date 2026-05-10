@@ -22,12 +22,12 @@ import javax.json.stream.JsonGenerator;
  */
 public class DoubleArraySerializer extends AbstractArraySerializer<double[]> {
 
-    protected DoubleArraySerializer(SerializerBuilder builder) {
+    protected DoubleArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected void serializeInternal(double[] arr, JsonGenerator generator, SerializationContext ctx) {
+    protected void serializeContents(double[] arr, JsonGenerator generator, SerializationContext ctx) {
         for (double obj : arr) {
             generator.write(obj);
         }

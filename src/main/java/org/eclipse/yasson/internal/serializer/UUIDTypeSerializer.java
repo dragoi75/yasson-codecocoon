@@ -13,8 +13,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.util.UUID;
@@ -22,19 +22,19 @@ import java.util.UUID;
 /**
  * Serializer for {@link UUID} type.
  */
-public class UUIDTypeSerializer extends AbstractValueTypeSerializer<UUID> {
+public class UUIDTypeSerializer extends ConfigurableValueTypeSerializer<UUID> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public UUIDTypeSerializer(Customization customization) {
+    public UUIDTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
-    protected void serialize(UUID obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(UUID obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

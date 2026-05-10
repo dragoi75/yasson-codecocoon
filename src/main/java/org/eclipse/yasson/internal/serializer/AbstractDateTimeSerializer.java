@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.ObjectMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.serializer.SerializationContext;
@@ -32,7 +32,7 @@ import java.util.Locale;
  * @author Roman Grigoriadi
  * @param <T> Type to serialize.
  */
-public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractDateTimeSerializer<T> extends ConfigurableValueTypeSerializer<T> {
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
@@ -41,13 +41,13 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      *
      * @param customization Model customization.
      */
-    public AbstractDateTimeSerializer(Customization customization) {
+    public AbstractDateTimeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        final JsonbContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
+        final JsonbContext jsonbContext = ((ObjectMarshaller) ctx).getJsonbContext();
         final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
         generator.write(toJson(obj, formatter, jsonbContext));
     }
@@ -146,7 +146,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     }
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
     }
 }

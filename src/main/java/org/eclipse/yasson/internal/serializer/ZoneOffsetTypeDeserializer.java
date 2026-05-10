@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.ZoneOffset;
@@ -31,7 +31,7 @@ public class ZoneOffsetTypeDeserializer extends AbstractValueTypeDeserializer<Zo
      *
      * @param customization customization
      */
-    public ZoneOffsetTypeDeserializer(Customization customization) {
+    public ZoneOffsetTypeDeserializer(SerializationCustomization customization) {
         super(ZoneOffset.class, customization);
     }
 

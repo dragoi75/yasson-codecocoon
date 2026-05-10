@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 
@@ -30,7 +30,7 @@ public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Cha
      *
      * @param customization Model customization.
      */
-    public CharacterTypeDeserializer(Customization customization) {
+    public CharacterTypeDeserializer(SerializationCustomization customization) {
         super(Character.class, customization);
     }
 
