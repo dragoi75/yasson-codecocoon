@@ -45,8 +45,8 @@ import org.eclipse.yasson.internal.model.ReverseTreeMap;
 import org.eclipse.yasson.internal.model.customization.PropertyOrdering;
 import org.eclipse.yasson.internal.model.customization.StrategiesProvider;
 import org.eclipse.yasson.internal.model.customization.VisibilityStrategiesProvider;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Resolved properties from JSONB config.
@@ -155,7 +155,7 @@ public class JsonbConfigProperties {
         if (propertyNamingStrategy instanceof String) {
             return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
         } else if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_NAMING_STRATEGY_INVALID));
         }
         return (PropertyNamingStrategy) property.get();
     }
@@ -265,7 +265,7 @@ public class JsonbConfigProperties {
                 .or(() -> Optional.of(defaultValue))
                 .filter(propertyType::isInstance)
                 .map(propertyType::cast)
-                .orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
+                .orElseThrow(() -> new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
                                                                           propertyName,
                                                                           propertyType.getSimpleName())));
     }

@@ -18,42 +18,42 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.ClassMultiReleaseExtension;
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Creator of the class instance with the default constructor.
  */
-class DefaultObjectInstanceCreator implements ModelDeserializer<JsonParser> {
+class DefaultObjectInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> delegate;
+    private final ModelUnmarshaller<JsonParser> delegate;
     private final Constructor<?> defaultConstructor;
     private final JsonbException exception;
 
-    DefaultObjectInstanceCreator(ModelDeserializer<JsonParser> delegate,
+    DefaultObjectInstanceCreator(ModelUnmarshaller<JsonParser> delegate,
                                  Class<?> clazz,
                                  Constructor<?> defaultConstructor) {
         this.delegate = delegate;
         this.defaultConstructor = defaultConstructor;
         if (clazz.isInterface()) {
-            this.exception = new JsonbException(Messages.getMessage(MessageKeys.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
+            this.exception = new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
         } else if (defaultConstructor == null) {
             this.exception = ClassMultiReleaseExtension.exceptionToThrow(clazz)
-                    .orElse(new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, clazz)));
+                    .orElse(new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.NO_DEFAULT_CONSTRUCTOR, clazz)));
         } else {
             this.exception = null;
         }
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
         if (exception != null) {
             throw exception;
         }
         Object instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);
         context.setInstance(instance);
-        return delegate.deserialize(value, context);
+        return delegate.unmarshal(value, context);
     }
 }

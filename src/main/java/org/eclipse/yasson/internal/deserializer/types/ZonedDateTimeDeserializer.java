@@ -18,8 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Deserializer of the {@link ZonedDateTime} type.
@@ -38,7 +38,7 @@ class ZonedDateTimeDeserializer extends AbstractDateDeserializer<ZonedDateTime> 
      */
     @Override
     protected ZonedDateTime fromInstant(Instant instant) {
-        LOGGER.warning(Messages.getMessage(MessageKeys.OFFSET_DATE_TIME_FROM_MILLIS, ZonedDateTime.class.getSimpleName(), UTC));
+        LOGGER.warning(LocalizedMessages.getMessage(MessageKeyConstants.OFFSET_DATE_TIME_FROM_MILLIS, ZonedDateTime.class.getSimpleName(), UTC));
         return ZonedDateTime.ofInstant(instant, UTC);
     }
 

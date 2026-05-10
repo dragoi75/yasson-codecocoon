@@ -19,10 +19,10 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import org.eclipse.yasson.internal.model.CreatorModel;
-import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.CreatorProfile;
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 class ConstructorPropertiesAnnotationIntrospector {
 
@@ -48,8 +48,8 @@ class ConstructorPropertiesAnnotationIntrospector {
         this.constructorProperties = annotationFinder;
     }
 
-    public JsonbCreator getCreator(Constructor<?>[] constructors) {
-        JsonbCreator jsonbCreator = null;
+    public JsonbCreatorInvoker getCreator(Constructor<?>[] constructors) {
+        JsonbCreatorInvoker jsonbCreator = null;
 
         for (Constructor<?> constructor : constructors) {
             Object properties = constructorProperties.valueIn(constructor.getDeclaredAnnotations());
@@ -68,7 +68,7 @@ class ConstructorPropertiesAnnotationIntrospector {
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(Messages.getMessage(MessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
+                LOG.warning(LocalizedMessages.getMessage(MessageKeyConstants.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
                                                 constructor.getDeclaringClass().getName()));
                 return null;
             }
@@ -77,15 +77,15 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
+    private JsonbCreatorInvoker createJsonbCreator(Executable executable, String[] properties) {
         final Parameter[] parameters = executable.getParameters();
 
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorModel(properties[i], parameter, executable, jsonbContext);
+            creatorModels[i] = new CreatorProfile(properties[i], parameter, executable, jsonbContext);
         }
-        return new JsonbCreator(executable, creatorModels);
+        return new JsonbCreatorInvoker(executable, creatorModels);
     }
 
     @Override

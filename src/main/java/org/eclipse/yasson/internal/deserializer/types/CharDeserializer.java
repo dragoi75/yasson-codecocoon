@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 
 import java.lang.reflect.Type;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 
 /**
  * Deserializer of the {@link Character} type.
@@ -26,7 +26,7 @@ class CharDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DeserializationContextManager context, Type rType) {
         return value.charAt(0);
     }
 }

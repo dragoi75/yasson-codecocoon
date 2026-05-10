@@ -12,6 +12,7 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,6 @@ import static org.eclipse.yasson.internal.AnnotationIntrospectorTestAsserts.asse
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithJsonbCreatorAnnotatedConstructor;
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithJsonbCreatorAnnotatedFactoryMethod;
 import org.eclipse.yasson.internal.AnnotationIntrospectorTestFixtures.ObjectWithoutAnnotatedConstructor;
-import org.eclipse.yasson.internal.model.JsonbCreator;
 
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.spi.JsonProvider;
@@ -60,14 +60,14 @@ public class AnnotationIntrospectorWithoutOptionalModulesTest {
 
     @Test
     public void testObjectShouldBeCreateableFromJsonbAnnotatedConstructorWithoutOptionalModules() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedConstructor.class);
+        JsonbCreatorInvoker creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedConstructor.class);
         assertParameters(ObjectWithJsonbCreatorAnnotatedConstructor.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAnnotatedConstructor.example(), creator);
     }
 
     @Test
     public void testObjectShouldBeCreateableFromJsonbAnnotatedStaticFactoryMethodWithoutOptionalModules() {
-        JsonbCreator creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedFactoryMethod.class);
+        JsonbCreatorInvoker creator = instrospector.getCreator(ObjectWithJsonbCreatorAnnotatedFactoryMethod.class);
         assertParameters(ObjectWithJsonbCreatorAnnotatedFactoryMethod.parameters(), creator);
         assertCreatedInstanceContainsAllParameters(ObjectWithJsonbCreatorAnnotatedFactoryMethod.example(), creator);
     }

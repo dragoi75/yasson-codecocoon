@@ -17,10 +17,10 @@ import java.nio.charset.StandardCharsets;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Deserializer of the {@link String} type.
@@ -32,7 +32,7 @@ class StringDeserializer extends TypeDeserializer {
     }
 
     @Override
-    public Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    public Object deserializeStringValue(String value, DeserializationContextManager context, Type rType) {
         JsonbConfigProperties config = context.getJsonbContext().getConfigProperties();
         return checkIJson(value, config);
     }
@@ -41,7 +41,7 @@ class StringDeserializer extends TypeDeserializer {
         if (config.isStrictIJson()) {
             String newString = new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
             if (!newString.equals(value)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
             }
         }
         return value;

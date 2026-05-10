@@ -53,7 +53,7 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbConfigProperties;
 import org.eclipse.yasson.internal.deserializer.JustReturn;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 import org.eclipse.yasson.internal.deserializer.NullCheckDeserializer;
 import org.eclipse.yasson.internal.deserializer.PositionChecker;
 import org.eclipse.yasson.internal.deserializer.ValueExtractor;
@@ -140,10 +140,10 @@ public class TypeDeserializers {
      * @param events        expected parser events at the beginning when deserializing the type
      * @return type deserializer
      */
-    public static ModelDeserializer<JsonParser> getTypeDeserializer(Class<?> clazz,
+    public static ModelUnmarshaller<JsonParser> getTypeDeserializer(Class<?> clazz,
                                                                     Customization customization,
                                                                     JsonbConfigProperties properties,
-                                                                    ModelDeserializer<Object> delegate,
+                                                                    ModelUnmarshaller<Object> delegate,
                                                                     Set<JsonParser.Event> events) {
         JsonParser.Event[] eventArray = events.toArray(new JsonParser.Event[0]);
         if (OPTIONAL_TYPES.containsKey(clazz)) {
@@ -174,14 +174,14 @@ public class TypeDeserializers {
         if (JsonValue.class.isAssignableFrom(builder.getClazz())) {
             return new JsonValueDeserializer(builder);
         }
-        ModelDeserializer<JsonParser> deserializer = assignableCases(builder, eventArray);
+        ModelUnmarshaller<JsonParser> deserializer = assignableCases(builder, eventArray);
         if (deserializer != null) {
             return new NullCheckDeserializer(deserializer, delegate);
         }
         return null;
     }
 
-    private static ModelDeserializer<JsonParser> assignableCases(TypeDeserializerBuilder builder,
+    private static ModelUnmarshaller<JsonParser> assignableCases(TypeDeserializerBuilder builder,
                                                                  JsonParser.Event[] checker) {
         if (Enum.class.isAssignableFrom(builder.getClazz())) {
             return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)),

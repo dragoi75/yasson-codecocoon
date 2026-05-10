@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
 import org.eclipse.yasson.internal.model.Property;
 
 /**
@@ -40,9 +40,9 @@ public class ClassMultiReleaseExtension {
         return false;
     }
 
-    static JsonbCreator findCreator(Class<?> clazz,
-                                    Constructor<?>[] declaredConstructors,
-                                    AnnotationIntrospector introspector) {
+    static JsonbCreatorInvoker findCreator(Class<?> clazz,
+                                           Constructor<?>[] declaredConstructors,
+                                           AnnotationIntrospector introspector) {
         return null;
     }
 

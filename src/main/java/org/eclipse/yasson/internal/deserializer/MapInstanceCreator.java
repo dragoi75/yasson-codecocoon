@@ -23,14 +23,14 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.InstanceCreator;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
 
 /**
  * Map instance creator.
  */
-class MapInstanceCreator implements ModelDeserializer<JsonParser> {
+class MapInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final MapDeserializer delegate;
     private final JsonbConfigProperties configProperties;
@@ -45,10 +45,10 @@ class MapInstanceCreator implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
         Map<?, ?> map = createInstance(clazz);
         context.setInstance(map);
-        return delegate.deserialize(value, context);
+        return delegate.unmarshal(value, context);
     }
 
     private Map<?, ?> createInstance(Class<?> clazz) {

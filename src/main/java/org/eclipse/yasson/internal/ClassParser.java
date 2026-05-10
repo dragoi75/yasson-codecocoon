@@ -29,13 +29,13 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.CreatorModel;
+import org.eclipse.yasson.internal.model.CreatorProfile;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Created a class internal model.
@@ -84,10 +84,10 @@ class ClassParser {
                                             .orderProperties(classPropertyModels, classModel));
 
         //reference property to creator parameter by name to merge configuration in runtime
-        JsonbCreator creator = classModel.getClassCustomization().getCreator();
+        JsonbCreatorInvoker creator = classModel.getClassCustomization().getCreator();
         if (creator != null) {
             sortedPropertyModels.forEach(propertyModel -> {
-                for (CreatorModel creatorModel : creator.getParams()) {
+                for (CreatorProfile creatorModel : creator.getParams()) {
                     if (creatorModel.getName().equals(propertyModel.getPropertyName())) {
                         creatorModel.getCustomization().setPropertyModel(propertyModel);
                     }
@@ -290,7 +290,7 @@ class ClassParser {
                                 && checkedPropertyModel.isWritable() //
                                 && collectedPropertyModel.isWritable())) {
                     throw new JsonbException(
-                            Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
+                            LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
                                     collectedPropertyModel.getPropertyName(), cls.getName()));
                 }
             }

@@ -18,8 +18,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Object container serializer.
@@ -40,7 +40,7 @@ class ObjectSerializer implements ModelSerializer {
                 context.setKey(key);
                 serializer.serialize(value, generator, context);
             } catch (Exception e) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.SERIALIZE_PROPERTY_ERROR, key,
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.SERIALIZE_PROPERTY_ERROR, key,
                                                              value.getClass().getCanonicalName()), e);
             }
         });

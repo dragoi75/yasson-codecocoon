@@ -14,11 +14,11 @@ package org.eclipse.yasson.internal.deserializer;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DeserializationContextManager;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
-class RequiredCreatorParameter implements ModelDeserializer<Object> {
+class RequiredCreatorParameter implements ModelUnmarshaller<Object> {
 
     private final String parameterName;
 
@@ -27,8 +27,8 @@ class RequiredCreatorParameter implements ModelDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
+    public Object unmarshal(Object value, DeserializationContextManager context) {
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
     }
 
 }

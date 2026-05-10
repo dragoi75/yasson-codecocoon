@@ -68,15 +68,15 @@ import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.AnnotationTarget;
-import org.eclipse.yasson.internal.model.CreatorModel;
+import org.eclipse.yasson.internal.model.CreatorProfile;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement.AnnotationWrapper;
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Introspects configuration on classes and their properties by reading annotations.
@@ -155,8 +155,8 @@ public class AnnotationIntrospector {
      * @param clazz class to search
      * @return JsonbCreator metadata object
      */
-    public JsonbCreator getCreator(Class<?> clazz) {
-        JsonbCreator jsonbCreator = null;
+    public JsonbCreatorInvoker getCreator(Class<?> clazz) {
+        JsonbCreatorInvoker jsonbCreator = null;
         Constructor<?>[] declaredConstructors =
                 AccessController.doPrivileged((PrivilegedAction<Constructor<?>[]>) clazz::getDeclaredConstructors);
 
@@ -175,7 +175,7 @@ public class AnnotationIntrospector {
                                                                                    jakarta.json.bind.annotation.JsonbCreator.class);
             if (annot != null && Modifier.isStatic(method.getModifiers())) {
                 if (!clazz.equals(method.getReturnType())) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE,
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE,
                                                                  method,
                                                                  clazz));
                 }
@@ -191,25 +191,25 @@ public class AnnotationIntrospector {
         return jsonbCreator;
     }
 
-    JsonbCreator createJsonbCreator(Executable executable, JsonbCreator existing, Class<?> clazz) {
+    JsonbCreatorInvoker createJsonbCreator(Executable executable, JsonbCreatorInvoker existing, Class<?> clazz) {
         if (existing != null) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.MULTIPLE_JSONB_CREATORS, clazz));
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.MULTIPLE_JSONB_CREATORS, clazz));
         }
 
         final Parameter[] parameters = executable.getParameters();
 
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             final Parameter parameter = parameters[i];
             final JsonbProperty jsonbPropertyAnnotation = parameter.getAnnotation(JsonbProperty.class);
             if (jsonbPropertyAnnotation != null && !jsonbPropertyAnnotation.value().isEmpty()) {
-                creatorModels[i] = new CreatorModel(jsonbPropertyAnnotation.value(), parameter, executable, jsonbContext);
+                creatorModels[i] = new CreatorProfile(jsonbPropertyAnnotation.value(), parameter, executable, jsonbContext);
             } else {
-                creatorModels[i] = new CreatorModel(parameter.getName(), parameter, executable, jsonbContext);
+                creatorModels[i] = new CreatorProfile(parameter.getName(), parameter, executable, jsonbContext);
             }
         }
 
-        return new JsonbCreator(executable, creatorModels);
+        return new JsonbCreatorInvoker(executable, creatorModels);
     }
 
     /**
@@ -252,7 +252,7 @@ public class AnnotationIntrospector {
 
         if (expectedClass.isPresent() && !(
                 ReflectionUtils.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_INCOMPATIBLE,
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ADAPTER_INCOMPATIBLE,
                                                          adapterBinding.getBindingType(),
                                                          expectedClass.get()));
         }
@@ -613,7 +613,7 @@ public class AnnotationIntrospector {
                 && !TemporalAccessor.class.isAssignableFrom(propertyRawType)
                 && !Date.class.isAssignableFrom(propertyRawType)
                 && !Calendar.class.isAssignableFrom(propertyRawType)) {
-            throw new IllegalStateException(Messages.getMessage(MessageKeys.UNSUPPORTED_DATE_TYPE, propertyRawType));
+            throw new IllegalStateException(LocalizedMessages.getMessage(MessageKeyConstants.UNSUPPORTED_DATE_TYPE, propertyRawType));
         }
 
         DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
@@ -734,7 +734,7 @@ public class AnnotationIntrospector {
         for (Class<? extends Annotation> ann : TRANSIENT_INCOMPATIBLE) {
             Annotation annotation = findAnnotation(target.getAnnotations(), ann);
             if (annotation != null) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
             }
         }
     }

@@ -19,7 +19,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.jsonstructure.JsonStructureToParserAdapter;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
 
@@ -28,18 +28,18 @@ import static jakarta.json.stream.JsonParser.Event;
 /**
  * Instance creator following the inheritance structure defined by {@link jakarta.json.bind.annotation.JsonbTypeInfo}.
  */
-class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
+class InheritanceInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final Class<?> processedType;
     private final Map<String, Class<?>> resolvedClasses = new ConcurrentHashMap<>();
     private final DeserializationModelCreator deserializationModelCreator;
     private final TypeInheritanceConfiguration typeInheritanceConfiguration;
-    private final ModelDeserializer<JsonParser> defaultProcessor;
+    private final ModelUnmarshaller<JsonParser> defaultProcessor;
 
     InheritanceInstanceCreator(Class<?> processedType,
                                DeserializationModelCreator deserializationModelCreator,
                                TypeInheritanceConfiguration typeInheritanceConfiguration,
-                               ModelDeserializer<JsonParser> defaultProcessor) {
+                               ModelUnmarshaller<JsonParser> defaultProcessor) {
         this.processedType = processedType;
         this.deserializationModelCreator = deserializationModelCreator;
         this.typeInheritanceConfiguration = typeInheritanceConfiguration;
@@ -47,7 +47,7 @@ class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser parser, DeserializationContextManager context) {
         String alias;
         JsonParser jsonParser;
         String polymorphismKeyName = typeInheritanceConfiguration.getFieldName();
@@ -62,14 +62,14 @@ class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
         context.setLastValueEvent(event);
         Class<?> polymorphicTypeClass;
         if (alias == null) {
-            return defaultProcessor.deserialize(jsonParser, context);
+            return defaultProcessor.unmarshal(jsonParser, context);
         }
         polymorphicTypeClass = getPolymorphicTypeClass(alias);
         if (polymorphicTypeClass.equals(processedType)) {
-            return defaultProcessor.deserialize(jsonParser, context);
+            return defaultProcessor.unmarshal(jsonParser, context);
         }
-        ModelDeserializer<JsonParser> deserializer = deserializationModelCreator.deserializerChain(polymorphicTypeClass);
-        return deserializer.deserialize(jsonParser, context);
+        ModelUnmarshaller<JsonParser> deserializer = deserializationModelCreator.deserializerChain(polymorphicTypeClass);
+        return deserializer.unmarshal(jsonParser, context);
     }
 
     @Override

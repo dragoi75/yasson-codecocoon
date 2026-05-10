@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.util.Objects;
 
 import org.eclipse.yasson.internal.JsonbConfigProperties;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -24,12 +24,12 @@ class TypeDeserializerBuilder {
     private final Class<?> clazz;
     private final Customization customization;
     private final JsonbConfigProperties configProperties;
-    private final ModelDeserializer<Object> delegate;
+    private final ModelUnmarshaller<Object> delegate;
 
     TypeDeserializerBuilder(Class<?> clazz,
                             Customization customization,
                             JsonbConfigProperties configProperties,
-                            ModelDeserializer<Object> delegate) {
+                            ModelUnmarshaller<Object> delegate) {
         this.clazz = Objects.requireNonNull(clazz);
         this.customization = customization == null ? ClassCustomization.empty() : customization;
         this.configProperties = configProperties;
@@ -44,7 +44,7 @@ class TypeDeserializerBuilder {
         return configProperties;
     }
 
-    public ModelDeserializer<Object> getDelegate() {
+    public ModelUnmarshaller<Object> getDelegate() {
         return delegate;
     }
 

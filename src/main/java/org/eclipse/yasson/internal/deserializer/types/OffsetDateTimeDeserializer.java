@@ -18,8 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
 /**
  * Deserializer of the {@link OffsetDateTime} type.
@@ -38,7 +38,7 @@ class OffsetDateTimeDeserializer extends AbstractDateDeserializer<OffsetDateTime
      */
     @Override
     protected OffsetDateTime fromInstant(Instant instant) {
-        LOGGER.warning(Messages.getMessage(MessageKeys.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
+        LOGGER.warning(LocalizedMessages.getMessage(MessageKeyConstants.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
         return OffsetDateTime.ofInstant(instant, UTC);
     }
 

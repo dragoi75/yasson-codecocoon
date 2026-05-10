@@ -16,25 +16,25 @@ import java.util.Optional;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 
 /**
  * Deserializer of the {@link Optional} types.
  */
-class OptionalDeserializer implements ModelDeserializer<JsonParser> {
+class OptionalDeserializer implements ModelUnmarshaller<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> typeDeserializer;
-    private final ModelDeserializer<Object> delegate;
+    private final ModelUnmarshaller<JsonParser> typeDeserializer;
+    private final ModelUnmarshaller<Object> delegate;
 
-    OptionalDeserializer(ModelDeserializer<JsonParser> typeDeserializer,
-                         ModelDeserializer<Object> delegate) {
+    OptionalDeserializer(ModelUnmarshaller<JsonParser> typeDeserializer,
+                         ModelUnmarshaller<Object> delegate) {
         this.typeDeserializer = typeDeserializer;
         this.delegate = delegate;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        Optional<Object> val = Optional.ofNullable(typeDeserializer.deserialize(value, context));
-        return delegate.deserialize(val, context);
+    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
+        Optional<Object> val = Optional.ofNullable(typeDeserializer.unmarshal(value, context));
+        return delegate.unmarshal(val, context);
     }
 }

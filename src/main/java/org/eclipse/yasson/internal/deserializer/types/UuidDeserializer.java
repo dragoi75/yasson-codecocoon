@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextManager;
 
 /**
  * Deserializer of the {@link UUID} type.
@@ -27,7 +27,7 @@ class UuidDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DeserializationContextManager context, Type rType) {
         return UUID.fromString(value);
     }
 }

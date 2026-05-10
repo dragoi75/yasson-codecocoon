@@ -16,7 +16,7 @@ import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.model.JsonbCreator;
+import org.eclipse.yasson.internal.model.JsonbCreatorInvoker;
 
 /**
  * Customization which could be applied on a class or package level.
@@ -25,7 +25,7 @@ public class ClassCustomization extends CustomizationBase {
 
     private static final ClassCustomization EMPTY = new ClassCustomization(new Builder());
 
-    private final JsonbCreator creator;
+    private final JsonbCreatorInvoker creator;
     private final String[] propertyOrder;
     private final JsonbNumberFormatter numberFormatter;
     private final JsonbDateFormatter dateTimeFormatter;
@@ -56,11 +56,11 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Returns instance of {@link JsonbCreator}.
+     * Returns instance of {@link JsonbCreatorInvoker}.
      *
      * @return instance of creator
      */
-    public JsonbCreator getCreator() {
+    public JsonbCreatorInvoker getCreator() {
         return creator;
     }
 
@@ -111,7 +111,7 @@ public class ClassCustomization extends CustomizationBase {
      */
     public static class Builder extends CustomizationBase.Builder<Builder, ClassCustomization> {
 
-        private JsonbCreator creator;
+        private JsonbCreatorInvoker creator;
         private String[] propertyOrder;
         private JsonbNumberFormatter numberFormatter;
         private JsonbDateFormatter dateTimeFormatter;
@@ -132,7 +132,7 @@ public class ClassCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder creator(JsonbCreator creator) {
+        public Builder creator(JsonbCreatorInvoker creator) {
             this.creator = creator;
             return this;
         }

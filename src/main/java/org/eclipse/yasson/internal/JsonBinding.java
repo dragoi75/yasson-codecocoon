@@ -51,60 +51,60 @@ public class JsonBinding implements YassonJsonb {
         }
     }
 
-    private <T> T deserialize(final Type type, final JsonParser parser, final DeserializationContextImpl unmarshaller) {
+    private <T> T deserialize(final Type type, final JsonParser parser, final DeserializationContextManager unmarshaller) {
         return unmarshaller.deserialize(type, parser);
     }
 
     @Override
     public <T> T fromJson(String str, Class<T> type) throws JsonbException {
         final JsonParser parser = jsonbContext.getJsonProvider().createParser(new StringReader(str));
-        final DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        final DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(String str, Type type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(new StringReader(str));
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(reader);
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Type type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(reader);
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Class<T> clazz) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(clazz, inputStreamParser(stream), unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Type type) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return deserialize(type, inputStreamParser(stream), unmarshaller);
     }
 
     @Override
     public <T> T fromJsonStructure(JsonStructure jsonStructure, Class<T> type) throws JsonbException {
         JsonParser parser = new JsonStructureToParserAdapter(jsonStructure);
-        return deserialize(type, parser, new DeserializationContextImpl(jsonbContext));
+        return deserialize(type, parser, new DeserializationContextManager(jsonbContext));
     }
 
     @Override
     public <T> T fromJsonStructure(JsonStructure jsonStructure, Type runtimeType) throws JsonbException {
         JsonParser parser = new JsonStructureToParserAdapter(jsonStructure);
-        return deserialize(runtimeType, parser, new DeserializationContextImpl(jsonbContext));
+        return deserialize(runtimeType, parser, new DeserializationContextManager(jsonbContext));
     }
 
     private JsonParser inputStreamParser(InputStream stream) {
@@ -164,13 +164,13 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return unmarshaller.deserialize(type, jsonParser);
     }
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DeserializationContextManager unmarshaller = new DeserializationContextManager(jsonbContext);
         return unmarshaller.deserialize(runtimeType, jsonParser);
     }
 

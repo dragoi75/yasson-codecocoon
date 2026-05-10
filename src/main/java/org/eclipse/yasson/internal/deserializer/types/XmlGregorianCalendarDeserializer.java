@@ -31,8 +31,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.LocalizedMessages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer of the {@link XMLGregorianCalendar} type.
@@ -52,7 +52,7 @@ class XmlGregorianCalendarDeserializer extends AbstractDateDeserializer<XMLGrego
         try {
             this.datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATATYPE_FACTORY_CREATION_FAILED), e);
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
         }
     }
 
