@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -25,19 +25,19 @@ import java.net.URI;
  * 
  * @author David Kral
  */
-public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
+public class URITypeDeserializer extends BaseValueTypeDeserializer<URI> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Binding model.
      */
-    public URITypeDeserializer(Customization customization) {
+    public URITypeDeserializer(SerializationCustomization customization) {
         super(URI.class, customization);
     }
 
     @Override
-    protected URI deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URI deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return URI.create(jsonValue);
     }
 }

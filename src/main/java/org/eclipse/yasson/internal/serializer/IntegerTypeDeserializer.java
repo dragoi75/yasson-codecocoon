@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -33,19 +33,19 @@ public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer>
      *
      * @param customization Model customization.
      */
-    public IntegerTypeDeserializer(Customization customization) {
+    public IntegerTypeDeserializer(SerializationCustomization customization) {
         super(Integer.class, customization);
     }
 
     @Override
-    protected Integer deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Integer deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
                 .map(num -> Integer.parseInt(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return Integer.parseInt(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR,
                                 Integer.class));
                     }
                 });

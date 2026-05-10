@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -26,19 +26,19 @@ import java.net.URL;
  * 
  * @author David Kral
  */
-public class URLTypeDeserializer extends AbstractValueTypeDeserializer<URL> {
+public class URLTypeDeserializer extends BaseValueTypeDeserializer<URL> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public URLTypeDeserializer(Customization customization) {
+    public URLTypeDeserializer(SerializationCustomization customization) {
         super(URL.class, customization);
     }
 
     @Override
-    protected URL deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected URL deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         URL url = null;
         try {
             url = new URL(jsonValue);

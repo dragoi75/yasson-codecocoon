@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.ReflectiveTypeUtils;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.ContainerCustomization;
 
@@ -41,9 +41,9 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link SerializerBuilder} used to build this instance
+     * @param builder {@link SerializationBuilder} used to build this instance
      */
-    protected AbstractContainerSerializer(SerializerBuilder builder) {
+    protected AbstractContainerSerializer(SerializationBuilder builder) {
         super(builder);
     }
 
@@ -54,7 +54,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @param runtimeType Runtime type of the item.
      * @param classModel Class model.
      */
-    public AbstractContainerSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public AbstractContainerSerializer(CurrentItemWrapper<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         super(wrapper, runtimeType, classModel);
     }
 
@@ -134,22 +134,22 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
             Type instanceValueType = getValueType(getRuntimeType());
             instanceValueType = instanceValueType.equals(Object.class) ? itemClass : instanceValueType;
 
-            SerializerBuilder builder = new SerializerBuilder(((Marshaller) ctx).getJsonbContext());
-            builder.withObjectClass(itemClass);
-            builder.withWrapper(this);
-            builder.withType(instanceValueType);
+            SerializationBuilder builder = new SerializationBuilder(((JsonbMarshaller) ctx).getJsonbContext());
+            builder.setObjectClass(itemClass);
+            builder.setWrapper(this);
+            builder.setType(instanceValueType);
 
 
-            if (!DefaultSerializers.getInstance().isKnownType(itemClass)) {
+            if (!DefaultSerializerRegistry.getInstance().isKnownType(itemClass)) {
                 //Need for class level annotations + user adapters/serializers bound to type
-                ClassModel classModel = ((Marshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
-                builder.withCustomization(new ContainerCustomization(classModel.getCustomization()));
+                ClassDescriptor classModel = ((JsonbMarshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
+                builder.setCustomization(new ContainerCustomization(classModel.getCustomization()));
             } else {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers
                 //to preserve collections and array null elements
-                builder.withCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
+                builder.setCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
             }
-            serializer = builder.build();
+            serializer = builder.buildSerializer();
 
             //Cache last used value serializer in case of next item is the same type.
             addValueSerializer(serializer, itemClass);
@@ -159,7 +159,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
 
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
+            Optional<Type> runtimeTypeOptional = ReflectiveTypeUtils.resolveTypeOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

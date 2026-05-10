@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 
@@ -23,19 +23,19 @@ import javax.json.stream.JsonGenerator;
  *
  * @author David Kral
  */
-public class BooleanTypeSerializer extends AbstractValueTypeSerializer<Boolean> {
+public class BooleanTypeSerializer extends ConfigurableValueTypeSerializer<Boolean> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public BooleanTypeSerializer(Customization customization) {
+    public BooleanTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
-    protected void serialize(Boolean obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Boolean obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj);
     }
 }

@@ -14,8 +14,8 @@
 package org.eclipse.yasson.internal.components;
 
 import org.eclipse.yasson.internal.InstanceCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
 import javax.json.bind.JsonbException;
@@ -56,7 +56,7 @@ public class JsonbComponentInstanceCreatorFactory {
             beanManager = getJndiBeanManager();
         }
         if (beanManager == null) {
-            log.finest(Messages.getMessage(MessageKeys.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
+            log.finest(ResourceBundleMessages.getMessage(MessageConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
             return new DefaultConstructorCreator(creator);
         }
         return new BeanManagerInstanceCreator(beanManager);
@@ -81,7 +81,7 @@ public class JsonbComponentInstanceCreatorFactory {
                     return getBeanManager.invoke(cdiObject);
                 });
             } catch (ClassNotFoundException e) {
-                log.finest(Messages.getMessage(MessageKeys.NO_CDI_API_PROVIDER, CDI_SPI_CLASS));
+                log.finest(ResourceBundleMessages.getMessage(MessageConstants.NO_CDI_API_PROVIDER, CDI_SPI_CLASS));
                 return null;
             }
         });
@@ -103,7 +103,7 @@ public class JsonbComponentInstanceCreatorFactory {
                     return lookupMethod.invoke(initialContextObject, BEAN_MANAGER_NAME);
                 });
             } catch (ClassNotFoundException e) {
-                log.finest(Messages.getMessage(MessageKeys.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
+                log.finest(ResourceBundleMessages.getMessage(MessageConstants.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
                 return null;
             }
         });
@@ -119,18 +119,18 @@ public class JsonbComponentInstanceCreatorFactory {
         try {
             return command.provide();
         } catch (NoSuchMethodException | InstantiationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, e.getMessage()), e);
         } catch (IllegalAccessException e) {
             //insufficient permissions for reflective invocation, don't fail in this case
             log.warning(e.getMessage());
-            log.warning(Messages.getMessage(MessageKeys.ILLEGAL_ACCESS, "lookup CDI bean manager"));
+            log.warning(ResourceBundleMessages.getMessage(MessageConstants.ILLEGAL_ACCESS, "lookup CDI bean manager"));
             return null;
         } catch (InvocationTargetException e) {
             //likely no CDI container is running or bean manager JNDI lookup fails.
             if (e.getCause() != null) {
                 log.finest(e.getMessage());
             }
-            log.finest(Messages.getMessage(MessageKeys.NO_CDI_ENVIRONMENT));
+            log.finest(ResourceBundleMessages.getMessage(MessageConstants.NO_CDI_ENVIRONMENT));
             return null;
         }
     }

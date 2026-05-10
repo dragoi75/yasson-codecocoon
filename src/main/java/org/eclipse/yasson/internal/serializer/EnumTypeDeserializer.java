@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 
@@ -23,20 +23,20 @@ import java.lang.reflect.Type;
  *
  * @author David Kral
  */
-public class EnumTypeDeserializer extends AbstractValueTypeDeserializer<Enum> {
+public class EnumTypeDeserializer extends BaseValueTypeDeserializer<Enum> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public EnumTypeDeserializer(Customization customization) {
+    public EnumTypeDeserializer(SerializationCustomization customization) {
         super(Enum.class, customization);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Enum deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Enum deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return Enum.valueOf((Class<Enum>) rtType, jsonValue);
     }
 }

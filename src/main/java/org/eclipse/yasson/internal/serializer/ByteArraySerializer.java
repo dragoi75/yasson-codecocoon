@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class ByteArraySerializer extends AbstractArraySerializer<byte[]> {
 
-    protected ByteArraySerializer(SerializerBuilder builder) {
+    protected ByteArraySerializer(SerializationBuilder builder) {
         super(builder);
     }
 

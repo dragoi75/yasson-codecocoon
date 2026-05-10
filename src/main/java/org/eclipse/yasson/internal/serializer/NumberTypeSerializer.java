@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.stream.JsonGenerator;
 import java.math.BigDecimal;
@@ -24,19 +24,19 @@ import java.math.BigDecimal;
  * 
  * @author David Kral
  */
-public class NumberTypeSerializer extends AbstractValueTypeSerializer<Number> {
+public class NumberTypeSerializer extends ConfigurableValueTypeSerializer<Number> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public NumberTypeSerializer(Customization customization) {
+    public NumberTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
-    protected void serialize(Number obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Number obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         BigDecimal bigDecimalValue = new BigDecimal(String.valueOf(obj));
         if (BigNumberUtil.isIEEE754(bigDecimalValue)) {
             generator.write(bigDecimalValue);

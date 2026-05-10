@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
@@ -26,19 +26,19 @@ import java.lang.reflect.Type;
  * 
  * @author David Kral
  */
-public class JsonStringTypeDeserializer extends AbstractValueTypeDeserializer<JsonString> {
+public class JsonStringTypeDeserializer extends BaseValueTypeDeserializer<JsonString> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public JsonStringTypeDeserializer(Customization customization) {
+    public JsonStringTypeDeserializer(SerializationCustomization customization) {
         super(JsonString.class, customization);
     }
 
     @Override
-    protected JsonString deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonString deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
         final JsonObject jsonObject = factory.createObjectBuilder()
                 .add("json", jsonValue)

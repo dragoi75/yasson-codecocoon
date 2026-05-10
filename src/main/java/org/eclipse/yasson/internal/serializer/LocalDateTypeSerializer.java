@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,7 +35,7 @@ public class LocalDateTypeSerializer extends AbstractDateTimeSerializer<LocalDat
      *
      * @param customization Model customization.
      */
-    public LocalDateTypeSerializer(Customization customization) {
+    public LocalDateTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
@@ -52,6 +52,6 @@ public class LocalDateTypeSerializer extends AbstractDateTimeSerializer<LocalDat
     @Override
     protected String formatStrictIJson(LocalDate value) {
         final ZonedDateTime zonedDateTime = value.atTime(0, 0, 0).atZone(UTC);
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedDateTime);
+        return JsonbDateTimeFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedDateTime);
     }
 }

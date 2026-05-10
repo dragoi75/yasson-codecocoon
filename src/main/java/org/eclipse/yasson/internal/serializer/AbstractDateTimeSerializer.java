@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.serializer.SerializationContext;
@@ -32,7 +32,7 @@ import java.util.Locale;
  * @author Roman Grigoriadi
  * @param <T> Type to serialize.
  */
-public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractDateTimeSerializer<T> extends ConfigurableValueTypeSerializer<T> {
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
@@ -41,14 +41,14 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      *
      * @param customization Model customization.
      */
-    public AbstractDateTimeSerializer(Customization customization) {
+    public AbstractDateTimeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        final JsonbContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
-        final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
+        final JsonbRuntimeContext jsonbContext = ((JsonbMarshaller) ctx).getJsonbContext();
+        final JsonbDateTimeFormatter formatter = getJsonbDateFormatter(jsonbContext);
         generator.write(toJson(obj, formatter, jsonbContext));
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      * @param jsonbContext JSON-B context.
      * @return JSON representation of given object.
      */
-    public String toJson(T object, JsonbDateFormatter formatter, JsonbContext jsonbContext) {
+    public String toJson(T object, JsonbDateTimeFormatter formatter, JsonbRuntimeContext jsonbContext) {
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return String.valueOf(toInstant(object).toEpochMilli());
         } else if (formatter.getDateTimeFormatter() != null) {
@@ -77,7 +77,7 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
         return formatDefault(object, jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
     }
 
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateTimeFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         if (customization != null && customization.getSerializeDateFormatter() != null) {
             return customization.getSerializeDateFormatter();
         }
@@ -142,11 +142,11 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      * @return formatted result
      */
     protected String formatStrictIJson(T value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
+        return JsonbDateTimeFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
     }
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
     }
 }

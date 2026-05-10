@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.Period;
@@ -24,19 +24,19 @@ import java.time.Period;
  * 
  * @author David Kral
  */
-public class PeriodTypeDeserializer extends AbstractValueTypeDeserializer<Period> {
+public class PeriodTypeDeserializer extends BaseValueTypeDeserializer<Period> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public PeriodTypeDeserializer(Customization customization) {
+    public PeriodTypeDeserializer(SerializationCustomization customization) {
         super(Period.class, customization);
     }
 
     @Override
-    protected Period deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Period deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return Period.parse(jsonValue);
     }
 }

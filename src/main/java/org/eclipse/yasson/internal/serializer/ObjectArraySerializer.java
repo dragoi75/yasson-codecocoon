@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class ObjectArraySerializer<T> extends AbstractArraySerializer<T[]> {
 
-    protected ObjectArraySerializer(SerializerBuilder builder) {
+    protected ObjectArraySerializer(SerializationBuilder builder) {
         super(builder);
     }
 

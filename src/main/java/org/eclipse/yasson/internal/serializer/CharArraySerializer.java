@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator;
  */
 public class CharArraySerializer extends AbstractArraySerializer<char[]> {
 
-    protected CharArraySerializer(SerializerBuilder builder) {
+    protected CharArraySerializer(SerializationBuilder builder) {
         super(builder);
     }
 

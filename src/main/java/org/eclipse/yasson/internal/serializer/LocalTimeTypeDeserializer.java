@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.time.Instant;
@@ -35,13 +35,13 @@ public class LocalTimeTypeDeserializer extends AbstractDateTimeDeserializer<Loca
      *
      * @param customization Model customization.
      */
-    public LocalTimeTypeDeserializer(Customization customization) {
+    public LocalTimeTypeDeserializer(SerializationCustomization customization) {
         super(LocalTime.class, customization);
     }
 
     @Override
     protected LocalTime fromInstant(Instant instant) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
+        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
 
     @Override

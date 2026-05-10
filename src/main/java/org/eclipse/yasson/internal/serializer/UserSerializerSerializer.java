@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.ProcessingEnvironment;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbSerializer;
@@ -34,7 +34,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     private final JsonbSerializer<T> userSerializer;
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Create instance of current item with its builder.
@@ -42,22 +42,22 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
      * @param classModel model
      * @param userSerializer user serializer
      */
-    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
+    public UserSerializerSerializer(ClassDescriptor classModel, JsonbSerializer<T> userSerializer) {
         this.classModel = classModel;
         this.userSerializer = userSerializer;
     }
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (Marshaller) ctx;
+        ProcessingEnvironment context = (JsonbMarshaller) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.registerProcessedObject(obj)) {
                 userSerializer.serialize(obj, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } finally {
-            context.removeProcessedObject(obj);
+            context.unregisterProcessedObject(obj);
         }
     }
 }

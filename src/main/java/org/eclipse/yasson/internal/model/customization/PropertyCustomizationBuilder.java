@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
- * The property customization builder that would be used to build an instance of {@link PropertyCustomization} to ensure its immutability.
+ * The property customization builder that would be used to build an instance of {@link PropertySerializationCustomization} to ensure its immutability.
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */
@@ -31,9 +31,9 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
 
     private JsonbNumberFormatter deserializeNumberFormatter;
 
-    private JsonbDateFormatter serializeDateFormatter;
+    private JsonbDateTimeFormatter serializeDateFormatter;
 
-    private JsonbDateFormatter deserializeDateFormatter;
+    private JsonbDateTimeFormatter deserializeDateFormatter;
 
     private boolean readTransient;
 
@@ -44,10 +44,10 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     /**
      * Creates a customization for class properties.
      *
-     * @return A new instance of {@link PropertyCustomization}
+     * @return A new instance of {@link PropertySerializationCustomization}
      */
-    public PropertyCustomization buildPropertyCustomization() {
-        return new PropertyCustomization(this);
+    public PropertySerializationCustomization buildPropertyCustomization() {
+        return new PropertySerializationCustomization(this);
     }
 
     /**
@@ -91,7 +91,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return date formatter for formatting dates during serialization process.
      */
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         return serializeDateFormatter;
     }
 
@@ -100,7 +100,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
      */
-    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
+    public void setSerializeDateFormatter(JsonbDateTimeFormatter serializeDateFormatter) {
         this.serializeDateFormatter = serializeDateFormatter;
     }
 
@@ -109,7 +109,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return Date formatter for formatting dates during deserialization process.
      */
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         return deserializeDateFormatter;
     }
 
@@ -118,7 +118,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
      */
-    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
+    public void setDeserializeDateFormatter(JsonbDateTimeFormatter deserializeDateFormatter) {
         this.deserializeDateFormatter = deserializeDateFormatter;
     }
 

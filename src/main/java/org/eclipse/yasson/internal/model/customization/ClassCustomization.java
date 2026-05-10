@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 
@@ -32,7 +32,7 @@ public class ClassCustomization extends CustomizationBase {
 
     private final JsonbNumberFormatter numberFormatter;
 
-    private final JsonbDateFormatter dateTimeFormatter;
+    private final JsonbDateTimeFormatter dateTimeFormatter;
 
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
@@ -110,12 +110,12 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         return dateTimeFormatter;
     }
 
     @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         return dateTimeFormatter;
     }
 

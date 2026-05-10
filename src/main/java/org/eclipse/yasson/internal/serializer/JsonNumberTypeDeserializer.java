@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonNumber;
@@ -27,7 +27,7 @@ import java.math.BigDecimal;
  * 
  * @author David Kral
  */
-public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<JsonNumber> {
+public class JsonNumberTypeDeserializer extends BaseValueTypeDeserializer<JsonNumber> {
 
     private final static String NUMBER = "number";
 
@@ -36,12 +36,12 @@ public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<Js
      *
      * @param customization Model customization.
      */
-    public JsonNumberTypeDeserializer(Customization customization) {
+    public JsonNumberTypeDeserializer(SerializationCustomization customization) {
         super(JsonNumber.class, customization);
     }
 
     @Override
-    protected JsonNumber deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonNumber deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
         JsonObject jsonObject;
         try {

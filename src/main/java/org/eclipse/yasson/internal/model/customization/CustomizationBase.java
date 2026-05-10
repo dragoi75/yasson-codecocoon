@@ -1,19 +1,19 @@
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingDescriptor;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 
 /**
- * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
+ * Common properties of {@link ClassCustomization} and {@link PropertySerializationCustomization}.
  */
-abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
+abstract class CustomizationBase implements SerializationCustomization, ComponentBindingCustomizer {
 
-    private final AdapterBinding adapterBinding;
+    private final AdapterBindingDescriptor adapterBinding;
 
     private final SerializerBinding serializerBinding;
 
-    private final DeserializerBinding deserializerBinding;
+    private final JsonbDeserializerBinding deserializerBinding;
 
     private final boolean nillable;
 
@@ -55,7 +55,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return components wrapper
      */
-    public AdapterBinding getAdapterBinding() {
+    public AdapterBindingDescriptor getAdapterBinding() {
         return adapterBinding;
     }
 
@@ -73,7 +73,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return deserializer wrapper
      */
-    public DeserializerBinding getDeserializerBinding() {
+    public JsonbDeserializerBinding getDeserializerBinding() {
         return deserializerBinding;
     }
 

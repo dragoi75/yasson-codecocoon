@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +33,7 @@ public class InstantTypeDeserializer extends AbstractDateTimeDeserializer<Instan
      *
      * @param customization Model customization.
      */
-    public InstantTypeDeserializer(Customization customization) {
+    public InstantTypeDeserializer(SerializationCustomization customization) {
         super(Instant.class, customization);
     }
 

@@ -2,8 +2,8 @@ package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
 import java.lang.reflect.Constructor;
@@ -15,22 +15,22 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private static final Logger LOG = Logger.getLogger(JsonbComponentInstanceCreator.class.getName());
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
         return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
     /**
      * Only for testing and internal purposes.
      * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonbContext)}.
+     * Please use static factory methods e.g. {@link #forContext(JsonbRuntimeContext)}.
      * 
-     * @param context          {@link JsonbContext}
+     * @param context          {@link JsonbRuntimeContext}
      * @param annotationFinder {@link AnnotationFinder}
      */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonbContext context, AnnotationFinder annotationFinder) {
+    protected ConstructorPropertiesAnnotationIntrospector(JsonbRuntimeContext context, AnnotationFinder annotationFinder) {
         this.jsonbContext = context;
         this.constructorProperties = annotationFinder;
     }
@@ -48,7 +48,7 @@ class ConstructorPropertiesAnnotationIntrospector {
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(Messages.getMessage(MessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS, constructor.getDeclaringClass().getName()));
+                LOG.warning(ResourceBundleMessages.getMessage(MessageConstants.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS, constructor.getDeclaringClass().getName()));
                 return null;
             }
             jsonbCreator = createJsonbCreator(constructor, (String[]) properties);

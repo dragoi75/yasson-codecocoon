@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.ZoneOffset;
@@ -24,19 +24,19 @@ import java.time.ZoneOffset;
  * 
  * @author David Kral
  */
-public class ZoneOffsetTypeDeserializer extends AbstractValueTypeDeserializer<ZoneOffset> {
+public class ZoneOffsetTypeDeserializer extends BaseValueTypeDeserializer<ZoneOffset> {
 
     /**
      * Creates a new instance.
      *
      * @param customization customization
      */
-    public ZoneOffsetTypeDeserializer(Customization customization) {
+    public ZoneOffsetTypeDeserializer(SerializationCustomization customization) {
         super(ZoneOffset.class, customization);
     }
 
     @Override
-    protected ZoneOffset deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected ZoneOffset deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return ZoneOffset.of(jsonValue);
     }
 }

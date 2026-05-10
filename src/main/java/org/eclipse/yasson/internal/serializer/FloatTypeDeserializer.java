@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -33,19 +33,19 @@ public class FloatTypeDeserializer extends AbstractNumberDeserializer<Float> {
      *
      * @param customization Model customization.
      */
-    public FloatTypeDeserializer(Customization customization) {
+    public FloatTypeDeserializer(SerializationCustomization customization) {
         super(Float.class, customization);
     }
 
     @Override
-    protected Float deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Float deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, false, unmarshaller.getJsonbContext())
                 .map(num -> Float.parseFloat(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return Float.parseFloat(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, Float.class));
+                        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, Float.class));
                     }
                 });
     }

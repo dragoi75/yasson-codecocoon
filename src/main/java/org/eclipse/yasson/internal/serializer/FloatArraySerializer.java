@@ -24,7 +24,7 @@ import java.math.BigDecimal;
  */
 public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
 
-    protected FloatArraySerializer(SerializerBuilder builder) {
+    protected FloatArraySerializer(SerializationBuilder builder) {
         super(builder);
     }
 

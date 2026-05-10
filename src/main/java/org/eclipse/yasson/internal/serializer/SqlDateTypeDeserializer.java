@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -36,7 +36,7 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
      *
      * @param customization Model customization.
      */
-    public SqlDateTypeDeserializer(Customization customization) {
+    public SqlDateTypeDeserializer(SerializationCustomization customization) {
         super(Date.class, customization);
     }
 

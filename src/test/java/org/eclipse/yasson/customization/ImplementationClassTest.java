@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.customization;
 
-import org.eclipse.yasson.YassonProperties;
+import org.eclipse.yasson.YassonConfiguration;
 import org.eclipse.yasson.customization.model.Animal;
 import org.eclipse.yasson.customization.model.Dog;
 import org.eclipse.yasson.customization.model.ImplementationClassPojo;
@@ -46,7 +46,7 @@ public class ImplementationClassTest {
     public void testJsonbConfigUserImplementation() {
         HashMap<Class, Class> userMapping = new HashMap<>();
         userMapping.put(Animal.class, Dog.class);
-        Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().setProperty(YassonProperties.USER_TYPE_MAPPING, userMapping));
+        Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().setProperty(YassonConfiguration.USER_TYPE_MAPPING, userMapping));
         Animal animal = new Dog("Bulldog");
         String expected = "{\"dogProperty\":\"Bulldog\"}";
         String json = jsonb.toJson(animal);

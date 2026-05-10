@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
@@ -30,20 +30,20 @@ import java.lang.reflect.Type;
  * 
  * @author Roman Grigoriadi
  */
-public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonValue> {
+public class JsonValueDeserializer extends BaseValueTypeDeserializer<JsonValue> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public JsonValueDeserializer(Customization customization) {
+    public JsonValueDeserializer(SerializationCustomization customization) {
         super(JsonValue.class, customization);
     }
 
     @Override
     public JsonValue deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbRiParser)parser).getLastEvent();
+        final JsonParser.Event next = ((JsonbStreamingParser)parser).getLastEvent();
         switch (next) {
             case VALUE_TRUE:
                 return JsonValue.TRUE;
@@ -55,12 +55,12 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
             case VALUE_NUMBER:
                 return parser.getValue();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: "+next));
+                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Unknown JSON value: "+next));
         }
     }
 
     @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonValue deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
 }

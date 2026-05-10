@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 /**
  * Create instance of a serializer.
@@ -28,5 +28,5 @@ public interface ISerializerProvider {
      * @param customization model customization
      * @return deserializer
      */
-    AbstractValueTypeSerializer<?> provideSerializer(Customization customization);
+    ConfigurableValueTypeSerializer<?> provideSerializer(SerializationCustomization customization);
 }

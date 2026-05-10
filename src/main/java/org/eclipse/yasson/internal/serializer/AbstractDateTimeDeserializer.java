@@ -13,12 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -34,7 +33,7 @@ import java.util.Locale;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeDeserializer<T> {
+public abstract class AbstractDateTimeDeserializer<T> extends BaseValueTypeDeserializer<T> {
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
@@ -44,13 +43,13 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
      * @param clazz Class to create deserializer for.
      * @param customization Model customization.
      */
-    public AbstractDateTimeDeserializer(Class<T> clazz, Customization customization) {
+    public AbstractDateTimeDeserializer(Class<T> clazz, SerializationCustomization customization) {
         super(clazz, customization);
     }
 
     @Override
-    public T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        final JsonbDateFormatter formatter = getJsonbDateFormatter(unmarshaller.getJsonbContext());
+    public T deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        final JsonbDateTimeFormatter formatter = getJsonbDateFormatter(unmarshaller.getJsonbContext());
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return fromInstant(Instant.ofEpochMilli(Long.parseLong(jsonValue)));
         } else if (formatter.getDateTimeFormatter() != null) {
@@ -63,16 +62,16 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         }
         final boolean strictIJson = unmarshaller.getJsonbContext().getConfigProperties().isStrictIJson();
         if (strictIJson) {
-            return parseWithFormatterInternal(jsonValue, JsonbDateFormatter.IJSON_DATE_FORMATTER);
+            return parseWithFormatterInternal(jsonValue, JsonbDateTimeFormatter.IJSON_DATE_FORMATTER);
         }
         try {
             return parseDefault(jsonValue, unmarshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateTimeFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }
@@ -122,7 +121,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DATE_PARSE_ERROR, jsonValue, getPropertyType()), e);
         }
     }
 }

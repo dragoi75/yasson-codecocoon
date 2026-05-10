@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.text.DecimalFormat;
@@ -30,7 +30,7 @@ import java.util.Optional;
  * @author Roman Grigoriadi
  * @param <T> Type to deserialize.
  */
-public abstract class AbstractNumberDeserializer<T extends Number> extends AbstractValueTypeDeserializer<T> {
+public abstract class AbstractNumberDeserializer<T extends Number> extends BaseValueTypeDeserializer<T> {
 
     /**
      * Creates a new instance.
@@ -38,11 +38,11 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @param clazz         Class to work with.
      * @param customization Model customization.
      */
-    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
+    public AbstractNumberDeserializer(Class<T> clazz, SerializationCustomization customization) {
         super(clazz, customization);
     }
 
-    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContext jsonbContext) {
+    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbRuntimeContext jsonbContext) {
         if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
             return Optional.empty();
         }
@@ -55,7 +55,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
         try {
             return Optional.of(format.parse(jsonValue));
         } catch (ParseException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
         }
     }
 }

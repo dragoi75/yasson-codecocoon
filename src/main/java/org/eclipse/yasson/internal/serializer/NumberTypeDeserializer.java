@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -24,19 +24,19 @@ import java.math.BigDecimal;
  * 
  * @author David Kral
  */
-public class NumberTypeDeserializer extends AbstractValueTypeDeserializer<Number> {
+public class NumberTypeDeserializer extends BaseValueTypeDeserializer<Number> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public NumberTypeDeserializer(Customization customization) {
+    public NumberTypeDeserializer(SerializationCustomization customization) {
         super(Number.class, customization);
     }
 
     @Override
-    protected Number deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Number deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return new BigDecimal(jsonValue);
     }
 }

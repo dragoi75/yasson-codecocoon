@@ -25,9 +25,9 @@ public class ComponentBindings {
 
     private final SerializerBinding serializer;
 
-    private final DeserializerBinding deserializer;
+    private final JsonbDeserializerBinding deserializer;
 
-    private final AdapterBinding adapterInfo;
+    private final AdapterBindingDescriptor adapterInfo;
 
     /**
      * Construct empty bindings for a given type.
@@ -45,7 +45,7 @@ public class ComponentBindings {
      * @param deserializer Deserializer.
      * @param adapter Adapter.
      */
-    public ComponentBindings(Type bindingType, SerializerBinding serializer, DeserializerBinding deserializer, AdapterBinding adapter) {
+    public ComponentBindings(Type bindingType, SerializerBinding serializer, JsonbDeserializerBinding deserializer, AdapterBindingDescriptor adapter) {
         this.bindingType = bindingType;
         this.serializer = serializer;
         this.deserializer = deserializer;
@@ -73,7 +73,7 @@ public class ComponentBindings {
      * Deserializer if any.
      * @return deserializer
      */
-    public DeserializerBinding getDeserializer() {
+    public JsonbDeserializerBinding getDeserializer() {
         return deserializer;
     }
 
@@ -81,7 +81,7 @@ public class ComponentBindings {
      * Adapter info if any.
      * @return adapterInfo
      */
-    public AdapterBinding getAdapterInfo() {
+    public AdapterBindingDescriptor getAdapterInfo() {
         return adapterInfo;
     }
 

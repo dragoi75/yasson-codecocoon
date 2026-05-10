@@ -13,12 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbCursor;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
-import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.stream.JsonParser;
@@ -30,20 +29,20 @@ import java.util.NoSuchElementException;
  *
  * @author David Kral
  */
-public class BooleanTypeDeserializer extends AbstractValueTypeDeserializer<Boolean> {
+public class BooleanTypeDeserializer extends BaseValueTypeDeserializer<Boolean> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public BooleanTypeDeserializer(Customization customization) {
+    public BooleanTypeDeserializer(SerializationCustomization customization) {
         super(Boolean.class, customization);
     }
 
     @Override
     public Boolean deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonParser.Event event = ((JsonbParser) parser).moveToValue();
+        JsonParser.Event event = ((JsonbCursor) parser).moveToValue();
         switch (event) {
             case VALUE_TRUE:
                 return Boolean.TRUE;
@@ -52,7 +51,7 @@ public class BooleanTypeDeserializer extends AbstractValueTypeDeserializer<Boole
             case VALUE_STRING:
                 return Boolean.parseBoolean(parser.getString());
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + event));
+                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Unknown JSON value: " + event));
         }
     }
 

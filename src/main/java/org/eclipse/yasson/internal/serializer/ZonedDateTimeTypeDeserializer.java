@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -36,7 +36,7 @@ public class ZonedDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
      *
      * @param customization Model customization.
      */
-    public ZonedDateTimeTypeDeserializer(Customization customization) {
+    public ZonedDateTimeTypeDeserializer(SerializationCustomization customization) {
         super(ZonedDateTime.class, customization);
     }
 
@@ -46,7 +46,7 @@ public class ZonedDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
      */
     @Override
     protected ZonedDateTime fromInstant(Instant instant) {
-        log.warning(Messages.getMessage(MessageKeys.OFFSET_DATE_TIME_FROM_MILLIS, ZonedDateTime.class.getSimpleName(), UTC));
+        log.warning(ResourceBundleMessages.getMessage(MessageConstants.OFFSET_DATE_TIME_FROM_MILLIS, ZonedDateTime.class.getSimpleName(), UTC));
         return ZonedDateTime.ofInstant(instant, UTC);
     }
 

@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -34,19 +34,19 @@ public class BigDecimalTypeDeserializer extends AbstractNumberDeserializer<BigDe
      *
      * @param customization Model customization.
      */
-    public BigDecimalTypeDeserializer(Customization customization) {
+    public BigDecimalTypeDeserializer(SerializationCustomization customization) {
         super(BigDecimal.class, customization);
     }
 
     @Override
-    public BigDecimal deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public BigDecimal deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, false, unmarshaller.getJsonbContext())
                 .map(num -> new BigDecimal(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return new BigDecimal(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR,
                                 BigDecimal.class));
                     }
                 });

@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -24,19 +24,19 @@ import java.time.Duration;
  *
  * @author David Kral
  */
-public class DurationTypeDeserializer extends AbstractValueTypeDeserializer<Duration> {
+public class DurationTypeDeserializer extends BaseValueTypeDeserializer<Duration> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public DurationTypeDeserializer(Customization customization) {
+    public DurationTypeDeserializer(SerializationCustomization customization) {
         super(Duration.class, customization);
     }
 
     @Override
-    protected Duration deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Duration deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return Duration.parse(jsonValue);
     }
 }

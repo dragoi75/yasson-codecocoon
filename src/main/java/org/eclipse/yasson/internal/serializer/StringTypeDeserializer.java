@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
@@ -28,24 +28,24 @@ import java.lang.reflect.Type;
  * 
  * @author Roman Grigoriadi
  */
-public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String> {
+public class StringTypeDeserializer extends BaseValueTypeDeserializer<String> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public StringTypeDeserializer(Customization customization) {
+    public StringTypeDeserializer(SerializationCustomization customization) {
         super(String.class, customization);
     }
 
     @Override
-    protected String deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected String deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         if ((boolean) unmarshaller.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
             try {
                 String newString = new String(jsonValue.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(jsonValue)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

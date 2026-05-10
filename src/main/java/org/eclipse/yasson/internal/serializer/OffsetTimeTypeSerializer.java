@@ -13,9 +13,9 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.time.Instant;
@@ -36,13 +36,13 @@ public class OffsetTimeTypeSerializer extends AbstractDateTimeSerializer<OffsetT
      *
      * @param customization Model customization.
      */
-    public OffsetTimeTypeSerializer(Customization customization) {
+    public OffsetTimeTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 
     @Override
     protected Instant toInstant(OffsetTime value) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
     }
 
     @Override

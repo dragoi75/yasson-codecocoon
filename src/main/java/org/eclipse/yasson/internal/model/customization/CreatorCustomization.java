@@ -1,7 +1,7 @@
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
@@ -11,11 +11,11 @@ public class CreatorCustomization extends CustomizationBase {
 
     private JsonbNumberFormatter numberFormatter;
 
-    private JsonbDateFormatter dateFormatter;
+    private JsonbDateTimeFormatter dateFormatter;
 
     private PropertyModel propertyModel;
 
-    public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
+    public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateTimeFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
         this.dateFormatter = dateFormatter;
@@ -37,12 +37,12 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         if (dateFormatter != null) {
             return dateFormatter;
         } else if (propertyModel != null) {

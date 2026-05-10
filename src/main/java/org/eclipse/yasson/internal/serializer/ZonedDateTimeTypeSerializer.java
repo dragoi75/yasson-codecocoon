@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -33,7 +33,7 @@ public class ZonedDateTimeTypeSerializer extends AbstractDateTimeSerializer<Zone
      *
      * @param customization Model customization.
      */
-    public ZonedDateTimeTypeSerializer(Customization customization) {
+    public ZonedDateTimeTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +39,7 @@ public class CalendarTypeDeserializer extends AbstractDateTimeDeserializer<Calen
      *
      * @param customization Model customization.
      */
-    public CalendarTypeDeserializer(Customization customization) {
+    public CalendarTypeDeserializer(SerializationCustomization customization) {
         super(Calendar.class, customization);
         this.calendarTemplate = new GregorianCalendar();
         this.calendarTemplate.clear();

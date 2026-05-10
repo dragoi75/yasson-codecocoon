@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -32,25 +32,25 @@ import java.util.TimeZone;
  * 
  * @author David Kral
  */
-public class TimeZoneTypeDeserializer extends AbstractValueTypeDeserializer<TimeZone> {
+public class TimeZoneTypeDeserializer extends BaseValueTypeDeserializer<TimeZone> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public TimeZoneTypeDeserializer(Customization customization) {
+    public TimeZoneTypeDeserializer(SerializationCustomization customization) {
         super(TimeZone.class, customization);
     }
 
     @Override
-    protected TimeZone deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected TimeZone deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         try {
             final ZoneId zoneId = ZoneId.of(jsonValue);
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
             return new SimpleTimeZone(zonedDateTime.getOffset().getTotalSeconds() * 1000, zoneId.getId());
         } catch (ZoneRulesException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ZONE_PARSE_ERROR, jsonValue), e);
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.ZONE_PARSE_ERROR, jsonValue), e);
         }
     }
 

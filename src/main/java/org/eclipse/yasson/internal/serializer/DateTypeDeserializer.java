@@ -23,7 +23,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 /**
  * Deserializer for {@link Date} type.
@@ -40,7 +40,7 @@ public class DateTypeDeserializer extends AbstractDateTimeDeserializer<Date> {
 	 *
 	 * @param customization Model customization.
 	 */
-	public DateTypeDeserializer(Customization customization) {
+	public DateTypeDeserializer(SerializationCustomization customization) {
 		super(Date.class, customization);
 	}
 

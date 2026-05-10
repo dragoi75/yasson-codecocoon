@@ -13,13 +13,12 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingDescriptor;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
-import org.eclipse.yasson.internal.model.JsonbCreator;
 
 /**
- * Abstract base builder for ensuring immutable state of {@link Customization} objects.
+ * Abstract base builder for ensuring immutable state of {@link SerializationCustomization} objects.
  *
  * @author Roman Grigoriadi
  */
@@ -27,11 +26,11 @@ public abstract class CustomizationBuilder {
 
     private boolean nillable;
 
-    private AdapterBinding adapterInfo;
+    private AdapterBindingDescriptor adapterInfo;
 
     private SerializerBinding serializerBinding;
 
-    private DeserializerBinding deserializerBinding;
+    private JsonbDeserializerBinding deserializerBinding;
 
     private String[] propertyOrder;
 
@@ -58,7 +57,7 @@ public abstract class CustomizationBuilder {
      *
      * @return Adapter.
      */
-    public AdapterBinding getAdapterInfo() {
+    public AdapterBindingDescriptor getAdapterInfo() {
         return adapterInfo;
     }
 
@@ -67,7 +66,7 @@ public abstract class CustomizationBuilder {
      *
      * @param adapterInfo Adapter.
      */
-    public void setAdapterInfo(AdapterBinding adapterInfo) {
+    public void setAdapterInfo(AdapterBindingDescriptor adapterInfo) {
         this.adapterInfo = adapterInfo;
     }
 
@@ -94,7 +93,7 @@ public abstract class CustomizationBuilder {
      *
      * @return Deserializer.
      */
-    public DeserializerBinding getDeserializerBinding() {
+    public JsonbDeserializerBinding getDeserializerBinding() {
         return deserializerBinding;
     }
 
@@ -103,7 +102,7 @@ public abstract class CustomizationBuilder {
      *
      * @param deserializerBinding Deserializer.
      */
-    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
+    public void setDeserializerBinding(JsonbDeserializerBinding deserializerBinding) {
         this.deserializerBinding = deserializerBinding;
     }
 

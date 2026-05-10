@@ -13,9 +13,9 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.*;
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 import java.lang.reflect.Parameter;
@@ -41,7 +41,7 @@ public class CreatorModel {
      * @param parameter constructor parameter
      * @param context jsonb context
      */
-    public CreatorModel(String name, Parameter parameter, JsonbContext context) {
+    public CreatorModel(String name, Parameter parameter, JsonbRuntimeContext context) {
         this.name = name;
         this.type = parameter.getParameterizedType();
 
@@ -49,7 +49,7 @@ public class CreatorModel {
 
         JsonbAnnotatedElement<Parameter> annotated = new JsonbAnnotatedElement<>(parameter);
         JsonbNumberFormatter constructorNumberFormatter = context.getAnnotationIntrospector().getConstructorNumberFormatter(annotated);
-        JsonbDateFormatter constructorDateFormatter = context.getAnnotationIntrospector().getConstructorDateFormatter(annotated);
+        JsonbDateTimeFormatter constructorDateFormatter = context.getAnnotationIntrospector().getConstructorDateFormatter(annotated);
         final JsonbAnnotatedElement<Class<?>> clsElement = annotationIntrospector.collectAnnotations(parameter.getType());
         final CustomizationBuilder builder = new ClassCustomizationBuilder();
         builder.setAdapterInfo(annotationIntrospector.getAdapterBinding(clsElement));

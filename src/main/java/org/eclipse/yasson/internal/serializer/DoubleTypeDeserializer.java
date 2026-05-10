@@ -13,10 +13,10 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Type;
@@ -37,12 +37,12 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
      *
      * @param customization Model customization.
      */
-    public DoubleTypeDeserializer(Customization customization) {
+    public DoubleTypeDeserializer(SerializationCustomization customization) {
         super(Double.class, customization);
     }
 
     @Override
-    protected Double deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Double deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         switch (jsonValue) {
             case NAN:
                 return Double.NaN;
@@ -57,7 +57,7 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
                     try {
                         return Double.parseDouble(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR,
                                 Double.class));
                     }
                 });

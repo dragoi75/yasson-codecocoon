@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -32,7 +32,7 @@ public class OffsetDateTimeTypeSerializer extends AbstractDateTimeSerializer<Off
      *
      * @param customization Model customization.
      */
-    public OffsetDateTimeTypeSerializer(Customization customization) {
+    public OffsetDateTimeTypeSerializer(SerializationCustomization customization) {
         super(customization);
     }
 

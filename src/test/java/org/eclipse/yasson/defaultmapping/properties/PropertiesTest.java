@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.yasson.defaultmapping.properties;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class PropertiesTest {
     @Test
     public void testPropertiesWithoutLocale() throws IOException {
         String template = "Process class: {0} from json using converter: {1}";
-        String message = Messages.getMessage(MessageKeys.PROCESS_FROM_JSON);
+        String message = ResourceBundleMessages.getMessage(MessageConstants.PROCESS_FROM_JSON);
 
         assertEquals(template, message);
     }
@@ -40,9 +40,9 @@ public class PropertiesTest {
     @Test
     public void testPropertiesWithLocale() throws IOException {
         String templateCS = "Zpracovávám třídu: {0} do jsonu za použití convertoru: {1}";
-        String messageCS = Messages.getMessage(MessageKeys.PROCESS_TO_JSON, new Locale("cs"));
+        String messageCS = ResourceBundleMessages.getMessage(MessageConstants.PROCESS_TO_JSON, new Locale("cs"));
         String templateEN = "Process class: {0} to json using converter: {1}";
-        String messageEN = Messages.getMessage(MessageKeys.PROCESS_TO_JSON, new Locale("en"));
+        String messageEN = ResourceBundleMessages.getMessage(MessageConstants.PROCESS_TO_JSON, new Locale("en"));
 
         assertEquals(templateCS, messageCS);
         assertEquals(templateEN, messageEN);
@@ -51,7 +51,7 @@ public class PropertiesTest {
     @Test
     public void testPropertiesAttributeSetting() throws IOException {
         String template = "Zpracovávám třídu: Test do jsonu za použití convertoru: Test1";
-        String message = Messages.getMessage(MessageKeys.PROCESS_TO_JSON, new Locale("cs"), "Test", "Test1");
+        String message = ResourceBundleMessages.getMessage(MessageConstants.PROCESS_TO_JSON, new Locale("cs"), "Test", "Test1");
 
         assertEquals(template, message);
     }

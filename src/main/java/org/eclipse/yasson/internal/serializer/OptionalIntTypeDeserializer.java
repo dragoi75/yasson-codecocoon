@@ -13,11 +13,11 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbCursor;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
@@ -30,33 +30,33 @@ import java.util.OptionalInt;
  * 
  * @author David Kral
  */
-public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<OptionalInt> {
+public class OptionalIntTypeDeserializer extends BaseValueTypeDeserializer<OptionalInt> {
 
     /**
      * Creates a new instance.
      *
      * @param customization Model customization.
      */
-    public OptionalIntTypeDeserializer(Customization customization) {
+    public OptionalIntTypeDeserializer(SerializationCustomization customization) {
         super(OptionalInt.class, customization);
     }
 
     @Override
     public OptionalInt deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbParser) parser).moveToValue();
+        final JsonParser.Event next = ((JsonbCursor) parser).moveToValue();
         if (next == JsonParser.Event.VALUE_NULL) {
             return OptionalInt.empty();
         }
         final String value = parser.getString();
-        return deserialize(value, (Unmarshaller) ctx, rtType);
+        return deserializeValue(value, (JsonbUnmarshaller) ctx, rtType);
     }
 
     @Override
-    protected OptionalInt deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected OptionalInt deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         try {
             return OptionalInt.of(Integer.parseInt(jsonValue));
         } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
         }
     }
 
