@@ -10,17 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
-
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.ProcessingContext;
@@ -48,11 +45,10 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
     public Optional<?> deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         JsonbContextManager jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
         final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
-        if (lastEvent == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == lastEvent) {
             return Optional.empty();
         }
-        JsonbDeserializer deserializer = new DeserializerBuilder(jsonbContext).withType(optionalValueType)
-                .withWrapper(wrapper).withJsonValueType(lastEvent).build();
+        JsonbDeserializer deserializer = new DeserializerBuilder(jsonbContext).withType(optionalValueType).withWrapper(wrapper).withJsonValueType(lastEvent).build();
         return Optional.of(deserializer.deserialize(parser, ctx, optionalValueType));
     }
 

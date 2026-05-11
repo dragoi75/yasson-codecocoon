@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.BeanPropertyModel;
@@ -34,9 +33,7 @@ public class CreatorCustomizer extends CustomizationBase {
      * @param numericFormatter number formatter
      * @param temporalFormatter   date formatter
      */
-    public CreatorCustomizer(CustomizationBuilder customBuilder,
-                             JsonbNumberFormatter numericFormatter,
-                             JsonbDateFormatter temporalFormatter) {
+    public CreatorCustomizer(CustomizationBuilder customBuilder, JsonbNumberFormatter numericFormatter, JsonbDateFormatter temporalFormatter) {
         super(customBuilder);
         this.numericFormatter = numericFormatter;
         this.temporalFormatter = temporalFormatter;
@@ -49,10 +46,12 @@ public class CreatorCustomizer extends CustomizationBase {
 
     @Override
     public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (numericFormatter != null) {
+        if (null == numericFormatter) {
+            if (null != beanPropertyDescriptor) {
+                return beanPropertyDescriptor.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
             return numericFormatter;
-        } else if (beanPropertyDescriptor != null) {
-            return beanPropertyDescriptor.getCustomization().getDeserializeNumberFormatter();
         }
         return null;
     }
@@ -64,10 +63,12 @@ public class CreatorCustomizer extends CustomizationBase {
 
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (temporalFormatter != null) {
+        if (null == temporalFormatter) {
+            if (null != beanPropertyDescriptor) {
+                return beanPropertyDescriptor.getCustomization().getDeserializeDateFormatter();
+            }
+        } else {
             return temporalFormatter;
-        } else if (beanPropertyDescriptor != null) {
-            return beanPropertyDescriptor.getCustomization().getDeserializeDateFormatter();
         }
         return null;
     }

@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
@@ -53,10 +50,10 @@ public class JsonbInstantiator {
     @SuppressWarnings("unchecked")
     public <T> T invoke(Object[] creatorProfiles, Class<T> targetType) {
         try {
-            if (callableMember instanceof Constructor) {
-                return ((Constructor<T>) callableMember).newInstance(creatorProfiles);
-            } else {
+            if (!(callableMember instanceof Constructor)) {
                 return (T) ((Method) callableMember).invoke(targetType, creatorProfiles);
+            } else {
+                return ((Constructor<T>) callableMember).newInstance(creatorProfiles);
             }
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException errorCause) {
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, targetType), errorCause);
@@ -70,7 +67,7 @@ public class JsonbInstantiator {
      * @return True if found.
      */
     public boolean contains(String parameterName) {
-        return findParameterByName(parameterName) != null;
+        return null != findParameterByName(parameterName);
     }
 
     /**

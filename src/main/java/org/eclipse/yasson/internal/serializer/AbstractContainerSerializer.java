@@ -9,18 +9,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
-
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
@@ -118,10 +115,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @param <X>        type of object
      */
     @SuppressWarnings("unchecked")
-    protected <X> void serializerCaptor(JsonbSerializer<?> serializer,
-                                        X object,
-                                        JsonGenerator generator,
-                                        SerializationContext ctx) {
+    protected <X> void serializerCaptor(JsonbSerializer<?> serializer, X object, JsonGenerator generator, SerializationContext ctx) {
         ((JsonbSerializer<X>) serializer).serialize(object, generator, ctx);
     }
 
@@ -132,7 +126,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @return cached serializer or null
      */
     protected JsonbSerializer<?> getValueSerializer(Class<?> valueClass) {
-        if (valueSerializer != null && valueClass == this.valueClass) {
+        if (null != valueSerializer && this.valueClass == valueClass) {
             return valueSerializer;
         }
         return null;
@@ -159,35 +153,31 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @param ctx       context
      */
     protected void serializeItem(Object item, JsonGenerator generator, SerializationContext ctx) {
-        if (item == null) {
+        if (null == item) {
             generator.writeNull();
             return;
         }
         Class<?> itemClass = item.getClass();
         //Not null when generic type is present or previous item is of same type
         JsonbSerializer<?> serializer = getValueSerializer(itemClass);
-
         //Raw collections + lost generic information
-        if (serializer == null) {
+        if (null == serializer) {
             Type instanceValueType = getValueType(getRuntimeType());
             instanceValueType = instanceValueType.equals(Object.class) ? itemClass : instanceValueType;
-
             SerializerBuilder builder = new SerializerBuilder(((Marshaller) ctx).getJsonbContext());
             builder.withObjectClass(itemClass);
             builder.withWrapper(this);
             builder.withType(instanceValueType);
-
-            if (!StandardSerializerRegistry.isKnownType(itemClass)) {
-                //Need for class level annotations + user adapters/serializers bound to type
-                ClassDescriptor classModel = ((Marshaller) ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
-                builder.withCustomization(new ContainerCustomization(classModel.getClassCustomization()));
-            } else {
+            if (StandardSerializerRegistry.isKnownType(itemClass)) {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers
                 //to preserve collections and array null elements
                 builder.withCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
+            } else {
+                //Need for class level annotations + user adapters/serializers bound to type
+                ClassDescriptor classModel = ((Marshaller) ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
+                builder.withCustomization(new ContainerCustomization(classModel.getClassCustomization()));
             }
             serializer = builder.build();
-
             //Cache last used value serializer in case of next item is the same type.
             addValueSerializer(serializer, itemClass);
         }
@@ -202,8 +192,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      */
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils
-                    .resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
+            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

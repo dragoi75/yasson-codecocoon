@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
 import jakarta.json.bind.JsonbException;
 
 /**
@@ -60,7 +58,7 @@ public class PropertyDescriptor {
      * @return field if present
      */
     public Field getField() {
-        if (memberVariable == null) {
+        if (null == memberVariable) {
             return null;
         }
         return memberVariable.getElement();
@@ -79,7 +77,7 @@ public class PropertyDescriptor {
      * @return getter if present
      */
     public Method getGetter() {
-        if (accessorMethodMember == null) {
+        if (null == accessorMethodMember) {
             return null;
         }
         return accessorMethodMember.getElement();
@@ -98,7 +96,7 @@ public class PropertyDescriptor {
      * @return setter if present
      */
     public Method getSetter() {
-        if (mutatorMethodMember == null) {
+        if (null == mutatorMethodMember) {
             return null;
         }
         return mutatorMethodMember.getElement();
@@ -128,18 +126,22 @@ public class PropertyDescriptor {
      * @return type of a property
      */
     public Type getPropertyType() {
-        if (getField() != null) {
+        if (null == getField()) {
+            if (null == getGetter()) {
+                if (null != getSetter()) {
+                    return getSetterType();
+                }
+            } else {
+                return getGetterType();
+            }
+        } else {
             return getField().getGenericType();
-        } else if (getGetter() != null) {
-            return getGetterType();
-        } else if (getSetter() != null) {
-            return getSetterType();
         }
         throw new JsonbException("Empty property: " + label);
     }
 
     Type getGetterType() {
-        if (getGetter() != null) {
+        if (null != getGetter()) {
             return getGetter().getGenericReturnType();
         }
         return null;
@@ -147,7 +149,7 @@ public class PropertyDescriptor {
 
     Type getSetterType() {
         Type[] typeArguments = getSetter().getGenericParameterTypes();
-        if (typeArguments.length != 1) {
+        if (1 != typeArguments.length) {
             throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
         return typeArguments[0];
@@ -179,5 +181,4 @@ public class PropertyDescriptor {
     public JsonbAnnotatedMember<Method> getSetterElement() {
         return mutatorMethodMember;
     }
-
 }

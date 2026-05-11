@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.GenericArrayType;
@@ -20,13 +19,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.ComponentMatcher;
 import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.ReflectionUtils;
@@ -76,104 +73,102 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     public JsonbDeserializer<?> build() {
         withRuntimeType(resolveRuntimeType());
         Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
-
         Optional<AdapterBinding> adapterInfoOptional = Optional.empty();
         Customization customization = getCustomization();
-        if (customization == null
-                || customization instanceof ComponentBoundCustomization) {
+        if (null == customization || customization instanceof ComponentBoundCustomization) {
             ComponentBoundCustomization componentBoundCustomization = (ComponentBoundCustomization) customization;
-
             //First check if user deserializer is registered for such type
             final ComponentMatcher componentMatcher = getJsonbContext().getComponentMatcher();
-            Optional<DeserializerBinding<?>> userDeserializer =
-                    componentMatcher.getDeserializerBinding(getRuntimeType(), componentBoundCustomization);
+            Optional<DeserializerBinding<?>> userDeserializer = componentMatcher.getDeserializerBinding(getRuntimeType(), componentBoundCustomization);
             if (userDeserializer.isPresent()) {
                 return new UserDeserializerDeserializer<>(this, userDeserializer.get());
             }
-
             //Second user components is registered.
-            Optional<AdapterBinding> adapterBinding = componentMatcher
-                    .getDeserializeAdapterBinding(getRuntimeType(), componentBoundCustomization);
+            Optional<AdapterBinding> adapterBinding = componentMatcher.getDeserializeAdapterBinding(getRuntimeType(), componentBoundCustomization);
             if (adapterBinding.isPresent()) {
                 adapterInfoOptional = adapterBinding;
                 withRuntimeType(adapterInfoOptional.get().getToType());
-                withWrapper(new AdaptedObjectDeserializer<>(adapterInfoOptional.get(),
-                                                            (AbstractContainerDeserializer<?>) getWrapper()));
+                withWrapper(new AdaptedObjectDeserializer<>(adapterInfoOptional.get(), (AbstractContainerDeserializer<?>) getWrapper()));
                 rawType = ReflectionUtils.getRawType(getRuntimeType());
             }
         }
-
-        if (Optional.class == rawType) {
+        if (rawType == Optional.class) {
             return new OptionalObjectDeserializer(this);
         }
-
         //In case of Base64 json value would be string and recognition by JsonValueType would not work
         if (isByteArray(rawType)) {
             String strategy = getJsonbContext().getConfigProperties().getBinaryDataStrategy();
-            switch (strategy) {
-            case BinaryDataStrategy.BYTE:
-                return new ByteArrayDeserializer(this);
-            default:
-                return new ByteArrayBase64Deserializer(customization);
+            switch(strategy) {
+                case BinaryDataStrategy.BYTE:
+                    return new ByteArrayDeserializer(this);
+                default:
+                    return new ByteArrayBase64Deserializer(customization);
             }
         }
-
         if (isCharArray(rawType)) {
             return new CharArrayDeserializer(this);
         }
-
         //Third deserializer is a supported value type to deserialize to JSON_VALUE
         if (isJsonValueEvent(jsonEvent)) {
             final Optional<AbstractValueTypeDeserializer<?>> supportedTypeDeserializer = getSupportedTypeDeserializer(rawType);
             if (!supportedTypeDeserializer.isPresent()) {
-                if (jsonEvent == JsonParser.Event.VALUE_NULL) {
+                if (JsonParser.Event.VALUE_NULL == jsonEvent) {
                     return NullDeserializer.INSTANCE;
                 }
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
             }
             return wrapAdapted(adapterInfoOptional, supportedTypeDeserializer.get());
         }
-
         JsonbDeserializer<?> deserializer;
-        if (jsonEvent == JsonParser.Event.START_ARRAY) {
-            if (JsonValue.class.isAssignableFrom(rawType)) {
-                return wrapAdapted(adapterInfoOptional, new JsonArrayDeserializer(this));
-            } else if (Map.class.isAssignableFrom(rawType)) {
-                final JsonbDeserializer<?> mapDeserializer = new MapEntriesArrayDeserializer<>(this);
-                return wrapAdapted(adapterInfoOptional, mapDeserializer);
-            } else if (rawType.isArray() || getRuntimeType() instanceof GenericArrayType) {
-                deserializer = createArrayItem(rawType.getComponentType());
-                return wrapAdapted(adapterInfoOptional, deserializer);
-            } else if (Collection.class.isAssignableFrom(rawType)) {
-                deserializer = new CollectionDeserializer<>(this);
-                return wrapAdapted(adapterInfoOptional, deserializer);
-            } else {
-                throw new JsonbException("Can't deserialize JSON array into: " + getRuntimeType());
+        if (JsonParser.Event.START_ARRAY != jsonEvent) {
+            if (JsonParser.Event.START_OBJECT == jsonEvent) {
+                if (!JsonValue.class.isAssignableFrom(rawType)) {
+                    if (!Map.class.isAssignableFrom(rawType)) {
+                        if (!rawType.isInterface()) {
+                            if (adapterInfoOptional.isPresent()) {
+                                withRuntimeType(adapterInfoOptional.get().getToType());
+                                rawType = ReflectionUtils.getRawType(getRuntimeType());
+                            }
+                            withClassModel(getClassModel(rawType));
+                            deserializer = new ObjectDeserializer<>(this);
+                            return wrapAdapted(adapterInfoOptional, deserializer);
+                        } else {
+                            Class<?> mappedType = getInterfaceMappedType(rawType);
+                            if (null == mappedType) {
+                                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
+                            }
+                            withRuntimeType(mappedType);
+                            withClassModel(getClassModel(mappedType));
+                            return new ObjectDeserializer<>(this);
+                        }
+                    } else {
+                        final JsonbDeserializer<?> mapDeserializer = new MapDeserializer<>(this);
+                        return wrapAdapted(adapterInfoOptional, mapDeserializer);
+                    }
+                } else {
+                    return wrapAdapted(adapterInfoOptional, new JsonObjectDeserializer(this));
+                }
             }
-        } else if (jsonEvent == JsonParser.Event.START_OBJECT) {
-            if (JsonValue.class.isAssignableFrom(rawType)) {
-                return wrapAdapted(adapterInfoOptional, new JsonObjectDeserializer(this));
-            } else if (Map.class.isAssignableFrom(rawType)) {
-                final JsonbDeserializer<?> mapDeserializer = new MapDeserializer<>(this);
-                return wrapAdapted(adapterInfoOptional, mapDeserializer);
-            } else if (rawType.isInterface()) {
-                Class<?> mappedType = getInterfaceMappedType(rawType);
-                if (mappedType == null) {
-                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
+        } else {
+            if (!JsonValue.class.isAssignableFrom(rawType)) {
+                if (!Map.class.isAssignableFrom(rawType)) {
+                    if (!rawType.isArray() && !(getRuntimeType() instanceof GenericArrayType)) {
+                        if (!Collection.class.isAssignableFrom(rawType)) {
+                            throw new JsonbException("Can't deserialize JSON array into: " + getRuntimeType());
+                        } else {
+                            deserializer = new CollectionDeserializer<>(this);
+                            return wrapAdapted(adapterInfoOptional, deserializer);
+                        }
+                    } else {
+                        deserializer = createArrayItem(rawType.getComponentType());
+                        return wrapAdapted(adapterInfoOptional, deserializer);
+                    }
+                } else {
+                    final JsonbDeserializer<?> mapDeserializer = new MapEntriesArrayDeserializer<>(this);
+                    return wrapAdapted(adapterInfoOptional, mapDeserializer);
                 }
-                withRuntimeType(mappedType);
-                withClassModel(getClassModel(mappedType));
-                return new ObjectDeserializer<>(this);
             } else {
-                if (adapterInfoOptional.isPresent()) {
-                    withRuntimeType(adapterInfoOptional.get().getToType());
-                    rawType = ReflectionUtils.getRawType(getRuntimeType());
-                }
-
-                withClassModel(getClassModel(rawType));
-
-                deserializer = new ObjectDeserializer<>(this);
-                return wrapAdapted(adapterInfoOptional, deserializer);
+                return wrapAdapted(adapterInfoOptional, new JsonArrayDeserializer(this));
             }
         }
         throw new JsonbException("unresolved type for deserialization: " + getRuntimeType());
@@ -186,24 +181,22 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      * @return True if one of value events.
      */
     public static boolean isJsonValueEvent(JsonParser.Event event) {
-        switch (event) {
-        case VALUE_NULL:
-        case VALUE_FALSE:
-        case VALUE_TRUE:
-        case VALUE_NUMBER:
-        case VALUE_STRING:
-            return true;
-        default:
-            return false;
+        switch(event) {
+            case VALUE_NULL:
+            case VALUE_FALSE:
+            case VALUE_TRUE:
+            case VALUE_NUMBER:
+            case VALUE_STRING:
+                return true;
+            default:
+                return false;
         }
     }
 
     private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderAdapter> supportedTypeDeserializerOptional = StandardSerializerRegistry
-                .locateValueSerializerProvider(rawType);
+        final Optional<? extends SerializerProviderAdapter> supportedTypeDeserializerOptional = StandardSerializerRegistry.locateValueSerializerProvider(rawType);
         if (supportedTypeDeserializerOptional.isPresent()) {
-            return Optional.of(supportedTypeDeserializerOptional.get().getDeserializerProvider()
-                                       .provideDeserializer(getCustomization()));
+            return Optional.of(supportedTypeDeserializerOptional.get().getDeserializerProvider().provideDeserializer(getCustomization()));
         }
         return Optional.empty();
     }
@@ -222,26 +215,25 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     private Type resolveRuntimeType() {
-        Type result = ReflectionUtils.resolveType(getWrapper(), getGenericType() != null ? getGenericType() : getRuntimeType());
+        Type result = ReflectionUtils.resolveType(getWrapper(), null != getGenericType() ? getGenericType() : getRuntimeType());
         //Try to infer best from JSON event.
-        if (result == Object.class) {
-            switch (jsonEvent) {
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                return Boolean.class;
-            case VALUE_NUMBER:
-                return BigDecimal.class;
-            case VALUE_STRING:
-                return String.class;
-            case START_ARRAY:
-                return ArrayList.class;
-            case START_OBJECT:
-                return getJsonbContext().getConfigProperties().getDefaultMapImplType();
-            case VALUE_NULL:
-                return Object.class;
-            default:
-                throw new IllegalStateException("Can't infer deserialization type type: " + jsonEvent);
-
+        if (Object.class == result) {
+            switch(jsonEvent) {
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    return Boolean.class;
+                case VALUE_NUMBER:
+                    return BigDecimal.class;
+                case VALUE_STRING:
+                    return String.class;
+                case START_ARRAY:
+                    return ArrayList.class;
+                case START_OBJECT:
+                    return getJsonbContext().getConfigProperties().getDefaultMapImplType();
+                case VALUE_NULL:
+                    return Object.class;
+                default:
+                    throw new IllegalStateException("Can't infer deserialization type type: " + jsonEvent);
             }
         }
         return result;
@@ -255,14 +247,12 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
                 implementationClass = ((PropertyCustomization) getCustomization()).getImplementationClass();
             }
             //JsonbConfig
-            if (implementationClass == null) {
+            if (null == implementationClass) {
                 implementationClass = getJsonbContext().getConfigProperties().getUserTypeMapping().get(interfaceType);
             }
-            if (implementationClass != null) {
+            if (null != implementationClass) {
                 if (!interfaceType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.IMPL_CLASS_INCOMPATIBLE,
-                                                                 implementationClass,
-                                                                 interfaceType));
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
                 }
                 return implementationClass;
             }
@@ -275,30 +265,42 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      * till parser ends parsing.
      */
     private JsonbDeserializer<?> createArrayItem(Class<?> componentType) {
-        if (componentType == byte.class) {
-            return new ByteArrayDeserializer(this);
-        } else if (componentType == short.class) {
-            return new ShortArrayDeserializer(this);
-        } else if (componentType == int.class) {
-            return new IntArrayDeserializer(this);
-        } else if (componentType == long.class) {
-            return new LongArrayDeserializer(this);
-        } else if (componentType == float.class) {
-            return new FloatArrayDeserializer(this);
-        } else if (componentType == double.class) {
-            return new DoubleArrayDeserializer(this);
-        } else if (componentType == boolean.class) {
-            return new BooleanArrayDeserializer(this);
+        if (byte.class != componentType) {
+            if (short.class != componentType) {
+                if (int.class != componentType) {
+                    if (long.class != componentType) {
+                        if (float.class != componentType) {
+                            if (double.class != componentType) {
+                                if (boolean.class != componentType) {
+                                    return new ObjectArrayDeserializer(this);
+                                } else {
+                                    return new BooleanArrayDeserializer(this);
+                                }
+                            } else {
+                                return new DoubleArrayDeserializer(this);
+                            }
+                        } else {
+                            return new FloatArrayDeserializer(this);
+                        }
+                    } else {
+                        return new LongArrayDeserializer(this);
+                    }
+                } else {
+                    return new IntArrayDeserializer(this);
+                }
+            } else {
+                return new ShortArrayDeserializer(this);
+            }
         } else {
-            return new ObjectArrayDeserializer(this);
+            return new ByteArrayDeserializer(this);
         }
     }
 
     private boolean isByteArray(Class<?> rawType) {
-        return rawType.isArray() && rawType.getComponentType() == Byte.TYPE;
+        return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
     }
 
     private boolean isCharArray(Class<?> rawType) {
-        return rawType.isArray() && rawType.getComponentType() == Character.TYPE;
+        return rawType.isArray() && Character.TYPE == rawType.getComponentType();
     }
 }

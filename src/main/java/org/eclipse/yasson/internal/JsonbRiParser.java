@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.math.BigDecimal;
@@ -19,14 +18,12 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
@@ -39,9 +36,13 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
      * State holder for current json structure level.
      */
     public static class LevelContext {
+
         private final LevelContext parent;
+
         private JsonParser.Event lastEvent;
+
         private String lastKeyName;
+
         private boolean parsed;
 
         /**
@@ -140,22 +141,22 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     public JsonParser.Event next() {
         final JsonParser.Event next = jsonParser.next();
         level.peek().setLastEvent(next);
-        switch (next) {
-        case START_ARRAY:
-        case START_OBJECT:
-            final LevelContext newLevel = new LevelContext(level.peek());
-            newLevel.setLastEvent(next);
-            level.push(newLevel);
-            break;
-        case END_ARRAY:
-        case END_OBJECT:
-            level.pop().finish();
-            break;
-        case KEY_NAME:
-            getCurrentLevel().setLastKeyName(jsonParser.getString());
-            break;
-        default:
-            break;
+        switch(next) {
+            case START_ARRAY:
+            case START_OBJECT:
+                final LevelContext newLevel = new LevelContext(level.peek());
+                newLevel.setLastEvent(next);
+                level.push(newLevel);
+                break;
+            case END_ARRAY:
+            case END_OBJECT:
+                level.pop().finish();
+                break;
+            case KEY_NAME:
+                getCurrentLevel().setLastKeyName(jsonParser.getString());
+                break;
+            default:
+                break;
         }
         return next;
     }
@@ -187,17 +188,14 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
 
     @Override
     public void moveTo(JsonParser.Event required) {
-        if (!level.isEmpty() && level.peek().getLastEvent() == required) {
+        if (!level.isEmpty() && required == level.peek().getLastEvent()) {
             return;
         }
-
         final Event next = next();
-        if (next == required) {
+        if (required == next) {
             return;
         }
-
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                     "Event " + required + " not found." + getLastDataMsg()));
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + required + " not found." + getLastDataMsg()));
     }
 
     @Override
@@ -214,20 +212,16 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
         if (!level.isEmpty() && contains(events, level.peek().getLastEvent())) {
             return level.peek().getLastEvent();
         }
-
         final Event next = next();
         if (contains(events, next)) {
             return next;
         }
-
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                     "Parser event [" + Arrays
-                                                             .toString(events) + "] not found." + getLastDataMsg()));
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(events) + "] not found." + getLastDataMsg()));
     }
 
     private boolean contains(Event[] events, Event candidate) {
         for (Event event : events) {
-            if (event == candidate) {
+            if (candidate == event) {
                 return true;
             }
         }
@@ -237,8 +231,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     private String getLastDataMsg() {
         StringBuilder builder = new StringBuilder();
         final LevelContext currentLevel = getCurrentLevel();
-        builder.append(" Last data: [").append("EVENT: ").append(currentLevel.getLastEvent()).append(" KEY_NAME: ")
-                .append(currentLevel.getLastKeyName()).append("]");
+        builder.append(" Last data: [").append("EVENT: ").append(currentLevel.getLastEvent()).append(" KEY_NAME: ").append(currentLevel.getLastKeyName()).append("]");
         return builder.toString();
     }
 
@@ -250,15 +243,15 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     @Override
     public void skipJsonStructure() {
         final LevelContext currentLevel = level.peek();
-        switch (currentLevel.getLastEvent()) {
-        case START_ARRAY:
-        case START_OBJECT:
-            while (!currentLevel.isParsed()) {
-                next();
-            }
-            return;
-        default:
-            return;
+        switch(currentLevel.getLastEvent()) {
+            case START_ARRAY:
+            case START_OBJECT:
+                while (!currentLevel.isParsed()) {
+                    next();
+                }
+                return;
+            default:
+                return;
         }
     }
 
@@ -271,10 +264,10 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
 
     @Override
     public JsonValue getValue() {
-        if (level.isEmpty() || getLastEvent() == null) {
+        if (level.isEmpty() || null == getLastEvent()) {
             return jsonParser.getValue();
         }
-        switch (getLastEvent()) {
+        switch(getLastEvent()) {
             case START_ARRAY:
                 return getArray();
             case START_OBJECT:

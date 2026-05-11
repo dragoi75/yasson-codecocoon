@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.time.Instant;
@@ -24,13 +23,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import jakarta.json.bind.JsonbException;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
@@ -43,6 +39,7 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
     private static final LocalTime MIDNIGHT_LOCAL_TIME = LocalTime.parse("00:00:00");
 
     private final Calendar calendarPrototype;
+
     private final DatatypeFactory typeFactory;
 
     /**
@@ -71,9 +68,7 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
 
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonStr, Locale region) {
-        DateTimeFormatter dateFormat = jsonStr.contains("T")
-                ? DateTimeFormatter.ISO_DATE_TIME
-                : DateTimeFormatter.ISO_DATE;
+        DateTimeFormatter dateFormat = jsonStr.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
         return parseWithFormatter(jsonStr, dateFormat.withLocale(region));
     }
 
@@ -82,10 +77,10 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
         final TemporalAccessor temporalResult = dateFormat.parse(jsonStr);
         LocalTime timeOfDay = temporalResult.query(TemporalQueries.localTime());
         ZoneId zoneId = temporalResult.query(TemporalQueries.zone());
-        if (zoneId == null) {
+        if (null == zoneId) {
             zoneId = UTC;
         }
-        if (timeOfDay == null) {
+        if (null == timeOfDay) {
             timeOfDay = MIDNIGHT_LOCAL_TIME;
         }
         ZonedDateTime zonedDateTime = LocalDate.from(temporalResult).atTime(timeOfDay).atZone(zoneId);

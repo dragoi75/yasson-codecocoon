@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Optional;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.JsonbContextManager;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
@@ -50,14 +47,12 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @return formatted number value
      */
     protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContextManager jsonbContext) {
-        if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
+        if (null == getCustomization() || null == getCustomization().getDeserializeNumberFormatter()) {
             return Optional.empty();
         }
-
         final JsonbNumberFormatter numberFormat = getCustomization().getDeserializeNumberFormatter();
         //consider synchronizing on format instance or per thread cache.
-        final NumberFormat format = NumberFormat
-                .getInstance(jsonbContext.getConfigProperties().getLocale(numberFormat.getLocale()));
+        final NumberFormat format = NumberFormat.getInstance(jsonbContext.getConfigProperties().getLocale(numberFormat.getLocale()));
         ((DecimalFormat) format).applyPattern(numberFormat.getFormat());
         format.setParseIntegerOnly(integerOnly);
         try {

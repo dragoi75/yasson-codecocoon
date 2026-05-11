@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.annotation.Annotation;
@@ -24,10 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
-
 import org.eclipse.yasson.internal.model.BeanPropertyModel;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.CreatorProfile;
@@ -61,31 +58,22 @@ class ClassIntrospector {
         final Map<String, PropertyDescriptor> propertyMap = new HashMap<>();
         parseDeclaredFields(annotatedClassMember, propertyMap);
         analyzeClassAndInterfaceMethods(annotatedClassMember, propertyMap);
-
         //add sorted properties from parent, if they are not overridden in current class
         //parent properties are by default first by alphabet, than properties from a subclass
         final List<BeanPropertyModel> parentPropertyModels = getSortedParentProperties(classDescriptor, annotatedClassMember, propertyMap);
-
-        List<BeanPropertyModel> propertyModelList = propertyMap.values().stream()
-                .map(propEntry -> new BeanPropertyModel(classDescriptor, propEntry, jsonbManager))
-                .collect(Collectors.toList());
-
+        List<BeanPropertyModel> propertyModelList = propertyMap.values().stream().map(propEntry -> new BeanPropertyModel(classDescriptor, propEntry, jsonbManager)).collect(Collectors.toList());
         //check for collision on same property read name
         List<BeanPropertyModel> mergedUnsortedList = new ArrayList<>(parentPropertyModels.size() + propertyModelList.size());
         mergedUnsortedList.addAll(parentPropertyModels);
         mergedUnsortedList.addAll(propertyModelList);
         detectPropertyNameClashes(mergedUnsortedList, classDescriptor.getType());
-
         mergeProperties(propertyModelList);
-
         List<BeanPropertyModel> sortedModelList = new ArrayList<>(parentPropertyModels.size() + propertyModelList.size());
         sortedModelList.addAll(parentPropertyModels);
-        sortedModelList.addAll(jsonbManager.getConfigProperties().getPropertyOrdering()
-                                            .sortProperties(propertyModelList, classDescriptor));
-
+        sortedModelList.addAll(jsonbManager.getConfigProperties().getPropertyOrdering().sortProperties(propertyModelList, classDescriptor));
         //reference property to creator parameter by name to merge configuration in runtime
         JsonbInstantiator instantiator = classDescriptor.getClassCustomization().getCreator();
-        if (instantiator != null) {
+        if (null != instantiator) {
             sortedModelList.forEach(propModel -> {
                 for (CreatorProfile creatorProfile : instantiator.getParams()) {
                     if (creatorProfile.getName().equals(propModel.getPropertyName())) {
@@ -94,27 +82,28 @@ class ClassIntrospector {
                 }
             });
         }
-
         classDescriptor.setProperties(sortedModelList);
-
     }
 
     private static void mergeProperties(List<BeanPropertyModel> mergedUnsortedList) {
         BeanPropertyModel[] clonedArray = mergedUnsortedList.toArray(new BeanPropertyModel[mergedUnsortedList.size()]);
-        for (int idx = 0; idx < clonedArray.length; idx++) {
-            for (int jdx = idx + 1; jdx < clonedArray.length; jdx++) {
+        int idx = 0;
+        while (clonedArray.length > idx) {
+            int jdx = idx + 1;
+            while (clonedArray.length > jdx) {
                 if (clonedArray[idx].equals(clonedArray[jdx])) {
                     // Need to merge two properties
                     mergedUnsortedList.remove(clonedArray[idx]);
                     mergedUnsortedList.remove(clonedArray[jdx]);
                     mergedUnsortedList.add(new BeanPropertyModel(clonedArray[idx], clonedArray[jdx]));
                 }
+                jdx += 1;
             }
+            idx += 1;
         }
     }
 
-    private void analyzeClassAndInterfaceMethods(JsonbAnnotatedMember<Class<?>> annotatedClassMember,
-                                                 Map<String, PropertyDescriptor> propertyMap) {
+    private void analyzeClassAndInterfaceMethods(JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
         Class<?> actualClass = annotatedClassMember.getElement();
         parseDeclaredMethods(actualClass, annotatedClassMember, propertyMap);
         for (Class<?> iface : jsonbManager.getAnnotationIntrospector().collectAllInterfaces(actualClass)) {
@@ -122,9 +111,7 @@ class ClassIntrospector {
         }
     }
 
-    private void parseInterfaceMethodAnnotations(Class<?> iface,
-                                                 JsonbAnnotatedMember<Class<?>> annotatedClassMember,
-                                                 Map<String, PropertyDescriptor> propertyMap) {
+    private void parseInterfaceMethodAnnotations(Class<?> iface, JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
         Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) iface::getDeclaredMethods);
         for (Method m : methodsArray) {
             final String name = m.getName();
@@ -132,60 +119,50 @@ class ClassIntrospector {
                 continue;
             }
             String propName = methodToPropertyName(name);
-
             PropertyDescriptor propEntry = propertyMap.get(propName);
-
             if (m.isDefault()) {
                 // Interface provides default implementation
-                if (propEntry == null) {
-                    // the property does not yet exists : create it from scratch
-                    propEntry = registerPropertyMethod(propName, m, annotatedClassMember, propertyMap);
-                } else {
+                if (null != propEntry) {
                     // property already exists, take care not overriding already parsed implementation
-                    if (isSetter(m)) {
-                        if (propEntry.getSetter() == null) {
-                            propEntry.setSetter(m);
-                        }
-                    } else {
-                        if (propEntry.getGetter() == null) {
+                    if (!isSetter(m)) {
+                        if (null == propEntry.getGetter()) {
                             propEntry.setGetter(m);
                         }
+                    } else {
+                        if (null == propEntry.getSetter()) {
+                            propEntry.setSetter(m);
+                        }
                     }
+                } else {
+                    // the property does not yet exists : create it from scratch
+                    propEntry = registerPropertyMethod(propName, m, annotatedClassMember, propertyMap);
                 }
             }
-
-            if (propEntry == null) {
+            if (null == propEntry) {
                 //May happen for classes which both extend a class with some method and implement interface with same method.
                 continue;
             }
-            JsonbAnnotatedMember<Method> annotatedMember = isGetter(m)
-                    ? propEntry.getGetterElement() : propEntry.getSetterElement();
+            JsonbAnnotatedMember<Method> annotatedMember = isGetter(m) ? propEntry.getGetterElement() : propEntry.getSetterElement();
             //Only push iface annotations if not overridden on impl classes
             for (Annotation annotationInstance : m.getDeclaredAnnotations()) {
-                if (annotatedMember.getAnnotation(annotationInstance.annotationType()) == null) {
+                if (null == annotatedMember.getAnnotation(annotationInstance.annotationType())) {
                     annotatedMember.addAnnotation(annotationInstance);
                 }
             }
         }
     }
 
-    private PropertyDescriptor registerPropertyMethod(String propName,
-                                                      Method m,
-                                                      JsonbAnnotatedMember<Class<?>> annotatedClassMember,
-                                                      Map<String, PropertyDescriptor> propertyMap) {
+    private PropertyDescriptor registerPropertyMethod(String propName, Method m, JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
         PropertyDescriptor propEntry = propertyMap.computeIfAbsent(propName, num -> new PropertyDescriptor(num, annotatedClassMember));
-        if (isSetter(m)) {
-            propEntry.setSetter(m);
-        } else {
+        if (!isSetter(m)) {
             propEntry.setGetter(m);
+        } else {
+            propEntry.setSetter(m);
         }
-
         return propEntry;
     }
 
-    private void parseDeclaredMethods(Class<?> targetType,
-                                      JsonbAnnotatedMember<Class<?>> annotatedClassMember,
-                                      Map<String, PropertyDescriptor> propertyMap) {
+    private void parseDeclaredMethods(Class<?> targetType, JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
         Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) targetType::getDeclaredMethods);
         for (Method m : methodsArray) {
             String identifier = m.getName();
@@ -194,7 +171,6 @@ class ClassIntrospector {
                 continue;
             }
             final String propName = methodToPropertyName(identifier);
-
             registerPropertyMethod(propName, m, annotatedClassMember, propertyMap);
         }
     }
@@ -209,24 +185,22 @@ class ClassIntrospector {
         }
         // Groovy objects will have public groovy.lang.MetaClass X.getMetaClass()
         // which causes an infinite loop in serialization
-        if (methodRef.getName().equals("getMetaClass")
-                && methodRef.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
+        if (methodRef.getName().equals("getMetaClass") && methodRef.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
             return true;
         }
         // WELD proxy objects will have 'public org.jboss.weld
-        if (methodRef.getName().equals("getMetadata")
-                && methodRef.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
+        if (methodRef.getName().equals("getMetadata") && methodRef.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
             return true;
         }
         return false;
     }
 
     private static boolean isGetter(Method methodRef) {
-        return (methodRef.getName().startsWith(GETTER_PREFIX) || methodRef.getName().startsWith(BOOLEAN_GETTER_PREFIX)) && methodRef.getParameterCount() == 0;
+        return (methodRef.getName().startsWith(GETTER_PREFIX) || methodRef.getName().startsWith(BOOLEAN_GETTER_PREFIX)) && 0 == methodRef.getParameterCount();
     }
 
     private static boolean isSetter(Method methodRef) {
-        return methodRef.getName().startsWith(SETTER_PREFIX) && methodRef.getParameterCount() == 1;
+        return methodRef.getName().startsWith(SETTER_PREFIX) && 1 == methodRef.getParameterCount();
     }
 
     private static String methodToPropertyName(String identifier) {
@@ -235,13 +209,11 @@ class ClassIntrospector {
 
     private static String decapitalize(String identifier) {
         Objects.requireNonNull(identifier);
-        if (identifier.length() == 0) {
+        if (0 == identifier.length()) {
             //methods named get() or set()
             return identifier;
         }
-        if (identifier.length() > 1
-                && Character.isUpperCase(identifier.charAt(1))
-                && Character.isUpperCase(identifier.charAt(0))) {
+        if (1 < identifier.length() && Character.isUpperCase(identifier.charAt(1)) && Character.isUpperCase(identifier.charAt(0))) {
             return identifier;
         }
         char[] charBuffer = identifier.toCharArray();
@@ -254,8 +226,7 @@ class ClassIntrospector {
     }
 
     private static void parseDeclaredFields(JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
-        Field[] fieldsArray = AccessController.doPrivileged(
-                (PrivilegedAction<Field[]>) () -> annotatedClassMember.getElement().getDeclaredFields());
+        Field[] fieldsArray = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> annotatedClassMember.getElement().getDeclaredFields());
         for (Field member : fieldsArray) {
             final String identifier = member.getName();
             if (member.isSynthetic()) {
@@ -271,15 +242,10 @@ class ClassIntrospector {
         final List<BeanPropertyModel> verifiedList = new ArrayList<>();
         for (BeanPropertyModel gatheredModel : propertyModels) {
             for (BeanPropertyModel existingModel : verifiedList) {
-                if ((existingModel.getReadName().equals(gatheredModel.getReadName())
-                        && existingModel.isReadable() //
-                        && gatheredModel.isReadable())
-                        || (existingModel.getWriteName().equals(gatheredModel.getWriteName())
-                                && existingModel.isWritable() //
-                                && gatheredModel.isWritable())) {
-                    throw new JsonbException(
-                            LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, existingModel.getPropertyName(),
-                                    gatheredModel.getPropertyName(), targetType.getName()));
+                if ((//
+                existingModel.getReadName().equals(gatheredModel.getReadName()) && existingModel.isReadable() && gatheredModel.isReadable()) || (//
+                existingModel.getWriteName().equals(gatheredModel.getWriteName()) && existingModel.isWritable() && gatheredModel.isWritable())) {
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, existingModel.getPropertyName(), gatheredModel.getPropertyName(), targetType.getName()));
                 }
             }
             verifiedList.add(gatheredModel);
@@ -296,29 +262,25 @@ class ClassIntrospector {
      * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private List<BeanPropertyModel> getSortedParentProperties(ClassDescriptor classDescriptor,
-                                                              JsonbAnnotatedMember<Class<?>> annotatedClassMember,
-                                                              Map<String, PropertyDescriptor> propertyMap) {
+    private List<BeanPropertyModel> getSortedParentProperties(ClassDescriptor classDescriptor, JsonbAnnotatedMember<Class<?>> annotatedClassMember, Map<String, PropertyDescriptor> propertyMap) {
         List<BeanPropertyModel> orderedProperties = new ArrayList<>();
         //Pull properties from parent
-        if (classDescriptor.getParentClassModel() != null) {
+        if (null != classDescriptor.getParentClassModel()) {
             for (BeanPropertyModel parentModel : classDescriptor.getParentClassModel().getSortedProperties()) {
                 final PropertyDescriptor activeDescriptor = propertyMap.get(parentModel.getPropertyName());
                 //don't replace overridden properties
-                if (activeDescriptor == null) {
-                    orderedProperties.add(parentModel);
-                } else {
+                if (null != activeDescriptor) {
                     //merge
                     final PropertyDescriptor combinedDescriptor = mergePropertyDescriptor(activeDescriptor, parentModel, annotatedClassMember);
                     PropertyVisibilityStrategy visibilityStrategy = classDescriptor.getClassCustomization().getPropertyVisibilityStrategy();
-                    
-                    if (BeanPropertyModel.isPropertyReadable(activeDescriptor.getField(), activeDescriptor.getGetter(), visibilityStrategy)) {
-                        propertyMap.replace(activeDescriptor.getName(), combinedDescriptor);
-                    } else {
+                    if (!BeanPropertyModel.isPropertyReadable(activeDescriptor.getField(), activeDescriptor.getGetter(), visibilityStrategy)) {
                         orderedProperties.add(new BeanPropertyModel(classDescriptor, combinedDescriptor, jsonbManager));
                         propertyMap.remove(activeDescriptor.getName());
+                    } else {
+                        propertyMap.replace(activeDescriptor.getName(), combinedDescriptor);
                     }
-
+                } else {
+                    orderedProperties.add(parentModel);
                 }
             }
         }
@@ -346,28 +308,21 @@ class ClassIntrospector {
      * @return effective method to register as getter or setter
      */
     private static Method chooseMostSpecificNonDefaultMethod(Method activeDescriptor, Method superMethod) {
-        return (
-                activeDescriptor != null ? (
-                        superMethod != null && activeDescriptor.isDefault()
-                                && !superMethod.isDefault() ? superMethod : activeDescriptor) : superMethod);
+        return (null != activeDescriptor ? (null != superMethod && activeDescriptor.isDefault() && !superMethod.isDefault() ? superMethod : activeDescriptor) : superMethod);
     }
 
     private static PropertyDescriptor mergePropertyDescriptor(PropertyDescriptor activeDescriptor, BeanPropertyModel parentModel, JsonbAnnotatedMember<Class<?>> annotatedClassMember) {
-        Field member = activeDescriptor.getField() != null
-                ? activeDescriptor.getField() : parentModel.getField();
-        Method accessorMethod = chooseMostSpecificNonDefaultMethod(activeDescriptor.getGetter(),
-                                                           parentModel.getGetter());
-        Method mutatorMethod = chooseMostSpecificNonDefaultMethod(activeDescriptor.getSetter(),
-                                                           parentModel.getSetter());
-
+        Field member = null != activeDescriptor.getField() ? activeDescriptor.getField() : parentModel.getField();
+        Method accessorMethod = chooseMostSpecificNonDefaultMethod(activeDescriptor.getGetter(), parentModel.getGetter());
+        Method mutatorMethod = chooseMostSpecificNonDefaultMethod(activeDescriptor.getSetter(), parentModel.getSetter());
         PropertyDescriptor combinedDescriptor = new PropertyDescriptor(parentModel.getPropertyName(), annotatedClassMember);
-        if (member != null) {
+        if (null != member) {
             combinedDescriptor.setField(member);
         }
-        if (accessorMethod != null) {
+        if (null != accessorMethod) {
             combinedDescriptor.setGetter(accessorMethod);
         }
-        if (mutatorMethod != null) {
+        if (null != mutatorMethod) {
             combinedDescriptor.setSetter(mutatorMethod);
         }
         return combinedDescriptor;

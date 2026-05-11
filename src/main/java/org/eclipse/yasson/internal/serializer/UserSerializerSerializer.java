@@ -9,14 +9,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
@@ -49,10 +47,10 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         ProcessingContext context = (Marshaller) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
-                userSerializer.serialize(obj, generator, ctx);
-            } else {
+            if (!context.addProcessedObject(obj)) {
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, obj.getClass()));
+            } else {
+                userSerializer.serialize(obj, generator, ctx);
             }
         } finally {
             context.removeProcessedObject(obj);

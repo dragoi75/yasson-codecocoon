@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
 import java.util.OptionalInt;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -42,7 +39,7 @@ public class OptionalIntValueDeserializer extends AbstractValueTypeDeserializer<
     @Override
     public OptionalInt deserialize(JsonParser jsonReader, DeserializationContext deserializationContext, Type runtimeType) {
         final JsonParser.Event currentEvent = ((JsonbParser) jsonReader).moveToValue();
-        if (currentEvent == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == currentEvent) {
             return OptionalInt.empty();
         }
         final String textContent = jsonReader.getString();
@@ -57,5 +54,4 @@ public class OptionalIntValueDeserializer extends AbstractValueTypeDeserializer<
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
         }
     }
-
 }
