@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- *     David Kral - initial implementation
- ******************************************************************************/
+ *  Contributors:
+ *      David Kral - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.properties;
 
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.ResourceBundle;
 public class Messages {
 
     private final static String MESSAGE_BUNDLE = "yasson-messages";
+
     private final static String ENCODING = "UTF-8";
 
     private Messages() {
@@ -72,28 +75,26 @@ public class Messages {
     }
 
     static class UTF8Control extends ResourceBundle.Control {
-        public ResourceBundle newBundle
-                (String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-                throws IllegalAccessException, InstantiationException, IOException
-        {
+
+        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             String bundleName = toBundleName(baseName, locale);
             String resourceName = toResourceName(bundleName, "properties");
             ResourceBundle bundle = null;
             InputStream stream = null;
-            if (reload) {
+            if (!reload) {
+                stream = loader.getResourceAsStream(resourceName);
+            } else {
                 URL url = loader.getResource(resourceName);
-                if (url != null) {
+                if (null != url) {
                     URLConnection connection = url.openConnection();
-                    if (connection != null) {
+                    if (null != connection) {
                         connection.setUseCaches(false);
                         stream = connection.getInputStream();
                     }
                 }
-            } else {
-                stream = loader.getResourceAsStream(resourceName);
             }
-            if (stream != null) {
+            if (null != stream) {
                 try {
                     // Only this line is changed to make it to read properties files as UTF-8.
                     bundle = new PropertyResourceBundle(new InputStreamReader(stream, ENCODING));
@@ -104,5 +105,4 @@ public class Messages {
             return bundle;
         }
     }
-
 }

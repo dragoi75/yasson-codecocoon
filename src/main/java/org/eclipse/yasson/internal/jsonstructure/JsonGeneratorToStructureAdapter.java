@@ -1,18 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.jsonstructure;
 
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
@@ -131,9 +132,7 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     private JsonObjectBuilder getJsonObjectBuilder(String keyName) {
         JsonStructureBuilder current = builders.peek();
         if (!(current instanceof JsonObjectBuilder)) {
-            throw new JsonbException(Messages.getMessage(
-                    MessageKeyConstants.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
-            + "because "+current.getClass() + " is not an instance of "+ JsonObjectBuilder.class));
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass() + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
         }
         return (JsonObjectBuilder) current;
     }
@@ -148,10 +147,10 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     public JsonGenerator writeEnd() {
         JsonStructureBuilder builder = builders.pop();
         JsonStructure structure = builder.build();
-        if (builders.isEmpty()) {
-            this.root = structure;
-        } else {
+        if (!builders.isEmpty()) {
             builders.peek().put(structure);
+        } else {
+            this.root = structure;
         }
         return this;
     }

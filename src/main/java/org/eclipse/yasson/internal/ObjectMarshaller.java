@@ -1,16 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- *     Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *      Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
@@ -21,7 +23,6 @@ import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
 import org.eclipse.yasson.internal.serializer.TypeSerializerBuilder;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
@@ -99,7 +100,7 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
      * @param outWriter generator to use
      */
     public void marshal(Object value, JsonGenerator outWriter) {
-        marshal(value, outWriter,true);
+        marshal(value, outWriter, true);
     }
 
     /**
@@ -110,7 +111,7 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
      * @param outWriter generator to use
      */
     public void marshalWithoutClose(Object value, JsonGenerator outWriter) {
-        marshal(value, outWriter,false);
+        marshal(value, outWriter, false);
     }
 
     @Override
@@ -136,13 +137,12 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
      */
     @SuppressWarnings("unchecked")
     public <T> void serializeRootObject(T sourceObject, JsonGenerator outputWriter) {
-        if (sourceObject == null) {
+        if (null == sourceObject) {
             getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, outputWriter, this);
             return;
         }
         final JsonbSerializer<T> primarySerializer = (JsonbSerializer<T>) getRootSerializer(sourceObject.getClass());
-        if (jsonbContext.getConfigProperties().isStrictIJson() &&
-                primarySerializer instanceof ConfigurableValueTypeSerializer) {
+        if (jsonbContext.getConfigProperties().isStrictIJson() && primarySerializer instanceof ConfigurableValueTypeSerializer) {
             throw new JsonbException(Messages.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
         }
         primarySerializer.serialize(sourceObject, outputWriter, this);
@@ -150,20 +150,14 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
 
     private JsonbSerializer<?> getRootSerializer(Class<?> targetClass) {
         final ContainerSerializerProvider containerProvider = getMappingContext().getSerializerProvider(targetClass);
-        if (containerProvider != null) {
-            return containerProvider
-                    .provideSerializer(new JsonbPropertyInfo()
-                            .withRuntimeType(resolvedClass));
+        if (null != containerProvider) {
+            return containerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(resolvedClass));
         }
-        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(jsonbContext)
-                .setObjectClass(targetClass)
-                .setType(resolvedClass);
-
+        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(jsonbContext).setObjectClass(targetClass).setType(resolvedClass);
         if (!DefaultSerializers.getInstance().isKnownType(targetClass)) {
             ClassDescriptor descriptor = getMappingContext().getOrCreateClassModel(targetClass);
             typeBuilder.setCustomization(descriptor.getCustomization());
         }
         return typeBuilder.buildSerializer();
     }
-
 }

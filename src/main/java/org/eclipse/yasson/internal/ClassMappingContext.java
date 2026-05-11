@@ -1,22 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -87,21 +88,22 @@ public class ClassMappingContext {
      */
     public ClassDescriptor getOrCreateClassModel(Class<?> targetClass) {
         ClassDescriptor classDescriptor = classMap.get(targetClass);
-        if (classDescriptor != null) {
+        if (null != classDescriptor) {
             return classDescriptor;
         }
         final Deque<Class> classDeque = new ArrayDeque<>();
-        for (Class candidateClass = targetClass; candidateClass != Object.class; candidateClass = candidateClass.getSuperclass()) {
-            if (candidateClass == null){
+        Class candidateClass = targetClass;
+        while (Object.class != candidateClass) {
+            if (null == candidateClass) {
                 break;
             }
             classDeque.push(candidateClass);
+            candidateClass = candidateClass.getSuperclass();
         }
-        if (targetClass == Object.class) {
+        if (Object.class == targetClass) {
             classMap.computeIfAbsent(targetClass, (clazzParam) -> new ClassDescriptor(clazzParam, null, null, null));
             return classMap.get(targetClass);
         }
-
         ClassDescriptor parentDescriptor = null;
         while (!classDeque.isEmpty()) {
             Class classToProcess = classDeque.pop();
@@ -119,11 +121,12 @@ public class ClassMappingContext {
      */
     public Iterator<ClassDescriptor> classModelIterator(final Class<?> targetClass) {
         return new Iterator<ClassDescriptor>() {
+
             private Class<?> next = targetClass;
 
             @Override
             public boolean hasNext() {
-                return next != Object.class;
+                return Object.class != next;
             }
 
             @Override

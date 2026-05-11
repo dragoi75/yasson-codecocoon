@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
@@ -25,7 +27,6 @@ import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.serializer.SerializerProviderWrapper;
 import org.eclipse.yasson.internal.serializer.UserSerializerSerializer;
-
 import javax.json.bind.config.PropertyNamingStrategy;
 import javax.json.bind.serializer.JsonbSerializer;
 import java.lang.reflect.Type;
@@ -101,7 +102,6 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
         this.valueSerializer = resolveSerializer();
     }
 
-
     /**
      * Try to cache serializer for this bean property. Only if type cannot be changed during runtime.
      *
@@ -113,19 +113,17 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
         if (!ReflectiveTypeResolver.isResolvedType(targetType)) {
             return null;
         }
-        if (customOptions.getAdapterBinding() != null) {
+        if (null != customOptions.getAdapterBinding()) {
             return new AdaptedObjectSerializer<>(classDescriptor, customOptions.getAdapterBinding());
         }
-        if (customOptions.getSerializerBinding() != null) {
+        if (null != customOptions.getSerializerBinding()) {
             return new UserSerializerSerializer<>(classDescriptor, customOptions.getSerializerBinding().getJsonbSerializer());
         }
-
         final Class<?> rawType = ReflectiveTypeResolver.getRawType(targetType);
         final Optional<SerializerProviderWrapper> serializerProviderOpt = DefaultSerializers.getInstance().findValueSerializerProvider(rawType);
         if (serializerProviderOpt.isPresent()) {
             return serializerProviderOpt.get().getSerializerProvider().provideSerializer(customOptions);
         }
-
         return null;
     }
 
@@ -135,7 +133,7 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
      * @return deserialization type
      */
     public Type getPropertyDeserializationType() {
-        return writeAccessType == null ? valueType : writeAccessType.getMethodType();
+        return null == writeAccessType ? valueType : writeAccessType.getMethodType();
     }
 
     /**
@@ -144,12 +142,12 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
      * @return serialization type
      */
     public Type getPropertySerializationType() {
-        return readAccessType == null ? valueType : readAccessType.getMethodType();
+        return null == readAccessType ? valueType : readAccessType.getMethodType();
     }
 
     private AdapterBinding getUserAdapterBinding(Property propInfo, JsonbContext jsonContext) {
         final AdapterBinding adapterRef = jsonContext.getAnnotationIntrospector().getAdapterBinding(propInfo);
-        if (adapterRef != null) {
+        if (null != adapterRef) {
             return adapterRef;
         }
         return jsonContext.getComponentMatcher().getAdapterBinding(valueType, null).orElse(null);
@@ -157,7 +155,7 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
 
     private SerializerBinding<?> getUserSerializerBinding(Property propInfo, JsonbContext jsonContext) {
         final SerializerBinding serializerRef = jsonContext.getAnnotationIntrospector().getSerializerBinding(propInfo);
-        if (serializerRef != null) {
+        if (null != serializerRef) {
             return serializerRef;
         }
         return jsonContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
@@ -168,19 +166,17 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
         final PropertyCustomizationBuilder customizationCreator = new PropertyCustomizationBuilder();
         //drop all other annotations for transient properties
         EnumSet<AnnotationTarget> ignoredTargets = annotationReader.getJsonbTransientCategorized(propInfo);
-        if (ignoredTargets.size() != 0) {
+        if (0 != ignoredTargets.size()) {
             customizationCreator.setReadTransient(ignoredTargets.contains(AnnotationTarget.GETTER));
             customizationCreator.setWriteTransient(ignoredTargets.contains(AnnotationTarget.SETTER));
-
             if (ignoredTargets.contains(AnnotationTarget.PROPERTY)) {
-                if(!ignoredTargets.contains(AnnotationTarget.GETTER)){
+                if (!ignoredTargets.contains(AnnotationTarget.GETTER)) {
                     customizationCreator.setReadTransient(true);
                 }
-                if(!ignoredTargets.contains(AnnotationTarget.SETTER)){
+                if (!ignoredTargets.contains(AnnotationTarget.SETTER)) {
                     customizationCreator.setWriteTransient(true);
                 }
             }
-
             if (customizationCreator.isReadTransient()) {
                 annotationReader.checkTransientIncompatible(propInfo.getFieldElement());
                 annotationReader.checkTransientIncompatible(propInfo.getGetterElement());
@@ -190,24 +186,19 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
                 annotationReader.checkTransientIncompatible(propInfo.getSetterElement());
             }
         }
-
-        if(!customizationCreator.isReadTransient()){
+        if (!customizationCreator.isReadTransient()) {
             customizationCreator.setJsonWriteName(annotationReader.getJsonbPropertyJsonWriteName(propInfo));
             customizationCreator.setNillable(annotationReader.isPropertyNillable(propInfo).orElse(classDescriptor.getClassCustomization().isNillable()));
             customizationCreator.setSerializerBinding(getUserSerializerBinding(propInfo, jsonContext));
         }
-
-        if(!customizationCreator.isWriteTransient()){
+        if (!customizationCreator.isWriteTransient()) {
             customizationCreator.setJsonReadName(annotationReader.getJsonbPropertyJsonReadName(propInfo));
             customizationCreator.setDeserializerBinding(annotationReader.getDeserializerBinding(propInfo));
         }
-
         customizationCreator.setAdapterInfo(getUserAdapterBinding(propInfo, jsonContext));
-
         determineDateFormatter(propInfo, annotationReader, customizationCreator, jsonContext);
         determineNumberFormatter(propInfo, annotationReader, customizationCreator);
         customizationCreator.setImplementationClass(annotationReader.getImplementationClass(propInfo));
-
         return customizationCreator.buildPropertyCustomization();
     }
 
@@ -221,19 +212,13 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
          */
         Map<AnnotationTarget, JsonbDateFormatter> dateFormatByTarget = annotationReader.getJsonbDateFormatCategorized(propInfo);
         final JsonbDateFormatter configuredFormatter = jsonContext.getConfigProperties().getConfigDateFormatter();
-
-        if(!customizationCreator.isReadTransient()){
-            final JsonbDateFormatter resolvedFormatter = getTargetForMostPreciseScope(dateFormatByTarget,
-                    AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
-
-            customizationCreator.setSerializeDateFormatter(resolvedFormatter != null ? resolvedFormatter : configuredFormatter);
+        if (!customizationCreator.isReadTransient()) {
+            final JsonbDateFormatter resolvedFormatter = getTargetForMostPreciseScope(dateFormatByTarget, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            customizationCreator.setSerializeDateFormatter(null != resolvedFormatter ? resolvedFormatter : configuredFormatter);
         }
-
-        if(!customizationCreator.isWriteTransient()){
-            final JsonbDateFormatter resolvedFormatter = getTargetForMostPreciseScope(dateFormatByTarget,
-                    AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
-
-            customizationCreator.setDeserializeDateFormatter(resolvedFormatter != null ? resolvedFormatter : configuredFormatter);
+        if (!customizationCreator.isWriteTransient()) {
+            final JsonbDateFormatter resolvedFormatter = getTargetForMostPreciseScope(dateFormatByTarget, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            customizationCreator.setDeserializeDateFormatter(null != resolvedFormatter ? resolvedFormatter : configuredFormatter);
         }
     }
 
@@ -246,16 +231,11 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
          * Priority from high to low is getter / setter > field > class > package > global configuration
          */
         Map<AnnotationTarget, JsonbNumberFormatter> numberFormatByTarget = annotationReader.getJsonNumberFormatter(propInfo);
-
-
-        if(!customizationCreator.isReadTransient()){
-            customizationCreator.setSerializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget,
-                    AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        if (!customizationCreator.isReadTransient()) {
+            customizationCreator.setSerializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
         }
-
-        if(!customizationCreator.isWriteTransient()){
-            customizationCreator.setDeserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget,
-                            AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        if (!customizationCreator.isWriteTransient()) {
+            customizationCreator.setDeserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
         }
     }
 
@@ -268,7 +248,7 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
     private <T> T getTargetForMostPreciseScope(Map<AnnotationTarget, T> annotationsByTarget, AnnotationTarget... annotationArray) {
         for (AnnotationTarget annotationKind : annotationArray) {
             final T computedValue = annotationsByTarget.get(annotationKind);
-            if (computedValue != null) {
+            if (null != computedValue) {
                 return computedValue;
             }
         }
@@ -358,8 +338,10 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
 
     @Override
     public boolean equals(Object otherPropDesc) {
-        if (this == otherPropDesc) return true;
-        if (otherPropDesc == null || getClass() != otherPropDesc.getClass()) return false;
+        if (otherPropDesc == this)
+            return true;
+        if (null == otherPropDesc || otherPropDesc.getClass() != getClass())
+            return false;
         PropertyDescriptor otherDescriptor = (PropertyDescriptor) otherPropDesc;
         return Objects.equals(fieldName, otherDescriptor.fieldName);
     }
@@ -397,7 +379,7 @@ public class PropertyDescriptor implements Comparable<PropertyDescriptor> {
      * with calculated values for same input.
      */
     private String computeReadWriteName(String accessorName, PropertyNamingStrategy namingPolicy) {
-        return accessorName != null ? accessorName : namingPolicy.translateName(fieldName);
+        return null != accessorName ? accessorName : namingPolicy.translateName(fieldName);
     }
 
     /**

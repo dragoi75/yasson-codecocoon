@@ -1,19 +1,20 @@
-/*******************************************************************************
- * Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.TreeSet;
 public class InstanceCreator {
 
     private interface Creator {
+
         Object createInstance();
     }
 
@@ -37,6 +39,7 @@ public class InstanceCreator {
      * Caches default constructor to create instance.
      */
     private static final class ConstructorCreator implements Creator {
+
         private final Constructor<?> constructor;
 
         public ConstructorCreator(Constructor<?> constructor) {
@@ -71,11 +74,10 @@ public class InstanceCreator {
     public <T> T createInstance(Class<T> tClass) {
         Creator creator = creators.get(tClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (creator == null) {
+        if (null == creator) {
             creator = new ConstructorCreator(ReflectiveTypeResolver.getDefaultConstructor(tClass, true));
             creators.put(tClass, creator);
         }
-
         return (T) creator.createInstance();
     }
 }

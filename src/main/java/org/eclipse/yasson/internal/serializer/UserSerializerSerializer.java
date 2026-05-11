@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ObjectMarshaller;
@@ -18,7 +19,6 @@ import org.eclipse.yasson.internal.ObjectProcessingContext;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
@@ -51,10 +51,10 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         ObjectProcessingContext context = (ObjectMarshaller) ctx;
         try {
-            if (context.registerProcessedObject(obj)) {
-                userSerializer.serialize(obj, generator, ctx);
-            } else {
+            if (!context.registerProcessedObject(obj)) {
                 throw new JsonbException(Messages.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, obj.getClass()));
+            } else {
+                userSerializer.serialize(obj, generator, ctx);
             }
         } finally {
             context.unregisterProcessedObject(obj);

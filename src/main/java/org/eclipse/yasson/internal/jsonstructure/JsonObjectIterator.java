@@ -1,18 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.jsonstructure;
 
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.bind.JsonbException;
@@ -28,10 +29,8 @@ public class JsonObjectIterator extends JsonStructureIterator {
      * Location pointer.
      */
     public enum State {
-        START,
-        KEY,
-        VALUE,
-        END
+
+        START, KEY, VALUE, END
     }
 
     private final JsonObject jsonObject;
@@ -42,12 +41,10 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     private State state = State.START;
 
-
     JsonObjectIterator(JsonObject jsonObject) {
         this.jsonObject = jsonObject;
         this.keyIterator = jsonObject.keySet().iterator();
     }
-
 
     private void nextKey() {
         if (!keyIterator.hasNext()) {
@@ -58,15 +55,15 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     public JsonParser.Event next() {
-        switch (state) {
+        switch(state) {
             case START:
-                if (keyIterator.hasNext()) {
+                if (!keyIterator.hasNext()) {
+                    setState(State.END);
+                    return JsonParser.Event.END_OBJECT;
+                } else {
                     nextKey();
                     setState(JsonObjectIterator.State.KEY);
                     return JsonParser.Event.KEY_NAME;
-                } else {
-                    setState(State.END);
-                    return JsonParser.Event.END_OBJECT;
                 }
             case KEY:
                 setState(JsonObjectIterator.State.VALUE);
@@ -83,13 +80,12 @@ public class JsonObjectIterator extends JsonStructureIterator {
             default:
                 throw new JsonbException("Illegal state");
         }
-
     }
 
     @Override
     public boolean hasNext() {
         //From the perspective of JsonParser not finished until END_OBJECT is being read.
-        return state != State.END;
+        return State.END != state;
     }
 
     /**
@@ -102,7 +98,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     String getString() {
-        if (state == JsonObjectIterator.State.KEY) {
+        if (JsonObjectIterator.State.KEY == state) {
             return currentKey;
         }
         return super.getString();
