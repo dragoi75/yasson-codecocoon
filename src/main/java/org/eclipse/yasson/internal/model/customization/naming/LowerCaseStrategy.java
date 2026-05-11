@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model.customization.naming;
 
 import javax.json.bind.config.PropertyNamingStrategy;
@@ -28,13 +29,15 @@ public abstract class LowerCaseStrategy implements PropertyNamingStrategy {
         Objects.requireNonNull(propertyName);
         CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
         char last = Character.MIN_VALUE;
-        for(int i=0; i<propertyName.length(); i++) {
+        int i = 0;
+        while (propertyName.length() > i) {
             final char current = propertyName.charAt(i);
-            if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+            if (0 < i && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
                 charBuffer.append(getSeparator());
             }
             charBuffer.append(Character.toLowerCase(current));
             last = current;
+            i += 1;
         }
         return new String(charBuffer.array(), 0, charBuffer.position());
     }

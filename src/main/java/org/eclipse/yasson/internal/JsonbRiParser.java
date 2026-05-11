@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -39,9 +39,13 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
      * State holder for current json structure level.
      */
     public static class LevelContext {
+
         private final LevelContext parent;
+
         private JsonParser.Event lastEvent;
+
         private String lastKeyName;
+
         private boolean parsed;
 
         /**
@@ -122,7 +126,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
 
     @Override
     public boolean hasNext() {
-        return  jsonParser.hasNext();
+        return jsonParser.hasNext();
     }
 
     @Override
@@ -139,7 +143,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     public JsonParser.Event next() {
         final JsonParser.Event next = jsonParser.next();
         level.peek().setLastEvent(next);
-        switch (next) {
+        switch(next) {
             case START_ARRAY:
             case START_OBJECT:
                 final LevelContext newLevel = new LevelContext(level.peek());
@@ -186,15 +190,13 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
 
     @Override
     public void moveTo(JsonParser.Event required) {
-        if (!level.empty() && level.peek().getLastEvent() == required) {
+        if (!level.empty() && required == level.peek().getLastEvent()) {
             return;
         }
-
         final Event next = next();
-        if (next == required) {
+        if (required == next) {
             return;
         }
-
         throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Event " + required + " not found." + getLastDataMsg()));
     }
 
@@ -212,18 +214,16 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
         if (!level.empty() && contains(events, level.peek().getLastEvent())) {
             return level.peek().getLastEvent();
         }
-
         final Event next = next();
         if (contains(events, next)) {
             return next;
         }
-
-        throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Parser event ["+Arrays.toString(events)+"] not found." + getLastDataMsg()));
+        throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(events) + "] not found." + getLastDataMsg()));
     }
 
     private boolean contains(Event[] events, Event candidate) {
         for (Event event : events) {
-            if (event == candidate) {
+            if (candidate == event) {
                 return true;
             }
         }
@@ -233,8 +233,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     private String getLastDataMsg() {
         StringBuilder builder = new StringBuilder();
         final LevelContext currentLevel = getCurrentLevel();
-        builder.append(" Last data: [").append("EVENT: ").append(currentLevel.getLastEvent()).append(" KEY_NAME: ")
-                .append(currentLevel.getLastKeyName()).append("]");
+        builder.append(" Last data: [").append("EVENT: ").append(currentLevel.getLastEvent()).append(" KEY_NAME: ").append(currentLevel.getLastKeyName()).append("]");
         return builder.toString();
     }
 
@@ -246,7 +245,7 @@ public class JsonbRiParser implements JsonParser, JsonbParser {
     @Override
     public void skipJsonStructure() {
         final LevelContext currentLevel = level.peek();
-        switch (currentLevel.getLastEvent()) {
+        switch(currentLevel.getLastEvent()) {
             case START_ARRAY:
             case START_OBJECT:
                 while (!currentLevel.isParsed()) {

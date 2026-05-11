@@ -1,23 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionTypeResolver;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.PropertyModel;
-
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -75,46 +75,43 @@ public class ObjectMarshaller<T> extends AbstractContainerSerializer<T> {
     @SuppressWarnings("unchecked")
     private void serializeProperty(T instance, JsonGenerator jsonWriter, SerializationContext serializationContext, PropertyModel property) {
         Marshaller converter = (Marshaller) serializationContext;
-
         if (property.isReadable()) {
             final Object value = property.getValue(instance);
-            if (value == null || isEmptyOptional(value)) {
+            if (null == value || isEmptyOptional(value)) {
                 if (property.getCustomization().isNillable()) {
                     jsonWriter.writeNull(property.getWriteName());
                 }
                 return;
             }
-
             jsonWriter.writeKey(property.getWriteName());
-
             final JsonbSerializer<?> cachedSerializer = property.getPropertySerializer();
-            if (cachedSerializer != null) {
+            if (null != cachedSerializer) {
                 serializerCaptor(cachedSerializer, value, jsonWriter, serializationContext);
                 return;
             }
-
             Optional<Type> resolvedTypeOpt = ReflectionTypeResolver.resolveTypeOptional(this, property.getPropertyType());
             Type paramType = resolvedTypeOpt.orElse(null);
-            final JsonbSerializer<?> jsonbHandler = new TypeSerializerBuilder(converter.getJsonbContext())
-                    .setWrapper(this)
-                    .setObjectClass(value.getClass())
-                    .setCustomization(property.getCustomization())
-                    .setType(paramType).buildSerializer();
+            final JsonbSerializer<?> jsonbHandler = new TypeSerializerBuilder(converter.getJsonbContext()).setWrapper(this).setObjectClass(value.getClass()).setCustomization(property.getCustomization()).setType(paramType).buildSerializer();
             serializerCaptor(jsonbHandler, value, jsonWriter, serializationContext);
         }
     }
 
     private boolean isEmptyOptional(Object value) {
-        if (value instanceof Optional) {
+        if (!(value instanceof Optional)) {
+            if (!(value instanceof OptionalInt)) {
+                if (!(value instanceof OptionalLong)) {
+                    if (value instanceof OptionalDouble) {
+                        return !((OptionalDouble) value).isPresent();
+                    }
+                } else {
+                    return !((OptionalLong) value).isPresent();
+                }
+            } else {
+                return !((OptionalInt) value).isPresent();
+            }
+        } else {
             return !((Optional) value).isPresent();
-        } else if (value instanceof OptionalInt) {
-            return !((OptionalInt) value).isPresent();
-        } else if (value instanceof OptionalLong) {
-            return !((OptionalLong) value).isPresent();
-        } else if (value instanceof OptionalDouble) {
-            return !((OptionalDouble) value).isPresent();
         }
         return false;
     }
-
 }

@@ -1,22 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
@@ -56,10 +56,9 @@ public abstract class BaseValueTypeDeserializer<T> implements JsonbDeserializer<
     public T deserialize(JsonParser jsonReader, DeserializationContext deserializationContext, Type runtimeType) {
         Unmarshaller jaxbHandler = (Unmarshaller) deserializationContext;
         final JsonParser.Event staxRecord = ((JsonbParser) jsonReader).getCurrentLevel().getLastEvent();
-        if (staxRecord == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == staxRecord) {
             return null;
         }
-
         final String textContent = jsonReader.getString();
         return deserializeInstance(textContent, jaxbHandler, runtimeType);
     }

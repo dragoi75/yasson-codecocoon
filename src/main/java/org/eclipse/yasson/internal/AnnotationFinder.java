@@ -2,7 +2,6 @@ package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -14,20 +13,23 @@ import java.util.logging.Logger;
 
 /**
  * Finds an annotation including inherited annotations (e.g. meta-annotations).
- * 
+ *
  * @author JohT
  */
 class AnnotationFinder {
 
     private static final String CONSTRUCTOR_PROPERTIES_ANNOTATION = "java.beans.ConstructorProperties";
+
     private static final Logger LOGGER = Logger.getLogger(AnnotationFinder.class.getName());
 
     private final String annotationClassName;
-    private final Class<? extends Annotation> annotationClass; // may be null
+
+    // may be null
+    private final Class<? extends Annotation> annotationClass;
 
     /**
      * Gets the {@link AnnotationFinder} for the given Annotation-Type.
-     * 
+     *
      * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
      * @return {@link AnnotationFinder}
      */
@@ -37,7 +39,7 @@ class AnnotationFinder {
 
     /**
      * Gets the {@link AnnotationFinder} for the given Annotation-Type Name.
-     * 
+     *
      * @param annotationClassName {@link String}, that is a sub-type of {@link Annotation}
      * @return {@link AnnotationFinder}
      */
@@ -47,7 +49,7 @@ class AnnotationFinder {
 
     /**
      * Gets the {@link AnnotationFinder} for @ConstructorProperties-Annotation.
-     * 
+     *
      * @return {@link AnnotationFinder}
      */
     public static final AnnotationFinder findConstructorProperties() {
@@ -61,7 +63,7 @@ class AnnotationFinder {
 
     @SuppressWarnings("unchecked")
     public <T extends Annotation> T in(Annotation[] annotations) {
-        if (annotationClass == null) {
+        if (null == annotationClass) {
             return null;
         }
         return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
@@ -70,7 +72,7 @@ class AnnotationFinder {
     /**
      * Looks for the annotation {@link #in(Annotation[])} <br>
      * and executes the "value" Method of it dynamically.
-     * 
+     *
      * @param annotations - Array of {@link Annotation}n.
      * @return {@link Object}
      */
@@ -79,7 +81,7 @@ class AnnotationFinder {
     }
 
     private Object invocateValueMethod(Annotation annotation) {
-        if (annotation == null) {
+        if (null == annotation) {
             return null;
         }
         try {
@@ -116,9 +118,9 @@ class AnnotationFinder {
             processed.add(candidate);
             final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
             inheritedAnnotations.removeAll(processed);
-            if (inheritedAnnotations.size() > 0) {
+            if (0 < inheritedAnnotations.size()) {
                 final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
-                if (inherited != null) {
+                if (null != inherited) {
                     return inherited;
                 }
             }
