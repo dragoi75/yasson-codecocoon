@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2015 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
-
 import javax.json.bind.JsonbException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -39,7 +39,6 @@ public class VariableTypeInheritanceSearch {
      *
      * Example 1: typevar is resolved
      *
-     *
      * class GenericClass &lt;T&gt; {
      *     private T genericField;
      * }
@@ -50,10 +49,8 @@ public class VariableTypeInheritanceSearch {
      * In above case when ConcreteClass type is passed as runtime type and &lt;T&gt; as type variable, T is resolved to MyPojo.
      * </pre>
      *
-     *
      * <pre>
      * Example 2: typevar is resolved to another propagated typevar
-     *
      *
      * class WrapperGenericClass&lt;X&gt; {
      *     private GenericClass&lt;X&gt; propagatedGenericField
@@ -61,7 +58,6 @@ public class VariableTypeInheritanceSearch {
      *
      * class AnotherClass extends WrapperGenericClass&lt;MyPojo&gt; {
      * }
-     *
      *
      * In second case when GenericClass {@link ParameterizedType} is passed as runtime type and &lt;T&gt; as type variable,
      * T is resolved to propagated &lt;X&gt; by WrapperGenericClass.
@@ -75,11 +71,11 @@ public class VariableTypeInheritanceSearch {
      */
     public Type searchParametrizedType(Type typeToSearch, TypeVariable<?> typeVar) {
         ParameterizedType parameterizedType = findParameterizedSuperclass(typeToSearch);
-        if (parameterizedType == null) {
+        if (null == parameterizedType) {
             return null;
         }
         Type matchedGenericType = searchRuntimeTypeArgument(parameterizedType, typeVar);
-        if (matchedGenericType != null) {
+        if (null != matchedGenericType) {
             return matchedGenericType;
         }
         parameterizedSubclasses.push(parameterizedType);
@@ -87,7 +83,7 @@ public class VariableTypeInheritanceSearch {
     }
 
     private Type checkSubclassRuntimeInfo(TypeVariable typeVar) {
-        if (parameterizedSubclasses.size() == 0) {
+        if (0 == parameterizedSubclasses.size()) {
             return typeVar;
         }
         ParameterizedType parametrizedSubclass = parameterizedSubclasses.pop();
@@ -95,11 +91,12 @@ public class VariableTypeInheritanceSearch {
     }
 
     private Type searchRuntimeTypeArgument(ParameterizedType runtimeType, TypeVariable<?> typeVar) {
-        if (ReflectionHelper.getRawType(runtimeType) != typeVar.getGenericDeclaration()) {
+        if (typeVar.getGenericDeclaration() != ReflectionHelper.getRawType(runtimeType)) {
             return null;
         }
         TypeVariable[] bounds = typeVar.getGenericDeclaration().getTypeParameters();
-        for (int i = 0; i < bounds.length; i++) {
+        int i = 0;
+        while (bounds.length > i) {
             if (bounds[i].equals(typeVar)) {
                 Type matchedGenericType = runtimeType.getActualTypeArguments()[i];
                 //Propagated generic types to another generic classes
@@ -109,12 +106,13 @@ public class VariableTypeInheritanceSearch {
                 //found runtime matchedGenericType
                 return matchedGenericType;
             }
+            i += 1;
         }
         return null;
     }
 
     private static ParameterizedType findParameterizedSuperclass(Type type) {
-        if (type == null || type instanceof ParameterizedType) {
+        if (null == type || type instanceof ParameterizedType) {
             return (ParameterizedType) type;
         }
         if (!(type instanceof Class)) {

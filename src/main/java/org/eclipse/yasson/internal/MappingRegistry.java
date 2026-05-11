@@ -1,22 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerFactory;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
-
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Stack;
@@ -86,21 +87,22 @@ public class MappingRegistry {
      */
     public ClassDescriptor getOrCreateClassModel(Class<?> targetClass) {
         ClassDescriptor descriptor = classModels.get(targetClass);
-        if (descriptor != null) {
+        if (null != descriptor) {
             return descriptor;
         }
         final Stack<Class> classStack = new Stack<>();
-        for (Class currentClass = targetClass; currentClass != Object.class; currentClass = currentClass.getSuperclass()) {
-            if (currentClass == null){
+        Class currentClass = targetClass;
+        while (Object.class != currentClass) {
+            if (null == currentClass) {
                 break;
             }
             classStack.push(currentClass);
+            currentClass = currentClass.getSuperclass();
         }
-        if (targetClass == Object.class) {
+        if (Object.class == targetClass) {
             classModels.computeIfAbsent(targetClass, (classArg) -> new ClassDescriptor(classArg, null, null, null));
             return classModels.get(targetClass);
         }
-
         ClassDescriptor parentClassDescriptor = null;
         while (!classStack.empty()) {
             Class parseTarget = classStack.pop();
@@ -118,11 +120,12 @@ public class MappingRegistry {
      */
     public Iterator<ClassDescriptor> classModelIterator(final Class<?> targetClass) {
         return new Iterator<ClassDescriptor>() {
+
             private Class<?> next = targetClass;
 
             @Override
             public boolean hasNext() {
-                return next != Object.class;
+                return Object.class != next;
             }
 
             @Override

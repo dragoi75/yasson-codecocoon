@@ -1,22 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.JsonbStreamParser;
 import org.eclipse.yasson.internal.JsonbRiStreamParser;
 import org.eclipse.yasson.internal.ReflectionHelper;
-
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.ParameterizedType;
@@ -42,10 +43,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
      */
     protected CollectionDeserializer(DeserializationBuilder builder) {
         super(builder);
-        collectionValueType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
-                : Object.class;
-
+        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
         instance = createInstance();
     }
 
@@ -53,10 +51,10 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     private T createInstance() {
         Class<T> rawType = (Class<T>) ReflectionHelper.getRawType(getRuntimeType());
         assert Collection.class.isAssignableFrom(rawType);
-
         if (rawType.isInterface()) {
             final T x = createInterfaceInstance(rawType);
-            if (x != null) return x;
+            if (null != x)
+                return x;
         }
         return ReflectionHelper.createInstanceNoArgs(rawType);
     }
@@ -64,7 +62,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     @SuppressWarnings("unchecked")
     private T createInterfaceInstance(Class<?> ifcType) {
         if (List.class.isAssignableFrom(ifcType)) {
-            if (LinkedList.class == ifcType) {
+            if (ifcType == LinkedList.class) {
                 return (T) new LinkedList();
             }
             return (T) new ArrayList<>();
@@ -78,7 +76,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
         if (Queue.class.isAssignableFrom(ifcType)) {
             return (T) new ArrayDeque<>();
         }
-        if (Collection.class == ifcType) {
+        if (ifcType == Collection.class) {
             return (T) new ArrayList();
         }
         return null;

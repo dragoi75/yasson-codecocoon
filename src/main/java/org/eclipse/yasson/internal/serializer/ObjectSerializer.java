@@ -1,23 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ObjectMarshaller;
 import org.eclipse.yasson.internal.ReflectionHelper;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.PropertyModel;
-
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -75,46 +75,43 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
     @SuppressWarnings("unchecked")
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
         ObjectMarshaller marshaller = (ObjectMarshaller) ctx;
-
         if (propertyModel.isReadable()) {
             final Object propertyValue = propertyModel.getValue(object);
-            if (propertyValue == null || isEmptyOptional(propertyValue)) {
+            if (null == propertyValue || isEmptyOptional(propertyValue)) {
                 if (propertyModel.getCustomization().isNillable()) {
                     generator.writeNull(propertyModel.getWriteName());
                 }
                 return;
             }
-
             generator.writeKey(propertyModel.getWriteName());
-
             final JsonbSerializer<?> propertyCachedSerializer = propertyModel.getPropertySerializer();
-            if (propertyCachedSerializer != null) {
+            if (null != propertyCachedSerializer) {
                 serializerCaptor(propertyCachedSerializer, propertyValue, generator, ctx);
                 return;
             }
-
             Optional<Type> runtimeTypeOptional = ReflectionHelper.resolveTypeOptional(this, propertyModel.getPropertyType());
             Type genericType = runtimeTypeOptional.orElse(null);
-            final JsonbSerializer<?> serializer = new TypeSerializerBuilder(marshaller.getJsonbContext())
-                    .setWrapper(this)
-                    .setObjectClass(propertyValue.getClass())
-                    .setCustomization(propertyModel.getCustomization())
-                    .setType(genericType).buildSerializer();
+            final JsonbSerializer<?> serializer = new TypeSerializerBuilder(marshaller.getJsonbContext()).setWrapper(this).setObjectClass(propertyValue.getClass()).setCustomization(propertyModel.getCustomization()).setType(genericType).buildSerializer();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }
 
     private boolean isEmptyOptional(Object object) {
-        if (object instanceof Optional) {
+        if (!(object instanceof Optional)) {
+            if (!(object instanceof OptionalInt)) {
+                if (!(object instanceof OptionalLong)) {
+                    if (object instanceof OptionalDouble) {
+                        return !((OptionalDouble) object).isPresent();
+                    }
+                } else {
+                    return !((OptionalLong) object).isPresent();
+                }
+            } else {
+                return !((OptionalInt) object).isPresent();
+            }
+        } else {
             return !((Optional) object).isPresent();
-        } else if (object instanceof OptionalInt) {
-            return !((OptionalInt) object).isPresent();
-        } else if (object instanceof OptionalLong) {
-            return !((OptionalLong) object).isPresent();
-        } else if (object instanceof OptionalDouble) {
-            return !((OptionalDouble) object).isPresent();
         }
         return false;
     }
-
 }

@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import javax.json.JsonArray;
@@ -54,7 +55,6 @@ public class DefaultSerializerProvider {
 
     private Map<Class<?>, SerializerProviderWrapper> initializeSerializers() {
         final Map<Class<?>, SerializerProviderWrapper> providerMap = new HashMap<>();
-
         providerMap.put(Boolean.class, new SerializerProviderWrapper(BooleanTypeSerializer::new, BooleanTypeDeserializer::new));
         providerMap.put(Boolean.TYPE, new SerializerProviderWrapper(BooleanTypeSerializer::new, BooleanTypeDeserializer::new));
         providerMap.put(Byte.class, new SerializerProviderWrapper(ByteTypeSerializer::new, ByteTypeDeserializer::new));
@@ -102,7 +102,6 @@ public class DefaultSerializerProvider {
         providerMap.put(BigDecimal.class, new SerializerProviderWrapper(BigDecimalTypeSerializer::new, BigDecimalTypeDeserializer::new));
         providerMap.put(ZoneOffset.class, new SerializerProviderWrapper(ZoneOffsetTypeSerializer::new, ZoneOffsetTypeDeserializer::new));
         providerMap.put(XMLGregorianCalendar.class, new SerializerProviderWrapper(XMLGregorianCalendarTypeSerializer::new, XMLGregorianCalendarTypeDeserializer::new));
-
         return Collections.unmodifiableMap(providerMap);
     }
 
@@ -117,24 +116,29 @@ public class DefaultSerializerProvider {
         Class<?> potentialMatchClass = targetType;
         do {
             final SerializerProviderWrapper serializerWrapper = providerMap.get(potentialMatchClass);
-            if (serializerWrapper != null) {
+            if (null != serializerWrapper) {
                 return Optional.of(serializerWrapper);
             }
             potentialMatchClass = potentialMatchClass.getSuperclass();
-        } while (potentialMatchClass != null);
-
+        } while (null != potentialMatchClass);
         return findProviderByCondition(targetType);
     }
 
     private <T> Optional<SerializerProviderWrapper> findProviderByCondition(Class<T> targetType) {
-        if (Enum.class.isAssignableFrom(targetType)) {
+        if (!Enum.class.isAssignableFrom(targetType)) {
+            if (!JsonString.class.isAssignableFrom(targetType)) {
+                if (!JsonNumber.class.isAssignableFrom(targetType)) {
+                    if (JsonValue.class.isAssignableFrom(targetType) && !(JsonObject.class.isAssignableFrom(targetType) || JsonArray.class.isAssignableFrom(targetType))) {
+                        return Optional.of(providerMap.get(JsonValue.class));
+                    }
+                } else {
+                    return Optional.of(providerMap.get(JsonNumber.class));
+                }
+            } else {
+                return Optional.of(providerMap.get(JsonString.class));
+            }
+        } else {
             return Optional.of(enumerationWrapper);
-        } else if (JsonString.class.isAssignableFrom(targetType)) {
-            return Optional.of(providerMap.get(JsonString.class));
-        } else if (JsonNumber.class.isAssignableFrom(targetType)) {
-            return Optional.of(providerMap.get(JsonNumber.class));
-        } else if (JsonValue.class.isAssignableFrom(targetType) && !(JsonObject.class.isAssignableFrom(targetType) || JsonArray.class.isAssignableFrom(targetType))) {
-            return Optional.of(providerMap.get(JsonValue.class));
         }
         return Optional.empty();
     }
@@ -147,15 +151,9 @@ public class DefaultSerializerProvider {
      * @return true if supported
      */
     public boolean isKnownType(Class<?> targetType) {
-        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType)
-                || Map.class.isAssignableFrom(targetType)
-                || JsonValue.class.isAssignableFrom(targetType)
-                || Optional.class.isAssignableFrom(targetType)
-                || targetType.isArray();
-
+        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
         return isContainerValueKnown || locateValueSerializerProvider(targetType).isPresent();
     }
-
 
     /**
      * Singleton instance.

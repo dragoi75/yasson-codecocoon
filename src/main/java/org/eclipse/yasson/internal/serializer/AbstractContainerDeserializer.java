@@ -1,23 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.bind.serializer.JsonbDeserializer;
@@ -35,6 +35,7 @@ import java.util.OptionalLong;
  * @author Roman Grigoriadi
  */
 public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> implements JsonbDeserializer<T> {
+
     protected JsonbRiStreamParser.LevelParseState parserContext;
 
     /**
@@ -73,7 +74,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         parserContext = moveToFirst(parser);
         while (parser.hasNext()) {
             final JsonParser.Event event = parser.next();
-            switch (event) {
+            switch(event) {
                 case START_OBJECT:
                 case START_ARRAY:
                 case VALUE_STRING:
@@ -124,7 +125,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         DeserializationBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).setType(actualValueType);
         if (!DefaultSerializerProvider.getInstance().isKnownType(ReflectionHelper.getRawType(actualValueType))) {
             ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionHelper.getRawType(actualValueType));
-            deserializerBuilder.setCustomization(classModel == null ? null : classModel.getCustomization());
+            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getCustomization());
         }
         return deserializerBuilder.buildDeserializer();
     }
@@ -139,24 +140,28 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @return empty optional if applies
      */
     protected Object convertNullToOptionalEmpty(Type propertyType, Object value) {
-        if (value != null) {
+        if (null != value) {
             return value;
         }
-
         if (!(propertyType instanceof Class)) {
             propertyType = ReflectionHelper.getRawType(ReflectionHelper.resolveGenericType(this, propertyType));
         }
-
-        if (propertyType == Optional.class) {
-            return Optional.empty();
-        } else if (propertyType == OptionalInt.class) {
-            return OptionalInt.empty();
-        } else if (propertyType == OptionalLong.class) {
-            return OptionalLong.empty();
-        } else if (propertyType == OptionalDouble.class) {
-            return OptionalDouble.empty();
+        if (Optional.class != propertyType) {
+            if (OptionalInt.class != propertyType) {
+                if (OptionalLong.class != propertyType) {
+                    if (OptionalDouble.class != propertyType) {
+                        return null;
+                    } else {
+                        return OptionalDouble.empty();
+                    }
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
+                return OptionalInt.empty();
+            }
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

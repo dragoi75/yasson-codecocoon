@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ObjectMarshaller;
@@ -18,7 +19,6 @@ import org.eclipse.yasson.internal.ReflectionHelper;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.ContainerCustomization;
-
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -102,7 +102,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @return cached serializer or null
      */
     protected JsonbSerializer<?> getValueSerializer(Class<?> valueClass) {
-        if (valueSerializer != null && valueClass == this.valueClass) {
+        if (null != valueSerializer && this.valueClass == valueClass) {
             return valueSerializer;
         }
         return null;
@@ -121,36 +121,31 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
     }
 
     protected void serializeItem(Object item, JsonGenerator generator, SerializationContext ctx) {
-        if (item == null) {
+        if (null == item) {
             generator.writeNull();
             return;
         }
         Class<?> itemClass = item.getClass();
         //Not null when generic type is present or previous item is of same type
         JsonbSerializer<?> serializer = getValueSerializer(itemClass);
-
         //Raw collections + lost generic information
-        if (serializer == null) {
+        if (null == serializer) {
             Type instanceValueType = getValueType(getRuntimeType());
             instanceValueType = instanceValueType.equals(Object.class) ? itemClass : instanceValueType;
-
             TypeSerializerBuilder builder = new TypeSerializerBuilder(((ObjectMarshaller) ctx).getJsonbContext());
             builder.setObjectClass(itemClass);
             builder.setWrapper(this);
             builder.setType(instanceValueType);
-
-
-            if (!DefaultSerializerProvider.getInstance().isKnownType(itemClass)) {
-                //Need for class level annotations + user adapters/serializers bound to type
-                ClassDescriptor classModel = ((ObjectMarshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
-                builder.setCustomization(new ContainerCustomization(classModel.getCustomization()));
-            } else {
+            if (DefaultSerializerProvider.getInstance().isKnownType(itemClass)) {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers
                 //to preserve collections and array null elements
                 builder.setCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
+            } else {
+                //Need for class level annotations + user adapters/serializers bound to type
+                ClassDescriptor classModel = ((ObjectMarshaller) ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
+                builder.setCustomization(new ContainerCustomization(classModel.getCustomization()));
             }
             serializer = builder.buildSerializer();
-
             //Cache last used value serializer in case of next item is the same type.
             addValueSerializer(serializer, itemClass);
         }

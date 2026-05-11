@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.YassonProperties;
@@ -23,7 +25,6 @@ import org.eclipse.yasson.internal.model.customization.ordering.ReverseOrderStra
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
-
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -90,7 +91,7 @@ public class JsonbConfigurationProperties {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Class<?>,Class<?>> loadUserTypeMapping() {
+    private Map<Class<?>, Class<?>> loadUserTypeMapping() {
         Optional<Object> optionalValue = mappingConfig.getProperty(YassonProperties.USER_TYPE_MAPPING);
         if (!optionalValue.isPresent()) {
             return Collections.emptyMap();
@@ -135,7 +136,7 @@ public class JsonbConfigurationProperties {
             if (!(resolvedPolicy instanceof String)) {
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.PROPERTY_ORDER, resolvedPolicy));
             }
-            switch ((String) resolvedPolicy) {
+            switch((String) resolvedPolicy) {
                 case PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return new LexicographicalOrderStrategy();
                 case PropertyOrderStrategy.REVERSE:
@@ -159,7 +160,7 @@ public class JsonbConfigurationProperties {
         if (namingStrategy instanceof String) {
             String namingKey = (String) namingStrategy;
             final PropertyNamingStrategy resolvedNaming = DefaultNamingStrategies.getStrategy(namingKey);
-            if (resolvedNaming == null) {
+            if (null == resolvedNaming) {
                 throw new JsonbException("No property naming strategy was found for: " + namingKey);
             }
             return resolvedNaming;
@@ -183,7 +184,7 @@ public class JsonbConfigurationProperties {
     }
 
     private String resolveBinaryDataStrategy() {
-        final Optional<Boolean> iJsonFlag = mappingConfig.getProperty(JsonbConfig.STRICT_IJSON).map((value ->(Boolean) value));
+        final Optional<Boolean> iJsonFlag = mappingConfig.getProperty(JsonbConfig.STRICT_IJSON).map((value -> (Boolean) value));
         if (iJsonFlag.isPresent() && iJsonFlag.get()) {
             return BinaryDataStrategy.BASE_64_URL;
         }
@@ -239,7 +240,7 @@ public class JsonbConfigurationProperties {
      *
      * @return Binary data strategy.
      */
-    public  String getBinaryDataStrategy() {
+    public String getBinaryDataStrategy() {
         return binaryEncoding;
     }
 
@@ -263,7 +264,7 @@ public class JsonbConfigurationProperties {
      */
     private Locale resolveConfigLocale() {
         final Optional<Object> regionCandidate = mappingConfig.getProperty(JsonbConfig.LOCALE);
-        return  regionCandidate.map(regionId -> {
+        return regionCandidate.map(regionId -> {
             if (!(regionId instanceof Locale)) {
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
             }

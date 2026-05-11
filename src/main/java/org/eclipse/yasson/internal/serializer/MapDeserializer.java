@@ -1,16 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- * Sebastien Rius
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ *  Sebastien Rius
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -19,10 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.JsonbRiStreamParser;
 import org.eclipse.yasson.internal.JsonbStreamParser;
@@ -35,7 +35,7 @@ import org.eclipse.yasson.internal.ReflectionHelper;
  *
  * @author Roman Grigoriadi
  */
-public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
 
     /**
      * Sorted map runtime type to use according to ordering strategy set in associated JSONB configuration
@@ -58,20 +58,15 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractContainerDeseri
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected MapDeserializer(DeserializationBuilder builder) {
         super(builder);
-
         Class<? extends Map> mapImplType = builder.getMapImplType();
-        if (SortedMap.class.isAssignableFrom(mapImplType)) {
-            // if deser. builder decided to deal with sorted maps by default : using its choice for lex or reverse order
-            sortedMapImplType = (Class<SortedMap>) mapImplType;
-        } else {
+        if (!SortedMap.class.isAssignableFrom(mapImplType)) {
             // if deser. builder decided not to deal with sorted maps by default : defaulting sorted maps to lex order
             sortedMapImplType = TreeMap.class;
+        } else {
+            // if deser. builder decided to deal with sorted maps by default : using its choice for lex or reverse order
+            sortedMapImplType = (Class<SortedMap>) mapImplType;
         }
-
-        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
-                : Object.class;
-
+        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1]) : Object.class;
         this.instance = createInstance();
     }
 

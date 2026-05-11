@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -39,9 +39,13 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
      * State holder for current json structure level.
      */
     public static class LevelParseState {
+
         private final LevelParseState enclosingState;
+
         private JsonParser.Event previousEvent;
+
         private String previousKey;
+
         private boolean isProcessed;
 
         /**
@@ -122,7 +126,7 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
 
     @Override
     public boolean hasNext() {
-        return  tokenParser.hasNext();
+        return tokenParser.hasNext();
     }
 
     @Override
@@ -139,7 +143,7 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     public JsonParser.Event next() {
         final JsonParser.Event upcomingEvent = tokenParser.next();
         stateStack.peek().setLastEvent(upcomingEvent);
-        switch (upcomingEvent) {
+        switch(upcomingEvent) {
             case START_ARRAY:
             case START_OBJECT:
                 final LevelParseState createdState = new LevelParseState(stateStack.peek());
@@ -186,15 +190,13 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
 
     @Override
     public void moveTo(JsonParser.Event targetEvent) {
-        if (!stateStack.empty() && stateStack.peek().getLastEvent() == targetEvent) {
+        if (!stateStack.empty() && targetEvent == stateStack.peek().getLastEvent()) {
             return;
         }
-
         final Event upcomingEvent = next();
-        if (upcomingEvent == targetEvent) {
+        if (targetEvent == upcomingEvent) {
             return;
         }
-
         throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + targetEvent + " not found." + getLastDataMsg()));
     }
 
@@ -212,18 +214,16 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
         if (!stateStack.empty() && containsEvent(candidates, stateStack.peek().getLastEvent())) {
             return stateStack.peek().getLastEvent();
         }
-
         final Event upcomingEvent = next();
         if (containsEvent(candidates, upcomingEvent)) {
             return upcomingEvent;
         }
-
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event ["+Arrays.toString(candidates)+"] not found." + getLastDataMsg()));
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(candidates) + "] not found." + getLastDataMsg()));
     }
 
     private boolean containsEvent(Event[] candidates, Event potentialEvent) {
         for (Event incoming : candidates) {
-            if (incoming == potentialEvent) {
+            if (potentialEvent == incoming) {
                 return true;
             }
         }
@@ -233,8 +233,7 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     private String getLastDataMsg() {
         StringBuilder sb = new StringBuilder();
         final LevelParseState activeState = getCurrentLevel();
-        sb.append(" Last data: [").append("EVENT: ").append(activeState.getLastEvent()).append(" KEY_NAME: ")
-                .append(activeState.getLastKeyName()).append("]");
+        sb.append(" Last data: [").append("EVENT: ").append(activeState.getLastEvent()).append(" KEY_NAME: ").append(activeState.getLastKeyName()).append("]");
         return sb.toString();
     }
 
@@ -246,7 +245,7 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     @Override
     public void skipJsonStructure() {
         final LevelParseState activeState = stateStack.peek();
-        switch (activeState.getLastEvent()) {
+        switch(activeState.getLastEvent()) {
             case START_ARRAY:
             case START_OBJECT:
                 while (!activeState.isParsed()) {
