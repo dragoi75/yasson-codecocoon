@@ -1,23 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKey;
 import org.eclipse.yasson.internal.properties.MessageBundle;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.stream.JsonParser;
@@ -34,6 +34,7 @@ import java.util.OptionalLong;
  * @author Roman Grigoriadi
  */
 public abstract class AbstractCollectionDeserializer<T> extends BaseItem<T> implements javax.json.bind.serializer.JsonbDeserializer<T> {
+
     protected JsonbRiStreamParser.ParsingLevelContext parserContext;
 
     /**
@@ -72,7 +73,7 @@ public abstract class AbstractCollectionDeserializer<T> extends BaseItem<T> impl
         parserContext = moveToFirstElement(tokenStream);
         while (tokenStream.hasNext()) {
             final JsonParser.Event jsonToken = tokenStream.next();
-            switch (jsonToken) {
+            switch(jsonToken) {
                 case START_OBJECT:
                 case START_ARRAY:
                 case VALUE_STRING:
@@ -123,7 +124,7 @@ public abstract class AbstractCollectionDeserializer<T> extends BaseItem<T> impl
         JsonDeserializerBuilder deserializerFactory = createUnmarshallerItemBuilder(itemDeserializer).setType(resolvedValueType);
         if (!DefaultSerializerRegistry.getInstance().isKnownType(ReflectionTypeResolver.getRawType(resolvedValueType))) {
             ClassDescriptor classDescriptor = itemDeserializer.getMappingContext().getOrCreateClassModel(ReflectionTypeResolver.getRawType(resolvedValueType));
-            deserializerFactory.setCustomization(classDescriptor == null ? null : classDescriptor.getCustomization());
+            deserializerFactory.setCustomization(null == classDescriptor ? null : classDescriptor.getCustomization());
         }
         return deserializerFactory.buildDeserializer();
     }
@@ -138,24 +139,28 @@ public abstract class AbstractCollectionDeserializer<T> extends BaseItem<T> impl
      * @return empty optional if applies
      */
     protected Object convertNullToEmptyOptional(Type attributeType, Object input) {
-        if (input != null) {
+        if (null != input) {
             return input;
         }
-
         if (!(attributeType instanceof Class)) {
             attributeType = ReflectionTypeResolver.getRawType(ReflectionTypeResolver.resolveActualType(this, attributeType));
         }
-
-        if (attributeType == Optional.class) {
-            return Optional.empty();
-        } else if (attributeType == OptionalInt.class) {
-            return OptionalInt.empty();
-        } else if (attributeType == OptionalLong.class) {
-            return OptionalLong.empty();
-        } else if (attributeType == OptionalDouble.class) {
-            return OptionalDouble.empty();
+        if (Optional.class != attributeType) {
+            if (OptionalInt.class != attributeType) {
+                if (OptionalLong.class != attributeType) {
+                    if (OptionalDouble.class != attributeType) {
+                        return null;
+                    } else {
+                        return OptionalDouble.empty();
+                    }
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
+                return OptionalInt.empty();
+            }
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
