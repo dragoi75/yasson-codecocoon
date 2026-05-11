@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.GenericArrayType;
@@ -33,12 +32,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
 import org.eclipse.yasson.internal.JsonbContext;
@@ -59,7 +56,6 @@ import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
-
 import static jakarta.json.bind.JsonbConfig.PROPERTY_NAMING_STRATEGY;
 import static jakarta.json.stream.JsonParser.Event;
 
@@ -71,15 +67,15 @@ import static jakarta.json.stream.JsonParser.Event;
 public class DeserializationModelCreator {
 
     private static final ModelUnmarshaller<Object> NULL_PROVIDER = (value, context) -> null;
+
     private static final Map<Class<?>, ModelUnmarshaller<Object>> DEFAULT_CREATOR_VALUES;
+
     private static final Set<JsonParser.Event> MAP_KEY_EVENTS = new HashSet<>();
 
     static {
         MAP_KEY_EVENTS.add(Event.KEY_NAME);
         MAP_KEY_EVENTS.addAll(PositionChecker.Checker.VALUES.getEvents());
-
         Map<Class<?>, ModelUnmarshaller<Object>> tmpValuesMap = new HashMap<>();
-
         tmpValuesMap.put(byte.class, (value, context) -> (byte) 0);
         tmpValuesMap.put(short.class, (value, context) -> (short) 0);
         tmpValuesMap.put(int.class, (value, context) -> 0);
@@ -92,13 +88,13 @@ public class DeserializationModelCreator {
         tmpValuesMap.put(OptionalInt.class, (value, context) -> OptionalInt.empty());
         tmpValuesMap.put(OptionalLong.class, (value, context) -> OptionalLong.empty());
         tmpValuesMap.put(OptionalDouble.class, (value, context) -> OptionalDouble.empty());
-
         DEFAULT_CREATOR_VALUES = Map.copyOf(tmpValuesMap);
     }
 
     private final Map<CachedItem, ModelUnmarshaller<JsonParser>> models = new ConcurrentHashMap<>();
 
     private final JsonbContext jsonbContext;
+
     private final Map<Class<?>, Class<?>> userTypeMapping;
 
     /**
@@ -123,10 +119,7 @@ public class DeserializationModelCreator {
         return deserializerChain(chain, type, classModel.getClassCustomization(), classModel);
     }
 
-    private ModelUnmarshaller<JsonParser> deserializerChain(LinkedList<Type> chain,
-                                                            Type type,
-                                                            Customization propertyCustomization,
-                                                            ClassModel classModel) {
+    private ModelUnmarshaller<JsonParser> deserializerChain(LinkedList<Type> chain, Type type, Customization propertyCustomization, ClassModel classModel) {
         if (chain.contains(type)) {
             return new CyclicReferenceDeserializer(type);
         }
@@ -138,29 +131,26 @@ public class DeserializationModelCreator {
         }
     }
 
-    private ModelUnmarshaller<JsonParser> deserializerChainInternal(LinkedList<Type> chain,
-                                                                    Type type,
-                                                                    Customization propertyCustomization,
-                                                                    ClassModel classModel) {
+    private ModelUnmarshaller<JsonParser> deserializerChainInternal(LinkedList<Type> chain, Type type, Customization propertyCustomization, ClassModel classModel) {
         Class<?> rawType = classModel.getType();
         CachedItem cachedItem = createCachedItem(type, propertyCustomization);
-        if (models.containsKey(cachedItem)) {
+        if (!models.containsKey(cachedItem)) {
+            if (userTypeMapping.containsKey(rawType)) {
+                Class<?> userTypeRaw = userTypeMapping.get(rawType);
+                ModelUnmarshaller<JsonParser> deserializer = deserializerChain(userTypeRaw);
+                models.put(cachedItem, deserializer);
+                return deserializer;
+            }
+        } else {
             return models.get(cachedItem);
-        } else if (userTypeMapping.containsKey(rawType)) {
-            Class<?> userTypeRaw = userTypeMapping.get(rawType);
-            ModelUnmarshaller<JsonParser> deserializer = deserializerChain(userTypeRaw);
-            models.put(cachedItem, deserializer);
-            return deserializer;
         }
         Optional<AdapterBinding> adapterBinding = adapterBinding(type, (ComponentBoundCustomization) propertyCustomization);
         if (adapterBinding.isPresent()) {
             AdapterBinding adapter = adapterBinding.get();
             Class<?> toType = ReflectionUtils.getRawType(adapter.getToType());
             ClassModel targetModel = jsonbContext.getMappingContext().getOrCreateClassModel(toType);
-            ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(toType,
-                                                                              targetModel.getClassCustomization(),
-                                                                              JustReturn.instance());
-            if (typeDeserializer == null) {
+            ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(toType, targetModel.getClassCustomization(), JustReturn.instance());
+            if (null == typeDeserializer) {
                 typeDeserializer = deserializerChain(adapter.getToType());
             }
             ModelUnmarshaller<JsonParser> targetAdapterModel = typeDeserializer;
@@ -172,45 +162,44 @@ public class DeserializationModelCreator {
             models.put(cachedItem, adapterDeser);
             return adapterDeser;
         }
-        ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(rawType,
-                                                                          propertyCustomization,
-                                                                          JustReturn.instance());
-        if (typeDeserializer != null) {
+        ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(rawType, propertyCustomization, JustReturn.instance());
+        if (null != typeDeserializer) {
             models.put(cachedItem, typeDeserializer);
             return typeDeserializer;
         }
-        if (Collection.class.isAssignableFrom(rawType)) {
-            return createCollectionDeserializer(cachedItem, rawType, chain, propertyCustomization);
-        } else if (Map.class.isAssignableFrom(rawType)) {
-            return createMapDeserializer(cachedItem, rawType, chain, propertyCustomization);
-        } else if (rawType.isArray()) {
-            return createArrayDeserializer(cachedItem, rawType, chain, propertyCustomization);
-        } else if (type instanceof GenericArrayType) {
-            return createGenericArray(cachedItem, rawType, chain, propertyCustomization);
-        } else if (Optional.class.isAssignableFrom(rawType)) {
-            return createOptionalDeserializer(chain, type, propertyCustomization, cachedItem);
+        if (!Collection.class.isAssignableFrom(rawType)) {
+            if (!Map.class.isAssignableFrom(rawType)) {
+                if (!rawType.isArray()) {
+                    if (!(type instanceof GenericArrayType)) {
+                        if (!Optional.class.isAssignableFrom(rawType)) {
+                            return createObjectDeserializer(chain, type, propertyCustomization, classModel, rawType, cachedItem);
+                        } else {
+                            return createOptionalDeserializer(chain, type, propertyCustomization, cachedItem);
+                        }
+                    } else {
+                        return createGenericArray(cachedItem, rawType, chain, propertyCustomization);
+                    }
+                } else {
+                    return createArrayDeserializer(cachedItem, rawType, chain, propertyCustomization);
+                }
+            } else {
+                return createMapDeserializer(cachedItem, rawType, chain, propertyCustomization);
+            }
         } else {
-            return createObjectDeserializer(chain, type, propertyCustomization, classModel, rawType, cachedItem);
+            return createCollectionDeserializer(cachedItem, rawType, chain, propertyCustomization);
         }
     }
 
-    private ModelUnmarshaller<JsonParser> createObjectDeserializer(LinkedList<Type> chain,
-                                                                   Type type,
-                                                                   Customization propertyCustomization,
-                                                                   ClassModel classModel,
-                                                                   Class<?> rawType,
-                                                                   CachedItem cachedItem) {
+    private ModelUnmarshaller<JsonParser> createObjectDeserializer(LinkedList<Type> chain, Type type, Customization propertyCustomization, ClassModel classModel, Class<?> rawType, CachedItem cachedItem) {
         ClassCustomization classCustomization = classModel.getClassCustomization();
-        Optional<DeserializerBinding<?>> deserializerBinding = userDeserializer(type,
-                                                                                (ComponentBoundCustomization) propertyCustomization);
+        Optional<DeserializerBinding<?>> deserializerBinding = userDeserializer(type, (ComponentBoundCustomization) propertyCustomization);
         if (deserializerBinding.isPresent()) {
-            UserDefinedDeserializer user = new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(),
-                                                                       JustReturn.instance(), type, classCustomization);
+            UserDefinedDeserializer user = new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(), JustReturn.instance(), type, classCustomization);
             models.put(cachedItem, user);
             return user;
         }
         JsonbCreatorInvoker creator = classCustomization.getCreator();
-        boolean hasCreator = creator != null;
+        boolean hasCreator = null != creator;
         List<String> params = hasCreator ? creatorParamsList(creator) : Collections.emptyList();
         Function<String, String> renamer = propertyRenamer();
         Map<String, ModelUnmarshaller<JsonParser>> processors = new LinkedHashMap<>();
@@ -224,34 +213,28 @@ public class DeserializationModelCreator {
         }
         for (String s : params) {
             CreatorProfile creatorModel = creator.findParamByName(s);
-            ModelUnmarshaller<JsonParser> modelDeserializer = typeProcessor(chain,
-                                                                            creatorModel.getType(),
-                                                                            creatorModel.getCustomization(),
-                                                                            JustReturn.instance());
+            ModelUnmarshaller<JsonParser> modelDeserializer = typeProcessor(chain, creatorModel.getType(), creatorModel.getCustomization(), JustReturn.instance());
             String parameterName = renamer.apply(creatorModel.getName());
             processors.put(parameterName, modelDeserializer);
-            if (creatorModel.getCustomization().isRequired()) {
-                defaultCreatorValues.put(parameterName, new RequiredCreatorParameter(parameterName));
-            } else {
+            if (!creatorModel.getCustomization().isRequired()) {
                 Class<?> rawParamType = ReflectionUtils.getRawType(creatorModel.getType());
                 defaultCreatorValues.put(parameterName, DEFAULT_CREATOR_VALUES.getOrDefault(rawParamType, NULL_PROVIDER));
+            } else {
+                defaultCreatorValues.put(parameterName, new RequiredCreatorParameter(parameterName));
             }
         }
         ModelUnmarshaller<JsonParser> instanceCreator;
         TypeInheritanceConfiguration typeInheritanceConfiguration = classCustomization.getPolymorphismConfig();
         Set<String> ignoredProperties = collectIgnoredProperties(typeInheritanceConfiguration);
         boolean failOnUnknownProperties = jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties();
-        if (hasCreator) {
-            instanceCreator = new JsonbCreatorInstantiator(processors, defaultCreatorValues, creator, rawType, renamer,
-                                                           failOnUnknownProperties, ignoredProperties);
+        if (!hasCreator) {
+            ModelUnmarshaller<JsonParser> typeWrapper = new PojoDeserializer(processors, renamer, rawType, failOnUnknownProperties, ignoredProperties);
+            instanceCreator = new DefaultObjectInstanceCreator(typeWrapper, rawType, classModel.getDefaultConstructor());
         } else {
-            ModelUnmarshaller<JsonParser> typeWrapper = new PojoDeserializer(processors, renamer, rawType,
-                                                                               failOnUnknownProperties, ignoredProperties);
-            instanceCreator = new DefaultObjectInstanceCreator(typeWrapper, rawType,
-                                                               classModel.getDefaultConstructor());
+            instanceCreator = new JsonbCreatorInstantiator(processors, defaultCreatorValues, creator, rawType, renamer, failOnUnknownProperties, ignoredProperties);
         }
         PositionChecker positionChecker = new PositionChecker(instanceCreator, rawType, Event.START_OBJECT);
-        if (typeInheritanceConfiguration != null && !typeInheritanceConfiguration.isInherited()) {
+        if (null != typeInheritanceConfiguration && !typeInheritanceConfiguration.isInherited()) {
             instanceCreator = new InheritanceInstanceCreator(rawType, this, typeInheritanceConfiguration, positionChecker);
             positionChecker = new PositionChecker(instanceCreator, rawType, Event.START_OBJECT);
         }
@@ -260,19 +243,11 @@ public class DeserializationModelCreator {
         return nullChecker;
     }
 
-    private ModelUnmarshaller<JsonParser> createCollectionDeserializer(CachedItem cachedItem,
-                                                                       Class<?> rawType,
-                                                                       LinkedList<Type> chain,
-                                                                       Customization propertyCustomization) {
+    private ModelUnmarshaller<JsonParser> createCollectionDeserializer(CachedItem cachedItem, Class<?> rawType, LinkedList<Type> chain, Customization propertyCustomization) {
         Type type = cachedItem.type;
-        Type colType = type instanceof ParameterizedType
-                ? ((ParameterizedType) type).getActualTypeArguments()[0]
-                : Object.class;
+        Type colType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
         colType = ReflectionUtils.resolveType(chain, colType);
-        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain,
-                                                                    colType,
-                                                                    propertyCustomization,
-                                                                    JustReturn.instance());
+        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain, colType, propertyCustomization, JustReturn.instance());
         CollectionDeserializer collectionDeserializer = new CollectionDeserializer(typeProcessor);
         CollectionInstanceCreator instanceDeserializer = new CollectionInstanceCreator(collectionDeserializer, type);
         PositionChecker positionChecker = new PositionChecker(instanceDeserializer, rawType, Event.START_ARRAY);
@@ -281,79 +256,43 @@ public class DeserializationModelCreator {
         return nullChecker;
     }
 
-    private ModelUnmarshaller<JsonParser> createMapDeserializer(CachedItem cachedItem,
-                                                                Class<?> rawType,
-                                                                LinkedList<Type> chain,
-                                                                Customization propertyCustomization) {
+    private ModelUnmarshaller<JsonParser> createMapDeserializer(CachedItem cachedItem, Class<?> rawType, LinkedList<Type> chain, Customization propertyCustomization) {
         Type type = cachedItem.type;
-        Type keyType = type instanceof ParameterizedType
-                ? ((ParameterizedType) type).getActualTypeArguments()[0]
-                : Object.class;
-        Type valueType = type instanceof ParameterizedType
-                ? ((ParameterizedType) type).getActualTypeArguments()[1]
-                : Object.class;
-        ModelUnmarshaller<JsonParser> keyProcessor = typeProcessor(chain,
-                                                                   keyType,
-                                                                   ClassCustomization.empty(),
-                                                                   JustReturn.instance(),
-                                                                   MAP_KEY_EVENTS);
-        ModelUnmarshaller<JsonParser> valueProcessor = typeProcessor(chain,
-                                                                     valueType,
-                                                                     propertyCustomization,
-                                                                     JustReturn.instance());
-
+        Type keyType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
+        Type valueType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[1] : Object.class;
+        ModelUnmarshaller<JsonParser> keyProcessor = typeProcessor(chain, keyType, ClassCustomization.empty(), JustReturn.instance(), MAP_KEY_EVENTS);
+        ModelUnmarshaller<JsonParser> valueProcessor = typeProcessor(chain, valueType, propertyCustomization, JustReturn.instance());
         MapDeserializer mapDeserializer = new MapDeserializer(keyProcessor, valueProcessor);
-        MapInstanceCreator mapInstanceCreator = new MapInstanceCreator(mapDeserializer,
-                                                                       jsonbContext.getConfigProperties(),
-                                                                       rawType);
+        MapInstanceCreator mapInstanceCreator = new MapInstanceCreator(mapDeserializer, jsonbContext.getConfigProperties(), rawType);
         PositionChecker positionChecker = new PositionChecker(mapInstanceCreator, rawType, PositionChecker.Checker.CONTAINER);
         NullCheckDeserializer nullChecker = new NullCheckDeserializer(positionChecker, JustReturn.instance());
         models.put(cachedItem, nullChecker);
         return nullChecker;
     }
 
-    private ModelUnmarshaller<JsonParser> createArrayDeserializer(CachedItem cachedItem,
-                                                                  Class<?> rawType,
-                                                                  LinkedList<Type> chain,
-                                                                  Customization propertyCustomization) {
+    private ModelUnmarshaller<JsonParser> createArrayDeserializer(CachedItem cachedItem, Class<?> rawType, LinkedList<Type> chain, Customization propertyCustomization) {
         JsonbConfigProperties configProperties = jsonbContext.getConfigProperties();
         if (rawType.equals(byte[].class) && !configProperties.getBinaryDataStrategy().equals(BinaryDataStrategy.BYTE)) {
             String strategy = configProperties.getBinaryDataStrategy();
-            ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain,
-                                                                        String.class,
-                                                                        propertyCustomization,
-                                                                        JustReturn.instance());
-            ModelUnmarshaller<JsonParser> base64Deserializer = ArrayInstanceCreator.createBase64Deserializer(strategy,
-                                                                                                             typeProcessor);
+            ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain, String.class, propertyCustomization, JustReturn.instance());
+            ModelUnmarshaller<JsonParser> base64Deserializer = ArrayInstanceCreator.createBase64Deserializer(strategy, typeProcessor);
             NullCheckDeserializer nullChecker = new NullCheckDeserializer(base64Deserializer, JustReturn.instance());
             models.put(cachedItem, nullChecker);
             return nullChecker;
         }
         Class<?> arrayType = rawType.getComponentType();
-        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain,
-                                                                    arrayType,
-                                                                    propertyCustomization,
-                                                                    JustReturn.instance());
+        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain, arrayType, propertyCustomization, JustReturn.instance());
         return createArrayCommonDeserializer(cachedItem, rawType, arrayType, typeProcessor);
     }
 
-    private ModelUnmarshaller<JsonParser> createGenericArray(CachedItem cachedItem,
-                                                             Class<?> rawType,
-                                                             LinkedList<Type> chain,
-                                                             Customization propertyCustomization) {
+    private ModelUnmarshaller<JsonParser> createGenericArray(CachedItem cachedItem, Class<?> rawType, LinkedList<Type> chain, Customization propertyCustomization) {
         GenericArrayType type = (GenericArrayType) cachedItem.type;
         Class<?> component = ReflectionUtils.getRawType(type.getGenericComponentType());
-        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain,
-                                                                    type.getGenericComponentType(),
-                                                                    propertyCustomization,
-                                                                    JustReturn.instance());
+        ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain, type.getGenericComponentType(), propertyCustomization, JustReturn.instance());
         return createArrayCommonDeserializer(cachedItem, rawType, component, typeProcessor);
     }
 
-    private ModelUnmarshaller<JsonParser> createArrayCommonDeserializer(CachedItem cachedItem,
-                                                                        Class<?> rawType,
-                                                                        Class<?> component,
-                                                                        ModelUnmarshaller<JsonParser> typeProcessor) {
+    private ModelUnmarshaller<JsonParser> createArrayCommonDeserializer(CachedItem cachedItem, Class<?> rawType, Class<?> component, ModelUnmarshaller<JsonParser> typeProcessor) {
         ArrayDeserializer arrayDeserializer = new ArrayDeserializer(typeProcessor);
         ArrayInstanceCreator arrayInstanceCreator = ArrayInstanceCreator.create(rawType, component, arrayDeserializer);
         PositionChecker positionChecker = new PositionChecker(arrayInstanceCreator, rawType, Event.START_ARRAY);
@@ -362,13 +301,8 @@ public class DeserializationModelCreator {
         return nullChecker;
     }
 
-    private OptionalDeserializer createOptionalDeserializer(LinkedList<Type> chain,
-                                                            Type type,
-                                                            Customization propertyCustomization,
-                                                            CachedItem cachedItem) {
-        Type colType = type instanceof ParameterizedType
-                ? ((ParameterizedType) type).getActualTypeArguments()[0]
-                : Object.class;
+    private OptionalDeserializer createOptionalDeserializer(LinkedList<Type> chain, Type type, Customization propertyCustomization, CachedItem cachedItem) {
+        Type colType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
         ModelUnmarshaller<JsonParser> typeProcessor = typeProcessor(chain, colType, propertyCustomization, JustReturn.instance());
         OptionalDeserializer optionalDeserializer = new OptionalDeserializer(typeProcessor, JustReturn.instance());
         models.put(cachedItem, optionalDeserializer);
@@ -377,9 +311,9 @@ public class DeserializationModelCreator {
 
     private Set<String> collectIgnoredProperties(TypeInheritanceConfiguration typeInheritanceConfiguration) {
         Set<String> ignoredProperties = new HashSet<>();
-        if (typeInheritanceConfiguration != null) {
+        if (null != typeInheritanceConfiguration) {
             TypeInheritanceConfiguration current = typeInheritanceConfiguration;
-            while (current != null) {
+            while (null != current) {
                 ignoredProperties.add(current.getFieldName());
                 current = current.getParentConfig();
             }
@@ -388,14 +322,8 @@ public class DeserializationModelCreator {
     }
 
     private Function<String, String> propertyRenamer() {
-        boolean isCaseInsensitive = jsonbContext.getConfig()
-                .getProperty(PROPERTY_NAMING_STRATEGY)
-                .filter(prop -> prop.equals(PropertyNamingStrategy.CASE_INSENSITIVE))
-                .isPresent();
-
-        return isCaseInsensitive
-                ? String::toLowerCase
-                : value -> value;
+        boolean isCaseInsensitive = jsonbContext.getConfig().getProperty(PROPERTY_NAMING_STRATEGY).filter(prop -> prop.equals(PropertyNamingStrategy.CASE_INSENSITIVE)).isPresent();
+        return isCaseInsensitive ? String::toLowerCase : value -> value;
     }
 
     private Optional<AdapterBinding> adapterBinding(Type type, ComponentBoundCustomization classCustomization) {
@@ -410,9 +338,7 @@ public class DeserializationModelCreator {
         return Arrays.stream(creator.getParams()).map(CreatorProfile::getName).collect(Collectors.toList());
     }
 
-    private ModelUnmarshaller<JsonParser> memberTypeProcessor(LinkedList<Type> chain,
-                                                              PropertyModel propertyModel,
-                                                              boolean hasCreator) {
+    private ModelUnmarshaller<JsonParser> memberTypeProcessor(LinkedList<Type> chain, PropertyModel propertyModel, boolean hasCreator) {
         ModelUnmarshaller<Object> memberDeserializer;
         Type type = propertyModel.getPropertyDeserializationType();
         memberDeserializer = new ValueSetterDeserializer(propertyModel.getSetValueHandle());
@@ -422,22 +348,14 @@ public class DeserializationModelCreator {
         return typeProcessor(chain, type, propertyModel.getCustomization(), memberDeserializer);
     }
 
-    private ModelUnmarshaller<JsonParser> typeProcessor(LinkedList<Type> chain,
-                                                        Type type,
-                                                        Customization customization,
-                                                        ModelUnmarshaller<Object> memberDeserializer) {
+    private ModelUnmarshaller<JsonParser> typeProcessor(LinkedList<Type> chain, Type type, Customization customization, ModelUnmarshaller<Object> memberDeserializer) {
         return typeProcessor(chain, type, customization, memberDeserializer, PositionChecker.Checker.VALUES.getEvents());
     }
 
-    private ModelUnmarshaller<JsonParser> typeProcessor(LinkedList<Type> chain,
-                                                        Type type,
-                                                        Customization customization,
-                                                        ModelUnmarshaller<Object> memberDeserializer,
-                                                        Set<Event> events) {
+    private ModelUnmarshaller<JsonParser> typeProcessor(LinkedList<Type> chain, Type type, Customization customization, ModelUnmarshaller<Object> memberDeserializer, Set<Event> events) {
         Type resolved = ReflectionUtils.resolveType(chain, type);
         Class<?> rawType = ReflectionUtils.getRawType(resolved);
-        Optional<DeserializerBinding<?>> deserializerBinding = userDeserializer(resolved,
-                                                                                (ComponentBoundCustomization) customization);
+        Optional<DeserializerBinding<?>> deserializerBinding = userDeserializer(resolved, (ComponentBoundCustomization) customization);
         if (deserializerBinding.isPresent()) {
             //TODO remove or not? fix for deserializer cycle
             //            ModelDeserializer<JsonParser> exactType = createNewChain(chain, memberDeserializer, rawType,
@@ -447,22 +365,16 @@ public class DeserializationModelCreator {
             //                                               memberDeserializer,
             //                                               resolved,
             //                                               customization);
-            return new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(),
-                                               memberDeserializer,
-                                               resolved,
-                                               customization);
+            return new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(), memberDeserializer, resolved, customization);
         }
         Optional<AdapterBinding> adapterBinding = adapterBinding(resolved, (ComponentBoundCustomization) customization);
         if (adapterBinding.isPresent()) {
             AdapterBinding adapter = adapterBinding.get();
-            ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(ReflectionUtils.getRawType(adapter.getToType()),
-                                                                              customization,
-                                                                              JustReturn.instance(), events);
-            if (typeDeserializer == null) {
+            ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(ReflectionUtils.getRawType(adapter.getToType()), customization, JustReturn.instance(), events);
+            if (null == typeDeserializer) {
                 typeDeserializer = deserializerChain(adapter.getToType());
             }
             ModelUnmarshaller<JsonParser> targetAdapterModel = typeDeserializer;
-
             AdapterDeserializer adapterDeserializer = new AdapterDeserializer(adapter, memberDeserializer);
             return (parser, context) -> {
                 DeserializationContextManager newContext = new DeserializationContextManager(context);
@@ -471,35 +383,25 @@ public class DeserializationModelCreator {
             };
         }
         ModelUnmarshaller<JsonParser> typeDeserializer = typeDeserializer(rawType, customization, memberDeserializer, events);
-        if (typeDeserializer == null) {
+        if (null == typeDeserializer) {
             Class<?> implClass = resolveImplClass(rawType, customization);
             return createNewChain(chain, memberDeserializer, implClass, resolved, customization);
         }
         return typeDeserializer;
     }
 
-    private ModelUnmarshaller<JsonParser> createNewChain(LinkedList<Type> chain,
-                                                         ModelUnmarshaller<Object> memberDeserializer,
-                                                         Class<?> rawType,
-                                                         Type type,
-                                                         Customization propertyCustomization) {
+    private ModelUnmarshaller<JsonParser> createNewChain(LinkedList<Type> chain, ModelUnmarshaller<Object> memberDeserializer, Class<?> rawType, Type type, Customization propertyCustomization) {
         ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
         ModelUnmarshaller<JsonParser> modelDeserializer = deserializerChain(chain, type, propertyCustomization, classModel);
         return new ContextSwitcher(memberDeserializer, modelDeserializer);
     }
 
-    private ModelUnmarshaller<JsonParser> typeDeserializer(Class<?> rawType,
-                                                           Customization customization,
-                                                           ModelUnmarshaller<Object> delegate) {
+    private ModelUnmarshaller<JsonParser> typeDeserializer(Class<?> rawType, Customization customization, ModelUnmarshaller<Object> delegate) {
         return typeDeserializer(rawType, customization, delegate, PositionChecker.Checker.VALUES.getEvents());
     }
 
-    private ModelUnmarshaller<JsonParser> typeDeserializer(Class<?> rawType,
-                                                           Customization customization,
-                                                           ModelUnmarshaller<Object> delegate,
-                                                           Set<JsonParser.Event> events) {
-        return TypeDeserializers
-                .getTypeDeserializer(rawType, customization, jsonbContext.getConfigProperties(), delegate, events);
+    private ModelUnmarshaller<JsonParser> typeDeserializer(Class<?> rawType, Customization customization, ModelUnmarshaller<Object> delegate, Set<JsonParser.Event> events) {
+        return TypeDeserializers.getTypeDeserializer(rawType, customization, jsonbContext.getConfigProperties(), delegate, events);
     }
 
     private Class<?> resolveImplClass(Class<?> rawType, Customization customization) {
@@ -510,14 +412,12 @@ public class DeserializationModelCreator {
                 implementationClass = ((PropertyCustomization) customization).getImplementationClass();
             }
             //JsonbConfig
-            if (implementationClass == null) {
+            if (null == implementationClass) {
                 implementationClass = jsonbContext.getConfigProperties().getUserTypeMapping().get(rawType);
             }
-            if (implementationClass != null) {
+            if (null != implementationClass) {
                 if (!rawType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.IMPL_CLASS_INCOMPATIBLE,
-                                                                 implementationClass,
-                                                                 rawType));
+                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.IMPL_CLASS_INCOMPATIBLE, implementationClass, rawType));
                 }
                 return implementationClass;
             }
@@ -532,7 +432,9 @@ public class DeserializationModelCreator {
     private static final class CachedItem {
 
         private final Type type;
+
         private final JsonbNumberFormatter numberFormatter;
+
         private final JsonbDateFormatter dateFormatter;
 
         CachedItem(Type type, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
@@ -543,16 +445,14 @@ public class DeserializationModelCreator {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
+            if (o == this) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (null == o || o.getClass() != getClass()) {
                 return false;
             }
             CachedItem that = (CachedItem) o;
-            return Objects.equals(type, that.type)
-                    && Objects.equals(numberFormatter, that.numberFormatter)
-                    && Objects.equals(dateFormatter, that.dateFormatter);
+            return Objects.equals(type, that.type) && Objects.equals(numberFormatter, that.numberFormatter) && Objects.equals(dateFormatter, that.dateFormatter);
         }
 
         @Override
@@ -562,12 +462,7 @@ public class DeserializationModelCreator {
 
         @Override
         public String toString() {
-            return "CachedItem{"
-                    + "type=" + type
-                    + ", numberFormatter=" + numberFormatter
-                    + ", dateFormatter=" + dateFormatter
-                    + '}';
+            return "CachedItem{" + "type=" + type + ", numberFormatter=" + numberFormatter + ", dateFormatter=" + dateFormatter + '}';
         }
     }
-
 }

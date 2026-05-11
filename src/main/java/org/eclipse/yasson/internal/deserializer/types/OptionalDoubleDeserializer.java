@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.util.OptionalDouble;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 class OptionalDoubleDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> extractor;
+
     private final ModelUnmarshaller<Object> nullValueDelegate;
 
     OptionalDoubleDeserializer(ModelUnmarshaller<JsonParser> extractor, ModelUnmarshaller<Object> nullValueDelegate) {
@@ -34,7 +32,7 @@ class OptionalDoubleDeserializer implements ModelUnmarshaller<JsonParser> {
 
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextManager context) {
-        if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == context.getLastValueEvent()) {
             return nullValueDelegate.unmarshal(OptionalDouble.empty(), context);
         }
         OptionalDouble optional = OptionalDouble.of((Double) extractor.unmarshal(value, context));

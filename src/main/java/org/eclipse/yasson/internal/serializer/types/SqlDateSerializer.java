@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.time.Instant;
@@ -28,30 +27,31 @@ class SqlDateSerializer extends DateSerializer<Date> {
 
     @Override
     protected Instant toInstant(Date value) {
-        if (value instanceof java.sql.Date) {
+        if (!(value instanceof java.sql.Date)) {
+            return super.toInstant(value);
+        } else {
             // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
             // In the future (at a breaking change boundary) we should probably reject this code path
             return Instant.ofEpochMilli(value.getTime());
-        } else {
-            return super.toInstant(value);
         }
     }
 
     @Override
     protected String formatDefault(Date value, Locale locale) {
-        if (value instanceof java.sql.Date) {
-            return value.toString() + 'Z'; // Z is the UTC timezone indicator
-        } else {
+        if (!(value instanceof java.sql.Date)) {
             return super.formatDefault(value, locale);
+        } else {
+            // Z is the UTC timezone indicator
+            return value.toString() + 'Z';
         }
     }
 
     @Override
     protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
-        if (value instanceof java.sql.Date) {
-            return ((java.sql.Date) value).toLocalDate().format(formatter);
-        } else {
+        if (!(value instanceof java.sql.Date)) {
             return super.formatWithFormatter(value, formatter);
+        } else {
+            return ((java.sql.Date) value).toLocalDate().format(formatter);
         }
     }
 }

@@ -9,17 +9,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.spi.JsonProvider;
-
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 
@@ -206,9 +203,8 @@ class JsonObjectBuilder extends JsonStructureBuilder {
     }
 
     private String getNextKey() {
-        if (nextKey == null) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                         "Can't write a value without key name"));
+        if (null == nextKey) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Can't write a value without key name"));
         }
         String key = nextKey;
         nextKey = null;

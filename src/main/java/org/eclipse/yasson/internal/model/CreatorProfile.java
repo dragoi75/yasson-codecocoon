@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-
 import org.eclipse.yasson.internal.AnnotationIntrospector;
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
@@ -45,31 +43,17 @@ public class CreatorProfile {
     public CreatorProfile(String label, Parameter methodArgument, Executable invokable, JsonbContext jsonbScope) {
         this.label = label;
         this.kind = methodArgument.getParameterizedType();
-
         AnnotationIntrospector metadataInspector = jsonbScope.getAnnotationIntrospector();
-
         JsonbAnnotatedElement<Parameter> elementWrapper = new JsonbAnnotatedElement<>(methodArgument);
         boolean mandatory = jsonbScope.getAnnotationIntrospector().requiredParameters(invokable, elementWrapper);
-        JsonbNumberFormatter numericFormatter = jsonbScope.getAnnotationIntrospector()
-                .getConstructorNumberFormatter(elementWrapper);
+        JsonbNumberFormatter numericFormatter = jsonbScope.getAnnotationIntrospector().getConstructorNumberFormatter(elementWrapper);
         JsonbDateFormatter dateFormatterForCtor = jsonbScope.getAnnotationIntrospector().getConstructorDateFormatter(elementWrapper);
         DeserializerBinding<?> deserializationBinding = metadataInspector.getDeserializerBinding(methodArgument);
         AdapterBinding adapterBinder = metadataInspector.getAdapterBinding(methodArgument);
         final JsonbAnnotatedElement<Class<?>> classElem = metadataInspector.collectAnnotations(methodArgument.getType());
-        deserializationBinding = deserializationBinding == null
-                ? metadataInspector.getDeserializerBinding(classElem)
-                : deserializationBinding;
-        adapterBinder = adapterBinder == null
-                ? metadataInspector.getAdapterBinding(classElem)
-                : adapterBinder;
-        this.creationConfig = CreatorCustomization.builder()
-                .adapterBinding(adapterBinder)
-                .deserializerBinding(deserializationBinding)
-                .serializerBinding(metadataInspector.getSerializerBinding(classElem))
-                .numberFormatter(numericFormatter)
-                .dateFormatter(dateFormatterForCtor)
-                .required(mandatory)
-                .build();
+        deserializationBinding = null == deserializationBinding ? metadataInspector.getDeserializerBinding(classElem) : deserializationBinding;
+        adapterBinder = null == adapterBinder ? metadataInspector.getAdapterBinding(classElem) : adapterBinder;
+        this.creationConfig = CreatorCustomization.builder().adapterBinding(adapterBinder).deserializerBinding(deserializationBinding).serializerBinding(metadataInspector.getSerializerBinding(classElem)).numberFormatter(numericFormatter).dateFormatter(dateFormatterForCtor).required(mandatory).build();
     }
 
     /**
@@ -93,5 +77,4 @@ public class CreatorProfile {
     public Type getType() {
         return kind;
     }
-
 }

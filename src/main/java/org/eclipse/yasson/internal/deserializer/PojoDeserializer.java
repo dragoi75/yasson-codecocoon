@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextManager;
 import org.eclipse.yasson.internal.properties.LocalizedMessages;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
@@ -29,16 +26,16 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 class PojoDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final Map<String, ModelUnmarshaller<JsonParser>> propertyUnmarshallers;
+
     private final Function<String, String> nameMapper;
+
     private final Class<?> targetType;
+
     private final boolean throwOnUnknownFields;
+
     private final Set<String> excludedProperties;
 
-    PojoDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyUnmarshallers,
-                     Function<String, String> nameMapper,
-                     Class<?> targetType,
-                     boolean throwOnUnknownFields,
-                     Set<String> excludedProperties) {
+    PojoDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyUnmarshallers, Function<String, String> nameMapper, Class<?> targetType, boolean throwOnUnknownFields, Set<String> excludedProperties) {
         this.propertyUnmarshallers = Map.copyOf(propertyUnmarshallers);
         this.nameMapper = nameMapper;
         this.targetType = targetType;
@@ -52,33 +49,35 @@ class PojoDeserializer implements ModelUnmarshaller<JsonParser> {
         while (jsonInput.hasNext()) {
             final JsonParser.Event upcomingEvent = jsonInput.next();
             ctxManager.setLastValueEvent(upcomingEvent);
-            switch (upcomingEvent) {
-            case KEY_NAME:
-                propertyName = nameMapper.apply(jsonInput.getString());
-                break;
-            case VALUE_NULL:
-            case START_OBJECT:
-            case START_ARRAY:
-            case VALUE_STRING:
-            case VALUE_NUMBER:
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                if (propertyUnmarshallers.containsKey(propertyName)) {
-                    try {
-                        propertyUnmarshallers.get(propertyName).deserialize(jsonInput, ctxManager);
-                    } catch (JsonbException ex) {
-                        throw new JsonbException("Unable to deserialize property '" + propertyName + "' because of: " + ex.getMessage(), ex);
+            switch(upcomingEvent) {
+                case KEY_NAME:
+                    propertyName = nameMapper.apply(jsonInput.getString());
+                    break;
+                case VALUE_NULL:
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    if (!propertyUnmarshallers.containsKey(propertyName)) {
+                        if (throwOnUnknownFields && !excludedProperties.contains(propertyName)) {
+                            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.UNKNOWN_JSON_PROPERTY, propertyName, targetType));
+                        }
+                    } else {
+                        try {
+                            propertyUnmarshallers.get(propertyName).deserialize(jsonInput, ctxManager);
+                        } catch (JsonbException ex) {
+                            throw new JsonbException("Unable to deserialize property '" + propertyName + "' because of: " + ex.getMessage(), ex);
+                        }
                     }
-                } else if (throwOnUnknownFields && !excludedProperties.contains(propertyName)) {
-                    throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.UNKNOWN_JSON_PROPERTY, propertyName, targetType));
-                }
-                break;
-            case END_ARRAY:
-                break;
-            case END_OBJECT:
-                return ctxManager.getInstance();
-            default:
-                throw new JsonbException("Unexpected state: " + upcomingEvent);
+                    break;
+                case END_ARRAY:
+                    break;
+                case END_OBJECT:
+                    return ctxManager.getInstance();
+                default:
+                    throw new JsonbException("Unexpected state: " + upcomingEvent);
             }
         }
         return ctxManager.getInstance();

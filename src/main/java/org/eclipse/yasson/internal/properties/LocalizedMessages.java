@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.properties;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ import java.util.ResourceBundle;
 public class LocalizedMessages {
 
     private static final String LOCALIZED_MESSAGES_BUNDLE = "yasson-messages";
+
     private static final String CHARSET_NAME = "UTF-8";
 
     private LocalizedMessages() {
@@ -70,26 +70,26 @@ public class LocalizedMessages {
     }
 
     static class UTF8ResourceBundleControl extends ResourceBundle.Control {
-        public ResourceBundle newBundle(String bundleBase, Locale targetRegion, String format, ClassLoader resourceClassLoader, boolean forceRefresh)
-                throws IllegalAccessException, InstantiationException, IOException {
+
+        public ResourceBundle newBundle(String bundleBase, Locale targetRegion, String format, ClassLoader resourceClassLoader, boolean forceRefresh) throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             String resourceBundleName = toBundleName(bundleBase, targetRegion);
             String resourcePath = toResourceName(resourceBundleName, "properties");
             ResourceBundle resultBundle = null;
             InputStream inputStreamRef = null;
-            if (forceRefresh) {
+            if (!forceRefresh) {
+                inputStreamRef = resourceClassLoader.getResourceAsStream(resourcePath);
+            } else {
                 URL resourceUrl = resourceClassLoader.getResource(resourcePath);
-                if (resourceUrl != null) {
+                if (null != resourceUrl) {
                     URLConnection urlConn = resourceUrl.openConnection();
-                    if (urlConn != null) {
+                    if (null != urlConn) {
                         urlConn.setUseCaches(false);
                         inputStreamRef = urlConn.getInputStream();
                     }
                 }
-            } else {
-                inputStreamRef = resourceClassLoader.getResourceAsStream(resourcePath);
             }
-            if (inputStreamRef != null) {
+            if (null != inputStreamRef) {
                 try {
                     // Only this line is changed to make it to read properties files as UTF-8.
                     resultBundle = new PropertyResourceBundle(new InputStreamReader(inputStreamRef, CHARSET_NAME));
@@ -100,5 +100,4 @@ public class LocalizedMessages {
             return resultBundle;
         }
     }
-
 }
