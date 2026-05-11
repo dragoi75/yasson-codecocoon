@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.YassonConfiguration;
@@ -24,7 +26,6 @@ import org.eclipse.yasson.internal.model.customization.ordering.ReversePropertyO
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
-
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -93,7 +94,7 @@ public class JsonbConfigurationProperties {
     private Class<?> initializeDefaultMapImplType() {
         Optional<String> optionalString = getPropertyOrderStrategy();
         if (optionalString.isPresent()) {
-            switch (optionalString.get()) {
+            switch(optionalString.get()) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return TreeMap.class;
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
@@ -110,7 +111,7 @@ public class JsonbConfigurationProperties {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Class<?>,Class<?>> initializeUserTypeMapping() {
+    private Map<Class<?>, Class<?>> initializeUserTypeMapping() {
         Optional<Object> maybeValue = jsonbSettings.getProperty(YassonConfiguration.USER_TYPE_MAPPING);
         if (!maybeValue.isPresent()) {
             return Collections.emptyMap();
@@ -151,7 +152,7 @@ public class JsonbConfigurationProperties {
     private PropertyOrderStrategy initializeOrderStrategy() {
         Optional<String> orderOption = getPropertyOrderStrategy();
         if (orderOption.isPresent()) {
-            switch (orderOption.get()) {
+            switch(orderOption.get()) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return new LexicographicalPropertyOrderStrategy();
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
@@ -173,7 +174,7 @@ public class JsonbConfigurationProperties {
             if (!(orderOption instanceof String)) {
                 throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.PROPERTY_ORDER, orderOption));
             }
-            switch ((String) orderOption) {
+            switch((String) orderOption) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
                 case javax.json.bind.config.PropertyOrderStrategy.ANY:
@@ -194,7 +195,7 @@ public class JsonbConfigurationProperties {
         if (namingStrategy instanceof String) {
             String schemeName = (String) namingStrategy;
             final PropertyNamingStrategy resolvedNamer = DefaultNamingStrategyProvider.getStrategy(schemeName);
-            if (resolvedNamer == null) {
+            if (null == resolvedNamer) {
                 throw new JsonbException("No property naming strategy was found for: " + schemeName);
             }
             return resolvedNamer;
@@ -218,7 +219,7 @@ public class JsonbConfigurationProperties {
     }
 
     private String initializeBinaryDataStrategy() {
-        final Optional<Boolean> internetJsonFlag = jsonbSettings.getProperty(JsonbConfig.STRICT_IJSON).map((element ->(Boolean) element));
+        final Optional<Boolean> internetJsonFlag = jsonbSettings.getProperty(JsonbConfig.STRICT_IJSON).map((element -> (Boolean) element));
         if (internetJsonFlag.isPresent() && internetJsonFlag.get()) {
             return BinaryDataStrategy.BASE_64_URL;
         }
@@ -274,7 +275,7 @@ public class JsonbConfigurationProperties {
      *
      * @return Binary data strategy.
      */
-    public  String getBinaryDataStrategy() {
+    public String getBinaryDataStrategy() {
         return binaryEncoding;
     }
 
@@ -298,7 +299,7 @@ public class JsonbConfigurationProperties {
      */
     private Locale initializeConfigLocale() {
         final Optional<Object> optionalConfigValue = jsonbSettings.getProperty(JsonbConfig.LOCALE);
-        return  optionalConfigValue.map(langTag -> {
+        return optionalConfigValue.map(langTag -> {
             if (!(langTag instanceof Locale)) {
                 throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
             }

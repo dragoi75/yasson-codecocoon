@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbCursor;
@@ -18,7 +19,6 @@ import org.eclipse.yasson.internal.JsonbStreamingParser;
 import org.eclipse.yasson.internal.ReflectiveTypeUtils;
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
-
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.GenericArrayType;
@@ -40,15 +40,15 @@ public abstract class AbstractArrayDeserializer<T> extends BaseContainerDeserial
 
     protected AbstractArrayDeserializer(JsonValueDeserializerBuilder builder) {
         super(builder);
-        if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectiveTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
-        } else {
+        if (!(getRuntimeType() instanceof GenericArrayType)) {
             componentClass = ReflectiveTypeUtils.getRawType(getRuntimeType()).getComponentType();
-        }
-        if (!DefaultSerializerRegistry.getInstance().isKnownType(componentClass)) {
-            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         } else {
+            componentClass = ReflectiveTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+        }
+        if (DefaultSerializerRegistry.getInstance().isKnownType(componentClass)) {
             componentClassModel = null;
+        } else {
+            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         }
     }
 
@@ -64,8 +64,7 @@ public abstract class AbstractArrayDeserializer<T> extends BaseContainerDeserial
 
     @Override
     protected void deserializeNextValue(JsonParser parser, JsonbUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass)
-                .setCustomization(componentClassModel == null ? null : componentClassModel.getCustomization()).buildDeserializer();
+        final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).buildDeserializer();
         addResult(deserializer.deserialize(parser, context, componentClass));
     }
 

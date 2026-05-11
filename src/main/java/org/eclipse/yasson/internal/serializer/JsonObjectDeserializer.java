@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
@@ -18,7 +20,6 @@ import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.PropertyModel;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
@@ -43,6 +44,7 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     private static class LeafPropertyModel {
 
         private final String jsonField;
+
         private final PropertyModel propertyDescriptor;
 
         public LeafPropertyModel(String jsonField, PropertyModel propertyDescriptor) {
@@ -85,27 +87,23 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T getInstance(JsonbUnmarshaller unmarshalContext) {
-        if (objectInstance != null) {
+        if (null != objectInstance) {
             return objectInstance;
         }
         final Class<?> resolvedRawType = ReflectiveTypeUtils.getRawType(getRuntimeType());
         final JsonbCreator creationMeta = getClassModel().getClassCustomization().getCreator();
-        objectInstance = creationMeta != null ? instantiate((Class<T>) resolvedRawType, creationMeta)
-                : ReflectiveTypeUtils.instantiateNoArgConstructor((Constructor<T>) getClassModel().getDefaultConstructor());
-
+        objectInstance = null != creationMeta ? instantiate((Class<T>) resolvedRawType, creationMeta) : ReflectiveTypeUtils.instantiateNoArgConstructor((Constructor<T>) getClassModel().getDefaultConstructor());
         //values must be set in order, in which they appears in JSON by spec
         valueMap.forEach((key, holder) -> {
             //skip creator values
-            if (holder.getCreatorModel() != null) {
+            if (null != holder.getCreatorModel()) {
                 return;
             }
             final PropertyModel propertyDescriptor = holder.getPropertyModel();
             propertyDescriptor.setValue(objectInstance, holder.getValue());
         });
-
         return objectInstance;
     }
-
 
     /**
      * Creates instance with custom jsonb creator (parameterized constructor or factory method)
@@ -113,10 +111,10 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     private T instantiate(Class<T> resolvedRawType, JsonbCreator creationMeta) {
         final T objectInstance;
         final List<Object> constructorArgs = new ArrayList<>();
-        for(CreatorModel creatorArg : creationMeta.getParams()) {
+        for (CreatorModel creatorArg : creationMeta.getParams()) {
             final ValueHolder holder = valueMap.get(creatorArg.getName());
             //required by spec
-            if (holder == null){
+            if (null == holder) {
                 throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.JSONB_CREATOR_MISSING_PROPERTY, creatorArg.getName()));
             }
             constructorArgs.add(holder.getValue());
@@ -134,7 +132,7 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     public void addResult(Object outcome) {
         final PropertyModel propertyDesc = getModel();
         //missing property for null values
-        if (propertyDesc == null) {
+        if (null == propertyDesc) {
             return;
         }
         valueMap.put(propertyDesc.getReadName(), new ValueHolder(propertyDesc, nullToOptionalEmpty(propertyDesc.getPropertyType(), outcome)));
@@ -142,31 +140,22 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
 
     @Override
     protected void deserializeNextValue(JsonParser jsonStreamParser, JsonbUnmarshaller unmarshalContext) {
-
         final JsonbCreator creationMeta = getClassModel().getClassCustomization().getCreator();
         //first check jsonb creator param, since it can be different from property name
-        if (creationMeta != null) {
+        if (null != creationMeta) {
             final CreatorModel creatorArg = creationMeta.findByName(parserContext.getLastKeyName());
-            if (creatorArg != null) {
-                final JsonbDeserializer<?> valueDeserializer = createUnmarshallerItemBuilder(unmarshalContext.getJsonbContext())
-                        .setType(creatorArg.getType())
-                        .setCustomization(creatorArg.getCustomization())
-                        .buildDeserializer();
+            if (null != creatorArg) {
+                final JsonbDeserializer<?> valueDeserializer = createUnmarshallerItemBuilder(unmarshalContext.getJsonbContext()).setType(creatorArg.getType()).setCustomization(creatorArg.getCustomization()).buildDeserializer();
                 Object outcome = valueDeserializer.deserialize(jsonStreamParser, unmarshalContext, creatorArg.getType());
                 valueMap.put(creatorArg.getName(), new ValueHolder(creatorArg, outcome));
                 return;
             }
         }
-
         //identify field model of currently processed class model
         PropertyModel createdProperty = getModel();
-        if (createdProperty != null && createdProperty.isWritable()) {
+        if (null != createdProperty && createdProperty.isWritable()) {
             //create current item instance of identified object field
-            final JsonbDeserializer<?> valueDeserializer = createUnmarshallerItemBuilder(unmarshalContext.getJsonbContext())
-                    .setCustomization(createdProperty.getCustomization())
-                    .setType(createdProperty.getPropertyDeserializationType())
-                    .buildDeserializer();
-
+            final JsonbDeserializer<?> valueDeserializer = createUnmarshallerItemBuilder(unmarshalContext.getJsonbContext()).setCustomization(createdProperty.getCustomization()).setType(createdProperty.getPropertyDeserializationType()).buildDeserializer();
             Type resolvedGenericType = ReflectiveTypeUtils.resolveGenericType(this, createdProperty.getPropertyDeserializationType());
             Object outcome = valueDeserializer.deserialize(jsonStreamParser, unmarshalContext, resolvedGenericType);
             valueMap.put(createdProperty.getPropertyName(), new ValueHolder(createdProperty, outcome));
@@ -193,7 +182,7 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
 
     protected PropertyModel getModel() {
         final String previousKeyName = parserContext.getLastKeyName();
-        if (lastLeafProperty != null && lastLeafProperty.getJsonKeyName().equals(previousKeyName)) {
+        if (null != lastLeafProperty && lastLeafProperty.getJsonKeyName().equals(previousKeyName)) {
             return lastLeafProperty.getPropertyModel();
         }
         lastLeafProperty = new LeafPropertyModel(previousKeyName, getClassModel().getPropertyModelByJsonReadName(previousKeyName));
@@ -203,7 +192,9 @@ class JsonObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     private static class ValueHolder {
 
         private final CreatorModel creatorInfo;
+
         private final PropertyModel propertyDescriptor;
+
         private final Object storedValue;
 
         public ValueHolder(CreatorModel creationMeta, Object storedValue) {

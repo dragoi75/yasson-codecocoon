@@ -1,22 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerFactory;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
-
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Stack;
@@ -86,21 +87,22 @@ public class ClassMappingContext {
      */
     public ClassDescriptor getOrCreateClassModel(Class<?> targetType) {
         ClassDescriptor classDescriptor = classModelMap.get(targetType);
-        if (classDescriptor != null) {
+        if (null != classDescriptor) {
             return classDescriptor;
         }
         final Stack<Class> classStack = new Stack<>();
-        for (Class targetClass = targetType; targetClass != Object.class; targetClass = targetClass.getSuperclass()) {
-            if (targetClass == null){
+        Class targetClass = targetType;
+        while (Object.class != targetClass) {
+            if (null == targetClass) {
                 break;
             }
             classStack.push(targetClass);
+            targetClass = targetClass.getSuperclass();
         }
-        if (targetType == Object.class) {
+        if (Object.class == targetType) {
             classModelMap.computeIfAbsent(targetType, (cls) -> new ClassDescriptor(cls, null, null, null));
             return classModelMap.get(targetType);
         }
-
         ClassDescriptor parentDescriptor = null;
         while (!classStack.empty()) {
             Class parseTarget = classStack.pop();
@@ -118,11 +120,12 @@ public class ClassMappingContext {
      */
     public Iterator<ClassDescriptor> classModelIterator(final Class<?> targetType) {
         return new Iterator<ClassDescriptor>() {
+
             private Class<?> next = targetType;
 
             @Override
             public boolean hasNext() {
-                return next != Object.class;
+                return Object.class != next;
             }
 
             @Override

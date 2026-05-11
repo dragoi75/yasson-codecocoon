@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.ResourceBundleMessages;
-
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -39,9 +39,13 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
      * State holder for current json structure level.
      */
     public static class LevelParseContext {
+
         private final LevelParseContext enclosingContext;
+
         private JsonParser.Event previousEvent;
+
         private String previousKey;
+
         private boolean isProcessed;
 
         /**
@@ -122,7 +126,7 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
 
     @Override
     public boolean hasNext() {
-        return  parserInstance.hasNext();
+        return parserInstance.hasNext();
     }
 
     @Override
@@ -139,7 +143,7 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
     public JsonParser.Event next() {
         final JsonParser.Event upcomingEvent = parserInstance.next();
         contextStack.peek().setLastEvent(upcomingEvent);
-        switch (upcomingEvent) {
+        switch(upcomingEvent) {
             case START_ARRAY:
             case START_OBJECT:
                 final LevelParseContext createdContext = new LevelParseContext(contextStack.peek());
@@ -186,15 +190,13 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
 
     @Override
     public void moveTo(JsonParser.Event targetEvent) {
-        if (!contextStack.empty() && contextStack.peek().getLastEvent() == targetEvent) {
+        if (!contextStack.empty() && targetEvent == contextStack.peek().getLastEvent()) {
             return;
         }
-
         final Event upcomingEvent = next();
-        if (upcomingEvent == targetEvent) {
+        if (targetEvent == upcomingEvent) {
             return;
         }
-
         throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Event " + targetEvent + " not found." + getLastDataMsg()));
     }
 
@@ -212,18 +214,16 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
         if (!contextStack.empty() && containsEvent(eventCandidates, contextStack.peek().getLastEvent())) {
             return contextStack.peek().getLastEvent();
         }
-
         final Event upcomingEvent = next();
         if (containsEvent(eventCandidates, upcomingEvent)) {
             return upcomingEvent;
         }
-
-        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Parser event ["+Arrays.toString(eventCandidates)+"] not found." + getLastDataMsg()));
+        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(eventCandidates) + "] not found." + getLastDataMsg()));
     }
 
     private boolean containsEvent(Event[] eventCandidates, Event option) {
         for (Event evt : eventCandidates) {
-            if (evt == option) {
+            if (option == evt) {
                 return true;
             }
         }
@@ -233,8 +233,7 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
     private String getLastDataMsg() {
         StringBuilder sb = new StringBuilder();
         final LevelParseContext activeContext = getCurrentLevel();
-        sb.append(" Last data: [").append("EVENT: ").append(activeContext.getLastEvent()).append(" KEY_NAME: ")
-                .append(activeContext.getLastKeyName()).append("]");
+        sb.append(" Last data: [").append("EVENT: ").append(activeContext.getLastEvent()).append(" KEY_NAME: ").append(activeContext.getLastKeyName()).append("]");
         return sb.toString();
     }
 
@@ -246,7 +245,7 @@ public class JsonbStreamingParser implements JsonParser, JsonbCursor {
     @Override
     public void skipJsonStructure() {
         final LevelParseContext activeContext = contextStack.peek();
-        switch (activeContext.getLastEvent()) {
+        switch(activeContext.getLastEvent()) {
             case START_ARRAY:
             case START_OBJECT:
                 while (!activeContext.isParsed()) {

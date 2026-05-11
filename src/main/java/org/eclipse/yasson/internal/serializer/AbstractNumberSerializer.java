@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.SerializationCustomization;
-
 import javax.json.stream.JsonGenerator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -36,8 +36,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Configu
      */
     public AbstractNumberSerializer(SerializationCustomization customization) {
         super(customization);
-        formatter = customization != null ?
-                customization.getSerializeNumberFormatter() : null;
+        formatter = null != customization ? customization.getSerializeNumberFormatter() : null;
     }
 
     /**
@@ -51,12 +50,12 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Configu
 
     @Override
     protected void serializeValue(T obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        if (formatter != null) {
-            final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
-            ((DecimalFormat)format).applyPattern(formatter.getFormat());
-            generator.write(format.format(obj));
-        } else {
+        if (null == formatter) {
             serializeNonFormatted(obj, generator);
+        } else {
+            final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
+            ((DecimalFormat) format).applyPattern(formatter.getFormat());
+            generator.write(format.format(obj));
         }
     }
 
@@ -67,5 +66,4 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Configu
      * @param generator generator to use
      */
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
-
 }

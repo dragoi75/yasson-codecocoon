@@ -1,20 +1,20 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ReflectiveTypeUtils;
-
 import javax.json.stream.JsonGenerator;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -36,14 +36,18 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
     }
 
     private Type resolveArrayType() {
-        if (getRuntimeType() == null || getRuntimeType() == Object.class) {
-            return Object.class;
-        } else if (getRuntimeType() instanceof ParameterizedType) {
-            return ReflectiveTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
-        } else if (getRuntimeType() instanceof GenericArrayType) {
-            return ReflectiveTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+        if (null != getRuntimeType() && Object.class != getRuntimeType()) {
+            if (!(getRuntimeType() instanceof ParameterizedType)) {
+                if (!(getRuntimeType() instanceof GenericArrayType)) {
+                    return ReflectiveTypeUtils.getRawType(getRuntimeType()).getComponentType();
+                } else {
+                    return ReflectiveTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+                }
+            } else {
+                return ReflectiveTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
+            }
         } else {
-            return ReflectiveTypeUtils.getRawType(getRuntimeType()).getComponentType();
+            return Object.class;
         }
     }
 

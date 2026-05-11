@@ -1,21 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.ReflectiveTypeUtils;
 import org.eclipse.yasson.internal.model.customization.naming.CaseInsensitiveStrategy;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
-
 import javax.json.bind.config.PropertyNamingStrategy;
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -89,7 +90,7 @@ public class ClassDescriptor {
     private PropertyModel findProperty(ClassDescriptor ownerClass, String jsonField) {
         //Standard javabean properties without overridden name (most of the cases)
         final PropertyModel foundProperty = ownerClass.getPropertyModel(jsonField);
-        if (foundProperty != null && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
             return foundProperty;
         }
         //Search for overridden name on setter with @JsonbProperty annotation
@@ -165,7 +166,7 @@ public class ClassDescriptor {
      * @param parsedPropertyList class properties
      */
     public void setProperties(List<PropertyModel> parsedPropertyList) {
-        orderedProperties = parsedPropertyList.toArray(new PropertyModel[]{});
+        orderedProperties = parsedPropertyList.toArray(new PropertyModel[] {});
         this.propertyMap = parsedPropertyList.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mapper) -> mapper));
     }
 

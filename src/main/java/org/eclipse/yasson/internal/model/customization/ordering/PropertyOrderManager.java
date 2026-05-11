@@ -1,20 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model.customization.ordering;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.PropertyModel;
-
 import javax.json.bind.JsonbConfig;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,22 +54,19 @@ public class PropertyOrderManager {
     public List<PropertyModel> sortPropertiesByOrder(List<PropertyModel> propertyList, ClassDescriptor classDescriptor) {
         Map<String, PropertyModel> readNameMap = new HashMap<>();
         propertyList.stream().forEach(propItem -> readNameMap.put(propItem.getReadName(), propItem));
-
         String[] sortSequence = classDescriptor.getClassCustomization().getPropertyOrder();
         List<PropertyModel> orderedList = new ArrayList<>();
-        if (sortSequence != null) {
+        if (null != sortSequence) {
             //if @JsonbPropertyOrder annotation is defined on a class
             for (String propKey : sortSequence) {
                 final PropertyModel removedItem = readNameMap.remove(propKey);
-                if (removedItem != null) {
+                if (null != removedItem) {
                     orderedList.add(removedItem);
                 }
             }
         }
-
         orderedList.addAll(orderStrategy.orderProperties(readNameMap.values()));
         return orderedList;
-
     }
 
     /**
