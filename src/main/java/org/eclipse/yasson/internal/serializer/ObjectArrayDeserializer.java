@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.yasson.internal.JsonbDeserializer;
 
 /**
@@ -46,7 +44,7 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
     @SuppressWarnings("unchecked")
     @Override
     public T[] getInstance(JsonbDeserializer unmarshaller) {
-        if (arrayInstance == null || arrayInstance.length != items.size()) {
+        if (null == arrayInstance || items.size() != arrayInstance.length) {
             arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
         }
         return items.toArray(arrayInstance);

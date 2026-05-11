@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Constructor;
@@ -20,9 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.ReflectionHelper;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.StrategiesProvider;
@@ -72,10 +69,7 @@ public class ClassModel {
      * @param parentClassModel       Class model of parent class.
      * @param propertyNamingStrategy Property naming strategy.
      */
-    public ClassModel(Class<?> clazz,
-                      ClassCustomization customization,
-                      ClassModel parentClassModel,
-                      PropertyNamingStrategy propertyNamingStrategy) {
+    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
         this.clazz = clazz;
         this.classCustomization = customization;
         this.parentClassModel = parentClassModel;
@@ -97,7 +91,7 @@ public class ClassModel {
     private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
         //Standard javabean properties without overridden name (most of the cases)
         final PropertyModel result = classModel.getPropertyModel(jsonReadName);
-        if (result != null && result.getPropertyName().equals(result.getReadName())) {
+        if (null != result && result.getPropertyName().equals(result.getReadName())) {
             return result;
         }
         //Search for overridden name on setter with @JsonbProperty annotation
@@ -118,7 +112,7 @@ public class ClassModel {
      */
     private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
         final String propertyReadName = propertyModel.getReadName();
-        if (propertyNamingStrategy == StrategiesProvider.CASE_INSENSITIVE_STRATEGY) {
+        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == propertyNamingStrategy) {
             return jsonName.equalsIgnoreCase(propertyReadName);
         }
         return jsonName.equals(propertyReadName);

@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
@@ -46,7 +45,7 @@ public class InstanceFactory {
     }
 
     private InstanceFactory() {
-        if (DEFAULT_FACTORY != null) {
+        if (null != DEFAULT_FACTORY) {
             throw new IllegalStateException("This class should never be instantiated");
         }
     }
@@ -62,13 +61,11 @@ public class InstanceFactory {
     public static <T> T newInstance(Class<T> targetClass) {
         Supplier<T> supplier = CLASS_TO_SUPPLIER_MAP.get(targetClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (supplier == null) {
+        if (null == supplier) {
             Constructor<T> ctor = ReflectionHelper.getDefaultConstructor(targetClass, true);
             supplier = () -> ReflectionHelper.createInstanceUsingNoArgCtor(ctor);
             CLASS_TO_SUPPLIER_MAP.put(targetClass, supplier);
         }
-
         return supplier.get();
     }
-
 }

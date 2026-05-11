@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.yasson.internal.JsonbDeserializer;
 
 /**
@@ -42,8 +40,10 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
     public char[] getInstance(JsonbDeserializer unmarshaller) {
         final int size = items.size();
         final char[] charArray = new char[size];
-        for (int i = 0; i < size; i++) {
+        int i = 0;
+        while (size > i) {
             charArray[i] = items.get(i);
+            i += 1;
         }
         return charArray;
     }

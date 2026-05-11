@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.AccessibleObject;
@@ -19,7 +18,6 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.function.Function;
-
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
 /**
@@ -39,6 +37,7 @@ public abstract class PropertyValuePropagation {
      * Mode of property propagation get or set.
      */
     public enum OperationMode {
+
         /**
          * Get property operation.
          */
@@ -76,54 +75,51 @@ public abstract class PropertyValuePropagation {
         this.propertyVisibilityStrategy = strategy;
         this.getterVisible = isMethodVisible(field, getter);
         this.setterVisible = isMethodVisible(field, setter);
-
         initReadable(field, getter);
         initWritable(field, setter);
     }
 
     private void initReadable(Field field, Method getter) {
-
-        final boolean fieldReadable = field == null || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) == 0;
+        final boolean fieldReadable = null == field || 0 == (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC));
         if (!fieldReadable) {
             readable = false;
             return;
         }
-        if (getter != null && getterVisible) {
+        if (null == getter || !getterVisible) {
+            if (isFieldVisible(field, getter)) {
+                acceptField(field, OperationMode.GET);
+                readable = true;
+            }
+        } else {
             acceptMethod(getter, OperationMode.GET);
-            readable = true;
-        } else if (isFieldVisible(field, getter)) {
-            acceptField(field, OperationMode.GET);
             readable = true;
         }
     }
 
     private void initWritable(Field field, Method setter) {
-
-        final boolean fieldWritable =
-                field == null || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL)) == 0;
+        final boolean fieldWritable = null == field || 0 == (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
         if (!fieldWritable) {
             writable = false;
             return;
         }
-        if (setter != null && setterVisible && !setter.getDeclaringClass().isAnonymousClass()) {
+        if (null == setter || !setterVisible || setter.getDeclaringClass().isAnonymousClass()) {
+            if (isFieldVisible(field, setter) && !field.getDeclaringClass().isAnonymousClass()) {
+                acceptField(field, OperationMode.SET);
+                writable = true;
+            }
+        } else {
             acceptMethod(setter, OperationMode.SET);
-            writable = true;
-        } else if (isFieldVisible(field, setter) && !field.getDeclaringClass().isAnonymousClass()) {
-            acceptField(field, OperationMode.SET);
             writable = true;
         }
     }
 
     private boolean isFieldVisible(Field field, Method method) {
-        if (field == null) {
+        if (null == field) {
             return false;
         }
         Boolean accessible = isVisible(strategy -> strategy.isVisible(field), field, method);
         //overridden by strategy, or anonymous class (readable by spec)
-        if (accessible && (
-                !Modifier.isPublic(field.getModifiers())
-                        || field.getDeclaringClass().isAnonymousClass()
-                        || isNotPublicAndNonNested(field.getDeclaringClass()))) {
+        if (accessible && (!Modifier.isPublic(field.getModifiers()) || field.getDeclaringClass().isAnonymousClass() || isNotPublicAndNonNested(field.getDeclaringClass()))) {
             overrideAccessible(field);
         }
         return accessible;
@@ -134,15 +130,12 @@ public abstract class PropertyValuePropagation {
     }
 
     private boolean isMethodVisible(Field field, Method method) {
-        if (method == null || Modifier.isStatic(method.getModifiers())) {
+        if (null == method || Modifier.isStatic(method.getModifiers())) {
             return false;
         }
-
         Boolean accessible = isVisible(strategy -> strategy.isVisible(method), field, method);
         //overridden by strategy, anonymous class, or lambda
-        if (accessible && (
-                !Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isAnonymousClass() || method
-                        .getDeclaringClass().isSynthetic())) {
+        if (accessible && (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isAnonymousClass() || method.getDeclaringClass().isSynthetic())) {
             overrideAccessible(method);
         }
         return accessible;
@@ -163,9 +156,7 @@ public abstract class PropertyValuePropagation {
      * @return Optional with result of visibility check, or empty optional if no strategy is found
      */
     private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityCheckFunction, Field field, Method method) {
-        return propertyVisibilityStrategy != null
-                ? visibilityCheckFunction.apply(propertyVisibilityStrategy)
-                : visibilityCheckFunction.apply(new DefaultVisibilityStrategy(field, method));
+        return null != propertyVisibilityStrategy ? visibilityCheckFunction.apply(propertyVisibilityStrategy) : visibilityCheckFunction.apply(new DefaultVisibilityStrategy(field, method));
     }
 
     /**
@@ -266,7 +257,7 @@ public abstract class PropertyValuePropagation {
         @Override
         public boolean isVisible(Field field) {
             //don't check field if getter is not visible (forced by spec)
-            if (method != null && !isVisible(method)) {
+            if (null != method && !isVisible(method)) {
                 return false;
             }
             return Modifier.isPublic(field.getModifiers());

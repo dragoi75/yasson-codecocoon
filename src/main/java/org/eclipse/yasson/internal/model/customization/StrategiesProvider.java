@@ -9,23 +9,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import static java.util.Comparator.comparing;
-
 import static jakarta.json.bind.config.PropertyNamingStrategy.CASE_INSENSITIVE;
 import static jakarta.json.bind.config.PropertyNamingStrategy.IDENTITY;
 import static jakarta.json.bind.config.PropertyNamingStrategy.LOWER_CASE_WITH_DASHES;
@@ -41,6 +36,7 @@ import static jakarta.json.bind.config.PropertyOrderStrategy.REVERSE;
  * {@link jakarta.json.bind.config.PropertyOrderStrategy}.
  */
 public final class StrategiesProvider {
+
     private StrategiesProvider() {
     }
 
@@ -56,16 +52,16 @@ public final class StrategiesProvider {
      * @return ordering strategy
      */
     public static Consumer<List<PropertyModel>> getOrderingFunction(String strategy) {
-        switch (strategy) {
-        case LEXICOGRAPHICAL:
-            return props -> props.sort(comparing(PropertyModel::getWriteName));
-        case ANY:
-            return props -> {
-            };
-        case REVERSE:
-            return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
-        default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+        switch(strategy) {
+            case LEXICOGRAPHICAL:
+                return props -> props.sort(comparing(PropertyModel::getWriteName));
+            case ANY:
+                return props -> {
+                };
+            case REVERSE:
+                return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
+            default:
+                throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
         }
     }
 
@@ -76,21 +72,21 @@ public final class StrategiesProvider {
      * @return naming strategy
      */
     public static PropertyNamingStrategy getPropertyNamingStrategy(String strategy) {
-        switch (strategy) {
-        case LOWER_CASE_WITH_UNDERSCORES:
-            return createLowerCaseStrategyWithSeparator('_');
-        case LOWER_CASE_WITH_DASHES:
-            return createLowerCaseStrategyWithSeparator('-');
-        case UPPER_CAMEL_CASE:
-            return createUpperCamelCaseStrategy();
-        case UPPER_CAMEL_CASE_WITH_SPACES:
-            return createUpperCamelCaseWithSpaceStrategy();
-        case IDENTITY:
-            return Objects::requireNonNull;
-        case CASE_INSENSITIVE:
-            return CASE_INSENSITIVE_STRATEGY;
-        default:
-            throw new JsonbException("No property naming strategy was found for: " + strategy);
+        switch(strategy) {
+            case LOWER_CASE_WITH_UNDERSCORES:
+                return createLowerCaseStrategyWithSeparator('_');
+            case LOWER_CASE_WITH_DASHES:
+                return createLowerCaseStrategyWithSeparator('-');
+            case UPPER_CAMEL_CASE:
+                return createUpperCamelCaseStrategy();
+            case UPPER_CAMEL_CASE_WITH_SPACES:
+                return createUpperCamelCaseWithSpaceStrategy();
+            case IDENTITY:
+                return Objects::requireNonNull;
+            case CASE_INSENSITIVE:
+                return CASE_INSENSITIVE_STRATEGY;
+            default:
+                throw new JsonbException("No property naming strategy was found for: " + strategy);
         }
     }
 
@@ -98,7 +94,6 @@ public final class StrategiesProvider {
         return propertyName -> {
             Objects.requireNonNull(propertyName);
             char first = Character.toUpperCase(propertyName.charAt(0));
-
             return first + propertyName.substring(1);
         };
     }
@@ -108,15 +103,15 @@ public final class StrategiesProvider {
             String upperCased = createUpperCamelCaseStrategy().translateName(propertyName);
             CharBuffer buffer = CharBuffer.allocate(upperCased.length() * 2);
             char last = Character.MIN_VALUE;
-
-            for (int i = 0; i < upperCased.length(); ++i) {
+            int i = 0;
+            while (upperCased.length() > i) {
                 char current = upperCased.charAt(i);
-
-                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+                if (0 < i && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
                     buffer.append(' ');
                 }
                 last = current;
                 buffer.append(current);
+                ++i;
             }
             return new String(buffer.array(), 0, buffer.position());
         };
@@ -127,15 +122,15 @@ public final class StrategiesProvider {
             Objects.requireNonNull(propertyName);
             CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
             char last = Character.MIN_VALUE;
-
-            for (int i = 0; i < propertyName.length(); ++i) {
+            int i = 0;
+            while (propertyName.length() > i) {
                 char current = propertyName.charAt(i);
-
-                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+                if (0 < i && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
                     charBuffer.append(separator);
                 }
                 last = current;
                 charBuffer.append(Character.toLowerCase(current));
+                ++i;
             }
             return new String(charBuffer.array(), 0, charBuffer.position());
         };

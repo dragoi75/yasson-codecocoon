@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -54,8 +51,7 @@ public class JsonbDeserializer extends ProcessingSessionContext implements Deser
     @SuppressWarnings("unchecked")
     private <T> T deserializeElement(Type targetClass, JsonParser jsonReader) {
         try {
-            JsonDeserializerBuilder builder = new JsonDeserializerBuilder(getJsonbContext())
-                    .setType(targetClass).setJsonValueType(getRootEvent(jsonReader));
+            JsonDeserializerBuilder builder = new JsonDeserializerBuilder(getJsonbContext()).setType(targetClass).setJsonValueType(getRootEvent(jsonReader));
             Class<?> rawClass = ReflectionHelper.getRawType(targetClass);
             ClassModel modelDescriptor = getMappingContext().getOrCreateClassModel(rawClass);
             builder.setCustomization(modelDescriptor.getClassCustomization());
@@ -76,11 +72,10 @@ public class JsonbDeserializer extends ProcessingSessionContext implements Deser
     private JsonParser.Event getRootEvent(JsonParser jsonReader) {
         JsonbRiEventParser.ParsingLevelContext levelContext = ((JsonbNavigator) jsonReader).getCurrentLevel();
         //Wrapper parser is at start
-        if (levelContext.getParent() == null) {
+        if (null == levelContext.getParent()) {
             return jsonReader.next();
         }
         final JsonParser.Event finalEvent = levelContext.getLastEvent();
-        return finalEvent == JsonParser.Event.KEY_NAME ? jsonReader.next() : finalEvent;
+        return JsonParser.Event.KEY_NAME == finalEvent ? jsonReader.next() : finalEvent;
     }
-
 }

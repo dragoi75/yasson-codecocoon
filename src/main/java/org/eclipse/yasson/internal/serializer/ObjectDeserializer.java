@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Constructor;
@@ -18,10 +17,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbRiEventParser;
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbNavigator;
@@ -46,6 +43,7 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
     private static class LastPropertyModel {
 
         private final String jsonKeyName;
+
         private final PropertyModel propertyModel;
 
         LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
@@ -87,30 +85,29 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T getInstance(JsonbDeserializer unmarshaller) {
-        if (instance != null) {
+        if (null != instance) {
             return instance;
         }
         final Class<?> rawType = ReflectionHelper.getRawType(getRuntimeType());
         final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
-        if (creator != null) {
-            instance = createInstance((Class<T>) rawType, creator);
-        } else {
+        if (null == creator) {
             Constructor<T> defaultConstructor = (Constructor<T>) getClassModel().getDefaultConstructor();
-            if (defaultConstructor == null) {
+            if (null == defaultConstructor) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, rawType));
             }
             instance = ReflectionHelper.createInstanceUsingNoArgCtor(defaultConstructor);
+        } else {
+            instance = createInstance((Class<T>) rawType, creator);
         }
         //values must be set in order, in which they appears in JSON by spec
         values.forEach((key, wrapper) -> {
             //skip creator values
-            if (wrapper.getCreatorModel() != null) {
+            if (null != wrapper.getCreatorModel()) {
                 return;
             }
             final PropertyModel propertyModel = wrapper.getPropertyModel();
             propertyModel.setValue(instance, wrapper.getValue());
         });
-
         return instance;
     }
 
@@ -123,7 +120,7 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
         for (CreatorModel param : creator.getParams()) {
             final ValueWrapper valueWrapper = values.get(param.getName());
             //required by spec
-            if (valueWrapper == null) {
+            if (null == valueWrapper) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
             }
             paramValues.add(valueWrapper.getValue());
@@ -141,40 +138,30 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
     public void addResult(Object result) {
         final PropertyModel model = getModel();
         //missing property for null values
-        if (model == null) {
+        if (null == model) {
             return;
         }
-        values.put(model.getReadName(),
-                   new ValueWrapper(model, convertNullToOptional(model.getPropertyDeserializationType(), result)));
+        values.put(model.getReadName(), new ValueWrapper(model, convertNullToOptional(model.getPropertyDeserializationType(), result)));
     }
 
     @Override
     protected void deserializeNextValue(JsonParser parser, JsonbDeserializer context) {
-
         final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
         //first check jsonb creator param, since it can be different from property name
-        if (creator != null) {
+        if (null != creator) {
             final CreatorModel param = creator.findByName(getParserContext().getLastKeyName());
-            if (param != null) {
-                final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext())
-                        .setType(param.getType())
-                        .setCustomization(param.getCustomization())
-                        .buildDeserializer();
+            if (null != param) {
+                final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(param.getType()).setCustomization(param.getCustomization()).buildDeserializer();
                 Object result = deserializer.deserialize(parser, context, param.getType());
                 values.put(param.getName(), new ValueWrapper(param, result));
                 return;
             }
         }
-
         //identify field model of currently processed class model
         PropertyModel newPropertyModel = getModel();
-        if (newPropertyModel != null && newPropertyModel.isWritable()) {
+        if (null != newPropertyModel && newPropertyModel.isWritable()) {
             //create current item instance of identified object field
-            final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext())
-                    .setCustomization(newPropertyModel.getCustomization())
-                    .setType(newPropertyModel.getPropertyDeserializationType())
-                    .buildDeserializer();
-
+            final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setCustomization(newPropertyModel.getCustomization()).setType(newPropertyModel.getPropertyDeserializationType()).buildDeserializer();
             Type resolvedType = ReflectionHelper.resolveActualType(this, newPropertyModel.getPropertyDeserializationType());
             Object result = deserializer.deserialize(parser, context, resolvedType);
             values.put(newPropertyModel.getPropertyName(), new ValueWrapper(newPropertyModel, result));
@@ -188,9 +175,7 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
      */
     private void skipJsonProperty(JsonbNavigator parser, JsonbRuntimeContext jsonbContext) {
         if (jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY,
-                                                         getParserContext().getLastKeyName(),
-                                                         getRuntimeType()));
+            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, getParserContext().getLastKeyName(), getRuntimeType()));
         }
         parser.skipJsonStructure();
     }
@@ -203,7 +188,7 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
 
     protected PropertyModel getModel() {
         final String lastKeyName = getParserContext().getLastKeyName();
-        if (lastPropertyModel != null && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
+        if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
             return lastPropertyModel.getPropertyModel();
         }
         lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByJsonReadName(lastKeyName));
@@ -213,7 +198,9 @@ class ObjectDeserializer<T> extends ContainerDeserializerBase<T> {
     private static class ValueWrapper {
 
         private final CreatorModel creatorModel;
+
         private final PropertyModel propertyModel;
+
         private final Object value;
 
         ValueWrapper(CreatorModel creator, Object value) {

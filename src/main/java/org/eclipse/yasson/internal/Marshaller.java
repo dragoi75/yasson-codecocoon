@@ -10,19 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -79,10 +76,10 @@ public class Marshaller extends ProcessingSessionContext implements Serializatio
             throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
-                if (close) {
-                    jsonGenerator.close();
-                } else {
+                if (!close) {
                     jsonGenerator.flush();
+                } else {
+                    jsonGenerator.close();
                 }
             } catch (JsonGenerationException jge) {
                 LOGGER.severe(jge.getMessage());
@@ -135,13 +132,12 @@ public class Marshaller extends ProcessingSessionContext implements Serializatio
      */
     @SuppressWarnings("unchecked")
     public <T> void serializeRoot(T root, JsonGenerator generator) {
-        if (root == null) {
+        if (null == root) {
             getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, generator, this);
             return;
         }
         final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
-        if (getJsonbContext().getConfigProperties().isStrictIJson()
-                && rootSerializer instanceof AbstractValueTypeSerializer) {
+        if (getJsonbContext().getConfigProperties().isStrictIJson() && rootSerializer instanceof AbstractValueTypeSerializer) {
             throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSerializer.serialize(root, generator, this);
@@ -149,18 +145,12 @@ public class Marshaller extends ProcessingSessionContext implements Serializatio
 
     JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
         final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
-        if (serializerProvider != null) {
-            return serializerProvider
-                    .provideSerializer(new JsonbPropertyInfo()
-                                               .withRuntimeType(runtimeType));
+        if (null != serializerProvider) {
+            return serializerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(runtimeType));
         }
-        SerializerBuilder serializerBuilder = new SerializerBuilder(getJsonbContext())
-                .withObjectClass(rootClazz)
-                .setType(runtimeType);
-
+        SerializerBuilder serializerBuilder = new SerializerBuilder(getJsonbContext()).withObjectClass(rootClazz).setType(runtimeType);
         ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
         serializerBuilder.setCustomization(classModel.getClassCustomization());
         return serializerBuilder.build();
     }
-    
 }

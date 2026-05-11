@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
@@ -55,22 +53,28 @@ public class JsonStructureToParserAdapter implements JsonParser {
     @Override
     public Event next() {
         if (iterators.isEmpty()) {
-            if (rootStructure instanceof JsonObject) {
+            if (!(rootStructure instanceof JsonObject)) {
+                if (rootStructure instanceof JsonArray) {
+                    iterators.push(new JsonArrayIterator((JsonArray) rootStructure));
+                    return Event.START_ARRAY;
+                }
+            } else {
                 iterators.push(new JsonObjectIterator((JsonObject) rootStructure));
                 return Event.START_OBJECT;
-            } else if (rootStructure instanceof JsonArray) {
-                iterators.push(new JsonArrayIterator((JsonArray) rootStructure));
-                return Event.START_ARRAY;
             }
         }
         JsonStructureIterator current = iterators.peek();
         Event next = current.next();
-        if (next == Event.START_OBJECT) {
+        if (Event.START_OBJECT != next) {
+            if (Event.START_ARRAY != next) {
+                if (Event.END_OBJECT == next || Event.END_ARRAY == next) {
+                    iterators.pop();
+                }
+            } else {
+                iterators.push(new JsonArrayIterator((JsonArray) iterators.peek().getValue()));
+            }
+        } else {
             iterators.push(new JsonObjectIterator((JsonObject) iterators.peek().getValue()));
-        } else if (next == Event.START_ARRAY) {
-            iterators.push(new JsonArrayIterator((JsonArray) iterators.peek().getValue()));
-        } else if (next == Event.END_OBJECT || next == Event.END_ARRAY) {
-            iterators.pop();
         }
         return next;
     }
@@ -103,7 +107,7 @@ public class JsonStructureToParserAdapter implements JsonParser {
     private JsonNumber getJsonNumberValue() {
         JsonStructureIterator iterator = iterators.peek();
         JsonValue value = iterator.getValue();
-        if (value.getValueType() != JsonValue.ValueType.NUMBER) {
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
             throw iterator.createIncompatibleValueError();
         }
         return (JsonNumber) value;

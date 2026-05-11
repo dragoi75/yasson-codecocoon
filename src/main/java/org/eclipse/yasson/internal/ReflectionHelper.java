@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
@@ -26,9 +25,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.AbstractWrappedItem;
@@ -56,12 +53,16 @@ public class ReflectionHelper {
      * @return Class of a type.
      */
     public static Optional<Class<?>> getOptionalRawType(Type target) {
-        if (target instanceof Class) {
+        if (!(target instanceof Class)) {
+            if (!(target instanceof ParameterizedType)) {
+                if (target instanceof GenericArrayType) {
+                    return Optional.of(((GenericArrayType) target).getClass());
+                }
+            } else {
+                return Optional.of((Class<?>) ((ParameterizedType) target).getRawType());
+            }
+        } else {
             return Optional.of((Class<?>) target);
-        } else if (target instanceof ParameterizedType) {
-            return Optional.of((Class<?>) ((ParameterizedType) target).getRawType());
-        } else if (target instanceof GenericArrayType) {
-            return Optional.of(((GenericArrayType) target).getClass());
         }
         return Optional.empty();
     }
@@ -76,8 +77,7 @@ public class ReflectionHelper {
      * @return Class of a raw type.
      */
     public static Class<?> getRawType(Type target) {
-        return getOptionalRawType(target)
-                .orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.TYPE_RESOLUTION_ERROR, target)));
+        return getOptionalRawType(target).orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.TYPE_RESOLUTION_ERROR, target)));
     }
 
     /**
@@ -91,15 +91,17 @@ public class ReflectionHelper {
      * @return resolved raw class
      */
     public static Class<?> getRawType(RuntimeTypeInfo runtimeInfo, Type target) {
-        if (target instanceof Class) {
-            return (Class<?>) target;
-        } else if (target instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) target).getRawType();
+        if (!(target instanceof Class)) {
+            if (!(target instanceof ParameterizedType)) {
+                return getRawType(resolveActualType(runtimeInfo, target));
+            } else {
+                return (Class<?>) ((ParameterizedType) target).getRawType();
+            }
         } else {
-            return getRawType(resolveActualType(runtimeInfo, target));
+            return (Class<?>) target;
         }
     }
-    
+
     /**
      * Resolve a type by item.
      * If type is a {@link TypeVariable} recursively search {@link AbstractWrappedItem} for resolution of typevar.
@@ -115,12 +117,16 @@ public class ReflectionHelper {
     }
 
     private static Type resolveActualType(RuntimeTypeInfo runtimeInfo, Type target, boolean logEnabled) {
-        if (target instanceof WildcardType) {
+        if (!(target instanceof WildcardType)) {
+            if (!(target instanceof TypeVariable)) {
+                if (target instanceof ParameterizedType && null != runtimeInfo) {
+                    return resolveActualTypeArguments((ParameterizedType) target, runtimeInfo.getRuntimeType());
+                }
+            } else {
+                return resolveItemTypeVariable(runtimeInfo, (TypeVariable<?>) target, logEnabled);
+            }
+        } else {
             return determineMostSpecificBound(runtimeInfo, (WildcardType) target, logEnabled);
-        } else if (target instanceof TypeVariable) {
-            return resolveItemTypeVariable(runtimeInfo, (TypeVariable<?>) target, logEnabled);
-        } else if (target instanceof ParameterizedType && runtimeInfo != null) {
-            return resolveActualTypeArguments((ParameterizedType) target, runtimeInfo.getRuntimeType());
         }
         return target;
     }
@@ -139,7 +145,7 @@ public class ReflectionHelper {
             return Optional.empty();
         }
     }
-    
+
     /**
      * Resolve a bounded type variable type by its wrapper types.
      * Resolution could be done only if a compile time generic information is provided, either:
@@ -151,32 +157,26 @@ public class ReflectionHelper {
      * @return Type of a generic "runtime" bound, not null.
      */
     static Type resolveItemTypeVariable(RuntimeTypeInfo runtimeInfo, TypeVariable<?> genericVar, boolean logEnabled) {
-        if (runtimeInfo == null) {
+        if (null == runtimeInfo) {
             //Bound not found, treat it as an Object.class
             if (logEnabled) {
-                LOG.warning(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND,
-                        genericVar,
-                                                   genericVar.getGenericDeclaration()));
+                LOG.warning(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND, genericVar, genericVar.getGenericDeclaration()));
             }
             return Object.class;
         }
-
         //Embedded items doesn't hold information about variable types
         if (runtimeInfo instanceof EmbeddedElement) {
             return resolveItemTypeVariable(runtimeInfo.getWrapper(), genericVar, logEnabled);
         }
-
         ParameterizedType wrapperParam = locateParameterizedSuperclass(runtimeInfo.getRuntimeType());
-
         VariableTypeInheritanceSearch finder = new VariableTypeInheritanceSearch();
         Type located = finder.searchParametrizedType(wrapperParam, genericVar);
-        if (located != null) {
+        if (null != located) {
             if (located instanceof TypeVariable) {
                 return resolveItemTypeVariable(runtimeInfo.getWrapper(), (TypeVariable<?>) located, logEnabled);
             }
             return located;
         }
-
         return resolveItemTypeVariable(runtimeInfo.getWrapper(), genericVar, logEnabled);
     }
 
@@ -190,26 +190,23 @@ public class ReflectionHelper {
     public static Type resolveActualTypeArguments(ParameterizedType toResolve, Type searchTarget) {
         final Type[] pendingArgs = toResolve.getActualTypeArguments();
         Type[] concreteArgs = new Type[pendingArgs.length];
-        for (int idx = 0; idx < pendingArgs.length; idx++) {
-            if (!(pendingArgs[idx] instanceof TypeVariable)) {
-                concreteArgs[idx] = pendingArgs[idx];
-            } else {
-                concreteArgs[idx] = new VariableTypeInheritanceSearch()
-                        .searchParametrizedType(searchTarget, (TypeVariable<?>) pendingArgs[idx]);
-                if (concreteArgs[idx] == null) {
+        int idx = 0;
+        while (pendingArgs.length > idx) {
+            if ((pendingArgs[idx] instanceof TypeVariable)) {
+                concreteArgs[idx] = new VariableTypeInheritanceSearch().searchParametrizedType(searchTarget, (TypeVariable<?>) pendingArgs[idx]);
+                if (null == concreteArgs[idx]) {
                     //No generic information available
-                    throw new IllegalStateException(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND,
-                                                                        pendingArgs[idx],
-                            searchTarget));
+                    throw new IllegalStateException(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND, pendingArgs[idx], searchTarget));
                 }
+            } else {
+                concreteArgs[idx] = pendingArgs[idx];
             }
             if (concreteArgs[idx] instanceof ParameterizedType) {
                 concreteArgs[idx] = resolveActualTypeArguments((ParameterizedType) concreteArgs[idx], searchTarget);
             }
+            idx += 1;
         }
-        return Arrays.equals(concreteArgs, pendingArgs)
-                ? toResolve
-                : new ResolvedParameterizedType(toResolve, concreteArgs);
+        return Arrays.equals(concreteArgs, pendingArgs) ? toResolve : new ResolvedParameterizedType(toResolve, concreteArgs);
     }
 
     /**
@@ -242,7 +239,7 @@ public class ReflectionHelper {
         return AccessController.doPrivileged((PrivilegedAction<Constructor<T>>) () -> {
             try {
                 final Constructor<T> declaredCtor = targetClass.getDeclaredConstructor();
-                if (declaredCtor.getModifiers() == Modifier.PROTECTED) {
+                if (Modifier.PROTECTED == declaredCtor.getModifiers()) {
                     declaredCtor.setAccessible(true);
                 }
                 return declaredCtor;
@@ -272,11 +269,9 @@ public class ReflectionHelper {
      */
     public static ParameterizedType locateParameterizedType(Class<?> searchClass, Class<?> targetInterface) {
         Class currentClass = searchClass;
-        while (currentClass != Object.class) {
+        while (Object.class != currentClass) {
             for (Type currentIface : currentClass.getGenericInterfaces()) {
-                if (currentIface instanceof ParameterizedType
-                        && targetInterface.isAssignableFrom(
-                        ReflectionHelper.getRawType(((ParameterizedType) currentIface).getRawType()))) {
+                if (currentIface instanceof ParameterizedType && targetInterface.isAssignableFrom(ReflectionHelper.getRawType(((ParameterizedType) currentIface).getRawType()))) {
                     return (ParameterizedType) currentIface;
                 }
             }
@@ -305,7 +300,7 @@ public class ReflectionHelper {
     }
 
     private static ParameterizedType locateParameterizedSuperclass(Type target) {
-        if (target == null || target instanceof ParameterizedType) {
+        if (null == target || target instanceof ParameterizedType) {
             return (ParameterizedType) target;
         }
         if (!(target instanceof Class)) {
@@ -333,7 +328,7 @@ public class ReflectionHelper {
     }
 
     private static Class<?> getMostSpecificBound(RuntimeTypeInfo runtimeInfo, Class<?> mostSpecificClass, Type candidateType, boolean logEnabled) {
-        if (candidateType == Object.class) {
+        if (Object.class == candidateType) {
             return mostSpecificClass;
         }
         //if bound is type variable search recursively for wrapper generic expansion

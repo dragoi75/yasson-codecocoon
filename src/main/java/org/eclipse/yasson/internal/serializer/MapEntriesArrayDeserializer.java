@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbDeserializer;
 import org.eclipse.yasson.internal.JsonbNavigator;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -45,6 +42,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * Map entries parser internal state.
      */
     private enum State {
+
         /**
          * Expecting the beginning of next Map entry JSON object.
          */
@@ -98,7 +96,6 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
     // External parser shall process whole JSON value following 'key' or 'value' MapEntry JSON Object
     // attribute identifiers. Finite-state machine just moves to ENTRY_KEY state to process next MapEntry
     // attribute or to finish current MapEntry parsing when END_OBJECT token was received.
-
     // JSON tokens are mapped to event method calls defined in ContainerDeserializer:
     //  * START_ARRAY  -> startArray
     //  * START_OBJECT -> startObject
@@ -113,7 +110,6 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
     // so JSON token dispatching is already implemented in ContainerDeserializer interface.
     // Each method needs just current state dispatcher (switch statement) to implement finite-state machine
     // transition function T(token, state) -> state
-
     /**
      * Internal container de-serializer context.
      */
@@ -182,7 +178,6 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
         public JsonbDeserializer getUnmarshallerContext() {
             return unmarshallerContext;
         }
-
     }
 
     /**
@@ -267,33 +262,33 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
         ((JsonbNavigator) ctx.parser).moveTo(JsonParser.Event.START_ARRAY);
         while (parser.hasNext() && ctx.parse()) {
             final JsonParser.Event event = parser.next();
-            switch (event) {
-            case START_ARRAY:
-                startArray(ctx, event);
-                break;
-            case START_OBJECT:
-                startObject(ctx, event);
-                break;
-            case KEY_NAME:
-                keyName(ctx, event);
-                break;
-            case VALUE_STRING:
-            case VALUE_NUMBER:
-            case VALUE_TRUE:
-            case VALUE_FALSE:
-                simpleValue(ctx, event);
-                break;
-            case VALUE_NULL:
-                valueNull(ctx, event);
-                break;
-            case END_ARRAY:
-                endArray(ctx, event);
-                break;
-            case END_OBJECT:
-                endObject(ctx, event);
-                break;
-            default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+            switch(event) {
+                case START_ARRAY:
+                    startArray(ctx, event);
+                    break;
+                case START_OBJECT:
+                    startObject(ctx, event);
+                    break;
+                case KEY_NAME:
+                    keyName(ctx, event);
+                    break;
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_TRUE:
+                case VALUE_FALSE:
+                    simpleValue(ctx, event);
+                    break;
+                case VALUE_NULL:
+                    valueNull(ctx, event);
+                    break;
+                case END_ARRAY:
+                    endArray(ctx, event);
+                    break;
+                case END_OBJECT:
+                    endObject(ctx, event);
+                    break;
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
             }
         }
         return instance;
@@ -306,15 +301,15 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     public void startArray(Context ctx, JsonParser.Event event) {
-        switch (state) {
-        case ENTRY_KEY_OBJECT:
-            key = deserializeContent(ctx, mapKeyType, event);
-            break;
-        case ENTRY_VALUE_OBJECT:
-            value = deserializeContent(ctx, mapValueType, event);
-            break;
-        default:
-            handleSyntaxError(state, event);
+        switch(state) {
+            case ENTRY_KEY_OBJECT:
+                key = deserializeContent(ctx, mapKeyType, event);
+                break;
+            case ENTRY_VALUE_OBJECT:
+                value = deserializeContent(ctx, mapValueType, event);
+                break;
+            default:
+                handleSyntaxError(state, event);
         }
         state = State.ENTRY_KEY;
     }
@@ -326,18 +321,18 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void startObject(Context ctx, JsonParser.Event event) {
-        switch (state) {
-        case NEXT_ENTRY:
-            clearMapEntry();
-            break;
-        case ENTRY_KEY_OBJECT:
-            key = deserializeContent(ctx, mapKeyType, event);
-            break;
-        case ENTRY_VALUE_OBJECT:
-            value = deserializeContent(ctx, mapValueType, event);
-            break;
-        default:
-            handleSyntaxError(state, event);
+        switch(state) {
+            case NEXT_ENTRY:
+                clearMapEntry();
+                break;
+            case ENTRY_KEY_OBJECT:
+                key = deserializeContent(ctx, mapKeyType, event);
+                break;
+            case ENTRY_VALUE_OBJECT:
+                value = deserializeContent(ctx, mapValueType, event);
+                break;
+            default:
+                handleSyntaxError(state, event);
         }
         state = State.ENTRY_KEY;
     }
@@ -350,17 +345,19 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void keyName(Context ctx, JsonParser.Event event) {
-        if (state == State.ENTRY_KEY) {
-            final String key = ctx.getParser().getString();
-            if (keyEntryName.equals(key)) {
-                state = State.ENTRY_KEY_OBJECT;
-            } else if (valueEntryName.equals(key)) {
-                state = State.ENTRY_VALUE_OBJECT;
-            } else {
-                throw new JsonbException("Invalid Map entry key: " + key);
-            }
-        } else {
+        if (State.ENTRY_KEY != state) {
             handleSyntaxError(state, event);
+        } else {
+            final String key = ctx.getParser().getString();
+            if (!keyEntryName.equals(key)) {
+                if (!valueEntryName.equals(key)) {
+                    throw new JsonbException("Invalid Map entry key: " + key);
+                } else {
+                    state = State.ENTRY_VALUE_OBJECT;
+                }
+            } else {
+                state = State.ENTRY_KEY_OBJECT;
+            }
         }
     }
 
@@ -371,15 +368,15 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void simpleValue(Context ctx, JsonParser.Event event) {
-        switch (state) {
-        case ENTRY_KEY_OBJECT:
-            key = deserializeContent(ctx, mapKeyType, event);
-            break;
-        case ENTRY_VALUE_OBJECT:
-            value = deserializeContent(ctx, mapValueType, event);
-            break;
-        default:
-            handleSyntaxError(state, event);
+        switch(state) {
+            case ENTRY_KEY_OBJECT:
+                key = deserializeContent(ctx, mapKeyType, event);
+                break;
+            case ENTRY_VALUE_OBJECT:
+                value = deserializeContent(ctx, mapValueType, event);
+                break;
+            default:
+                handleSyntaxError(state, event);
         }
         state = State.ENTRY_KEY;
     }
@@ -391,12 +388,12 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void valueNull(Context ctx, JsonParser.Event event) {
-        switch (state) {
-        case ENTRY_KEY_OBJECT:
-        case ENTRY_VALUE_OBJECT:
-            break;
-        default:
-            handleSyntaxError(state, event);
+        switch(state) {
+            case ENTRY_KEY_OBJECT:
+            case ENTRY_VALUE_OBJECT:
+                break;
+            default:
+                handleSyntaxError(state, event);
         }
         state = State.ENTRY_KEY;
     }
@@ -409,10 +406,10 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void endArray(Context ctx, JsonParser.Event event) {
-        if (state == State.NEXT_ENTRY) {
-            ctx.finish();
-        } else {
+        if (State.NEXT_ENTRY != state) {
             handleSyntaxError(state, event);
+        } else {
+            ctx.finish();
         }
         state = State.ARRAY_END;
     }
@@ -426,17 +423,16 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event JSON parser token (event)
      */
     private void endObject(Context ctx, JsonParser.Event event) {
-        if (state == State.ENTRY_KEY) {
-            instance.put(key, value);
-        } else {
+        if (State.ENTRY_KEY != state) {
             handleSyntaxError(state, event);
+        } else {
+            instance.put(key, value);
         }
         state = State.NEXT_ENTRY;
     }
 
     // It's switch called from switch, but it simplified proper error message selection depending
     // on current state and token.
-
     /**
      * Throw more specific exception for map deserialization JSON parser syntax errors.
      *
@@ -444,28 +440,21 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      * @param event current JSON token
      */
     private static void handleSyntaxError(State state, JsonParser.Event event) {
-        switch (state) {
-        // Error handling for individual states and undefined transition from them.
-        case NEXT_ENTRY:
-            throw new JsonbException("Map deserialization error: got " + event.name()
-                                             + " when expecting beginning of map entry JSON object or end of whole map entries "
-                                             + "array");
-        case ENTRY_KEY:
-            throw new JsonbException("Map deserialization error: got " + event.name()
-                                             + " when expecting map entry attribute name 'key' or 'value' or end of map entry "
-                                             + "JSON object");
-        case ENTRY_KEY_OBJECT:
-            throw new JsonbException("Map deserialization error: got " + event.name()
-                                             + " when expecting map entry attribute value related to target map entry key");
-        case ENTRY_VALUE_OBJECT:
-            throw new JsonbException("Map deserialization error: got " + event.name()
-                                             + " when expecting map entry attribute value related to target map entry value");
+        switch(state) {
+            // Error handling for individual states and undefined transition from them.
+            case NEXT_ENTRY:
+                throw new JsonbException("Map deserialization error: got " + event.name() + " when expecting beginning of map entry JSON object or end of whole map entries " + "array");
+            case ENTRY_KEY:
+                throw new JsonbException("Map deserialization error: got " + event.name() + " when expecting map entry attribute name 'key' or 'value' or end of map entry " + "JSON object");
+            case ENTRY_KEY_OBJECT:
+                throw new JsonbException("Map deserialization error: got " + event.name() + " when expecting map entry attribute value related to target map entry key");
+            case ENTRY_VALUE_OBJECT:
+                throw new JsonbException("Map deserialization error: got " + event.name() + " when expecting map entry attribute value related to target map entry value");
             // Following cases are theoretically unreachable, but let's have full states list to handle coding error
-        case ARRAY_END:
-            throw new JsonbException("Map deserialization error: got " + event.name()
-                                             + " when current map deserialization was already finished");
-        default:
-            throw new IllegalStateException("Unknown map deserialization parser state: " + state.name());
+            case ARRAY_END:
+                throw new JsonbException("Map deserialization error: got " + event.name() + " when current map deserialization was already finished");
+            default:
+                throw new IllegalStateException("Unknown map deserialization parser state: " + state.name());
         }
     }
 
@@ -479,8 +468,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
      */
     @SuppressWarnings("unchecked")
     private <T> T deserializeContent(Context ctx, Type contentType, JsonParser.Event event) {
-        final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = ContainerDeserializerUtils
-                .newCollectionOrMapItem(this, contentType, ctx.getUnmarshallerContext().getJsonbContext(), event);
+        final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = ContainerDeserializerUtils.newCollectionOrMapItem(this, contentType, ctx.getUnmarshallerContext().getJsonbContext(), event);
         return (T) deserializer.deserialize(ctx.getParser(), ctx.getUnmarshallerContext(), contentType);
     }
 
@@ -491,5 +479,4 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractWrappedItem<Map<K
         key = null;
         value = null;
     }
-
 }

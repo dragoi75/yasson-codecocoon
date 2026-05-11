@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.time.Instant;
@@ -24,7 +23,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -57,9 +55,7 @@ public class CalendarTypeDeserializer extends AbstractDateTimeDeserializer<Calen
 
     @Override
     protected Calendar parseDefault(String jsonValue, Locale locale) {
-        DateTimeFormatter formatter = jsonValue.contains("T")
-                ? DateTimeFormatter.ISO_DATE_TIME
-                : DateTimeFormatter.ISO_DATE;
+        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
         return parseWithFormatter(jsonValue, formatter.withLocale(locale));
     }
 
@@ -68,10 +64,10 @@ public class CalendarTypeDeserializer extends AbstractDateTimeDeserializer<Calen
         final TemporalAccessor parsed = formatter.parse(jsonValue);
         LocalTime time = parsed.query(TemporalQueries.localTime());
         ZoneId zone = parsed.query(TemporalQueries.zone());
-        if (zone == null) {
+        if (null == zone) {
             zone = UTC;
         }
-        if (time == null) {
+        if (null == time) {
             time = ZERO_LOCAL_TIME;
         }
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
