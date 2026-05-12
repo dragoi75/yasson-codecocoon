@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ComponentMatcher {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbBindingContext jsonbContext;
 
     /**
      * Flag for searching for generic serializers and adapters in runtime.
@@ -61,7 +61,7 @@ public class ComponentMatcher {
      * Create component matcher.
      * @param context mandatory
      */
-    ComponentMatcher(JsonbContext context) {
+    ComponentMatcher(JsonbBindingContext context) {
         Objects.requireNonNull(context);
         this.jsonbContext = context;
         userComponents = new ConcurrentHashMap<>();

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -54,14 +54,14 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      */
     protected Customization customization;
 
-    protected final JsonbContext jsonbContext;
+    protected final JsonbBindingContext jsonbContext;
 
     /**
      * Crates a builder.
      *
      * @param jsonbContext Not null.
      */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
+    public AbstractSerializerBuilder(JsonbBindingContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
     }
@@ -151,7 +151,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbBindingContext getJsonbContext() {
         return jsonbContext;
     }
 

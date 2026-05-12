@@ -41,9 +41,9 @@ public class MappingContext {
 
         private ClassParser classParser;
 
-        private JsonbContext jsonbContext;
+        private JsonbBindingContext jsonbContext;
 
-        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
+        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbBindingContext jsonbContext) {
             this.parentClassModel = parentClassModel;
             this.classParser = classParser;
             this.jsonbContext = jsonbContext;
@@ -59,7 +59,7 @@ public class MappingContext {
         }
     }
 
-    private final JsonbContext jsonbContext;
+    private final JsonbBindingContext jsonbContext;
 
     private final ConcurrentHashMap<Class<?>, ClassModel> classes = new ConcurrentHashMap<>();
 
@@ -72,7 +72,7 @@ public class MappingContext {
      *
      * @param jsonbContext Context. Required.
      */
-    public MappingContext(JsonbContext jsonbContext) {
+    public MappingContext(JsonbBindingContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.classParser = new ClassParser(jsonbContext);

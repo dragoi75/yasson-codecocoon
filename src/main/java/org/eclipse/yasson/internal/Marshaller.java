@@ -49,7 +49,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      * @param jsonbContext Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public Marshaller(JsonbBindingContext jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -59,7 +59,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      *
      * @param jsonbContext Current context.
      */
-    public Marshaller(JsonbContext jsonbContext) {
+    public Marshaller(JsonbBindingContext jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
     }

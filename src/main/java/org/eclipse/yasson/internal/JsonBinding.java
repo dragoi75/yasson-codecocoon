@@ -43,10 +43,10 @@ import java.util.Optional;
  */
 public class JsonBinding implements YassonJsonb {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbBindingContext jsonbContext;
 
     JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+        this.jsonbContext = new JsonbBindingContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
     }
 
     private <T> T deserialize(final Type type, final JsonParser parser, final Unmarshaller unmarshaller) {

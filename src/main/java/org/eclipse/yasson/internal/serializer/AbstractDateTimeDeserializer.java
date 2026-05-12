@@ -13,9 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -72,7 +71,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
         }
     }
 
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbBindingContext context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }

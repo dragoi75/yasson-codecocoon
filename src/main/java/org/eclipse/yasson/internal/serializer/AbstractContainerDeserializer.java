@@ -121,11 +121,11 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      */
     protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
 
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
+    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbBindingContext ctx) {
         return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
     }
 
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbBindingContext ctx) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
         Type actualValueType = ReflectionUtils.resolveType(this, valueType);

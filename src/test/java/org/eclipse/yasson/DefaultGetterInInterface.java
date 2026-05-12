@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,7 +119,7 @@ public class DefaultGetterInInterface {
 
     @Test
     public void testWithInheritedAndDefault() throws NoSuchMethodException {
-        JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+        JsonbBindingContext jsonbContext = new JsonbBindingContext(new JsonbConfig(), JsonProvider.provider());
 
         // direct implementation only (no default implementation)
         Method pojoGetter = jsonbContext.getMappingContext().getOrCreateClassModel(Pojo.class).getPropertyModel("getterI").getPropagation().getGetter();

@@ -23,26 +23,26 @@ import java.lang.reflect.Type;
  *
  * @author Roman Grigoriadi
  */
-public class Property {
+public class PropertyDescriptor {
 
-    private final String name;
+    private final String identifier;
 
-    private final JsonbAnnotatedElement<Class<?>> declaringClassElement;
+    private final JsonbAnnotatedElement<Class<?>> enclosingClassMeta;
 
-    private JsonbAnnotatedElement<Field> fieldElement;
+    private JsonbAnnotatedElement<Field> backingFieldMeta;
 
-    private JsonbAnnotatedElement<Method> getterElement;
+    private JsonbAnnotatedElement<Method> readMethodElement;
 
-    private JsonbAnnotatedElement<Method> setterElement;
+    private JsonbAnnotatedElement<Method> writeMethodElement;
 
     /**
      * Create instance of property.
-     * @param name not null
-     * @param declaringClassModel Class model for a class declaring property.
+     * @param identifier not null
+     * @param enclosingClassMeta Class model for a class declaring property.
      */
-    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
-        this.name = name;
-        this.declaringClassElement = declaringClassModel;
+    public PropertyDescriptor(String identifier, JsonbAnnotatedElement<Class<?>> enclosingClassMeta) {
+        this.identifier = identifier;
+        this.enclosingClassMeta = enclosingClassMeta;
     }
 
     /**
@@ -51,7 +51,7 @@ public class Property {
      * @return name
      */
     public String getName() {
-        return name;
+        return identifier;
     }
 
     /**
@@ -60,17 +60,17 @@ public class Property {
      * @return field if present
      */
     public Field getField() {
-        if (fieldElement == null) {
+        if (backingFieldMeta == null) {
             return null;
         }
-        return fieldElement.getElement();
+        return backingFieldMeta.getElement();
     }
 
     /**
-     * @param field field not null
+     * @param backingMember field not null
      */
-    public void setField(Field field) {
-        this.fieldElement = new JsonbAnnotatedElement<>(field);
+    public void setField(Field backingMember) {
+        this.backingFieldMeta = new JsonbAnnotatedElement<>(backingMember);
     }
 
     /**
@@ -79,17 +79,17 @@ public class Property {
      * @return getter if present
      */
     public Method getGetter() {
-        if (getterElement == null) {
+        if (readMethodElement == null) {
             return null;
         }
-        return getterElement.getElement();
+        return readMethodElement.getElement();
     }
 
     /**
-     * @param getter not null
+     * @param readMethod not null
      */
-    public void setGetter(Method getter) {
-        this.getterElement = new JsonbAnnotatedElement<>(getter);
+    public void setGetter(Method readMethod) {
+        this.readMethodElement = new JsonbAnnotatedElement<>(readMethod);
     }
 
     /**
@@ -98,17 +98,17 @@ public class Property {
      * @return setter if present
      */
     public Method getSetter() {
-        if (setterElement == null) {
+        if (writeMethodElement == null) {
             return null;
         }
-        return setterElement.getElement();
+        return writeMethodElement.getElement();
     }
 
     /**
-     * @param setter setter not null
+     * @param writeMethod setter not null
      */
-    public void setSetter(Method setter) {
-        this.setterElement = new JsonbAnnotatedElement<>(setter);
+    public void setSetter(Method writeMethod) {
+        this.writeMethodElement = new JsonbAnnotatedElement<>(writeMethod);
     }
 
     /**
@@ -117,7 +117,7 @@ public class Property {
      * @return ClassModel
      */
     public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
-        return declaringClassElement;
+        return enclosingClassMeta;
     }
 
     /**
@@ -134,7 +134,7 @@ public class Property {
         } else if (getSetter() != null) {
             return getSetterType();
         }
-        throw new JsonbException("Empty property: " + name);
+        throw new JsonbException("Empty property: " + identifier);
     }
 
     public Type getGetterType() {
@@ -145,11 +145,11 @@ public class Property {
     }
 
     public Type getSetterType() {
-        Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
-        if (genericParameterTypes.length != 1) {
+        Type[] typeParameters = getSetter().getGenericParameterTypes();
+        if (typeParameters.length != 1) {
             throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
-        return genericParameterTypes[0];
+        return typeParameters[0];
     }
 
     /**
@@ -157,7 +157,7 @@ public class Property {
      * @return field with annotations
      */
     public JsonbAnnotatedElement<Field> getFieldElement() {
-        return fieldElement;
+        return backingFieldMeta;
     }
 
     /**
@@ -165,7 +165,7 @@ public class Property {
      * @return getter with annotations
      */
     public JsonbAnnotatedElement<Method> getGetterElement() {
-        return getterElement;
+        return readMethodElement;
     }
 
     /**
@@ -173,7 +173,7 @@ public class Property {
      * @return setter with annotations
      */
     public JsonbAnnotatedElement<Method> getSetterElement() {
-        return setterElement;
+        return writeMethodElement;
     }
 
 }

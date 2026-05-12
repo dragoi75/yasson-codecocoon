@@ -29,7 +29,7 @@ import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
@@ -56,7 +56,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      *
      * @param jsonbContext Context.
      */
-    public DeserializerBuilder(JsonbContext jsonbContext) {
+    public DeserializerBuilder(JsonbBindingContext jsonbContext) {
         super(jsonbContext);
     }
 

@@ -22,7 +22,7 @@ import org.junit.rules.ExpectedException;
 
 public class ConstructorPropertiesAnnotationIntrospectorTest {
 
-    private JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private JsonbBindingContext jsonbContext = new JsonbBindingContext(new JsonbConfig(), JsonProvider.provider());
     private AnnotationFinder constructorPropertiesFinder = AnnotationFinder.findConstructorProperties();
 
     /**

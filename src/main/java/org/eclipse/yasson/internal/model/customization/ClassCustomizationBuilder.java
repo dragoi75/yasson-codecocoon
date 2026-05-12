@@ -13,7 +13,6 @@
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 

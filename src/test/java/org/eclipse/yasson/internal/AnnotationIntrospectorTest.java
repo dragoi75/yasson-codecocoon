@@ -28,7 +28,7 @@ import org.junit.rules.ExpectedException;
  */
 public class AnnotationIntrospectorTest {
 
-    private JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
+    private JsonbBindingContext jsonbContext = new JsonbBindingContext(new JsonbConfig(), JsonProvider.provider());
 
     /**
      * class under test.

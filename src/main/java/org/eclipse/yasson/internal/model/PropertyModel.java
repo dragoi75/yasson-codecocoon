@@ -13,7 +13,7 @@
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
@@ -73,7 +73,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      */
     final private PropertyCustomization customization;
 
-    private final PropertyValuePropagation propagation;
+    private final PropertyValuePropagator propagation;
 
     private final JsonbSerializer<?> propertySerializer;
 
@@ -88,7 +88,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      * @param property Property.
      * @param jsonbContext Context.
      */
-    public PropertyModel(ClassModel classModel, Property property, JsonbContext jsonbContext) {
+    public PropertyModel(ClassModel classModel, PropertyDescriptor property, JsonbBindingContext jsonbContext) {
         this.classModel = classModel;
         this.propertyName = property.getName();
         this.propertyType = property.getPropertyType();
@@ -147,7 +147,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return getterMethodType == null ? propertyType : getterMethodType.getMethodType();
     }
 
-    private AdapterBinding getUserAdapterBinding(Property property, JsonbContext jsonbContext) {
+    private AdapterBinding getUserAdapterBinding(PropertyDescriptor property, JsonbBindingContext jsonbContext) {
         final AdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
         if (adapterBinding != null) {
             return adapterBinding;
@@ -155,7 +155,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return jsonbContext.getComponentMatcher().getAdapterBinding(propertyType, null).orElse(null);
     }
 
-    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbContext jsonbContext) {
+    private SerializerBinding<?> getUserSerializerBinding(PropertyDescriptor property, JsonbBindingContext jsonbContext) {
         final SerializerBinding serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
         if (serializerBinding != null) {
             return serializerBinding;
@@ -163,7 +163,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return jsonbContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
     }
 
-    private PropertyCustomization introspectCustomization(Property property, JsonbContext jsonbContext) {
+    private PropertyCustomization introspectCustomization(PropertyDescriptor property, JsonbBindingContext jsonbContext) {
         final AnnotationIntrospector introspector = jsonbContext.getAnnotationIntrospector();
         final PropertyCustomizationBuilder builder = new PropertyCustomizationBuilder();
         //drop all other annotations for transient properties
@@ -211,7 +211,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return builder.buildPropertyCustomization();
     }
 
-    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbContext jsonbContext) {
+    private void introspectDateFormatter(PropertyDescriptor property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbBindingContext jsonbContext) {
         /*
          * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
@@ -237,7 +237,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         }
     }
 
-    private void introspectNumberFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder) {
+    private void introspectNumberFormatter(PropertyDescriptor property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder) {
         /*
          * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
@@ -405,7 +405,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
      *
      * @return Property model
      */
-    public PropertyValuePropagation getPropagation() {
+    public PropertyValuePropagator getPropagation() {
         return propagation;
     }
 }

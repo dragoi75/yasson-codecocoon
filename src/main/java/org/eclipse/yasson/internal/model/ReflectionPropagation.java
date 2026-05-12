@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
-
 import javax.json.bind.config.PropertyVisibilityStrategy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -21,13 +19,13 @@ import java.lang.reflect.Method;
 /**
  * @author Roman Grigoriadi
  */
-public class ReflectionPropagation extends PropertyValuePropagation {
+public class ReflectionPropagation extends PropertyValuePropagator {
 
     private GetValueCommand getValueCommand;
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
+    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
         super(property, strategy);
     }
 
@@ -35,7 +33,7 @@ public class ReflectionPropagation extends PropertyValuePropagation {
      * {@inheritDoc}
      */
     @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
+    protected void registerMethod(Method method, OperationType mode) {
         switch (mode) {
             case GET:
                 getValueCommand = new GetFromGetter(method);
@@ -51,7 +49,7 @@ public class ReflectionPropagation extends PropertyValuePropagation {
      * {@inheritDoc}
      */
     @Override
-    protected void acceptField(Field field, OperationMode mode) {
+    protected void registerField(Field field, OperationType mode) {
         switch (mode) {
             case GET:
                 getValueCommand = new GetFromField(field);

@@ -14,7 +14,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbBindingContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.model.ClassModel;
@@ -80,7 +80,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        JsonbBindingContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
         if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller)ctx)) {
             return;
         }

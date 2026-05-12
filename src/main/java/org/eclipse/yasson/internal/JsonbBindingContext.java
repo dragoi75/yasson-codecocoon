@@ -33,42 +33,42 @@ import java.util.logging.Logger;
  *
  * @author Roman Grigoriadi
  */
-public class JsonbContext {
+public class JsonbBindingContext {
     
-    private static final Logger log = Logger.getLogger(JsonbContext.class.getName());
+    private static final Logger ERROR_RECORDER = Logger.getLogger(JsonbBindingContext.class.getName());
 
-    private final JsonbConfig jsonbConfig;
+    private final JsonbConfig bindingConfig;
 
-    private final MappingContext mappingContext;
+    private final MappingContext mapperContext;
 
-    private final JsonbComponentInstanceCreator componentInstanceCreator;
+    private final JsonbComponentInstanceCreator componentFactory;
 
-    private final JsonProvider jsonProvider;
+    private final JsonProvider jsonSource;
 
-    private final ComponentMatcher componentMatcher;
+    private final ComponentMatcher componentFilter;
 
-    private final AnnotationIntrospector annotationIntrospector;
+    private final AnnotationIntrospector annotationInspector;
 
-    private final JsonbConfigProperties configProperties;
+    private final JsonbConfigProperties configurationProperties;
 
-    private final InstanceCreator instanceCreator;
+    private final InstanceCreator instanceFactory;
 
     /**
      * Creates and initialize context.
      *
-     * @param jsonbConfig jsonb jsonbConfig not null
-     * @param jsonProvider provider of JSONP
+     * @param bindingConfig jsonb jsonbConfig not null
+     * @param jsonSource provider of JSONP
      */
-    public JsonbContext(JsonbConfig jsonbConfig, JsonProvider jsonProvider) {
-        Objects.requireNonNull(jsonbConfig);
-        this.jsonbConfig = jsonbConfig;
-        this.mappingContext = new MappingContext(this);
-        this.instanceCreator = new InstanceCreator();
-        this.componentInstanceCreator = initComponentInstanceCreator(instanceCreator);
-        this.componentMatcher = new ComponentMatcher(this);
-        this.annotationIntrospector = new AnnotationIntrospector(this);
-        this.jsonProvider = jsonProvider;
-        this.configProperties = new JsonbConfigProperties(jsonbConfig);
+    public JsonbBindingContext(JsonbConfig bindingConfig, JsonProvider jsonSource) {
+        Objects.requireNonNull(bindingConfig);
+        this.bindingConfig = bindingConfig;
+        this.mapperContext = new MappingContext(this);
+        this.instanceFactory = new InstanceCreator();
+        this.componentFactory = initializeComponentInstanceCreator(instanceFactory);
+        this.componentFilter = new ComponentMatcher(this);
+        this.annotationInspector = new AnnotationIntrospector(this);
+        this.jsonSource = jsonSource;
+        this.configurationProperties = new JsonbConfigProperties(bindingConfig);
     }
 
     /**
@@ -77,7 +77,7 @@ public class JsonbContext {
      * @return Configuration.
      */
     public JsonbConfig getConfig() {
-        return jsonbConfig;
+        return bindingConfig;
     }
 
     /**
@@ -86,7 +86,7 @@ public class JsonbContext {
      * @return Mapping context.
      */
     public MappingContext getMappingContext() {
-        return mappingContext;
+        return mapperContext;
     }
 
 
@@ -96,7 +96,7 @@ public class JsonbContext {
      * @return JSONP provider.
      */
     public JsonProvider getJsonProvider() {
-        return jsonProvider;
+        return jsonSource;
     }
 
     /**
@@ -105,7 +105,7 @@ public class JsonbContext {
      * @return Instance creator.
      */
     public JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        return componentInstanceCreator;
+        return componentFactory;
     }
 
     /**
@@ -114,7 +114,7 @@ public class JsonbContext {
      * @return Component matcher.
      */
     public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
+        return componentFilter;
     }
 
     /**
@@ -123,12 +123,12 @@ public class JsonbContext {
      * @return Annotation introspector.
      */
     public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationIntrospector;
+        return annotationInspector;
     }
 
 
     public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
+        return configurationProperties;
     }
 
 
@@ -137,25 +137,25 @@ public class JsonbContext {
      * @return InstanceCreator
      */
     public InstanceCreator getInstanceCreator() {
-        return instanceCreator;
+        return instanceFactory;
     }
 
-    private JsonbComponentInstanceCreator initComponentInstanceCreator(InstanceCreator instanceCreator) {
-        ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
+    private JsonbComponentInstanceCreator initializeComponentInstanceCreator(InstanceCreator instanceFactory) {
+        ServiceLoader<JsonbComponentInstanceCreator> serviceRegistry = AccessController
                 .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
                         .load(JsonbComponentInstanceCreator.class));
-        List<JsonbComponentInstanceCreator> creators = new ArrayList<>();
-        for (JsonbComponentInstanceCreator creator : loader) {
-            creators.add(creator);
+        List<JsonbComponentInstanceCreator> componentFactoryList = new ArrayList<>();
+        for (JsonbComponentInstanceCreator candidate : serviceRegistry) {
+            componentFactoryList.add(candidate);
         }
-        if (creators.isEmpty()) {
+        if (componentFactoryList.isEmpty()) {
             // No service provider found - use the defaults
-            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceCreator);
+            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceFactory);
         }
-        creators.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
-        JsonbComponentInstanceCreator creator = creators.get(0);
-        log.finest("Component instance creator:" + creator.getClass());
-        return creator;
+        componentFactoryList.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
+        JsonbComponentInstanceCreator candidate = componentFactoryList.get(0);
+        ERROR_RECORDER.finest("Component instance creator:" + candidate.getClass());
+        return candidate;
     }
 
 }

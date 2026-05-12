@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
@@ -33,19 +32,19 @@ import java.lang.reflect.Method;
  *
  * @author Roman Grigoriadi
  */
-class MethodHandleValuePropagation extends PropertyValuePropagation {
+class MethodHandleValuePropagation extends PropertyValuePropagator {
 
     private MethodHandle getHandle;
 
     private MethodHandle setHandle;
 
 
-    MethodHandleValuePropagation(Property property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
+    MethodHandleValuePropagation(PropertyDescriptor property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
         super(property, propertyVisibilityStrategy);
     }
 
     @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
+    protected void registerMethod(Method method, OperationType mode) {
         try {
             switch (mode) {
                 case GET:
@@ -63,7 +62,7 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
     }
 
     @Override
-    protected void acceptField(Field field, OperationMode mode) {
+    protected void registerField(Field field, OperationType mode) {
         try {
             switch (mode) {
                 case GET:
