@@ -29,7 +29,7 @@ public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
      *
      * @param builder serializer builder
      */
-    protected JsonObjectSerializer(SerializerBuilder builder) {
+    protected JsonObjectSerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

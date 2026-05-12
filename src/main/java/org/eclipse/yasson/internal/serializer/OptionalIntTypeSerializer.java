@@ -17,7 +17,7 @@ import java.util.OptionalInt;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.handleEmpty;
@@ -25,7 +25,7 @@ import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.ha
 /**
  * Serializer for {@link OptionalInt} type.
  */
-public class OptionalIntTypeSerializer extends AbstractValueTypeSerializer<OptionalInt> {
+public class OptionalIntTypeSerializer extends AbstractValueSerializer<OptionalInt> {
 
     /**
      * Creates a new instance.
@@ -37,7 +37,7 @@ public class OptionalIntTypeSerializer extends AbstractValueTypeSerializer<Optio
     }
 
     @Override
-    protected void serialize(OptionalInt obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalInt obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         if (!handleEmpty(obj, OptionalInt::isPresent, getCustomization(), generator, marshaller)) {
             generator.write(obj.getAsInt());
         }

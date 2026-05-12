@@ -21,9 +21,9 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.ProcessingContext;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
 
 /**
  * Deserialize optional object.
@@ -39,20 +39,20 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
      *
      * @param deserializerBuilder deserializer builder
      */
-    public OptionalObjectDeserializer(DeserializerBuilder deserializerBuilder) {
+    public OptionalObjectDeserializer(JsonDeserializerBuilder deserializerBuilder) {
         this.wrapper = deserializerBuilder.getWrapper();
         this.optionalValueType = resolveOptionalType(deserializerBuilder.getRuntimeType());
     }
 
     @Override
     public Optional<?> deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
-        final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
+        JsonbRuntimeContext jsonbContext = ((ObjectProcessingContext) ctx).getJsonbContext();
+        final JsonParser.Event lastEvent = ((JsonbNavigator) parser).getCurrentLevel().getLastEvent();
         if (lastEvent == JsonParser.Event.VALUE_NULL) {
             return Optional.empty();
         }
-        JsonbDeserializer deserializer = new DeserializerBuilder(jsonbContext).withType(optionalValueType)
-                .withWrapper(wrapper).withJsonValueType(lastEvent).build();
+        JsonbDeserializer deserializer = new JsonDeserializerBuilder(jsonbContext).setType(optionalValueType)
+                .setWrapper(wrapper).withJsonEvent(lastEvent).buildDeserializer();
         return Optional.of(deserializer.deserialize(parser, ctx, optionalValueType));
     }
 

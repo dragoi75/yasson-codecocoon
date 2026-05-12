@@ -16,13 +16,13 @@ import java.time.Period;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link Period} type.
  */
-public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
+public class PeriodTypeSerializer extends AbstractValueSerializer<Period> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
     }
 
     @Override
-    protected void serialize(Period obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Period obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

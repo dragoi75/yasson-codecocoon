@@ -32,8 +32,8 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link XMLGregorianCalendar} type.
@@ -58,7 +58,7 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         try {
             this.datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATATYPE_FACTORY_CREATION_FAILED), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
         }
     }
 

@@ -22,10 +22,10 @@ import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -45,7 +45,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
      *
      * @param builder Builder to initialize the instance.
      */
-    public OptionalObjectSerializer(SerializerBuilder builder) {
+    public OptionalObjectSerializer(TypeSerializerBuilder builder) {
         this.wrapper = builder.getWrapper();
         this.customization = builder.getCustomization();
         this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
@@ -59,7 +59,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 
@@ -79,13 +79,13 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
-        if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller) ctx)) {
+        JsonbRuntimeContext jsonbContext = ((ObjectProcessingContext) ctx).getJsonbContext();
+        if (handleEmpty(obj, Optional::isPresent, customization, generator, (JsonbMarshaller) ctx)) {
             return;
         }
         Object optionalValue = obj.get();
-        final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass())
-                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
+        final JsonbSerializer<?> serializer = new TypeSerializerBuilder(jsonbContext).setObjectClass(optionalValue.getClass())
+                .setType(optionalValueType).setWrapper(wrapper).setCustomization(customization).buildSerializer();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 
@@ -93,7 +93,7 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
                                    Predicate<T> presentCheck,
                                    Customization customization,
                                    JsonGenerator generator,
-                                   Marshaller marshaller) {
+                                   JsonbMarshaller marshaller) {
         if (value == null || !presentCheck.test(value)) {
             if (customization != null) {
                 if (customization.isNillable()) {

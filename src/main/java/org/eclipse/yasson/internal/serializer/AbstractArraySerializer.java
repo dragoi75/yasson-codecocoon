@@ -19,14 +19,14 @@ import jakarta.json.stream.JsonGenerator;
  *
  * @param <T> Type to serialize.
  */
-public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedElement {
 
     /**
      * Creates new instance of array serializer.
      *
      * @param builder serializer builder
      */
-    protected AbstractArraySerializer(SerializerBuilder builder) {
+    protected AbstractArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

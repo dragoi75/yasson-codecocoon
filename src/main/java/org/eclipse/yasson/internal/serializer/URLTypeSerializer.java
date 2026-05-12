@@ -16,13 +16,13 @@ import java.net.URL;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link URL} type.
  */
-public class URLTypeSerializer extends AbstractValueTypeSerializer<URL> {
+public class URLTypeSerializer extends AbstractValueSerializer<URL> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class URLTypeSerializer extends AbstractValueTypeSerializer<URL> {
     }
 
     @Override
-    protected void serialize(URL obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(URL obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

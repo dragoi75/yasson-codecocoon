@@ -17,10 +17,10 @@ import java.math.BigInteger;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link BigInteger} type.
@@ -37,14 +37,14 @@ public class BigIntegerTypeDeserializer extends AbstractNumberDeserializer<BigIn
     }
 
     @Override
-    public BigInteger deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    public BigInteger deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
                 .map(num -> new BigInteger(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return new BigInteger(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR,
                                                                      BigInteger.class));
                     }
                 });

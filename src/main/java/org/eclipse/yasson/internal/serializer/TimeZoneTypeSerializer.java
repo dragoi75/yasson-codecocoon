@@ -16,13 +16,13 @@ import java.util.TimeZone;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link TimeZone} type.
  */
-public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone> {
+public class TimeZoneTypeSerializer extends AbstractValueSerializer<TimeZone> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class TimeZoneTypeSerializer extends AbstractValueTypeSerializer<TimeZone
     }
 
     @Override
-    protected void serialize(TimeZone obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(TimeZone obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.getID());
     }
 }

@@ -18,39 +18,39 @@ import java.util.List;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 /**
  * Common array unmarshalling item implementation.
  *
  * @param <T> array type
  */
-public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDeserializer<T> implements EmbeddedElement {
 
     /**
      * Runtime type class of an array.
      */
     private final Class<?> componentClass;
-    private final ClassModel componentClassModel;
+    private final ClassDescriptor componentClassModel;
 
     /**
      * Creates new class instance.
      *
      * @param builder deserializer builder
      */
-    AbstractArrayDeserializer(DeserializerBuilder builder) {
+    AbstractArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectionUtils
-                    .resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            componentClass = ReflectionTypeResolver
+                    .getRawClass(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            componentClass = ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            componentClass = ReflectionTypeResolver.getRawType(getRuntimeType()).getComponentType();
         }
-        if (!DefaultSerializers.getInstance().isKnownType(componentClass)) {
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(componentClass)) {
             componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         } else {
             componentClassModel = null;
@@ -77,9 +77,9 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass)
-                .withCustomization(componentClassModel == null ? null : componentClassModel.getClassCustomization()).build();
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass)
+                .setCustomization(componentClassModel == null ? null : componentClassModel.getClassCustomization()).buildDeserializer();
         appendResult(deserializer.deserialize(parser, context, componentClass));
     }
 
@@ -91,7 +91,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     protected abstract List<?> getItems();
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

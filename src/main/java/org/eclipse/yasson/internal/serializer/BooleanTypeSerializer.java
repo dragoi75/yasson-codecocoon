@@ -14,13 +14,13 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link Boolean} type.
  */
-public class BooleanTypeSerializer extends AbstractValueTypeSerializer<Boolean> {
+public class BooleanTypeSerializer extends AbstractValueSerializer<Boolean> {
 
     /**
      * Creates a new instance.
@@ -32,7 +32,7 @@ public class BooleanTypeSerializer extends AbstractValueTypeSerializer<Boolean> 
     }
 
     @Override
-    protected void serialize(Boolean obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Boolean obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj);
     }
 }

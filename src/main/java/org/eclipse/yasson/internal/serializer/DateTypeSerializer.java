@@ -68,7 +68,7 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTimeSerializ
 
     @Override
     protected String formatStrictIJson(Date value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
+        return JsonbDateTimeFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
     }
 
     @Override

@@ -25,7 +25,7 @@ public class IntArraySerializer extends AbstractArraySerializer<int[]> {
      *
      * @param builder serializer builder
      */
-    protected IntArraySerializer(SerializerBuilder builder) {
+    protected IntArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

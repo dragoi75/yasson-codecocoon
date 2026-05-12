@@ -17,7 +17,7 @@ import java.text.NumberFormat;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -25,9 +25,9 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  *
  * @param <T> number type
  */
-public abstract class AbstractNumberSerializer<T extends Number> extends AbstractValueTypeSerializer<T> {
+public abstract class AbstractNumberSerializer<T extends Number> extends AbstractValueSerializer<T> {
 
-    private final JsonbNumberFormatter formatter;
+    private final JsonbNumericFormatter formatter;
 
     /**
      * Creates a new instance.
@@ -51,7 +51,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
 
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(T obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         if (formatter != null) {
             final NumberFormat format = NumberFormat
                     .getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));

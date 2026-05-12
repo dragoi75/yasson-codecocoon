@@ -25,7 +25,7 @@ public class ShortArraySerializer extends AbstractArraySerializer<short[]> {
      *
      * @param builder serializer builder
      */
-    protected ShortArraySerializer(SerializerBuilder builder) {
+    protected ShortArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

@@ -19,11 +19,11 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer for {@link JsonValue} containing null, false, true, string and number.
@@ -41,7 +41,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
 
     @Override
     public JsonValue deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbRiParser) parser).getLastEvent();
+        final JsonParser.Event next = ((JsonbStreamingParser) parser).getLastEvent();
         switch (next) {
         case VALUE_TRUE:
             return JsonValue.TRUE;
@@ -53,12 +53,12 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
         case VALUE_NUMBER:
             return parser.getValue();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + next));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: " + next));
         }
     }
 
     @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonValue deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
 }

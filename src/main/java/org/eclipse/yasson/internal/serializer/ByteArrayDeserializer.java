@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
  * Array unmarshaller item implementation for small int.
@@ -29,7 +29,7 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
      *
      * @param builder deserializer builder
      */
-    protected ByteArrayDeserializer(DeserializerBuilder builder) {
+    protected ByteArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -39,7 +39,7 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
     }
 
     @Override
-    public byte[] getInstance(Unmarshaller unmarshaller) {
+    public byte[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final byte[] byteArray = new byte[size];
         for (int i = 0; i < size; i++) {

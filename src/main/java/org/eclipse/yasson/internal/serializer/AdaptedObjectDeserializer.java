@@ -20,10 +20,10 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Decorator for an item which builds adapted type instance by a {@link JsonbAdapter}.
@@ -36,7 +36,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
 
     private JsonbDeserializer<A> adaptedTypeDeserializer;
 
-    private final AdapterBinding adapterInfo;
+    private final TypeAdapterBinding adapterInfo;
 
     private final AbstractContainerDeserializer<?> wrapperItem;
 
@@ -46,13 +46,13 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
      * @param adapterInfo components type info
      * @param wrapperItem wrapper item to get instance from
      */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+    public AdaptedObjectDeserializer(TypeAdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
         this.adapterInfo = adapterInfo;
         this.wrapperItem = wrapperItem;
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         throw new UnsupportedOperationException();
     }
 
@@ -66,7 +66,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
         if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
             return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
         }
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR,
                                                      "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }
 
@@ -87,7 +87,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
             final T adapted = ((JsonbAdapter<T, A>) adapterInfo.getAdapter()).adaptFromJson(result);
             return adapted;
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION,
                                                          adapterInfo.getBindingType(),
                                                          adapterInfo.getToType(),
                                                          adapterInfo.getAdapter().getClass()), e);

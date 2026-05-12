@@ -19,8 +19,8 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link OffsetDateTime} type.
@@ -44,7 +44,7 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
      */
     @Override
     protected OffsetDateTime fromInstant(Instant instant) {
-        LOGGER.warning(Messages.getMessage(MessageKeys.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
+        LOGGER.warning(MessageBundle.getMessage(MessageKeyConstants.OFFSET_DATE_TIME_FROM_MILLIS, OffsetDateTime.class.getSimpleName(), UTC));
         return OffsetDateTime.ofInstant(instant, UTC);
     }
 

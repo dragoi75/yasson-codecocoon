@@ -20,13 +20,13 @@ import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbMarshaller;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.JsonbPropertyMetadata;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Serializer for adapted object.
@@ -37,9 +37,9 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSerializer<T> {
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
-    private final AdapterBinding adapterInfo;
+    private final TypeAdapterBinding adapterInfo;
 
     /**
      * Creates AdapterObjectSerializer.
@@ -47,7 +47,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
      * @param classModel Class model.
      * @param adapter    Adapter.
      */
-    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
+    public AdaptedObjectSerializer(ClassDescriptor classModel, TypeAdapterBinding adapter) {
         this.classModel = classModel;
         this.adapterInfo = adapter;
     }
@@ -55,49 +55,49 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     @Override
     @SuppressWarnings("unchecked")
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (ProcessingContext) ctx;
+        ObjectProcessingContext context = (ObjectProcessingContext) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.addToProcessedObjects(obj)) {
                 final JsonbAdapter<T, A> adapter = (JsonbAdapter<T, A>) adapterInfo.getAdapter();
                 A adapted = adapter.adaptToJson(obj);
                 if (adapted == null) {
                     generator.writeNull();
                     return;
                 }
-                final JsonbSerializer<A> serializer = resolveSerializer((Marshaller) ctx, adapted);
+                final JsonbSerializer<A> serializer = resolveSerializer((JsonbMarshaller) ctx, adapted);
                 serializer.serialize(adapted, generator, ctx);
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION,
                                                          adapterInfo.getBindingType(),
                                                          adapterInfo.getToType(),
                                                          adapterInfo.getAdapter().getClass()), e);
         } finally {
-            context.removeProcessedObject(obj);
+            context.removeFromProcessedObjects(obj);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private JsonbSerializer<A> resolveSerializer(Marshaller ctx, A adapted) {
-        final ContainerSerializerProvider cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
+    private JsonbSerializer<A> resolveSerializer(JsonbMarshaller ctx, A adapted) {
+        final ContainerSerializerFactory cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
         if (cached != null) {
-            return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo()
-                                                                         .withWrapper(this)
-                                                                         .withRuntimeType(classModel == null
+            return (JsonbSerializer<A>) cached.createSerializer(new JsonbPropertyMetadata()
+                                                                         .setWrapper(this)
+                                                                         .setRuntimeType(classModel == null
                                                                                                   ? null
                                                                                                   : classModel.getType()));
         }
-        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
-                .withObjectClass(adapted.getClass())
-                .withCustomization(classModel == null ? null : classModel.getClassCustomization())
-                .withWrapper(this)
-                .build();
+        return (JsonbSerializer<A>) new TypeSerializerBuilder(ctx.getJsonbContext())
+                .setObjectClass(adapted.getClass())
+                .setCustomization(classModel == null ? null : classModel.getClassCustomization())
+                .setWrapper(this)
+                .buildSerializer();
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return null;
     }
 

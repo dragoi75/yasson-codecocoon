@@ -25,7 +25,7 @@ public class DoubleArraySerializer extends AbstractArraySerializer<double[]> {
      *
      * @param builder serializer builder
      */
-    protected DoubleArraySerializer(SerializerBuilder builder) {
+    protected DoubleArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

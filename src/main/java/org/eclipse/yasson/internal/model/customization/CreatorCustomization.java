@@ -13,17 +13,17 @@
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
-import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbNumericFormatter;
 
 /**
  * Customization for creator (constructor / factory methods) parameters.
  */
 public class CreatorCustomization extends CustomizationBase {
 
-    private JsonbNumberFormatter numberFormatter;
+    private JsonbNumericFormatter numberFormatter;
 
-    private JsonbDateFormatter dateFormatter;
+    private JsonbDateTimeFormatter dateFormatter;
 
     private PropertyModel propertyModel;
 
@@ -34,21 +34,21 @@ public class CreatorCustomization extends CustomizationBase {
      * @param numberFormatter number formatter
      * @param dateFormatter   date formatter
      */
-    public CreatorCustomization(CustomizationBuilder customization,
-                                JsonbNumberFormatter numberFormatter,
-                                JsonbDateFormatter dateFormatter) {
+    public CreatorCustomization(SerializationCustomizationBuilder customization,
+                                JsonbNumericFormatter numberFormatter,
+                                JsonbDateTimeFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
         this.dateFormatter = dateFormatter;
     }
 
     @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
+    public JsonbNumericFormatter getSerializeNumberFormatter() {
         throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+    public JsonbNumericFormatter getDeserializeNumberFormatter() {
         if (numberFormatter != null) {
             return numberFormatter;
         } else if (propertyModel != null) {
@@ -58,12 +58,12 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         if (dateFormatter != null) {
             return dateFormatter;
         } else if (propertyModel != null) {

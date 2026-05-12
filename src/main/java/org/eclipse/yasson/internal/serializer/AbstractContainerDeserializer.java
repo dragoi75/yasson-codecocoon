@@ -23,13 +23,13 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Base class for all deserializers producing non single value result.
@@ -37,16 +37,16 @@ import org.eclipse.yasson.internal.properties.Messages;
  *
  * @param <T> container type
  */
-public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> implements JsonbDeserializer<T> {
+public abstract class AbstractContainerDeserializer<T> extends BaseItem<T> implements JsonbDeserializer<T> {
 
-    private JsonbRiParser.LevelContext parserContext;
+    private JsonbStreamingParser.LevelParseContext parserContext;
 
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
      */
-    AbstractContainerDeserializer(DeserializerBuilder builder) {
+    AbstractContainerDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -60,9 +60,9 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      */
     @Override
     public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
-        deserializeInternal((JsonbParser) parser, ctx);
-        return getInstance((Unmarshaller) context);
+        JsonbUnmarshaller ctx = (JsonbUnmarshaller) context;
+        deserializeInternal((JsonbNavigator) parser, ctx);
+        return getInstance((JsonbUnmarshaller) context);
     }
 
     /**
@@ -71,7 +71,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param unmarshaller Current deserialization context.
      * @return An instance of deserializing item.
      */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
+    protected abstract T getInstance(JsonbUnmarshaller unmarshaller);
 
     /**
      * Deserialize specific item type.
@@ -79,7 +79,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser  jsonb parser
      * @param context context
      */
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeInternal(JsonbNavigator parser, JsonbUnmarshaller context) {
         parserContext = moveToFirst(parser);
         while (parser.hasNext()) {
             final JsonParser.Event event = parser.next();
@@ -110,7 +110,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
             case END_ARRAY:
                 return;
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
             }
         }
     }
@@ -122,7 +122,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser  Json parser.
      * @param context Current unmarshalling context.
      */
-    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
+    protected abstract void deserializeNext(JsonParser parser, JsonbUnmarshaller context);
 
     /**
      * Move to first event for current deserializer structure.
@@ -130,7 +130,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param parser Json parser.
      * @return First event.
      */
-    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
+    protected abstract JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser);
 
     /**
      * Returns new deserialization builder for specific item.
@@ -138,7 +138,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param ctx jsonb context
      * @return deserialization builder
      */
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
+    protected JsonDeserializerBuilder newUnmarshallerItemBuilder(JsonbRuntimeContext ctx) {
         return ContainerDeserializerUtils.newUnmarshallerItemBuilder(this, ctx, parserContext.getLastEvent());
     }
 
@@ -149,7 +149,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param ctx       jsonb context
      * @return deserialization builder
      */
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbRuntimeContext ctx) {
         return ContainerDeserializerUtils.newCollectionOrMapItem(this, valueType, ctx, parserContext.getLastEvent());
     }
 
@@ -168,7 +168,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         }
 
         if (!(propertyType instanceof Class)) {
-            propertyType = ReflectionUtils.getRawType(ReflectionUtils.resolveType(this, propertyType));
+            propertyType = ReflectionTypeResolver.getRawType(ReflectionTypeResolver.resolveTypeDefault(this, propertyType));
         }
 
         if (propertyType == Optional.class) {
@@ -198,7 +198,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      *
      * @return parser context
      */
-    JsonbRiParser.LevelContext getParserContext() {
+    JsonbStreamingParser.LevelParseContext getParserContext() {
         return parserContext;
     }
 
@@ -207,7 +207,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      *
      * @param parserContext parser context
      */
-    void setParserContext(JsonbRiParser.LevelContext parserContext) {
+    void setParserContext(JsonbStreamingParser.LevelParseContext parserContext) {
         this.parserContext = parserContext;
     }
 }

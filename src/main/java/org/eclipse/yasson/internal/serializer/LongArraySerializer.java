@@ -25,7 +25,7 @@ public class LongArraySerializer extends AbstractArraySerializer<long[]> {
      *
      * @param builder serializer builder
      */
-    protected LongArraySerializer(SerializerBuilder builder) {
+    protected LongArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

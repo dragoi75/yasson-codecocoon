@@ -25,7 +25,7 @@ public class ByteArraySerializer extends AbstractArraySerializer<byte[]> {
      *
      * @param builder serializer builder
      */
-    protected ByteArraySerializer(SerializerBuilder builder) {
+    protected ByteArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

@@ -69,7 +69,7 @@ public abstract class PropertyValuePropagation {
      * @param property Provided property.
      * @param strategy Visibility strategy
      */
-    protected PropertyValuePropagation(Property property, PropertyVisibilityStrategy strategy) {
+    protected PropertyValuePropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
         this.field = property.getField();
         this.getter = property.getGetter();
         this.setter = property.getSetter();

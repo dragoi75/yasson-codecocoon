@@ -26,7 +26,7 @@ public abstract class AbstractJsonpSerializer<T extends JsonValue> extends Abstr
      *
      * @param builder serializer builder
      */
-    protected AbstractJsonpSerializer(SerializerBuilder builder) {
+    protected AbstractJsonpSerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

@@ -16,13 +16,13 @@ import java.time.Duration;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link Duration} type.
  */
-public class DurationTypeSerializer extends AbstractValueTypeSerializer<Duration> {
+public class DurationTypeSerializer extends AbstractValueSerializer<Duration> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class DurationTypeSerializer extends AbstractValueTypeSerializer<Duration
     }
 
     @Override
-    protected void serialize(Duration obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Duration obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

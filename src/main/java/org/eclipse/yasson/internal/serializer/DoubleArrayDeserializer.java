@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
  * Array unmarshaller item implementation for small double.
@@ -29,7 +29,7 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
      *
      * @param builder deserializer builder
      */
-    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
+    protected DoubleArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -39,7 +39,7 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
     }
 
     @Override
-    public double[] getInstance(Unmarshaller unmarshaller) {
+    public double[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final double[] doubleArray = new double[size];
         for (int i = 0; i < size; i++) {

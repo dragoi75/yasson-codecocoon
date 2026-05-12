@@ -27,7 +27,7 @@ public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
      *
      * @param builder serializer builder
      */
-    protected FloatArraySerializer(SerializerBuilder builder) {
+    protected FloatArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

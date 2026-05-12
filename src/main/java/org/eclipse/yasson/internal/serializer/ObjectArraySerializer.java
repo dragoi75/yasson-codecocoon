@@ -27,7 +27,7 @@ public class ObjectArraySerializer<T> extends AbstractArraySerializer<T[]> {
      *
      * @param builder serialization builder
      */
-    protected ObjectArraySerializer(SerializerBuilder builder) {
+    protected ObjectArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

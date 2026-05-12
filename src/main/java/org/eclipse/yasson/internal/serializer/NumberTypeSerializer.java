@@ -16,13 +16,13 @@ import java.math.BigDecimal;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link Number} type.
  */
-public class NumberTypeSerializer extends AbstractValueTypeSerializer<Number> {
+public class NumberTypeSerializer extends AbstractValueSerializer<Number> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class NumberTypeSerializer extends AbstractValueTypeSerializer<Number> {
     }
 
     @Override
-    protected void serialize(Number obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Number obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         BigDecimal bigDecimalValue = new BigDecimal(String.valueOf(obj));
         generator.write(bigDecimalValue);
     }

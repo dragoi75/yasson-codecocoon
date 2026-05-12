@@ -49,6 +49,6 @@ public class LocalDateTypeSerializer extends AbstractDateTimeSerializer<LocalDat
     @Override
     protected String formatStrictIJson(LocalDate value) {
         final ZonedDateTime zonedDateTime = value.atTime(0, 0, 0).atZone(UTC);
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedDateTime);
+        return JsonbDateTimeFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedDateTime);
     }
 }

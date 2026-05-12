@@ -16,13 +16,13 @@ import java.time.ZoneId;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link ZoneId} type.
  */
-public class ZoneIdTypeSerializer extends AbstractValueTypeSerializer<ZoneId> {
+public class ZoneIdTypeSerializer extends AbstractValueSerializer<ZoneId> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class ZoneIdTypeSerializer extends AbstractValueTypeSerializer<ZoneId> {
     }
 
     @Override
-    protected void serialize(ZoneId obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(ZoneId obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.getId());
     }
 }

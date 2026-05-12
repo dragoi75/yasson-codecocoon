@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
  * Array unmarshaller item implementation for small float.
@@ -28,7 +28,7 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
      *
      * @param builder deserializer builder
      */
-    protected FloatArrayDeserializer(DeserializerBuilder builder) {
+    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -38,7 +38,7 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     }
 
     @Override
-    public float[] getInstance(Unmarshaller unmarshaller) {
+    public float[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final float[] floatArray = new float[size];
         for (int i = 0; i < size; i++) {

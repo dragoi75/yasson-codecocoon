@@ -36,81 +36,81 @@ public class AnnotationFinderTest {
     /**
      * class under test.
      */
-    private AnnotationFinder findAnnotation = AnnotationFinder.findAnnotation(Deprecated.class);
+    private AnnotationLocator findAnnotation = AnnotationLocator.locateAnnotation(Deprecated.class);
 
     @Test
     public void testAnnotationShouldBeFound() {
-        assertNotNull(findAnnotation.in(getMethodAnnotationsOf(ObjectWithDeprecatedMethod.class)));
+        assertNotNull(findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithDeprecatedMethod.class)));
     }
 
     @Test
     public void testAnnotationShouldBeFoundWithinOthers() {
-        assertNotNull(findAnnotation.in(getMethodAnnotationsOf(ObjectWithDeprecatedAndIgnoredMethod.class)));
+        assertNotNull(findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithDeprecatedAndIgnoredMethod.class)));
     }
 
     @Test
     public void testInheritedAnnotationShouldBeFound() {
-        Deprecated annotation = findAnnotation.in(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class));
+        Deprecated annotation = findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class));
         assertEquals("inherited", annotation.since());
     }
 
     @Test
     public void testInheritedAnnotationShouldBeFoundWithinOthers() {
-        Deprecated annotation = findAnnotation.in(getMethodAnnotationsOf(ObjectWithIgnoredAndInheritedDeprecatedMethod.class));
+        Deprecated annotation = findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithIgnoredAndInheritedDeprecatedMethod.class));
         assertEquals("inherited", annotation.since());
     }
 
     @Test
     public void testDirectAnnotationShouldBePreferedOverInheritedOnes() {
-        Deprecated annotation = findAnnotation.in(getMethodAnnotationsOf(ObjectWithInheritedAndDirectlyDeprecatedMethod.class));
+        Deprecated annotation = findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithInheritedAndDirectlyDeprecatedMethod.class));
         assertEquals("", annotation.since());
     }
 
     @Test
     public void testResultShouldBeNullWhenThereIsNoAnnotation() {
-        assertNull(findAnnotation.in(getMethodAnnotationsOf(ObjectWithNoAnnotations.class)));
+        assertNull(findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithNoAnnotations.class)));
     }
 
     @Test
     public void testResultShouldBeNullWhenThereAreOnlyOtherAnnotations() {
-        assertNull(findAnnotation.in(getMethodAnnotationsOf(ObjectWithIgnoredMethod.class)));
+        assertNull(findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithIgnoredMethod.class)));
     }
 
     @Test
     @SuppressWarnings("deprecation")
     public void testValueOfAnnotationShouldBeExtractedDynamically() {
-        findAnnotation = AnnotationFinder.findAnnotation(AnnotationAnnotatedWithDeprecated.class);
-        assertEquals(TESTVALUE, findAnnotation.valueIn(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class)));
+        findAnnotation = AnnotationLocator.locateAnnotation(AnnotationAnnotatedWithDeprecated.class);
+        assertEquals(TESTVALUE, findAnnotation.getValueIn(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class)));
     }
 
     @Test
     public void testValueOfAnnotationShouldBeNullIfAnnotationDoesNotExist() {
-        findAnnotation = AnnotationFinder.findAnnotation(ObjectWithNoAnnotations.class);
-        assertNull(findAnnotation.valueIn(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class)));
+        findAnnotation = AnnotationLocator.locateAnnotation(ObjectWithNoAnnotations.class);
+        assertNull(findAnnotation.getValueIn(getMethodAnnotationsOf(ObjectWithInheritedDeprecatedMethod.class)));
     }
 
     @Test
     public void testValueOfConstructorAnnotation() {
-        findAnnotation = AnnotationFinder.findConstructorProperties();
-        assertArrayEquals(new Object[] { TESTVALUE }, (Object[]) findAnnotation.valueIn(getConstructorAnnotationsOf(ObjectWithConstructAnnotation.class)));
+        findAnnotation = AnnotationLocator.findConstructorPropertiesAnnotation();
+        assertArrayEquals(new Object[] { TESTVALUE }, (Object[]) findAnnotation.getValueIn(getConstructorAnnotationsOf(ObjectWithConstructAnnotation.class)));
     }
 
     @Test
     @SuppressWarnings("deprecation")
     public void testValueOfConstructorMetaAnnotation() {
-        findAnnotation = AnnotationFinder.findAnnotation(AnnotationAnnotatedWithDeprecated.class);
-        assertEquals(TESTVALUE, findAnnotation.valueIn(getConstructorAnnotationsOf(ObjectWithConstructAnnotation.class)));
+        findAnnotation = AnnotationLocator.locateAnnotation(AnnotationAnnotatedWithDeprecated.class);
+        assertEquals(TESTVALUE, findAnnotation.getValueIn(getConstructorAnnotationsOf(ObjectWithConstructAnnotation.class)));
     }
 
     @Test
     public void testIgnorenNonExistingOptionalAnnotationClassName() {
-        findAnnotation = AnnotationFinder.findAnnotationByName("java.nnnooootttt.eexxxxiissttting.Class");
-        assertNull(findAnnotation.in(getMethodAnnotationsOf(ObjectWithIgnoredMethod.class)));
+        findAnnotation = AnnotationLocator.locateAnnotationByName("java.nnnooootttt.eexxxxiissttting.Class");
+        assertNull(findAnnotation.findAnnotationIn(getMethodAnnotationsOf(ObjectWithIgnoredMethod.class)));
     }
 
     @Test
     public void testIgnorenAnnotationAnnotationWithoutValueProperty() {
-        findAnnotation = AnnotationFinder.findAnnotation(AnnotationWithoutValueProperty.class);
-        assertNull(findAnnotation.valueIn(getMethodAnnotationsOf(ObjectWithMissingValuePropertyAnnotation.class)));
+        findAnnotation = AnnotationLocator.locateAnnotation(AnnotationWithoutValueProperty.class);
+        assertNull(findAnnotation.getValueIn(getMethodAnnotationsOf(ObjectWithMissingValuePropertyAnnotation.class)));
     }
 }

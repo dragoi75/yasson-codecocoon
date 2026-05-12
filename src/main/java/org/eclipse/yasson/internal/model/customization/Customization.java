@@ -12,8 +12,8 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
-import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbNumericFormatter;
 
 /**
  * Customization configuration for class or field.
@@ -29,7 +29,7 @@ public interface Customization {
      *
      * @return number formatter
      */
-    JsonbNumberFormatter getSerializeNumberFormatter();
+    JsonbNumericFormatter getSerializeNumberFormatter();
 
     /**
      * Number formatter for formatting numbers during deserialization process. It could be the same formatter instance used for
@@ -38,7 +38,7 @@ public interface Customization {
      *
      * @return number formatter
      */
-    JsonbNumberFormatter getDeserializeNumberFormatter();
+    JsonbNumericFormatter getDeserializeNumberFormatter();
 
     /**
      * Date formatter for formatting date values during serialization process. It could be the same formatter instance used for
@@ -49,7 +49,7 @@ public interface Customization {
      *
      * @return date formatter
      */
-    JsonbDateFormatter getSerializeDateFormatter();
+    JsonbDateTimeFormatter getSerializeDateFormatter();
 
     /**
      * Date formatter for formatting date values during deserialization process. It could be the same formatter instance used
@@ -60,7 +60,7 @@ public interface Customization {
      *
      * @return date formatter
      */
-    JsonbDateFormatter getDeserializeDateFormatter();
+    JsonbDateTimeFormatter getDeserializeDateFormatter();
 
     /**
      * Returns true if <i>nillable</i> customization is present.

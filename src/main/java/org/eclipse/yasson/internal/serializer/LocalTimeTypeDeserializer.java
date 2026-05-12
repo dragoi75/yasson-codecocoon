@@ -20,8 +20,8 @@ import java.util.Locale;
 import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer for {@link LocalTime} type.
@@ -39,7 +39,7 @@ public class LocalTimeTypeDeserializer extends AbstractDateTimeDeserializer<Loca
 
     @Override
     protected LocalTime fromInstant(Instant instant) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
 
     @Override

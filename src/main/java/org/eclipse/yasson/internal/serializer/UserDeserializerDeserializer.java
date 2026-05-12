@@ -14,11 +14,11 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.UserDeserializerParser;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
 
 /**
  * Item for processing types, to which deserializer is bound.
@@ -27,7 +27,7 @@ import org.eclipse.yasson.internal.components.DeserializerBinding;
  */
 public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializer<T> {
 
-    private DeserializerBinding<?> deserializerBinding;
+    private JsonbDeserializerBinding<?> deserializerBinding;
 
     private T deserializerResult;
 
@@ -37,10 +37,10 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
      * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
      * in wrong position after returning from deserializerBinding.
      *
-     * @param builder             {@link DeserializerBuilder} used to build this instance
+     * @param builder             {@link JsonDeserializerBuilder} used to build this instance
      * @param deserializerBinding Deserializer.
      */
-    protected UserDeserializerDeserializer(DeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
+    protected UserDeserializerDeserializer(JsonDeserializerBuilder builder, JsonbDeserializerBinding<?> deserializerBinding) {
         super(builder);
         this.deserializerBinding = deserializerBinding;
     }
@@ -52,13 +52,13 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     @Override
     @SuppressWarnings("unchecked")
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
         return deserializerResult;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    public void deserializeInternal(JsonbNavigator parser, JsonbUnmarshaller context) {
         setParserContext(moveToFirst(parser));
         JsonParser.Event lastEvent = getParserContext().getLastEvent();
         final UserDeserializerParser userDeserializerParser = new UserDeserializerParser(parser);
@@ -66,13 +66,13 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
                 .deserialize(userDeserializerParser, context, getRuntimeType());
         //In case deserialized structure is json object or array and the parser is not advanced
         //after enclosing bracket of deserialized object.
-        if (parser.getCurrentLevel() == getParserContext() && !DeserializerBuilder.isJsonValueEvent(lastEvent)) {
+        if (parser.getCurrentLevel() == getParserContext() && !JsonDeserializerBuilder.isJsonValueEvent(lastEvent)) {
             userDeserializerParser.advanceParserToEnd();
         }
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
         throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 
@@ -80,7 +80,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
      * Don't move anywhere in case of user deserializer.
      */
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         return parser.getCurrentLevel();
     }
 

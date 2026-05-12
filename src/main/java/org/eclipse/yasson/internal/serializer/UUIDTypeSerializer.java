@@ -16,13 +16,13 @@ import java.util.UUID;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link UUID} type.
  */
-public class UUIDTypeSerializer extends AbstractValueTypeSerializer<UUID> {
+public class UUIDTypeSerializer extends AbstractValueSerializer<UUID> {
 
     /**
      * Creates a new instance.
@@ -34,7 +34,7 @@ public class UUIDTypeSerializer extends AbstractValueTypeSerializer<UUID> {
     }
 
     @Override
-    protected void serialize(UUID obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(UUID obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.toString());
     }
 }

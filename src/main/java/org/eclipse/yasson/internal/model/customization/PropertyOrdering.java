@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.config.PropertyOrderStrategy;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.PropertyModel;
 
 /**
@@ -50,7 +50,7 @@ public class PropertyOrdering {
      * @param classModel Class model.
      * @return Sorted list of properties.
      */
-    public List<PropertyModel> orderProperties(List<PropertyModel> properties, ClassModel classModel) {
+    public List<PropertyModel> orderProperties(List<PropertyModel> properties, ClassDescriptor classModel) {
         Map<String, PropertyModel> byReadName = new HashMap<>();
         properties.forEach(propertyModel -> byReadName.put(propertyModel.getPropertyName(), propertyModel));
 

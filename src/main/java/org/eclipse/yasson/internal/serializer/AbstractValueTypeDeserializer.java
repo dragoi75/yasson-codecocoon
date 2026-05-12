@@ -18,8 +18,8 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -54,8 +54,8 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      */
     @Override
     public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        Unmarshaller unmarshaller = (Unmarshaller) ctx;
-        final JsonParser.Event event = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
+        JsonbUnmarshaller unmarshaller = (JsonbUnmarshaller) ctx;
+        final JsonParser.Event event = ((JsonbNavigator) parser).getCurrentLevel().getLastEvent();
         if (event == JsonParser.Event.VALUE_NULL) {
             return null;
         }
@@ -72,7 +72,7 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
      * @param rtType       Runtime type.
      * @return Deserialized object.
      */
-    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected T deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException("Operation not supported in " + getClass());
     }
 

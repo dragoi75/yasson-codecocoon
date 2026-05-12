@@ -20,10 +20,10 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * De-serialize JSON array of map entries JSON objects as {@link Map}.
@@ -40,7 +40,7 @@ import org.eclipse.yasson.internal.properties.Messages;
  * @param <K> {@link Map} key type to serialize
  * @param <V> {@link Map} value type to serialize
  */
-public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> implements JsonbDeserializer<Map<K, V>> {
+public class MapEntriesArrayDeserializer<K, V> extends BaseItem<Map<K, V>> implements JsonbDeserializer<Map<K, V>> {
 
     /**
      * Map entries parser internal state.
@@ -133,7 +133,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
         /**
          * Current de-serialization context.
          */
-        private final Unmarshaller unmarshallerContext;
+        private final JsonbUnmarshaller unmarshallerContext;
 
         /**
          * Creates an instance of parser context.
@@ -142,7 +142,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
          * @param parserContext       state holder for current json structure level
          * @param unmarshallerContext JSON-B unmarshaller
          */
-        Context(JsonParser parser, Unmarshaller unmarshallerContext) {
+        Context(JsonParser parser, JsonbUnmarshaller unmarshallerContext) {
             this.parser = parser;
             this.unmarshallerContext = unmarshallerContext;
             this.parse = true;
@@ -180,7 +180,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
          *
          * @return JSON-B unmarshaller
          */
-        public Unmarshaller getUnmarshallerContext() {
+        public JsonbUnmarshaller getUnmarshallerContext() {
             return unmarshallerContext;
         }
 
@@ -241,7 +241,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
      *
      * @param builder de-serializer builder
      */
-    MapEntriesArrayDeserializer(DeserializerBuilder builder) {
+    MapEntriesArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         final Type mapType = getRuntimeType();
         this.mapKeyType = ContainerDeserializerUtils.mapKeyType(this, mapType);
@@ -264,8 +264,8 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
      */
     @Override
     public Map<K, V> deserialize(final JsonParser parser, DeserializationContext context, Type rtType) {
-        final Context ctx = new Context(parser, (Unmarshaller) context);
-        ((JsonbParser) ctx.parser).moveTo(JsonParser.Event.START_ARRAY);
+        final Context ctx = new Context(parser, (JsonbUnmarshaller) context);
+        ((JsonbNavigator) ctx.parser).moveTo(JsonParser.Event.START_ARRAY);
         while (parser.hasNext() && ctx.parse()) {
             final JsonParser.Event event = parser.next();
             switch (event) {
@@ -294,7 +294,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
                 endObject(ctx, event);
                 break;
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
             }
         }
         return instance;

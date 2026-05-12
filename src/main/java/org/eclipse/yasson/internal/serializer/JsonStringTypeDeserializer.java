@@ -18,7 +18,7 @@ import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -36,7 +36,7 @@ public class JsonStringTypeDeserializer extends AbstractValueTypeDeserializer<Js
     }
 
     @Override
-    protected JsonString deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonString deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
         final JsonObject jsonObject = factory.createObjectBuilder()
                 .add("json", jsonValue)

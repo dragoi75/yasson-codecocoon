@@ -35,7 +35,7 @@ public class ReflectionPropagation extends PropertyValuePropagation {
      * @param property target property
      * @param strategy visibility strategy
      */
-    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
+    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
         super(property, strategy);
     }
 

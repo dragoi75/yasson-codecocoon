@@ -14,13 +14,13 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link Enum} type.
  */
-public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
+public class EnumTypeSerializer extends AbstractValueSerializer<Enum> {
 
     /**
      * Creates a new instance.
@@ -32,7 +32,7 @@ public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
     }
 
     @Override
-    protected void serialize(Enum obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(Enum obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj.name());
     }
 }

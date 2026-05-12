@@ -22,10 +22,10 @@ import java.util.TreeMap;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
  * Item implementation for {@link java.util.Map} fields.
@@ -34,7 +34,7 @@ import org.eclipse.yasson.internal.Unmarshaller;
  *
  * @param <T> map type
  */
-public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeserializer<T> implements EmbeddedElement {
 
     /**
      * Type of value in the map. (Keys must always be Strings, because of JSON spec)
@@ -46,27 +46,27 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     /**
      * Create instance of current item with its builder.
      *
-     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected MapDeserializer(DeserializerBuilder builder) {
+    protected MapDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
+                ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
                 : Object.class;
 
         this.instance = createInstance(builder);
     }
 
     @SuppressWarnings("unchecked")
-    private T createInstance(DeserializerBuilder builder) {
-        Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<?> rawType = ReflectionTypeResolver.getRawType(getRuntimeType());
         return rawType.isInterface()
                 ? (T) getMapImpl(rawType, builder)
                 : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
     }
 
-    private Map getMapImpl(Class ifcType, DeserializerBuilder builder) {
+    private Map getMapImpl(Class ifcType, JsonDeserializerBuilder builder) {
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
             Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
@@ -78,7 +78,7 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     }
 
     @Override
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
         return instance;
     }
 
@@ -93,13 +93,13 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
         final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
         appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         parser.moveTo(JsonParser.Event.START_OBJECT);
         return parser.getCurrentLevel();
     }

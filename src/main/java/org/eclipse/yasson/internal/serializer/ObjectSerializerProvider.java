@@ -14,15 +14,15 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.bind.serializer.JsonbSerializer;
 
-import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
+import org.eclipse.yasson.internal.model.JsonbPropertyMetadata;
 
 /**
  * Object serializer provider.
  */
-public class ObjectSerializerProvider implements ContainerSerializerProvider {
+public class ObjectSerializerProvider implements ContainerSerializerFactory {
 
     @Override
-    public JsonbSerializer<?> provideSerializer(JsonbPropertyInfo propertyInfo) {
+    public JsonbSerializer<?> createSerializer(JsonbPropertyMetadata propertyInfo) {
         return new ObjectSerializer<>(propertyInfo.getWrapper(), propertyInfo.getRuntimeType(), propertyInfo.getClassModel());
     }
 }

@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
  * Array unmarshaller item implementation for char.
@@ -29,7 +29,7 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
      *
      * @param builder deserializer builder
      */
-    protected CharArrayDeserializer(DeserializerBuilder builder) {
+    protected CharArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -39,7 +39,7 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
     }
 
     @Override
-    public char[] getInstance(Unmarshaller unmarshaller) {
+    public char[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final char[] charArray = new char[size];
         for (int i = 0; i < size; i++) {

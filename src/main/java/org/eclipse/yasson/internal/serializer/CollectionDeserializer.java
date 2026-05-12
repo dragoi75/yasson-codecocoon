@@ -29,15 +29,15 @@ import java.util.TreeSet;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
+import org.eclipse.yasson.internal.JsonbStreamingParser;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
+import org.eclipse.yasson.internal.ReflectionTypeResolver;
 
 /**
  * Item implementation for {@link java.util.List} fields.
  */
-class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerDeserializer<T> implements EmbeddedItem {
+class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerDeserializer<T> implements EmbeddedElement {
 
     /**
      * Generic bound parameter of List.
@@ -47,20 +47,20 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     private T instance;
 
     /**
-     * @param builder {@link DeserializerBuilder) used to build this instance
+     * @param builder {@link JsonDeserializerBuilder ) used to build this instance
      */
-    protected CollectionDeserializer(DeserializerBuilder builder) {
+    protected CollectionDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         collectionValueType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
+                ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
                 : Object.class;
 
         instance = createInstance(builder);
     }
 
     @SuppressWarnings("unchecked")
-    private T createInstance(DeserializerBuilder builder) {
-        Class<T> rawType = (Class<T>) ReflectionUtils.getRawType(getRuntimeType());
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<T> rawType = (Class<T>) ReflectionTypeResolver.getRawType(getRuntimeType());
 
         if (rawType.isInterface()) {
             final T x = createInterfaceInstance(rawType);
@@ -97,7 +97,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    public T getInstance(Unmarshaller unmarshaller) {
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
         return instance;
     }
 
@@ -112,13 +112,13 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
         final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
         appendResult(deserializer.deserialize(parser, context, collectionValueType));
     }
 
     @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }

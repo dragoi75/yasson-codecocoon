@@ -12,11 +12,11 @@
 
 package org.eclipse.yasson.customization.model;
 
-import org.eclipse.yasson.ImplementationClass;
+import org.eclipse.yasson.ConcreteImplementation;
 
 public class ImplementationClassPojo {
 
-    @ImplementationClass(Dog.class)
+    @ConcreteImplementation(getValue = Dog.class)
     private Animal animal;
 
     public Animal getAnimal() {

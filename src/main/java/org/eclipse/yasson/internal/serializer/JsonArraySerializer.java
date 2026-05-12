@@ -27,7 +27,7 @@ public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
      *
      * @param builder serializer builder
      */
-    protected JsonArraySerializer(SerializerBuilder builder) {
+    protected JsonArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 

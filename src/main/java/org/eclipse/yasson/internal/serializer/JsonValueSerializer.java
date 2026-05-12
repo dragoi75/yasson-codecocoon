@@ -15,13 +15,13 @@ package org.eclipse.yasson.internal.serializer;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Serializer for {@link JsonValue} type.
  */
-public class JsonValueSerializer extends AbstractValueTypeSerializer<JsonValue> {
+public class JsonValueSerializer extends AbstractValueSerializer<JsonValue> {
 
     /**
      * Creates a new instance.
@@ -33,7 +33,7 @@ public class JsonValueSerializer extends AbstractValueTypeSerializer<JsonValue> 
     }
 
     @Override
-    protected void serialize(JsonValue obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(JsonValue obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         generator.write(obj);
     }
 }

@@ -18,10 +18,10 @@ import java.lang.reflect.Type;
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer for {@link String} type.
@@ -38,12 +38,12 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
     }
 
     @Override
-    protected String deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected String deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         if ((boolean) unmarshaller.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
             try {
                 String newString = new String(jsonValue.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(jsonValue)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

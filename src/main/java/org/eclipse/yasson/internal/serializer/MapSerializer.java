@@ -24,7 +24,7 @@ import jakarta.json.stream.JsonGenerator;
  * @param <K> {@link Map} key type to serialize
  * @param <V> {@link Map} value type to serialize
  */
-public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> implements EmbeddedItem {
+public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> implements EmbeddedElement {
 
     /**
      * Internal Map serializing delegate interface.
@@ -91,9 +91,9 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
     /**
      * Creates an instance of {@link Map} serialization.
      *
-     * @param builder current instance of {@link SerializerBuilder}
+     * @param builder current instance of {@link TypeSerializerBuilder}
      */
-    protected MapSerializer(SerializerBuilder builder) {
+    protected MapSerializer(TypeSerializerBuilder builder) {
         super(builder);
         nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
         serializer = null;

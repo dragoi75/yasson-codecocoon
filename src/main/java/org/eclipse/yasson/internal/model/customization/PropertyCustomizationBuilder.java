@@ -12,30 +12,30 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
-import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbNumericFormatter;
 
 /**
  * The property customization builder that would be used to build an instance of {@link PropertyCustomization} to ensure its
  * immutability.
  */
-public class PropertyCustomizationBuilder extends CustomizationBuilder {
+public class PropertyCustomizationBuilder extends SerializationCustomizationBuilder {
 
     private String jsonReadName;
     private String jsonWriteName;
 
-    private JsonbNumberFormatter serializeNumberFormatter;
-    private JsonbNumberFormatter deserializeNumberFormatter;
+    private JsonbNumericFormatter serializeNumberFormatter;
+    private JsonbNumericFormatter deserializeNumberFormatter;
 
-    private JsonbDateFormatter serializeDateFormatter;
-    private JsonbDateFormatter deserializeDateFormatter;
+    private JsonbDateTimeFormatter serializeDateFormatter;
+    private JsonbDateTimeFormatter deserializeDateFormatter;
 
     private boolean readTransient;
     private boolean writeTransient;
 
-    private AdapterBinding serializeAdapter;
-    private AdapterBinding deserializeAdapter;
+    private TypeAdapterBinding serializeAdapter;
+    private TypeAdapterBinding deserializeAdapter;
 
     private Class implementationClass;
 
@@ -53,7 +53,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return Number formatter for formatting numbers during serialization process.
      */
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
+    public JsonbNumericFormatter getSerializeNumberFormatter() {
         return serializeNumberFormatter;
     }
 
@@ -62,7 +62,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param serializeNumberFormatter Number formatter for formatting numbers during serialization process.
      */
-    public void setSerializeNumberFormatter(JsonbNumberFormatter serializeNumberFormatter) {
+    public void setSerializeNumberFormatter(JsonbNumericFormatter serializeNumberFormatter) {
         this.serializeNumberFormatter = serializeNumberFormatter;
     }
 
@@ -71,7 +71,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return Number formatter for formatting numbers during deserialization process.
      */
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+    public JsonbNumericFormatter getDeserializeNumberFormatter() {
         return deserializeNumberFormatter;
     }
 
@@ -80,7 +80,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param deserializeNumberFormatter Number formatter for formatting numbers during deserialization process.
      */
-    public void setDeserializeNumberFormatter(JsonbNumberFormatter deserializeNumberFormatter) {
+    public void setDeserializeNumberFormatter(JsonbNumericFormatter deserializeNumberFormatter) {
         this.deserializeNumberFormatter = deserializeNumberFormatter;
     }
 
@@ -89,7 +89,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return date formatter for formatting dates during serialization process.
      */
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         return serializeDateFormatter;
     }
 
@@ -98,7 +98,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
      */
-    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
+    public void setSerializeDateFormatter(JsonbDateTimeFormatter serializeDateFormatter) {
         this.serializeDateFormatter = serializeDateFormatter;
     }
 
@@ -107,7 +107,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @return Date formatter for formatting dates during deserialization process.
      */
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         return deserializeDateFormatter;
     }
 
@@ -116,7 +116,7 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      *
      * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
      */
-    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
+    public void setDeserializeDateFormatter(JsonbDateTimeFormatter deserializeDateFormatter) {
         this.deserializeDateFormatter = deserializeDateFormatter;
     }
 
@@ -211,28 +211,28 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     @Override
-    public void setAdapterInfo(AdapterBinding adapterInfo) {
+    public void setAdapterInfo(TypeAdapterBinding adapterInfo) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public AdapterBinding getAdapterInfo() {
+    public TypeAdapterBinding getAdapterInfo() {
         return null;
     }
 
-    public AdapterBinding getSerializeAdapter() {
+    public TypeAdapterBinding getSerializeAdapter() {
         return serializeAdapter;
     }
 
-    public void setSerializeAdapter(AdapterBinding adapter) {
+    public void setSerializeAdapter(TypeAdapterBinding adapter) {
         this.serializeAdapter = adapter;
     }
 
-    public AdapterBinding getDeserializeAdapter() {
+    public TypeAdapterBinding getDeserializeAdapter() {
         return deserializeAdapter;
     }
 
-    public void setDeserializeAdapter(AdapterBinding adapter) {
+    public void setDeserializeAdapter(TypeAdapterBinding adapter) {
         this.deserializeAdapter = adapter;
     }
 }

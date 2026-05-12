@@ -12,9 +12,9 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
-import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
+import org.eclipse.yasson.internal.components.TypeAdapterBinding;
+import org.eclipse.yasson.internal.serializer.JsonbDateTimeFormatter;
+import org.eclipse.yasson.internal.serializer.JsonbNumericFormatter;
 
 /**
  * Customization for a property of a class.
@@ -24,14 +24,14 @@ public class PropertyCustomization extends CustomizationBase {
     private final String jsonReadName;
     private final String jsonWriteName;
 
-    private final JsonbNumberFormatter serializeNumberFormatter;
-    private final JsonbNumberFormatter deserializeNumberFormatter;
+    private final JsonbNumericFormatter serializeNumberFormatter;
+    private final JsonbNumericFormatter deserializeNumberFormatter;
 
-    private final JsonbDateFormatter serializeDateFormatter;
-    private final JsonbDateFormatter deserializeDateFormatter;
+    private final JsonbDateTimeFormatter serializeDateFormatter;
+    private final JsonbDateTimeFormatter deserializeDateFormatter;
 
-    private final AdapterBinding serializeAdapter;
-    private final AdapterBinding deserializeAdapter;
+    private final TypeAdapterBinding serializeAdapter;
+    private final TypeAdapterBinding deserializeAdapter;
 
     private boolean readTransient;
     private boolean writeTransient;
@@ -77,22 +77,22 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
+    public JsonbNumericFormatter getSerializeNumberFormatter() {
         return serializeNumberFormatter;
     }
 
     @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+    public JsonbNumericFormatter getDeserializeNumberFormatter() {
         return deserializeNumberFormatter;
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         return serializeDateFormatter;
     }
 
     @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         return deserializeDateFormatter;
     }
 
@@ -128,12 +128,12 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     @Override
-    public AdapterBinding getDeserializeAdapterBinding() {
+    public TypeAdapterBinding getDeserializeAdapterBinding() {
         return deserializeAdapter;
     }
 
     @Override
-    public AdapterBinding getSerializeAdapterBinding() {
+    public TypeAdapterBinding getSerializeAdapterBinding() {
         return serializeAdapter;
     }
 

@@ -16,10 +16,10 @@ import java.lang.reflect.Type;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link Float} type.
@@ -36,14 +36,14 @@ public class FloatTypeDeserializer extends AbstractNumberDeserializer<Float> {
     }
 
     @Override
-    protected Float deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Float deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, false, unmarshaller.getJsonbContext())
                 .map(num -> Float.parseFloat(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return Float.parseFloat(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, Float.class));
+                        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, Float.class));
                     }
                 });
     }

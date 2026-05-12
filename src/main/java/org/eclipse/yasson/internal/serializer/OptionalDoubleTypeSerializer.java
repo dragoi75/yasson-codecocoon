@@ -17,7 +17,7 @@ import java.util.OptionalDouble;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.Marshaller;
+import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.handleEmpty;
@@ -25,7 +25,7 @@ import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.ha
 /**
  * Serializer for {@link OptionalDouble} type.
  */
-public class OptionalDoubleTypeSerializer extends AbstractValueTypeSerializer<OptionalDouble> {
+public class OptionalDoubleTypeSerializer extends AbstractValueSerializer<OptionalDouble> {
 
     /**
      * Creates a new instance.
@@ -37,7 +37,7 @@ public class OptionalDoubleTypeSerializer extends AbstractValueTypeSerializer<Op
     }
 
     @Override
-    protected void serialize(OptionalDouble obj, JsonGenerator generator, Marshaller marshaller) {
+    protected void serializeValue(OptionalDouble obj, JsonGenerator generator, JsonbMarshaller marshaller) {
         if (!handleEmpty(obj, OptionalDouble::isPresent, getCustomization(), generator, marshaller)) {
             generator.write(obj.getAsDouble());
         }

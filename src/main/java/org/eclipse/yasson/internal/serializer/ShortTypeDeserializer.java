@@ -16,10 +16,10 @@ import java.lang.reflect.Type;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer for {@link Short} type.
@@ -36,14 +36,14 @@ public class ShortTypeDeserializer extends AbstractNumberDeserializer<Short> {
     }
 
     @Override
-    protected Short deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Short deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
                 .map(num -> Short.parseShort(num.toString()))
                 .orElseGet(() -> {
                     try {
                         return Short.parseShort(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, Short.class));
+                        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, Short.class));
                     }
                 });
     }

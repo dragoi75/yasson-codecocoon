@@ -25,7 +25,7 @@ public class CharArraySerializer extends AbstractArraySerializer<char[]> {
      *
      * @param builder serializer builder
      */
-    protected CharArraySerializer(SerializerBuilder builder) {
+    protected CharArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
     }
 
