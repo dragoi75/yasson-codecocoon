@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -22,10 +21,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.ReflectionUtils;
@@ -54,35 +51,28 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
      */
     protected MapDeserializer(DeserializerBuilder builder) {
         super(builder);
-        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
-                : Object.class;
-
+        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1]) : Object.class;
         this.instance = createInstance(builder);
     }
 
     @SuppressWarnings("unchecked")
     private T createInstance(DeserializerBuilder builder) {
         Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
-        return rawType.isInterface()
-                ? (T) getMapImpl(rawType, builder)
-                : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
+        return rawType.isInterface() ? (T) getMapImpl(rawType, builder) : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
     }
 
     private Map getMapImpl(Class ifcType, DeserializerBuilder builder) {
         if (ConcurrentMap.class.isAssignableFrom(ifcType)) {
-            if (SortedMap.class.isAssignableFrom(ifcType) || NavigableMap.class.isAssignableFrom(ifcType)) {
-                return new ConcurrentSkipListMap<>();
-            } else {
+            if (!SortedMap.class.isAssignableFrom(ifcType) && !NavigableMap.class.isAssignableFrom(ifcType)) {
                 return new ConcurrentHashMap<>();
+            } else {
+                return new ConcurrentSkipListMap<>();
             }
         }
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
             Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
-            return SortedMap.class.isAssignableFrom(defaultMapImplType)
-                    ? (Map) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType)
-                    : new TreeMap<>();
+            return SortedMap.class.isAssignableFrom(defaultMapImplType) ? (Map) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType) : new TreeMap<>();
         }
         return new HashMap<>();
     }

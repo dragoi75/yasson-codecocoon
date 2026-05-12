@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.invoke.MethodHandle;
@@ -26,12 +25,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
-
 import org.eclipse.yasson.internal.JsonbAnnotationIntrospector;
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.ReflectionUtils;
@@ -51,9 +48,9 @@ import org.eclipse.yasson.internal.serializer.UserSerializerSerializer;
  * Property is JavaBean alike meta information field / getter / setter of a property in class.
  */
 public final class PropertyMetadata implements Comparable<PropertyMetadata> {
-    
+
     private static final MethodHandles.Lookup DEFAULT_RESOLVER = ModulesUtil.lookup();
-    
+
     /**
      * Field propertyName as in class by java bean convention.
      */
@@ -78,7 +75,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * Model of the class this field belongs to.
      */
     private final ClassDescriptor declaringClass;
-    
+
     private final PropertyDescriptor attributeDescriptor;
 
     /**
@@ -91,17 +88,17 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
     private final MethodHandle getterHandle;
 
     private final MethodHandle setterHandle;
-    
+
     private final Field reflectedField;
 
     private final Method readMethod;
 
     private final Method writeMethod;
-    
+
     private final Type readMethodType;
 
     private final Type writeMethodType;
-    
+
     /**
      * Create a new PropertyModel that merges two existing PropertyModel that have identical read/write names.
      * The input PropertyModel objects MUST be equal (a.equals(b) == true)
@@ -112,7 +109,6 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         if (!firstMetadata.equals(secondMetadata)) {
             throw new IllegalStateException("Property models " + firstMetadata + " and " + secondMetadata + " cannot be merged");
         }
-        
         // Initial cloning steps
         this.declaringClass = firstMetadata.declaringClass;
         this.attributeName = firstMetadata.attributeName;
@@ -120,24 +116,22 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         this.setterName = firstMetadata.setterName;
         this.attributeType = firstMetadata.attributeType;
         this.customOptions = firstMetadata.customOptions;
-        
         // Merging steps
-        this.readMethodType = firstMetadata.readMethodType != null ? firstMetadata.readMethodType : secondMetadata.readMethodType;
-        this.writeMethodType = firstMetadata.writeMethodType != null ? firstMetadata.writeMethodType : secondMetadata.writeMethodType;
+        this.readMethodType = null != firstMetadata.readMethodType ? firstMetadata.readMethodType : secondMetadata.readMethodType;
+        this.writeMethodType = null != firstMetadata.writeMethodType ? firstMetadata.writeMethodType : secondMetadata.writeMethodType;
         this.attributeDescriptor = firstMetadata.attributeDescriptor;
-        if (secondMetadata.attributeDescriptor.getField() != null) {
+        if (null != secondMetadata.attributeDescriptor.getField()) {
             this.attributeDescriptor.setField(secondMetadata.attributeDescriptor.getField());
         }
-        if (secondMetadata.attributeDescriptor.getGetter() != null) {
+        if (null != secondMetadata.attributeDescriptor.getGetter()) {
             this.attributeDescriptor.setGetter(secondMetadata.attributeDescriptor.getGetter());
         }
-        if (secondMetadata.attributeDescriptor.getSetter() != null) {
+        if (null != secondMetadata.attributeDescriptor.getSetter()) {
             this.attributeDescriptor.setSetter(secondMetadata.attributeDescriptor.getSetter());
         }
         this.reflectedField = attributeDescriptor.getField();
         this.readMethod = attributeDescriptor.getGetter();
         this.writeMethod = attributeDescriptor.getSetter();
-        
         PropertyVisibilityStrategy visibilityPolicy = declaringClass.getClassCustomization().getPropertyVisibilityStrategy();
         this.getterHandle = createGetterHandle(reflectedField, readMethod, isMethodVisible(readMethod, visibilityPolicy), visibilityPolicy);
         this.setterHandle = createSetterHandle(reflectedField, writeMethod, isMethodVisible(writeMethod, visibilityPolicy), visibilityPolicy);
@@ -159,20 +153,16 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         this.reflectedField = attributeDescriptor.getField();
         this.readMethod = attributeDescriptor.getGetter();
         this.writeMethod = attributeDescriptor.getSetter();
-        
         PropertyVisibilityStrategy visibilityPolicy = declaringClass.getClassCustomization().getPropertyVisibilityStrategy();
         boolean readAccessible = isMethodVisible(readMethod, visibilityPolicy);
         boolean writeAccessible = isMethodVisible(writeMethod, visibilityPolicy);
-        
         this.getterHandle = createGetterHandle(reflectedField, readMethod, readAccessible, visibilityPolicy);
         this.setterHandle = createSetterHandle(reflectedField, writeMethod, writeAccessible, visibilityPolicy);
         this.readMethodType = readAccessible ? attributeDescriptor.getGetterType() : null;
         this.writeMethodType = writeAccessible ? attributeDescriptor.getSetterType() : null;
         this.customOptions = inspectCustomization(attributeDescriptor, runtimeContext);
-        this.getterName = determineReadWriteName(customOptions.getJsonReadName(), attributeName,
-                                               runtimeContext.getConfigProperties().getPropertyNamingStrategy());
-        this.setterName = determineReadWriteName(customOptions.getJsonWriteName(), attributeName,
-                                                runtimeContext.getConfigProperties().getPropertyNamingStrategy());
+        this.getterName = determineReadWriteName(customOptions.getJsonReadName(), attributeName, runtimeContext.getConfigProperties().getPropertyNamingStrategy());
+        this.setterName = determineReadWriteName(customOptions.getJsonWriteName(), attributeName, runtimeContext.getConfigProperties().getPropertyNamingStrategy());
         this.valueSerializer = getCachedSerializer();
     }
 
@@ -187,19 +177,17 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         if (!ReflectionUtils.isResolvedType(formatType)) {
             return null;
         }
-        if (customOptions.getSerializeAdapterBinding() != null) {
+        if (null != customOptions.getSerializeAdapterBinding()) {
             return new AdaptedObjectSerializer<>(declaringClass, customOptions.getSerializeAdapterBinding());
         }
-        if (customOptions.getSerializerBinding() != null) {
+        if (null != customOptions.getSerializerBinding()) {
             return new UserSerializerSerializer<>(declaringClass, customOptions.getSerializerBinding().getJsonbSerializer());
         }
-
         final Class<?> rawTypeClass = ReflectionUtils.getRawType(formatType);
         final Optional<SerializerProviderWrapper> serializerProviderOptional = DefaultSerializers.findValueSerializerProvider(rawTypeClass);
         if (serializerProviderOptional.isPresent()) {
             return serializerProviderOptional.get().getSerializerProvider().provideSerializer(customOptions);
         }
-
         return null;
     }
 
@@ -209,7 +197,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * @return deserialization type
      */
     public Type getPropertyDeserializationType() {
-        return writeMethodType == null ? attributeType : writeMethodType;
+        return null == writeMethodType ? attributeType : writeMethodType;
     }
 
     /**
@@ -218,12 +206,12 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * @return serialization type
      */
     public Type getPropertySerializationType() {
-        return readMethodType == null ? attributeType : readMethodType;
+        return null == readMethodType ? attributeType : readMethodType;
     }
 
     private SerializerBinding<?> getUserSerializerBinding(PropertyDescriptor attributeDescriptor, JsonbRuntimeContext runtimeContext) {
         final SerializerBinding<?> bindingEntry = runtimeContext.getAnnotationIntrospector().getSerializerBinding(attributeDescriptor);
-        if (bindingEntry != null) {
+        if (null != bindingEntry) {
             return bindingEntry;
         }
         return runtimeContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
@@ -234,10 +222,9 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         final PropertyCustomizationBuilder customizationFactory = new PropertyCustomizationBuilder();
         //drop all other annotations for transient properties
         EnumSet<AnnotationTarget> ignoredAnnotationTargets = annotationInspector.getJsonbTransientCategorized(attributeDescriptor);
-        if (ignoredAnnotationTargets.size() != 0) {
+        if (0 != ignoredAnnotationTargets.size()) {
             customizationFactory.setReadTransient(ignoredAnnotationTargets.contains(AnnotationTarget.GETTER));
             customizationFactory.setWriteTransient(ignoredAnnotationTargets.contains(AnnotationTarget.SETTER));
-
             if (ignoredAnnotationTargets.contains(AnnotationTarget.PROPERTY)) {
                 if (!ignoredAnnotationTargets.contains(AnnotationTarget.GETTER)) {
                     customizationFactory.setReadTransient(true);
@@ -246,7 +233,6 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
                     customizationFactory.setWriteTransient(true);
                 }
             }
-
             if (customizationFactory.isReadTransient()) {
                 annotationInspector.validateTransientCompatibility(attributeDescriptor.getFieldElement());
                 annotationInspector.validateTransientCompatibility(attributeDescriptor.getGetterElement());
@@ -256,42 +242,30 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
                 annotationInspector.validateTransientCompatibility(attributeDescriptor.getSetterElement());
             }
         }
-
         if (!customizationFactory.isReadTransient()) {
             customizationFactory.setJsonWriteName(annotationInspector.getJsonbPropertyJsonWriteName(attributeDescriptor));
-            customizationFactory.setNillable(annotationInspector.isPropertyNillable(attributeDescriptor)
-                                        .orElse(declaringClass.getClassCustomization().isNillable()));
+            customizationFactory.setNillable(annotationInspector.isPropertyNillable(attributeDescriptor).orElse(declaringClass.getClassCustomization().isNillable()));
             customizationFactory.setSerializerBinding(getUserSerializerBinding(attributeDescriptor, runtimeContext));
         }
-
         if (!customizationFactory.isWriteTransient()) {
             customizationFactory.setJsonReadName(annotationInspector.getJsonbPropertyJsonReadName(attributeDescriptor));
             customizationFactory.setDeserializerBinding(annotationInspector.getDeserializerBinding(attributeDescriptor));
         }
-
         final AdapterBinding adapterRef = runtimeContext.getAnnotationIntrospector().getAdapterBinding(attributeDescriptor);
-        if (adapterRef != null) {
+        if (null == adapterRef) {
+            customizationFactory.setSerializeAdapter(runtimeContext.getComponentMatcher().getSerializeAdapterBinding(getPropertySerializationType(), null).orElse(null));
+            customizationFactory.setDeserializeAdapter(runtimeContext.getComponentMatcher().getDeserializeAdapterBinding(getPropertyDeserializationType(), null).orElse(null));
+        } else {
             customizationFactory.setSerializeAdapter(adapterRef);
             customizationFactory.setDeserializeAdapter(adapterRef);
-        } else {
-            customizationFactory.setSerializeAdapter(runtimeContext.getComponentMatcher()
-                                                .getSerializeAdapterBinding(getPropertySerializationType(), null).orElse(null));
-            customizationFactory.setDeserializeAdapter(runtimeContext.getComponentMatcher()
-                                                  .getDeserializeAdapterBinding(getPropertyDeserializationType(), null)
-                                                  .orElse(null));
         }
-
         resolveDateFormatter(attributeDescriptor, annotationInspector, customizationFactory, runtimeContext);
         resolveNumberFormatter(attributeDescriptor, annotationInspector, customizationFactory);
         customizationFactory.setImplementationClass(annotationInspector.getImplementationClass(attributeDescriptor));
-
         return customizationFactory.buildPropertyCustomization();
     }
 
-    private static void resolveDateFormatter(PropertyDescriptor attributeDescriptor,
-                                             JsonbAnnotationIntrospector annotationInspector,
-                                             PropertyCustomizationBuilder customizationFactory,
-                                             JsonbRuntimeContext runtimeContext) {
+    private static void resolveDateFormatter(PropertyDescriptor attributeDescriptor, JsonbAnnotationIntrospector annotationInspector, PropertyCustomizationBuilder customizationFactory, JsonbRuntimeContext runtimeContext) {
         /*
          * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
@@ -299,32 +273,19 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
          *
          * Priority from high to low is getter / setter > field > class > package > global configuration
          */
-        Map<AnnotationTarget, JsonbDateFormatter> dateFormatByTarget = annotationInspector
-                .getJsonbDateFormatCategorized(attributeDescriptor);
+        Map<AnnotationTarget, JsonbDateFormatter> dateFormatByTarget = annotationInspector.getJsonbDateFormatCategorized(attributeDescriptor);
         final JsonbDateFormatter configuredDateFormatter = runtimeContext.getConfigProperties().getConfigDateFormatter();
-
         if (!customizationFactory.isReadTransient()) {
-            final JsonbDateFormatter resolvedDateFormatter = getTargetForMostPreciseScope(dateFormatByTarget,
-                                                                                  AnnotationTarget.GETTER,
-                                                                                  AnnotationTarget.PROPERTY,
-                                                                                  AnnotationTarget.CLASS);
-
-            customizationFactory.setSerializeDateFormatter(resolvedDateFormatter != null ? resolvedDateFormatter : configuredDateFormatter);
+            final JsonbDateFormatter resolvedDateFormatter = getTargetForMostPreciseScope(dateFormatByTarget, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            customizationFactory.setSerializeDateFormatter(null != resolvedDateFormatter ? resolvedDateFormatter : configuredDateFormatter);
         }
-
         if (!customizationFactory.isWriteTransient()) {
-            final JsonbDateFormatter resolvedDateFormatter = getTargetForMostPreciseScope(dateFormatByTarget,
-                                                                                  AnnotationTarget.SETTER,
-                                                                                  AnnotationTarget.PROPERTY,
-                                                                                  AnnotationTarget.CLASS);
-
-            customizationFactory.setDeserializeDateFormatter(resolvedDateFormatter != null ? resolvedDateFormatter : configuredDateFormatter);
+            final JsonbDateFormatter resolvedDateFormatter = getTargetForMostPreciseScope(dateFormatByTarget, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            customizationFactory.setDeserializeDateFormatter(null != resolvedDateFormatter ? resolvedDateFormatter : configuredDateFormatter);
         }
     }
 
-    private static void resolveNumberFormatter(PropertyDescriptor attributeDescriptor,
-                                               JsonbAnnotationIntrospector annotationInspector,
-                                               PropertyCustomizationBuilder customizationFactory) {
+    private static void resolveNumberFormatter(PropertyDescriptor attributeDescriptor, JsonbAnnotationIntrospector annotationInspector, PropertyCustomizationBuilder customizationFactory) {
         /*
          * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
          * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
@@ -333,19 +294,11 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
          * Priority from high to low is getter / setter > field > class > package > global configuration
          */
         Map<AnnotationTarget, JsonbNumberFormatter> numberFormatByTarget = annotationInspector.getJsonNumberFormatter(attributeDescriptor);
-
         if (!customizationFactory.isReadTransient()) {
-            customizationFactory.setSerializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget,
-                                                                             AnnotationTarget.GETTER,
-                                                                             AnnotationTarget.PROPERTY,
-                                                                             AnnotationTarget.CLASS));
+            customizationFactory.setSerializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
         }
-
         if (!customizationFactory.isWriteTransient()) {
-            customizationFactory.setDeserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget,
-                                                                               AnnotationTarget.SETTER,
-                                                                               AnnotationTarget.PROPERTY,
-                                                                               AnnotationTarget.CLASS));
+            customizationFactory.setDeserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatByTarget, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
         }
     }
 
@@ -358,7 +311,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
     private static <T> T getTargetForMostPreciseScope(Map<AnnotationTarget, T> annotationsMap, AnnotationTarget... annotationTargets) {
         for (AnnotationTarget annotationTarget : annotationTargets) {
             final T resolvedValue = annotationsMap.get(annotationTarget);
-            if (resolvedValue != null) {
+            if (null != resolvedValue) {
                 return resolvedValue;
             }
         }
@@ -404,7 +357,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * @return true if can be serialized to JSON
      */
     public boolean isReadable() {
-        return !customOptions.isReadTransient() && this.getterHandle != null;
+        return !customOptions.isReadTransient() && null != this.getterHandle;
     }
 
     /**
@@ -413,7 +366,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * @return true if can be deserialized from JSON
      */
     public boolean isWritable() {
-        return !customOptions.isWriteTransient() && this.setterHandle != null;
+        return !customOptions.isWriteTransient() && null != this.setterHandle;
     }
 
     /**
@@ -448,20 +401,19 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
     @Override
     public int compareTo(PropertyMetadata otherMetadata) {
         int comparisonResult = getterName.compareTo(otherMetadata.getterName);
-        return comparisonResult == 0 ? setterName.compareTo(otherMetadata.setterName) : comparisonResult;
+        return 0 == comparisonResult ? setterName.compareTo(otherMetadata.setterName) : comparisonResult;
     }
 
     @Override
     public boolean equals(Object otherProp) {
-        if (this == otherProp) {
+        if (otherProp == this) {
             return true;
         }
-        if (otherProp == null || getClass() != otherProp.getClass()) {
+        if (null == otherProp || otherProp.getClass() != getClass()) {
             return false;
         }
         PropertyMetadata otherMetadata = (PropertyMetadata) otherProp;
-        return Objects.equals(getterName, otherMetadata.getterName)
-               && Objects.equals(setterName, otherMetadata.setterName);
+        return Objects.equals(getterName, otherMetadata.getterName) && Objects.equals(setterName, otherMetadata.setterName);
     }
 
     @Override
@@ -497,9 +449,9 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * with calculated values for same input.
      */
     private static String determineReadWriteName(String rwName, String attributeName, PropertyNamingStrategy visibilityPolicy) {
-        return rwName != null ? rwName : visibilityPolicy.translateName(attributeName);
+        return null != rwName ? rwName : visibilityPolicy.translateName(attributeName);
     }
-    
+
     /**
      * Field of a javabean property.
      *
@@ -526,17 +478,16 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
     public Method getSetter() {
         return writeMethod;
     }
-    
+
     // Used in ClassParser
     public static boolean isPropertyReadable(Field reflectedField, Method readMethod, PropertyVisibilityStrategy visibilityPolicy) {
-        return createGetterHandle(reflectedField, readMethod, isMethodVisible(readMethod, visibilityPolicy), visibilityPolicy) != null;
+        return null != createGetterHandle(reflectedField, readMethod, isMethodVisible(readMethod, visibilityPolicy), visibilityPolicy);
     }
-    
+
     private static MethodHandle createGetterHandle(Field reflectedField, Method readMethod, boolean readAccessible, PropertyVisibilityStrategy visibilityPolicy) {
-        boolean isFieldReadable = reflectedField == null || (reflectedField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) == 0;
-        
+        boolean isFieldReadable = null == reflectedField || 0 == (reflectedField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC));
         if (isFieldReadable) {
-            if (readMethod != null && readAccessible) {
+            if (null != readMethod && readAccessible) {
                 try {
                     return DEFAULT_RESOLVER.unreflect(readMethod);
                 } catch (Throwable cause) {
@@ -551,15 +502,13 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
                 }
             }
         }
-        
         return null;
     }
-    
+
     private static MethodHandle createSetterHandle(Field reflectedField, Method writeMethod, boolean writeAccessible, PropertyVisibilityStrategy visibilityPolicy) {
-        boolean isFieldWritable = reflectedField == null || (reflectedField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL)) == 0;
-        
+        boolean isFieldWritable = null == reflectedField || 0 == (reflectedField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
         if (isFieldWritable) {
-            if (writeMethod != null && writeAccessible && !writeMethod.getDeclaringClass().isAnonymousClass()) {
+            if (null != writeMethod && writeAccessible && !writeMethod.getDeclaringClass().isAnonymousClass()) {
                 try {
                     return DEFAULT_RESOLVER.unreflect(writeMethod);
                 } catch (IllegalAccessException cause) {
@@ -574,20 +523,16 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
                 }
             }
         }
-        
         return null;
     }
 
     private static boolean isFieldVisible(Field reflectedField, Method accessor, PropertyVisibilityStrategy visibilityPolicy) {
-        if (reflectedField == null) {
+        if (null == reflectedField) {
             return false;
         }
         boolean canAccess = isVisible(visPolicy -> visPolicy.isVisible(reflectedField), accessor, visibilityPolicy);
         //overridden by strategy, or anonymous class (readable by spec)
-        if (canAccess && (
-                !Modifier.isPublic(reflectedField.getModifiers())
-                        || reflectedField.getDeclaringClass().isAnonymousClass()
-                        || isNotPublicAndNonNested(reflectedField.getDeclaringClass()))) {
+        if (canAccess && (!Modifier.isPublic(reflectedField.getModifiers()) || reflectedField.getDeclaringClass().isAnonymousClass() || isNotPublicAndNonNested(reflectedField.getDeclaringClass()))) {
             setAccessiblePrivileged(reflectedField);
         }
         return canAccess;
@@ -598,15 +543,12 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
     }
 
     private static boolean isMethodVisible(Method accessor, PropertyVisibilityStrategy visibilityPolicy) {
-        if (accessor == null || Modifier.isStatic(accessor.getModifiers())) {
+        if (null == accessor || Modifier.isStatic(accessor.getModifiers())) {
             return false;
         }
-
         boolean canAccess = isVisible(visPolicy -> visPolicy.isVisible(accessor), accessor, visibilityPolicy);
         //overridden by strategy, anonymous class, or lambda
-        if (canAccess && (
-                !Modifier.isPublic(accessor.getModifiers()) || accessor.getDeclaringClass().isAnonymousClass() || accessor
-                        .getDeclaringClass().isSynthetic())) {
+        if (canAccess && (!Modifier.isPublic(accessor.getModifiers()) || accessor.getDeclaringClass().isAnonymousClass() || accessor.getDeclaringClass().isSynthetic())) {
             setAccessiblePrivileged(accessor);
         }
         return canAccess;
@@ -627,7 +569,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
      * @return Optional with result of visibility check, or empty optional if no strategy is found
      */
     private static boolean isVisible(Predicate<PropertyVisibilityStrategy> visibilityChecker, Method accessor, PropertyVisibilityStrategy visibilityPolicy) {
-        return visibilityPolicy != null ? visibilityChecker.test(visibilityPolicy) : visibilityChecker.test(new DefaultVisibilityPolicy(accessor));
+        return null != visibilityPolicy ? visibilityChecker.test(visibilityPolicy) : visibilityChecker.test(new DefaultVisibilityPolicy(accessor));
     }
 
     private static final class DefaultVisibilityPolicy implements PropertyVisibilityStrategy {
@@ -641,7 +583,7 @@ public final class PropertyMetadata implements Comparable<PropertyMetadata> {
         @Override
         public boolean isVisible(Field reflectedField) {
             //don't check field if getter is not visible (forced by spec)
-            return (accessor == null || isVisible(accessor)) && Modifier.isPublic(reflectedField.getModifiers());
+            return (null == accessor || isVisible(accessor)) && Modifier.isPublic(reflectedField.getModifiers());
         }
 
         @Override

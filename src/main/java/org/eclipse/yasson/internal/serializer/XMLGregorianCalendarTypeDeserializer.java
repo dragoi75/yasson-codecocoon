@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.time.Instant;
@@ -24,13 +23,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import jakarta.json.bind.JsonbException;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
 import org.eclipse.yasson.internal.properties.MessageBundle;
@@ -43,6 +39,7 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
     private static final LocalTime ZERO_LOCAL_TIME = LocalTime.parse("00:00:00");
 
     private final Calendar calendarTemplate;
+
     private final DatatypeFactory datatypeFactory;
 
     /**
@@ -71,9 +68,7 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
 
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
-        DateTimeFormatter formatter = jsonValue.contains("T")
-                ? DateTimeFormatter.ISO_DATE_TIME
-                : DateTimeFormatter.ISO_DATE;
+        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
         return parseWithFormatter(jsonValue, formatter.withLocale(locale));
     }
 
@@ -82,10 +77,10 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         final TemporalAccessor parsed = formatter.parse(jsonValue);
         LocalTime time = parsed.query(TemporalQueries.localTime());
         ZoneId zone = parsed.query(TemporalQueries.zone());
-        if (zone == null) {
+        if (null == zone) {
             zone = UTC;
         }
-        if (time == null) {
+        if (null == time) {
             time = ZERO_LOCAL_TIME;
         }
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);

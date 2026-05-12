@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
@@ -18,7 +17,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
 import org.eclipse.yasson.internal.model.CreatorProfile;
 import org.eclipse.yasson.internal.model.JsonbInstantiator;
 import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
@@ -29,6 +27,7 @@ class ConstructorPropertiesAnnotationIntrospector {
     private static final Logger LOG = Logger.getLogger(ConstructorPropertiesAnnotationIntrospector.class.getName());
 
     private final JsonbRuntimeContext jsonbContext;
+
     private final AnnotationFinder constructorProperties;
 
     public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
@@ -50,7 +49,6 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     public JsonbInstantiator getCreator(Constructor<?>[] constructors) {
         JsonbInstantiator jsonbCreator = null;
-
         for (Constructor<?> constructor : constructors) {
             Object properties = constructorProperties.valueIn(constructor.getDeclaredAnnotations());
             if (!(properties instanceof String[])) {
@@ -58,18 +56,16 @@ class ConstructorPropertiesAnnotationIntrospector {
             }
             if (!Modifier.isPublic(constructor.getModifiers())) {
                 String declaringClass = constructor.getDeclaringClass().getName();
-                String message = "The constructor of {0} annotated with @ConstructorProperties {1} is not accessible and will "
-                        + "be ignored.";
+                String message = "The constructor of {0} annotated with @ConstructorProperties {1} is not accessible and will " + "be ignored.";
                 LOG.finest(String.format(message, declaringClass, Arrays.toString((String[]) properties)));
                 continue;
             }
-            if (jsonbCreator != null) {
+            if (null != jsonbCreator) {
                 // don't fail in this case, because it is perfectly allowed to have more than one
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(MessageBundle.getMessage(ErrorMessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
-                                                constructor.getDeclaringClass().getName()));
+                LOG.warning(MessageBundle.getMessage(ErrorMessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS, constructor.getDeclaringClass().getName()));
                 return null;
             }
             jsonbCreator = createJsonbCreator(constructor, (String[]) properties);
@@ -79,11 +75,12 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private JsonbInstantiator createJsonbCreator(Executable executable, String[] properties) {
         final Parameter[] parameters = executable.getParameters();
-
         CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
+        int i = 0;
+        while (parameters.length > i) {
             final Parameter parameter = parameters[i];
             creatorModels[i] = new CreatorProfile(properties[i], parameter, jsonbContext);
+            i += 1;
         }
         return new JsonbInstantiator(executable, creatorModels);
     }

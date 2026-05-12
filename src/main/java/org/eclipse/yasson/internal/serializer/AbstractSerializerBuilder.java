@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
-
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -116,7 +114,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
         return (T) this;
     }
 
-    /***
+    /**
      * Gets or load class model for a class an its superclasses.
      *
      * @param rawType Class to get model for.
@@ -124,7 +122,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      */
     protected ClassDescriptor getClassModel(Class<?> rawType) {
         ClassDescriptor classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (classModel == null) {
+        if (null == classModel) {
             classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
         }
         return classModel;

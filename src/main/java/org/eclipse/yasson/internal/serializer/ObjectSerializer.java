@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
@@ -17,12 +16,10 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
@@ -61,19 +58,17 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
         Marshaller context = (Marshaller) ctx;
         try {
-            if (context.addProcessedObject(object)) {
-                final PropertyMetadata[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass())
-                        .getSortedProperties();
+            if (!context.addProcessedObject(object)) {
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.RECURSIVE_REFERENCE, object.getClass()));
+            } else {
+                final PropertyMetadata[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
                 for (PropertyMetadata model : allProperties) {
                     try {
                         marshallProperty(object, generator, context, model);
                     } catch (Exception e) {
-                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(),
-                                                                     object.getClass().getCanonicalName()), e);
+                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(), object.getClass().getCanonicalName()), e);
                     }
                 }
-            } else {
-                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.RECURSIVE_REFERENCE, object.getClass()));
             }
         } finally {
             context.removeProcessedObject(object);
@@ -92,47 +87,43 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyMetadata propertyModel) {
         Marshaller marshaller = (Marshaller) ctx;
-
         if (propertyModel.isReadable()) {
             final Object propertyValue = propertyModel.getValue(object);
-            if (propertyValue == null || isEmptyOptional(propertyValue)) {
+            if (null == propertyValue || isEmptyOptional(propertyValue)) {
                 if (propertyModel.getCustomization().isNillable()) {
                     generator.writeNull(propertyModel.getWriteName());
                 }
                 return;
             }
-
             generator.writeKey(propertyModel.getWriteName());
-
             final JsonbSerializer<?> propertyCachedSerializer = propertyModel.getPropertySerializer();
-            if (propertyCachedSerializer != null) {
+            if (null != propertyCachedSerializer) {
                 serializerCaptor(propertyCachedSerializer, propertyValue, generator, ctx);
                 return;
             }
-
-            Optional<Type> runtimeTypeOptional = ReflectionUtils
-                    .resolveOptionalType(this, propertyModel.getPropertySerializationType());
+            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, propertyModel.getPropertySerializationType());
             Type genericType = runtimeTypeOptional.orElse(null);
-            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
-                    .withWrapper(this)
-                    .withObjectClass(propertyValue.getClass())
-                    .withCustomization(propertyModel.getCustomization())
-                    .withType(genericType).build();
+            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext()).withWrapper(this).withObjectClass(propertyValue.getClass()).withCustomization(propertyModel.getCustomization()).withType(genericType).build();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }
 
     private boolean isEmptyOptional(Object object) {
-        if (object instanceof Optional) {
+        if (!(object instanceof Optional)) {
+            if (!(object instanceof OptionalInt)) {
+                if (!(object instanceof OptionalLong)) {
+                    if (object instanceof OptionalDouble) {
+                        return !((OptionalDouble) object).isPresent();
+                    }
+                } else {
+                    return !((OptionalLong) object).isPresent();
+                }
+            } else {
+                return !((OptionalInt) object).isPresent();
+            }
+        } else {
             return !((Optional) object).isPresent();
-        } else if (object instanceof OptionalInt) {
-            return !((OptionalInt) object).isPresent();
-        } else if (object instanceof OptionalLong) {
-            return !((OptionalLong) object).isPresent();
-        } else if (object instanceof OptionalDouble) {
-            return !((OptionalDouble) object).isPresent();
         }
         return false;
     }
-
 }

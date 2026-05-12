@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Constructor;
@@ -20,9 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
 import org.eclipse.yasson.internal.model.customization.StrategiesProvider;
@@ -72,10 +69,7 @@ public class ClassDescriptor {
      * @param parentDescriptor       Class model of parent class.
      * @param namingStrategy Property naming strategy.
      */
-    public ClassDescriptor(Class<?> objectType,
-                           ClassSerializationConfig config,
-                           ClassDescriptor parentDescriptor,
-                           PropertyNamingStrategy namingStrategy) {
+    public ClassDescriptor(Class<?> objectType, ClassSerializationConfig config, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
         this.objectType = objectType;
         this.serializationConfig = config;
         this.parentDescriptor = parentDescriptor;
@@ -97,7 +91,7 @@ public class ClassDescriptor {
     private PropertyMetadata findPropertyByJsonReadName(ClassDescriptor classDescriptor, String jsonFieldName) {
         //Standard javabean properties without overridden name (most of the cases)
         final PropertyMetadata foundProperty = classDescriptor.getPropertyModel(jsonFieldName);
-        if (foundProperty != null && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
             return foundProperty;
         }
         //Search for overridden name on setter with @JsonbProperty annotation
@@ -118,7 +112,7 @@ public class ClassDescriptor {
      */
     private boolean isReadNameEqual(String jsonFieldName, PropertyMetadata propModel) {
         final String actualReadName = propModel.getReadName();
-        if (namingStrategy == StrategiesProvider.CASE_INSENSITIVE_STRATEGY) {
+        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == namingStrategy) {
             return jsonFieldName.equalsIgnoreCase(actualReadName);
         }
         return jsonFieldName.equals(actualReadName);
