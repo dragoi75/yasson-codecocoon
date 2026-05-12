@@ -22,8 +22,8 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Array container serializer.
@@ -112,7 +112,7 @@ abstract class ArraySerializer implements ModelSerializer {
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlEncoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Invalid strategy: " + strategy));
             }
         }
     }

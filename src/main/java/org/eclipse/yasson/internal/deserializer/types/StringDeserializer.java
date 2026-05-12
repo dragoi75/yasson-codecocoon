@@ -19,8 +19,8 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer of the {@link String} type.
@@ -41,7 +41,7 @@ class StringDeserializer extends TypeDeserializer {
         if (config.isStrictIJson()) {
             String newString = new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
             if (!newString.equals(value)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.UNPAIRED_SURROGATE));
             }
         }
         return value;

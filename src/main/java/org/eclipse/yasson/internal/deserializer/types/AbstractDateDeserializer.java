@@ -30,8 +30,8 @@ import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.deserializer.JustReturn;
 import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Base deserializer for all the date related types.
@@ -72,7 +72,7 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
             try {
                 return parseDefault(value, locale);
             } catch (DateTimeException e) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, value, getType()), e);
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.DATE_PARSE_ERROR, value, getType()), e);
             }
         };
     }
@@ -122,7 +122,7 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getType()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.DATE_PARSE_ERROR, jsonValue, getType()), e);
         }
     }
 

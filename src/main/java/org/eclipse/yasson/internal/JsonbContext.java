@@ -32,8 +32,8 @@ import jakarta.json.stream.JsonParserFactory;
 
 import org.eclipse.yasson.internal.components.JsonbComponentInstanceCreatorFactory;
 import org.eclipse.yasson.internal.deserializer.DeserializationModelCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 import org.eclipse.yasson.internal.serializer.SerializationModelCreator;
 import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 
@@ -181,7 +181,7 @@ public class JsonbContext {
         if (property.isPresent()) {
             final Object value = property.get();
             if (!(value instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
             }
             if ((Boolean) value) {
                 factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);

@@ -23,8 +23,8 @@ import jakarta.json.stream.JsonParser;
 import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Deserialization context implementation.
@@ -139,7 +139,7 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         } catch (JsonbException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, e.getMessage()), e);
         }
     }
 

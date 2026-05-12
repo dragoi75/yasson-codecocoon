@@ -16,8 +16,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Recursion checker serializer deals with possible instance recursion in instances.
@@ -33,7 +33,7 @@ class RecursionChecker implements ModelSerializer {
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         if (!context.addProcessedObject(value)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, value.getClass()));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RECURSIVE_REFERENCE, value.getClass()));
         }
         delegate.serialize(value, generator, context);
         context.removeProcessedObject(value);

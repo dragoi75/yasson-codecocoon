@@ -19,9 +19,9 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.ClassMultiReleaseExtension;
 import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Creator of the class instance with the default constructor.
@@ -38,10 +38,10 @@ class DefaultObjectInstanceCreator implements ModelDeserializer<JsonParser> {
         this.delegate = delegate;
         this.defaultConstructor = defaultConstructor;
         if (clazz.isInterface()) {
-            this.exception = new JsonbException(Messages.getMessage(MessageKeys.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
+            this.exception = new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
         } else if (defaultConstructor == null) {
             this.exception = ClassMultiReleaseExtension.exceptionToThrow(clazz)
-                    .orElse(new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, clazz)));
+                    .orElse(new JsonbException(MessageBundle.getMessage(MessageKeysEnum.NO_DEFAULT_CONSTRUCTOR, clazz)));
         } else {
             this.exception = null;
         }
@@ -52,7 +52,7 @@ class DefaultObjectInstanceCreator implements ModelDeserializer<JsonParser> {
         if (exception != null) {
             throw exception;
         }
-        Object instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);
+        Object instance = ReflectiveTypeResolver.createInstanceNoArgConstructor(defaultConstructor);
         context.setInstance(instance);
         return delegate.deserialize(value, context);
     }

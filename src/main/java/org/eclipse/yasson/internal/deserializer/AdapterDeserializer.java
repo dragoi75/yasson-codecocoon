@@ -17,8 +17,8 @@ import jakarta.json.bind.adapter.JsonbAdapter;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * User defined type adapter executor.
@@ -42,7 +42,7 @@ class AdapterDeserializer implements ModelDeserializer<Object> {
         try {
             return delegate.deserialize(adapter.adaptFromJson(value), context);
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.ADAPTER_EXCEPTION,
                                                          adapterBinding.getBindingType(),
                                                          adapterBinding.getToType(),
                                                          adapterBinding.getAdapter().getClass()), e);

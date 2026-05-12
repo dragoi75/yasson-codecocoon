@@ -24,8 +24,8 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 import org.eclipse.yasson.internal.serializer.ModelSerializer;
 
 /**
@@ -134,7 +134,7 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
         } catch (JsonbException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
                 if (close) {

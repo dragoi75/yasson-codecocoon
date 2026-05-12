@@ -12,13 +12,13 @@
 
 package org.eclipse.yasson.defaultmapping.basic;
 
+import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.eclipse.yasson.Jsonbs.*;
 
 import org.eclipse.yasson.internal.JsonBindingBuilder;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbConfig;
@@ -87,7 +87,7 @@ public class SingleValueTest {
             jsonb.toJson(5);
             fail();
         } catch (JsonbException exception){
-            assertEquals(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
+            assertEquals(MessageBundle.getMessage(MessageKeysEnum.IJSON_ENABLED_SINGLE_VALUE), exception.getMessage());
         }
     }
 }

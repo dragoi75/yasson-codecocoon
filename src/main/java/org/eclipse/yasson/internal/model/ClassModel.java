@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 
 import org.eclipse.yasson.internal.ClassMultiReleaseExtension;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.StrategiesProvider;
 
@@ -195,7 +195,7 @@ public class ClassModel {
                 //No default constructor should be used in case of records
                 defaultConstructor = null;
             } else {
-                defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
+                defaultConstructor = ReflectiveTypeResolver.getDefaultConstructor(clazz, false);
             }
             isInitialized.set(true);
         }

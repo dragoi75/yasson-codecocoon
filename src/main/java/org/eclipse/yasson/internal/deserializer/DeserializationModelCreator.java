@@ -44,7 +44,7 @@ import org.eclipse.yasson.internal.JsonbConfigProperties;
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.deserializer.types.TypeDeserializers;
@@ -57,8 +57,8 @@ import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomizati
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 import static jakarta.json.bind.JsonbConfig.PROPERTY_NAMING_STRATEGY;
 import static jakarta.json.stream.JsonParser.Event;
@@ -119,7 +119,7 @@ public class DeserializationModelCreator {
      */
     public ModelDeserializer<JsonParser> deserializerChain(Type type) {
         LinkedList<Type> chain = new LinkedList<>();
-        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(type));
+        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(type));
         return deserializerChain(chain, type, classModel.getClassCustomization(), classModel);
     }
 
@@ -155,7 +155,7 @@ public class DeserializationModelCreator {
         Optional<AdapterBinding> adapterBinding = adapterBinding(type, (ComponentBoundCustomization) propertyCustomization);
         if (adapterBinding.isPresent()) {
             AdapterBinding adapter = adapterBinding.get();
-            Class<?> toType = ReflectionUtils.getRawType(adapter.getToType());
+            Class<?> toType = ReflectiveTypeResolver.getRawType(adapter.getToType());
             ClassModel targetModel = jsonbContext.getMappingContext().getOrCreateClassModel(toType);
             ModelDeserializer<JsonParser> typeDeserializer = typeDeserializer(toType,
                                                                               targetModel.getClassCustomization(),
@@ -233,7 +233,7 @@ public class DeserializationModelCreator {
             if (creatorModel.getCustomization().isRequired()) {
                 defaultCreatorValues.put(parameterName, new RequiredCreatorParameter(parameterName));
             } else {
-                Class<?> rawParamType = ReflectionUtils.getOptionalRawType(creatorModel.getType()).orElse(Object.class);
+                Class<?> rawParamType = ReflectiveTypeResolver.getOptionalRawType(creatorModel.getType()).orElse(Object.class);
                 defaultCreatorValues.put(parameterName, DEFAULT_CREATOR_VALUES.getOrDefault(rawParamType, NULL_PROVIDER));
             }
         }
@@ -268,8 +268,8 @@ public class DeserializationModelCreator {
         Type colType = type instanceof ParameterizedType
                 ? ((ParameterizedType) type).getActualTypeArguments()[0]
                 : Object.class;
-        colType = ReflectionUtils.resolveType(chain, colType);
-        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(colType));
+        colType = ReflectiveTypeResolver.inferType(chain, colType);
+        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(colType));
         ModelDeserializer<JsonParser> typeProcessor = typeProcessor(chain,
                                                                     colType,
                                                                     classModel.getClassCustomization(),
@@ -343,7 +343,7 @@ public class DeserializationModelCreator {
                                                              LinkedList<Type> chain,
                                                              Customization propertyCustomization) {
         GenericArrayType type = (GenericArrayType) cachedItem.type;
-        Class<?> component = ReflectionUtils.getRawType(type.getGenericComponentType());
+        Class<?> component = ReflectiveTypeResolver.getRawType(type.getGenericComponentType());
         ModelDeserializer<JsonParser> typeProcessor = typeProcessor(chain,
                                                                     type.getGenericComponentType(),
                                                                     propertyCustomization,
@@ -435,8 +435,8 @@ public class DeserializationModelCreator {
                                                         Customization customization,
                                                         ModelDeserializer<Object> memberDeserializer,
                                                         Set<Event> events) {
-        Type resolved = ReflectionUtils.resolveType(chain, type);
-        Class<?> rawType = ReflectionUtils.getRawType(resolved);
+        Type resolved = ReflectiveTypeResolver.inferType(chain, type);
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(resolved);
         Optional<DeserializerBinding<?>> deserializerBinding = userDeserializer(resolved,
                                                                                 (ComponentBoundCustomization) customization);
         if (deserializerBinding.isPresent()) {
@@ -456,7 +456,7 @@ public class DeserializationModelCreator {
         Optional<AdapterBinding> adapterBinding = adapterBinding(resolved, (ComponentBoundCustomization) customization);
         if (adapterBinding.isPresent()) {
             AdapterBinding adapter = adapterBinding.get();
-            ModelDeserializer<JsonParser> typeDeserializer = typeDeserializer(ReflectionUtils.getRawType(adapter.getToType()),
+            ModelDeserializer<JsonParser> typeDeserializer = typeDeserializer(ReflectiveTypeResolver.getRawType(adapter.getToType()),
                                                                               customization,
                                                                               JustReturn.instance(), events);
             if (typeDeserializer == null) {
@@ -516,7 +516,7 @@ public class DeserializationModelCreator {
             }
             if (implementationClass != null) {
                 if (!rawType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE,
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.IMPL_CLASS_INCOMPATIBLE,
                                                                  implementationClass,
                                                                  rawType));
                 }

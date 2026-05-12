@@ -23,8 +23,8 @@ import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Creator of the array instance based upon the array type.
@@ -263,7 +263,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlDecoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Invalid strategy: " + strategy));
             }
         }
 

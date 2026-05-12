@@ -19,8 +19,8 @@ import java.lang.reflect.Method;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Object holding reference to Constructor / Method for custom object creation.
@@ -59,7 +59,7 @@ public class JsonbCreator {
                 return (T) ((Method) executable).invoke(on, params);
             }
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ERROR_CALLING_JSONB_CREATOR, on), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.ERROR_CALLING_JSONB_CREATOR, on), e);
         }
     }
 

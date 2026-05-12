@@ -19,8 +19,8 @@ import java.util.Locale;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Serializer of the {@link OffsetTime} type.
@@ -33,7 +33,7 @@ class OffsetTimeSerializer extends AbstractDateSerializer<OffsetTime> {
 
     @Override
     protected Instant toInstant(OffsetTime value) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
     }
 
     @Override

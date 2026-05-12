@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.deserializer;
 import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 class RequiredCreatorParameter implements ModelDeserializer<Object> {
 
@@ -28,7 +28,7 @@ class RequiredCreatorParameter implements ModelDeserializer<Object> {
 
     @Override
     public Object deserialize(Object value, DeserializationContextImpl context) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
     }
 
 }

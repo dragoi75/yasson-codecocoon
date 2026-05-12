@@ -26,8 +26,8 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Base deserializer for all the number types.
@@ -50,7 +50,7 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
                 try {
                     return parseNumberValue(value);
                 } catch (NumberFormatException e) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, getType()), e);
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.DESERIALIZE_VALUE_ERROR, getType()), e);
                 }
             };
         }
@@ -67,7 +67,7 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
                 String updated = valueChanger.apply(value);
                 return parseNumberValue(String.valueOf(format.parse(updated)));
             } catch (ParseException e) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.PARSING_NUMBER, value, numberFormat.getFormat()), e);
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.PARSING_NUMBER, value, numberFormat.getFormat()), e);
             }
         };
     }

@@ -29,7 +29,7 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.ClassModel;
@@ -38,8 +38,8 @@ import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 import org.eclipse.yasson.internal.serializer.types.ObjectTypeSerializer;
 import org.eclipse.yasson.internal.serializer.types.TypeSerializers;
 
@@ -85,7 +85,7 @@ public class SerializationModelCreator {
      * @return type model serializer
      */
     public ModelSerializer serializerChain(Type type, boolean rootValue, boolean resolveRootAdapter) {
-        Class<?> rawType = ReflectionUtils.getRawType(type);
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(type);
         ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
         LinkedList<Type> chain = new LinkedList<>();
         return serializerChain(chain, type, classModel.getClassCustomization(), rootValue, false, resolveRootAdapter);
@@ -111,8 +111,8 @@ public class SerializationModelCreator {
         }
         //If the class instance and class of the field are the same and there has been generics specified for this field,
         //we need to use those instead of raw type.
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        Class<?> rawLast = ReflectionUtils.getRawType(chain.getLast());
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(type);
+        Class<?> rawLast = ReflectiveTypeResolver.getRawType(chain.getLast());
         if (rawLast.equals(rawType)) {
             return serializerChainInternal(chain, chain.getLast(), propertyCustomization, rootValue, isKey, true);
         }
@@ -145,7 +145,7 @@ public class SerializationModelCreator {
         if (explicitChain.containsKey(type)) {
             return explicitChain.get(type);
         }
-        Class<?> rawType = ReflectionUtils.getRawType(type);
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(type);
         Optional<ModelSerializer> serializerBinding = userSerializer(type,
                                                                      (ComponentBoundCustomization) propertyCustomization);
         if (serializerBinding.isPresent()) {
@@ -156,7 +156,7 @@ public class SerializationModelCreator {
             if (maybeAdapter.isPresent()) {
                 AdapterBinding adapterBinding = maybeAdapter.get();
                 Type toType = adapterBinding.getToType();
-                Class<?> rawToType = ReflectionUtils.getRawType(toType);
+                Class<?> rawToType = ReflectiveTypeResolver.getRawType(toType);
                 ModelSerializer typeSerializer = TypeSerializers
                         .getTypeSerializer(rawToType, propertyCustomization, jsonbContext);
                 if (typeSerializer == null) {
@@ -176,7 +176,7 @@ public class SerializationModelCreator {
         }
         if (typeSerializer != null) {
             if (jsonbContext.getConfigProperties().isStrictIJson() && rootValue) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.IJSON_ENABLED_SINGLE_VALUE));
             }
             return typeSerializer;
         }
@@ -282,8 +282,8 @@ public class SerializationModelCreator {
         Type colType = type instanceof ParameterizedType
                 ? ((ParameterizedType) type).getActualTypeArguments()[0]
                 : Object.class;
-        Type resolvedKey = ReflectionUtils.resolveType(chain, colType);
-        Class<?> rawClass = ReflectionUtils.getRawType(resolvedKey);
+        Type resolvedKey = ReflectiveTypeResolver.inferType(chain, colType);
+        Class<?> rawClass = ReflectiveTypeResolver.getRawType(resolvedKey);
         ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawClass);
         ModelSerializer typeSerializer = memberSerializer(chain, colType, classModel.getClassCustomization(), false);
         CollectionSerializer collectionSerializer = new CollectionSerializer(typeSerializer);
@@ -299,8 +299,8 @@ public class SerializationModelCreator {
         Type valueType = type instanceof ParameterizedType
                 ? ((ParameterizedType) type).getActualTypeArguments()[1]
                 : Object.class;
-        Type resolvedKey = ReflectionUtils.resolveType(chain, keyType);
-        Class<?> rawClass = ReflectionUtils.getRawType(resolvedKey);
+        Type resolvedKey = ReflectiveTypeResolver.inferType(chain, keyType);
+        Class<?> rawClass = ReflectiveTypeResolver.getRawType(resolvedKey);
         ModelSerializer keySerializer = memberSerializer(chain, keyType, ClassCustomization.empty(), true);
         ModelSerializer valueSerializer = memberSerializer(chain, valueType, propertyCustomization, false);
         MapSerializer mapSerializer = MapSerializer.create(rawClass, keySerializer, valueSerializer);
@@ -323,8 +323,8 @@ public class SerializationModelCreator {
     private ModelSerializer createGenericArraySerializer(LinkedList<Type> chain,
                                                          Type type,
                                                          Customization propertyCustomization) {
-        Class<?> raw = ReflectionUtils.getRawType(type);
-        Class<?> component = ReflectionUtils.getRawType(((GenericArrayType) type).getGenericComponentType());
+        Class<?> raw = ReflectiveTypeResolver.getRawType(type);
+        Class<?> component = ReflectiveTypeResolver.getRawType(((GenericArrayType) type).getGenericComponentType());
         ModelSerializer modelSerializer = memberSerializer(chain, component, propertyCustomization, false);
         ModelSerializer arraySerializer = ArraySerializer.create(raw, jsonbContext, modelSerializer);
         KeyWriter keyWriter = new KeyWriter(arraySerializer);
@@ -347,8 +347,8 @@ public class SerializationModelCreator {
                                              Type type,
                                              Customization customization,
                                              boolean key) {
-        Type resolved = ReflectionUtils.resolveType(chain, type);
-        Class<?> rawType = ReflectionUtils.getRawType(resolved);
+        Type resolved = ReflectiveTypeResolver.inferType(chain, type);
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(resolved);
 
         Optional<ModelSerializer> serializerBinding = userSerializer(resolved,
                                                                      (ComponentBoundCustomization) customization);
@@ -359,7 +359,7 @@ public class SerializationModelCreator {
         if (maybeAdapter.isPresent()) {
             AdapterBinding adapterBinding = maybeAdapter.get();
             Type toType = adapterBinding.getToType();
-            Class<?> rawToType = ReflectionUtils.getRawType(toType);
+            Class<?> rawToType = ReflectiveTypeResolver.getRawType(toType);
             ModelSerializer typeSerializer = TypeSerializers.getTypeSerializer(rawToType, customization, jsonbContext);
             if (typeSerializer == null) {
                 typeSerializer = serializerChain(toType, false, true);

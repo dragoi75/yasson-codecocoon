@@ -18,8 +18,8 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Deserializer of the {@link JsonValue} type.
@@ -56,7 +56,7 @@ class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
         case START_ARRAY:
             return parser.getArray();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + last));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Unknown JSON value: " + last));
         }
     }
 }

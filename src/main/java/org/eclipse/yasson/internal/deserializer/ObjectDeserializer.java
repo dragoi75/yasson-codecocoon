@@ -22,8 +22,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Object container deserializer.
@@ -80,7 +80,7 @@ class ObjectDeserializer implements ModelDeserializer<JsonParser> {
                         throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
                     }
                 } else if (failOnUnknownProperty && !ignoredProperties.contains(key)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, key, rawClass));
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.UNKNOWN_JSON_PROPERTY, key, rawClass));
                 } else {
                     //We need to skip the corresponding structure if property key was not found
                     VALUE_SKIPPERS.getOrDefault(next, NOOP).accept(parser);

@@ -55,8 +55,8 @@ public class InstanceCreator {
         Supplier<T> creator = (Supplier<T>) CREATORS.get(tClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
         if (creator == null) {
-            Constructor<T> constructor = ReflectionUtils.getDefaultConstructor(tClass, true);
-            creator = () -> ReflectionUtils.createNoArgConstructorInstance(constructor);
+            Constructor<T> constructor = ReflectiveTypeResolver.getDefaultConstructor(tClass, true);
+            creator = () -> ReflectiveTypeResolver.createInstanceNoArgConstructor(constructor);
             CREATORS.put(tClass, creator);
         }
 

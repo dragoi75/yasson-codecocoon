@@ -21,8 +21,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 import static java.util.Comparator.comparing;
 
@@ -65,7 +65,7 @@ public final class StrategiesProvider {
         case REVERSE:
             return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.PROPERTY_ORDER, strategy));
         }
     }
 

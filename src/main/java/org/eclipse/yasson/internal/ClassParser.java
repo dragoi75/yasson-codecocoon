@@ -34,8 +34,8 @@ import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Created a class internal model.
@@ -290,7 +290,7 @@ class ClassParser {
                                 && checkedPropertyModel.isWritable() //
                                 && collectedPropertyModel.isWritable())) {
                     throw new JsonbException(
-                            Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
+                            MessageBundle.getMessage(MessageKeysEnum.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
                                     collectedPropertyModel.getPropertyName(), cls.getName()));
                 }
             }

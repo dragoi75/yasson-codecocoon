@@ -25,8 +25,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
 /**
  * Adapter for {@link JsonParser}, that reads a {@link JsonStructure} content tree instead of JSON text.
@@ -111,7 +111,7 @@ public class JsonStructureToParserAdapter implements JsonParser {
             iterators.pop();
             return current.getValue().asJsonObject();
         } else {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Outside of object context"));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Outside of object context"));
         }
     }
 

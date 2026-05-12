@@ -29,7 +29,7 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.InstanceCreator;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 
 /**
  * Collection instance creator.
@@ -43,7 +43,7 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
 
     CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
         this.delegate = delegate;
-        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
+        this.clazz = implementationClass(ReflectiveTypeResolver.getRawType(type));
         this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
         this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
     }
