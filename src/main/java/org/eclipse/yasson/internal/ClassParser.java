@@ -48,9 +48,9 @@ class ClassParser {
 
     private static final String SET_PREFIX = "set";
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
-    ClassParser(JsonbContext jsonbContext) {
+    ClassParser(JsonbRuntimeContext jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 

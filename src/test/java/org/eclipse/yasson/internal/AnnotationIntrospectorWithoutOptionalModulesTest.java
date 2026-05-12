@@ -40,7 +40,7 @@ public class AnnotationIntrospectorWithoutOptionalModulesTest {
     /**
      * class under test.
      */
-    private static final AnnotationIntrospector instrospector = new AnnotationIntrospector(new JsonbContext(new JsonbConfig(), JsonProvider.provider()));
+    private static final AnnotationIntrospector instrospector = new AnnotationIntrospector(new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider()));
 
     @Test
     public void testNoConstructorPropertiesAnnotationWithoutOptionalModules() {

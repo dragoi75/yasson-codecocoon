@@ -15,12 +15,12 @@ package org.eclipse.yasson.internal.components;
 import java.io.IOException;
 
 import org.eclipse.yasson.internal.InstanceCreator;
-import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
+import org.eclipse.yasson.spi.JsonbComponentFactory;
 
 /**
  * Creates components instance with default constructor.
  */
-public class DefaultConstructorCreator implements JsonbComponentInstanceCreator {
+public class DefaultConstructorCreator implements JsonbComponentFactory {
 
     private final InstanceCreator creator;
 

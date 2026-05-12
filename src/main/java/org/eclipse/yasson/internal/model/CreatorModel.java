@@ -16,7 +16,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
@@ -40,7 +40,7 @@ public class CreatorModel {
      * @param parameter constructor parameter
      * @param context   jsonb context
      */
-    public CreatorModel(String name, Parameter parameter, JsonbContext context) {
+    public CreatorModel(String name, Parameter parameter, JsonbRuntimeContext context) {
         this.name = name;
         this.type = parameter.getParameterizedType();
 

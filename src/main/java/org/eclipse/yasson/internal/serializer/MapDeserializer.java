@@ -28,7 +28,7 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.Unmarshaller;
 
 /**
@@ -55,7 +55,7 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     protected MapDeserializer(DeserializerBuilder builder) {
         super(builder);
         mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
+                ? ReflectiveTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
                 : Object.class;
 
         this.instance = createInstance(builder);
@@ -63,7 +63,7 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
 
     @SuppressWarnings("unchecked")
     private T createInstance(DeserializerBuilder builder) {
-        Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
         return rawType.isInterface()
                 ? (T) getMapImpl(rawType, builder)
                 : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);

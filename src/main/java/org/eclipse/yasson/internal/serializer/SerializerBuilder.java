@@ -23,11 +23,11 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
 
-import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
-import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
+import org.eclipse.yasson.internal.ComponentBindingResolver;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
+import org.eclipse.yasson.internal.model.customization.ComponentSerializationBindingProvider;
 
 /**
  * Builder for serializers.
@@ -41,7 +41,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      *
      * @param jsonbContext JSON-B context.
      */
-    public SerializerBuilder(JsonbContext jsonbContext) {
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -64,18 +64,18 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
     public JsonbSerializer<?> build() {
         withRuntimeType(resolveRuntimeType());
 
-        if (getCustomization() instanceof ComponentBoundCustomization) {
-            ComponentBoundCustomization customization = (ComponentBoundCustomization) this.getCustomization();
+        if (getCustomization() instanceof ComponentSerializationBindingProvider) {
+            ComponentSerializationBindingProvider customization = (ComponentSerializationBindingProvider) this.getCustomization();
             //First check if user deserializer is registered for such type
-            final ComponentMatcher componentMatcher = getJsonbContext().getComponentMatcher();
-            Optional<SerializerBinding<?>> userSerializer = componentMatcher
+            final ComponentBindingResolver componentMatcher = getJsonbContext().getComponentMatcher();
+            Optional<SerializerBindingEntry<?>> userSerializer = componentMatcher
                     .getSerializerBinding(getRuntimeType(), customization);
             if (userSerializer.isPresent()) {
                 return new UserSerializerSerializer<>(getClassModel(), userSerializer.get().getJsonbSerializer());
             }
 
             //Second user components is registered.
-            Optional<AdapterBinding> adapterInfoOptional = componentMatcher
+            Optional<AdapterBindingEntry> adapterInfoOptional = componentMatcher
                     .getSerializeAdapterBinding(getRuntimeType(), customization);
             if (adapterInfoOptional.isPresent()) {
                 return new AdaptedObjectSerializer<>(getClassModel(), adapterInfoOptional.get());

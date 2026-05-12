@@ -19,18 +19,18 @@ import java.util.Objects;
  * Wrapper for user components, components, (de)serializer.
  * Contains resolved binding type an component.
  */
-public abstract class AbstractComponentBinding {
+public abstract class BaseComponentBinding {
 
-    private final Type bindingType;
+    private final Type componentType;
 
     /**
      * Creates info.
      *
-     * @param bindingType type to which component is bound.
+     * @param componentType type to which component is bound.
      */
-    public AbstractComponentBinding(Type bindingType) {
-        Objects.requireNonNull(bindingType);
-        this.bindingType = bindingType;
+    public BaseComponentBinding(Type componentType) {
+        Objects.requireNonNull(componentType);
+        this.componentType = componentType;
     }
 
     /**
@@ -39,7 +39,7 @@ public abstract class AbstractComponentBinding {
      * @return binding type
      */
     public Type getBindingType() {
-        return bindingType;
+        return componentType;
     }
 
     /**

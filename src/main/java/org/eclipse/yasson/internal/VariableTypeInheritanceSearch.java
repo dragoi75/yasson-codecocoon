@@ -95,8 +95,8 @@ public class VariableTypeInheritanceSearch {
     }
 
     private Type searchRuntimeTypeArgument(ParameterizedType runtimeType, TypeVariable<?> typeVar) {
-        if (ReflectionUtils.getRawType(runtimeType) != typeVar.getGenericDeclaration()) {
-            return ReflectionUtils.getOptionalRawType(typeVar).filter(rawType -> !Object.class.equals(rawType)).orElse(null);
+        if (ReflectiveTypeResolver.getRawType(runtimeType) != typeVar.getGenericDeclaration()) {
+            return ReflectiveTypeResolver.getOptionalRawType(typeVar).filter(rawType -> !Object.class.equals(rawType)).orElse(null);
         }
         TypeVariable[] bounds = typeVar.getGenericDeclaration().getTypeParameters();
         for (int i = 0; i < bounds.length; i++) {

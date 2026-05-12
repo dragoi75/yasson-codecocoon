@@ -22,7 +22,7 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -39,7 +39,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
 
     private final ClassModel classModel;
 
-    private final AdapterBinding adapterInfo;
+    private final AdapterBindingEntry adapterInfo;
 
     /**
      * Creates AdapterObjectSerializer.
@@ -47,7 +47,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
      * @param classModel Class model.
      * @param adapter    Adapter.
      */
-    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
+    public AdaptedObjectSerializer(ClassModel classModel, AdapterBindingEntry adapter) {
         this.classModel = classModel;
         this.adapterInfo = adapter;
     }

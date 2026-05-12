@@ -37,7 +37,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
      *
      * @param jsonbContext context to use
      */
-    public Unmarshaller(JsonbContext jsonbContext) {
+    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -56,7 +56,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
         try {
             DeserializerBuilder deserializerBuilder = new DeserializerBuilder(getJsonbContext())
                     .withType(type).withJsonValueType(getRootEvent(parser));
-            Class<?> rawType = ReflectionUtils.getRawType(type);
+            Class<?> rawType = ReflectiveTypeResolver.getRawType(type);
             ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
             deserializerBuilder.withCustomization(classModel.getClassCustomization());
             return (T) deserializerBuilder.build().deserialize(parser, this, type);

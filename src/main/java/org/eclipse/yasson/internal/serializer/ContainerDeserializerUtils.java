@@ -22,8 +22,8 @@ import java.util.TreeMap;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.RuntimeTypeInfo;
 import org.eclipse.yasson.internal.model.ClassModel;
 
@@ -47,7 +47,7 @@ class ContainerDeserializerUtils {
      */
     public static Type mapKeyType(RuntimeTypeInfo item, Type mapType) {
         return mapType instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(item, ((ParameterizedType) mapType).getActualTypeArguments()[0])
+                ? ReflectiveTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0])
                 : Object.class;
     }
 
@@ -60,7 +60,7 @@ class ContainerDeserializerUtils {
      */
     public static Type mapValueType(RuntimeTypeInfo item, Type mapType) {
         return mapType instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(item, ((ParameterizedType) mapType).getActualTypeArguments()[1])
+                ? ReflectiveTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[1])
                 : Object.class;
     }
 
@@ -74,7 +74,7 @@ class ContainerDeserializerUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Map<?, ?>> T createMapInstance(DeserializerBuilder builder, Type mapType) {
-        Class<?> rawType = ReflectionUtils.getRawType(mapType);
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(mapType);
         if (rawType.isInterface()) {
             if (SortedMap.class.isAssignableFrom(rawType)) {
                 Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
@@ -100,14 +100,14 @@ class ContainerDeserializerUtils {
      */
     public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper,
                                                               Type valueType,
-                                                              JsonbContext ctx,
+                                                              JsonbRuntimeContext ctx,
                                                               JsonParser.Event event) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectionUtils.resolveType(wrapper, valueType);
+        Type actualValueType = ReflectiveTypeResolver.resolveTypeDefault(wrapper, valueType);
         DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(wrapper, ctx, event).withType(actualValueType);
-        if (!DefaultSerializers.isKnownType(ReflectionUtils.getRawType(actualValueType))) {
-            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
+        if (!DefaultSerializers.isKnownType(ReflectiveTypeResolver.getRawType(actualValueType))) {
+            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(actualValueType));
             deserializerBuilder.withCustomization(classModel == null ? null : classModel.getClassCustomization());
         }
         return deserializerBuilder.build();
@@ -122,7 +122,7 @@ class ContainerDeserializerUtils {
      * @return new instance of {@code DeserializerBuilder}
      */
     public static DeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper,
-                                                                 JsonbContext ctx,
+                                                                 JsonbRuntimeContext ctx,
                                                                  JsonParser.Event event) {
         return new DeserializerBuilder(ctx).withWrapper(wrapper).withJsonValueType(event);
     }

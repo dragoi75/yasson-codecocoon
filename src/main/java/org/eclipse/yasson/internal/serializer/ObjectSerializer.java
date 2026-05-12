@@ -24,7 +24,7 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -110,8 +110,8 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                 return;
             }
 
-            Optional<Type> runtimeTypeOptional = ReflectionUtils
-                    .resolveOptionalType(this, propertyModel.getPropertySerializationType());
+            Optional<Type> runtimeTypeOptional = ReflectiveTypeResolver
+                    .resolveTypeOptional(this, propertyModel.getPropertySerializationType());
             Type genericType = runtimeTypeOptional.orElse(null);
             final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
                     .withWrapper(this)

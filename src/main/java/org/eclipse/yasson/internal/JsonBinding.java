@@ -43,10 +43,10 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class JsonBinding implements YassonJsonb {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+        this.jsonbContext = new JsonbRuntimeContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
         Set<Class<?>> eagerInitClasses = this.jsonbContext.getConfigProperties().getEagerInitClasses();
         for (Class<?> eagerInitClass : eagerInitClasses) {
             // Eagerly initialize requested ClassModels and Serializers

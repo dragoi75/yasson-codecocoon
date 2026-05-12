@@ -20,7 +20,7 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.ClassModel;
 
@@ -45,10 +45,10 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);
         if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectionUtils
-                    .resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            componentClass = ReflectiveTypeResolver
+                    .getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            componentClass = ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            componentClass = ReflectiveTypeResolver.getRawType(getRuntimeType()).getComponentType();
         }
         if (!DefaultSerializers.isKnownType(componentClass)) {
             componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);

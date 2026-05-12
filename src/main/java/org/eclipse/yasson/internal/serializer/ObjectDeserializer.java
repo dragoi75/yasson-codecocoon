@@ -23,10 +23,10 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
@@ -91,7 +91,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         if (instance != null) {
             return instance;
         }
-        final Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+        final Class<?> rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
         final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
         if (creator != null) {
             instance = createInstance((Class<T>) rawType, creator);
@@ -100,7 +100,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             if (defaultConstructor == null) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, rawType));
             }
-            instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);
+            instance = ReflectiveTypeResolver.instantiateNoArg(defaultConstructor);
         }
         //values must be set in order, in which they appears in JSON by spec
         values.forEach((key, wrapper) -> {
@@ -176,7 +176,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
                     .withType(newPropertyModel.getPropertyDeserializationType())
                     .build();
 
-            Type resolvedType = ReflectionUtils.resolveType(this, newPropertyModel.getPropertyDeserializationType());
+            Type resolvedType = ReflectiveTypeResolver.resolveTypeDefault(this, newPropertyModel.getPropertyDeserializationType());
             Object result = deserializer.deserialize(parser, context, resolvedType);
             values.put(newPropertyModel.getPropertyName(), new ValueWrapper(newPropertyModel, result));
             return;
@@ -187,7 +187,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
     /**
      * Rise an exception, or ignore JSON property, which is missing in class model.
      */
-    private void skipJsonProperty(JsonbParser parser, JsonbContext jsonbContext) {
+    private void skipJsonProperty(JsonbParser parser, JsonbRuntimeContext jsonbContext) {
         if (jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
             throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY,
                                                          getParserContext().getLastKeyName(),

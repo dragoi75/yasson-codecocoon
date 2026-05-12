@@ -27,12 +27,12 @@ import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
+import org.eclipse.yasson.internal.ComponentBindingResolver;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
+import org.eclipse.yasson.internal.model.customization.ComponentSerializationBindingProvider;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -53,7 +53,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      *
      * @param jsonbContext Context.
      */
-    public DeserializerBuilder(JsonbContext jsonbContext) {
+    public DeserializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -75,31 +75,31 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      */
     public JsonbDeserializer<?> build() {
         withRuntimeType(resolveRuntimeType());
-        Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
 
-        Optional<AdapterBinding> adapterInfoOptional = Optional.empty();
+        Optional<AdapterBindingEntry> adapterInfoOptional = Optional.empty();
         Customization customization = getCustomization();
         if (customization == null
-                || customization instanceof ComponentBoundCustomization) {
-            ComponentBoundCustomization componentBoundCustomization = (ComponentBoundCustomization) customization;
+                || customization instanceof ComponentSerializationBindingProvider) {
+            ComponentSerializationBindingProvider componentBoundCustomization = (ComponentSerializationBindingProvider) customization;
 
             //First check if user deserializer is registered for such type
-            final ComponentMatcher componentMatcher = getJsonbContext().getComponentMatcher();
-            Optional<DeserializerBinding<?>> userDeserializer =
+            final ComponentBindingResolver componentMatcher = getJsonbContext().getComponentMatcher();
+            Optional<JsonbDeserializerBinding<?>> userDeserializer =
                     componentMatcher.getDeserializerBinding(getRuntimeType(), componentBoundCustomization);
             if (userDeserializer.isPresent()) {
                 return new UserDeserializerDeserializer<>(this, userDeserializer.get());
             }
 
             //Second user components is registered.
-            Optional<AdapterBinding> adapterBinding = componentMatcher
+            Optional<AdapterBindingEntry> adapterBinding = componentMatcher
                     .getDeserializeAdapterBinding(getRuntimeType(), componentBoundCustomization);
             if (adapterBinding.isPresent()) {
                 adapterInfoOptional = adapterBinding;
                 withRuntimeType(adapterInfoOptional.get().getToType());
                 withWrapper(new AdaptedObjectDeserializer<>(adapterInfoOptional.get(),
                                                             (AbstractContainerDeserializer<?>) getWrapper()));
-                rawType = ReflectionUtils.getRawType(getRuntimeType());
+                rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
             }
         }
 
@@ -167,7 +167,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             } else {
                 if (adapterInfoOptional.isPresent()) {
                     withRuntimeType(adapterInfoOptional.get().getToType());
-                    rawType = ReflectionUtils.getRawType(getRuntimeType());
+                    rawType = ReflectiveTypeResolver.getRawType(getRuntimeType());
                 }
 
                 withClassModel(getClassModel(rawType));
@@ -209,7 +209,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     @SuppressWarnings("unchecked")
-    private JsonbDeserializer<?> wrapAdapted(Optional<AdapterBinding> adapterInfoOptional, JsonbDeserializer<?> item) {
+    private JsonbDeserializer<?> wrapAdapted(Optional<AdapterBindingEntry> adapterInfoOptional, JsonbDeserializer<?> item) {
         final Optional<JsonbDeserializer<?>> adaptedDeserializerOptional = adapterInfoOptional.map(adapterInfo -> {
             setAdaptedItemCaptor((AdaptedObjectDeserializer) getWrapper(), item);
             return (JsonbDeserializer<?>) getWrapper();
@@ -222,7 +222,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     private Type resolveRuntimeType() {
-        Type result = ReflectionUtils.resolveType(getWrapper(), getGenericType() != null ? getGenericType() : getRuntimeType());
+        Type result = ReflectiveTypeResolver.resolveTypeDefault(getWrapper(), getGenericType() != null ? getGenericType() : getRuntimeType());
         //Try to infer best from JSON event.
         if (result == Object.class) {
             switch (jsonEvent) {

@@ -22,7 +22,7 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.ContainerCustomization;
@@ -202,8 +202,8 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      */
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils
-                    .resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
+            Optional<Type> runtimeTypeOptional = ReflectiveTypeResolver
+                    .resolveTypeOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

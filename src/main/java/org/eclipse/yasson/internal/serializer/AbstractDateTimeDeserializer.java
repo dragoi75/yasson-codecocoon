@@ -22,7 +22,7 @@ import java.util.Locale;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -81,7 +81,7 @@ public abstract class AbstractDateTimeDeserializer<T> extends AbstractValueTypeD
      * @param context context
      * @return date formatter
      */
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbContext context) {
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbRuntimeContext context) {
         if (getCustomization() != null && getCustomization().getDeserializeDateFormatter() != null) {
             return getCustomization().getDeserializeDateFormatter();
         }

@@ -17,21 +17,21 @@ import java.lang.reflect.Type;
 /**
  * Holds runtime type and wrapper runtime type info if any.
  */
-public class RuntimeTypeHolder implements RuntimeTypeInfo {
+public class RuntimeTypeContainer implements RuntimeTypeInfo {
 
-    private final RuntimeTypeInfo wrapper;
+    private final RuntimeTypeInfo typeInfo;
 
-    private final Type runtimeType;
+    private final Type resolvedType;
 
     /**
      * Creates a new instance.
      *
-     * @param wrapper     runtime info about class
-     * @param runtimeType class type
+     * @param typeInfo     runtime info about class
+     * @param resolvedType class type
      */
-    public RuntimeTypeHolder(RuntimeTypeInfo wrapper, Type runtimeType) {
-        this.wrapper = wrapper;
-        this.runtimeType = runtimeType;
+    public RuntimeTypeContainer(RuntimeTypeInfo typeInfo, Type resolvedType) {
+        this.typeInfo = typeInfo;
+        this.resolvedType = resolvedType;
     }
 
     /**
@@ -41,7 +41,7 @@ public class RuntimeTypeHolder implements RuntimeTypeInfo {
      */
     @Override
     public RuntimeTypeInfo getWrapper() {
-        return wrapper;
+        return typeInfo;
     }
 
     /**
@@ -51,6 +51,6 @@ public class RuntimeTypeHolder implements RuntimeTypeInfo {
      */
     @Override
     public Type getRuntimeType() {
-        return runtimeType;
+        return resolvedType;
     }
 }

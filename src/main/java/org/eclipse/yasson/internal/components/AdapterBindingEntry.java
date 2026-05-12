@@ -20,25 +20,25 @@ import jakarta.json.bind.adapter.JsonbAdapter;
 /**
  * Wrapper for JsonbAdapter generic information and an components itself.
  */
-public class AdapterBinding extends AbstractComponentBinding {
+public class AdapterBindingEntry extends BaseComponentBinding {
 
-    private final Type toType;
+    private final Type targetType;
 
-    private final JsonbAdapter<?, ?> adapter;
+    private final JsonbAdapter<?, ?> valueConverter;
 
     /**
      * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
      *
-     * @param fromType from not null
-     * @param toType   to not null
-     * @param adapter  components not null
+     * @param sourceType from not null
+     * @param targetType   to not null
+     * @param valueConverter  components not null
      */
-    public AdapterBinding(Type fromType, Type toType, JsonbAdapter<?, ?> adapter) {
-        super(fromType);
-        Objects.requireNonNull(toType);
-        Objects.requireNonNull(adapter);
-        this.toType = toType;
-        this.adapter = adapter;
+    public AdapterBindingEntry(Type sourceType, Type targetType, JsonbAdapter<?, ?> valueConverter) {
+        super(sourceType);
+        Objects.requireNonNull(targetType);
+        Objects.requireNonNull(valueConverter);
+        this.targetType = targetType;
+        this.valueConverter = valueConverter;
     }
 
     /**
@@ -50,7 +50,7 @@ public class AdapterBinding extends AbstractComponentBinding {
      * @return Type from which to adapt
      */
     public Type getToType() {
-        return toType;
+        return targetType;
     }
 
     /**
@@ -59,11 +59,11 @@ public class AdapterBinding extends AbstractComponentBinding {
      * @return components
      */
     public JsonbAdapter<?, ?> getAdapter() {
-        return adapter;
+        return valueConverter;
     }
 
     @Override
     public Class<?> getComponentClass() {
-        return adapter.getClass();
+        return valueConverter.getClass();
     }
 }

@@ -12,7 +12,7 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
@@ -30,8 +30,8 @@ public class PropertyCustomization extends CustomizationBase {
     private final JsonbDateFormatter serializeDateFormatter;
     private final JsonbDateFormatter deserializeDateFormatter;
 
-    private final AdapterBinding serializeAdapter;
-    private final AdapterBinding deserializeAdapter;
+    private final AdapterBindingEntry serializeAdapter;
+    private final AdapterBindingEntry deserializeAdapter;
 
     private boolean readTransient;
     private boolean writeTransient;
@@ -128,12 +128,12 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     @Override
-    public AdapterBinding getDeserializeAdapterBinding() {
+    public AdapterBindingEntry getDeserializeAdapterBinding() {
         return deserializeAdapter;
     }
 
     @Override
-    public AdapterBinding getSerializeAdapterBinding() {
+    public AdapterBindingEntry getSerializeAdapterBinding() {
         return serializeAdapter;
     }
 

@@ -21,19 +21,19 @@ import jakarta.json.bind.serializer.JsonbDeserializer;
  *
  * @param <T> type of contained deserializer
  */
-public class DeserializerBinding<T> extends AbstractComponentBinding {
+public class JsonbDeserializerBinding<T> extends BaseComponentBinding {
 
-    private final JsonbDeserializer<T> jsonbDeserializer;
+    private final JsonbDeserializer<T> jsonbParser;
 
     /**
      * Creates a new instance.
      *
-     * @param bindingType       Binding type.
-     * @param jsonbDeserializer Deserializer.
+     * @param boundType       Binding type.
+     * @param jsonbParser Deserializer.
      */
-    public DeserializerBinding(Type bindingType, JsonbDeserializer<T> jsonbDeserializer) {
-        super(bindingType);
-        this.jsonbDeserializer = jsonbDeserializer;
+    public JsonbDeserializerBinding(Type boundType, JsonbDeserializer<T> jsonbParser) {
+        super(boundType);
+        this.jsonbParser = jsonbParser;
     }
 
     /**
@@ -42,11 +42,11 @@ public class DeserializerBinding<T> extends AbstractComponentBinding {
      * @return Deserializer.
      */
     public JsonbDeserializer<T> getJsonbDeserializer() {
-        return jsonbDeserializer;
+        return jsonbParser;
     }
 
     @Override
     public Class<?> getComponentClass() {
-        return jsonbDeserializer.getClass();
+        return jsonbParser.getClass();
     }
 }

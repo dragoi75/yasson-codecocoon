@@ -23,7 +23,7 @@ import java.io.Closeable;
  * default implementation is used.
  * </p>
  */
-public interface JsonbComponentInstanceCreator extends Closeable {
+public interface JsonbComponentFactory extends Closeable {
 
     /**
      * Default component priority.
@@ -34,10 +34,10 @@ public interface JsonbComponentInstanceCreator extends Closeable {
      * Returns instance of JsonbComponent for desired class.
      *
      * @param <T>            Jsonb component type
-     * @param componentClass component class
+     * @param targetClass component class
      * @return component instance
      */
-    <T> T getOrCreateComponent(Class<T> componentClass);
+    <T> T getOrCreateComponent(Class<T> targetClass);
 
     /**
      * @return the priority of the component

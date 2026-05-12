@@ -18,7 +18,7 @@ import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -38,7 +38,7 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
         super(customization);
     }
 
-    private String toJson(String object, JsonbContext jsonbContext) {
+    private String toJson(String object, JsonbRuntimeContext jsonbContext) {
         if ((boolean) jsonbContext.getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
             try {
                 String newString = new String(object.getBytes("UTF-8"), "UTF-8");

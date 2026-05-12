@@ -31,7 +31,7 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectiveTypeResolver;
 import org.eclipse.yasson.internal.Unmarshaller;
 
 /**
@@ -52,7 +52,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     protected CollectionDeserializer(DeserializerBuilder builder) {
         super(builder);
         collectionValueType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
+                ? ReflectiveTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
                 : Object.class;
 
         instance = createInstance(builder);
@@ -60,7 +60,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
 
     @SuppressWarnings("unchecked")
     private T createInstance(DeserializerBuilder builder) {
-        Class<T> rawType = (Class<T>) ReflectionUtils.getRawType(getRuntimeType());
+        Class<T> rawType = (Class<T>) ReflectiveTypeResolver.getRawType(getRuntimeType());
 
         if (rawType.isInterface()) {
             final T x = createInterfaceInstance(rawType);

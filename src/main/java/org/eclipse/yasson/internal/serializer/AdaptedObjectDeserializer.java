@@ -20,7 +20,7 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -36,7 +36,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
 
     private JsonbDeserializer<A> adaptedTypeDeserializer;
 
-    private final AdapterBinding adapterInfo;
+    private final AdapterBindingEntry adapterInfo;
 
     private final AbstractContainerDeserializer<?> wrapperItem;
 
@@ -46,7 +46,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
      * @param adapterInfo components type info
      * @param wrapperItem wrapper item to get instance from
      */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+    public AdaptedObjectDeserializer(AdapterBindingEntry adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
         this.adapterInfo = adapterInfo;
         this.wrapperItem = wrapperItem;
     }

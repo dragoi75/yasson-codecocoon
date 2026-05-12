@@ -18,7 +18,7 @@ import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.UserDeserializerParser;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
 
 /**
  * Item for processing types, to which deserializer is bound.
@@ -27,7 +27,7 @@ import org.eclipse.yasson.internal.components.DeserializerBinding;
  */
 public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializer<T> {
 
-    private DeserializerBinding<?> deserializerBinding;
+    private JsonbDeserializerBinding<?> deserializerBinding;
 
     private T deserializerResult;
 
@@ -40,7 +40,7 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
      * @param builder             {@link DeserializerBuilder} used to build this instance
      * @param deserializerBinding Deserializer.
      */
-    protected UserDeserializerDeserializer(DeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
+    protected UserDeserializerDeserializer(DeserializerBuilder builder, JsonbDeserializerBinding<?> deserializerBinding) {
         super(builder);
         this.deserializerBinding = deserializerBinding;
     }

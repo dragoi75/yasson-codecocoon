@@ -25,7 +25,7 @@ import jakarta.json.bind.JsonbException;
 import org.eclipse.yasson.internal.JsonBinding;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
+import org.eclipse.yasson.spi.JsonbComponentFactory;
 
 /**
  * CDI instance manager.
@@ -34,7 +34,7 @@ import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
  *
  * CDI API dependency is optional, this class is never referenced / loaded if CDI API is not resolvable.
  */
-public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator {
+public class BeanManagerInstanceCreator implements JsonbComponentFactory {
 
     private final BeanManager beanManager;
 

@@ -21,7 +21,7 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.ProcessingContext;
 
@@ -46,7 +46,7 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
 
     @Override
     public Optional<?> deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
+        JsonbRuntimeContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
         final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
         if (lastEvent == JsonParser.Event.VALUE_NULL) {
             return Optional.empty();

@@ -12,20 +12,20 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
 
 /**
  * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
  */
-abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
+abstract class CustomizationBase implements Customization, ComponentSerializationBindingProvider {
 
-    private final AdapterBinding adapterBinding;
+    private final AdapterBindingEntry adapterBinding;
 
-    private final SerializerBinding serializerBinding;
+    private final SerializerBindingEntry serializerBinding;
 
-    private final DeserializerBinding deserializerBinding;
+    private final JsonbDeserializerBinding deserializerBinding;
 
     private final boolean nillable;
 
@@ -62,12 +62,12 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         return nillable;
     }
 
-    public AdapterBinding getSerializeAdapterBinding() {
+    public AdapterBindingEntry getSerializeAdapterBinding() {
         return adapterBinding;
     }
 
     @Override
-    public AdapterBinding getDeserializeAdapterBinding() {
+    public AdapterBindingEntry getDeserializeAdapterBinding() {
         return adapterBinding;
     }
 
@@ -76,7 +76,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return serializer wrapper
      */
-    public SerializerBinding getSerializerBinding() {
+    public SerializerBindingEntry getSerializerBinding() {
         return serializerBinding;
     }
 
@@ -85,7 +85,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return deserializer wrapper
      */
-    public DeserializerBinding getDeserializerBinding() {
+    public JsonbDeserializerBinding getDeserializerBinding() {
         return deserializerBinding;
     }
 

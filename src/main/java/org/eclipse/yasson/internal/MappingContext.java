@@ -31,7 +31,7 @@ import org.eclipse.yasson.internal.serializer.DefaultSerializers;
  * Thread safe.
  */
 public class MappingContext {
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     private final ConcurrentHashMap<Class<?>, ClassModel> classes = new ConcurrentHashMap<>();
 
@@ -44,7 +44,7 @@ public class MappingContext {
      *
      * @param jsonbContext Context. Required.
      */
-    public MappingContext(JsonbContext jsonbContext) {
+    public MappingContext(JsonbRuntimeContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.classParser = new ClassParser(jsonbContext);
@@ -85,7 +85,7 @@ public class MappingContext {
 
     private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
                                                                                 ClassParser classParser,
-                                                                                JsonbContext jsonbContext) {
+                                                                                JsonbRuntimeContext jsonbContext) {
         return aClass -> {
             JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
             ClassCustomization customization = jsonbContext.getAnnotationIntrospector().introspectCustomization(clsElement);

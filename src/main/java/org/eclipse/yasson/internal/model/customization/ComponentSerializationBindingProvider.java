@@ -12,36 +12,36 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingEntry;
+import org.eclipse.yasson.internal.components.JsonbDeserializerBinding;
+import org.eclipse.yasson.internal.components.SerializerBindingEntry;
 
 /**
  * Customization which is aware of bound components, such as adapters and (de)serializers.
  */
-public interface ComponentBoundCustomization {
+public interface ComponentSerializationBindingProvider {
 
     /**
      * @return Adapter wrapper class with resolved generic information.
      */
-    AdapterBinding getSerializeAdapterBinding();
+    AdapterBindingEntry getSerializeAdapterBinding();
 
     /**
      * @return Adapter wrapper class with resolved generic information.
      */
-    AdapterBinding getDeserializeAdapterBinding();
+    AdapterBindingEntry getDeserializeAdapterBinding();
 
     /**
      * Serializer wrapper with resolved generic info.
      *
      * @return serializer wrapper
      */
-    SerializerBinding getSerializerBinding();
+    SerializerBindingEntry getSerializerBinding();
 
     /**
      * Deserializer wrapper with resolved generic info.
      *
      * @return deserializer wrapper
      */
-    DeserializerBinding getDeserializerBinding();
+    JsonbDeserializerBinding getDeserializerBinding();
 }

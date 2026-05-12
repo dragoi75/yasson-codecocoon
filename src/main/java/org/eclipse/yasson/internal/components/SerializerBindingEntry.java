@@ -21,19 +21,19 @@ import jakarta.json.bind.serializer.JsonbSerializer;
  *
  * @param <T> type of jsonb serializer
  */
-public class SerializerBinding<T> extends AbstractComponentBinding {
+public class SerializerBindingEntry<T> extends BaseComponentBinding {
 
-    private final JsonbSerializer<T> jsonbSerializer;
+    private final JsonbSerializer<T> jsonbAdapter;
 
     /**
      * Creates a new instance.
      *
-     * @param bindingType     Generic type argument of serializer. Not null.
-     * @param jsonbSerializer Serializer. Can be null.
+     * @param boundType     Generic type argument of serializer. Not null.
+     * @param jsonbAdapter Serializer. Can be null.
      */
-    public SerializerBinding(Type bindingType, JsonbSerializer<T> jsonbSerializer) {
-        super(bindingType);
-        this.jsonbSerializer = jsonbSerializer;
+    public SerializerBindingEntry(Type boundType, JsonbSerializer<T> jsonbAdapter) {
+        super(boundType);
+        this.jsonbAdapter = jsonbAdapter;
     }
 
     /**
@@ -42,7 +42,7 @@ public class SerializerBinding<T> extends AbstractComponentBinding {
      * @return Serializer.
      */
     public JsonbSerializer<T> getJsonbSerializer() {
-        return jsonbSerializer;
+        return jsonbAdapter;
     }
 
     /**
@@ -52,6 +52,6 @@ public class SerializerBinding<T> extends AbstractComponentBinding {
      */
     @Override
     public Class<?> getComponentClass() {
-        return jsonbSerializer.getClass();
+        return jsonbAdapter.getClass();
     }
 }
