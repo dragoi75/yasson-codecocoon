@@ -16,7 +16,7 @@ import java.util.TimeZone;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link TimeZone} type.
@@ -28,7 +28,7 @@ class TimeZoneSerializer extends TypeSerializer<TimeZone> {
     }
 
     @Override
-    void serializeValue(TimeZone value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(TimeZone value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.getID());
     }
 }

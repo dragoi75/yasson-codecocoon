@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer.types;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Character} type.
@@ -26,7 +26,7 @@ class CharSerializer extends TypeSerializer<Character> {
     }
 
     @Override
-    void serializeValue(Character value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Character value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(String.valueOf(value));
     }
 

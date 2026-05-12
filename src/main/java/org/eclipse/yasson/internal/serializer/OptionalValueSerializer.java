@@ -16,24 +16,24 @@ import java.util.Optional;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Optional container serializer.
  */
-class OptionalSerializer implements ModelSerializer {
+class OptionalValueSerializer implements ModelMarshaller {
 
-    private final ModelSerializer delegate;
+    private final ModelMarshaller backingMarshaller;
 
-    OptionalSerializer(ModelSerializer delegate) {
-        this.delegate = delegate;
+    OptionalValueSerializer(ModelMarshaller backingMarshaller) {
+        this.backingMarshaller = backingMarshaller;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        Optional<Object> optional = (Optional<Object>) value;
-        delegate.serialize(optional.orElse(null), generator, context);
+    public void marshal(Object inputObject, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
+        Optional<Object> maybeObject = (Optional<Object>) inputObject;
+        backingMarshaller.marshal(maybeObject.orElse(null), jsonWriter, serializationState);
     }
 
 }

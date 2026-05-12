@@ -16,25 +16,25 @@ import java.util.Collection;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Collection container serializer.
  */
-class CollectionSerializer implements ModelSerializer {
+class CollectionSerializer implements ModelMarshaller {
 
-    private final ModelSerializer delegate;
+    private final ModelMarshaller delegate;
 
-    CollectionSerializer(ModelSerializer delegate) {
+    CollectionSerializer(ModelMarshaller delegate) {
         this.delegate = delegate;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         Collection<Object> collection = (Collection<Object>) value;
         generator.writeStartArray();
-        collection.forEach(object -> delegate.serialize(object, generator, context));
+        collection.forEach(object -> delegate.marshal(object, generator, context));
         generator.writeEnd();
     }
 

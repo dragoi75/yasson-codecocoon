@@ -16,7 +16,7 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.adapter.JsonbAdapter;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -31,16 +31,16 @@ class AdapterSerializer extends AbstractSerializer {
 
     @SuppressWarnings("unchecked")
     AdapterSerializer(AdapterBinding adapterBinding,
-                      ModelSerializer delegate) {
+                      ModelMarshaller delegate) {
         super(delegate);
         this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
         this.adapterBinding = adapterBinding;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         try {
-            delegate.serialize(adapter.adaptToJson(value), generator, context);
+            delegate.marshal(adapter.adaptToJson(value), generator, context);
         } catch (Exception e) {
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
                                                          adapterBinding.getBindingType(),

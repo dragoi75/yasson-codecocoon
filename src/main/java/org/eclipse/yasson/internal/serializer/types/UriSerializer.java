@@ -16,7 +16,7 @@ import java.net.URI;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link URI} type.
@@ -28,7 +28,7 @@ class UriSerializer extends TypeSerializer<URI> {
     }
 
     @Override
-    void serializeValue(URI value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(URI value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

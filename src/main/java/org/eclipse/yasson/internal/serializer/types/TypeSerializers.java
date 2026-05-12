@@ -56,7 +56,7 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 import org.eclipse.yasson.internal.serializer.SerializationModelCreator;
 
 import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
@@ -66,13 +66,13 @@ import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
  */
 public class TypeSerializers {
 
-    private static final Map<Class<?>, Function<TypeSerializerBuilder, ModelSerializer>> SERIALIZERS;
+    private static final Map<Class<?>, Function<TypeSerializerBuilder, ModelMarshaller>> SERIALIZERS;
     private static final Set<Class<?>> SUPPORTED_MAP_KEYS;
 
     private static final Map<Class<?>, Class<?>> OPTIONALS;
 
     static {
-        Map<Class<?>, Function<TypeSerializerBuilder, ModelSerializer>> cache = new HashMap<>();
+        Map<Class<?>, Function<TypeSerializerBuilder, ModelMarshaller>> cache = new HashMap<>();
         cache.put(Byte.class, ByteSerializer::new);
         cache.put(Byte.TYPE, ByteSerializer::new);
         cache.put(BigDecimal.class, BigDecimalSerializer::new);
@@ -161,7 +161,7 @@ public class TypeSerializers {
      * @param jsonbContext  jsonb context
      * @return new type serializer
      */
-    public static ModelSerializer getTypeSerializer(Class<?> clazz, Customization customization, JsonbContext jsonbContext) {
+    public static ModelMarshaller getTypeSerializer(Class<?> clazz, Customization customization, JsonbContext jsonbContext) {
         return getTypeSerializer(Collections.emptyList(), clazz, customization, jsonbContext, false);
     }
 
@@ -175,7 +175,7 @@ public class TypeSerializers {
      * @param key           whether serializer is a key
      * @return new type serializer
      */
-    public static ModelSerializer getTypeSerializer(List<Type> chain,
+    public static ModelMarshaller getTypeSerializer(List<Type> chain,
                                                     Class<?> clazz,
                                                     Customization customization,
                                                     JsonbContext jsonbContext,
@@ -183,19 +183,19 @@ public class TypeSerializers {
         Class<?> current = clazz;
         List<Type> chainClone = new LinkedList<>(chain);
         TypeSerializerBuilder builder = new TypeSerializerBuilder(chainClone, clazz, customization, jsonbContext, key);
-        ModelSerializer typeSerializer = null;
+        ModelMarshaller typeSerializer = null;
         if (Object.class.equals(current)) {
             return SERIALIZERS.get(current).apply(builder);
         }
         if (OPTIONALS.containsKey(current)) {
             Class<?> optionalInner = OPTIONALS.get(current);
-            ModelSerializer serializer = getTypeSerializer(chainClone, optionalInner, customization, jsonbContext, key);
+            ModelMarshaller serializer = getTypeSerializer(chainClone, optionalInner, customization, jsonbContext, key);
             if (OptionalInt.class.equals(current)) {
-                return new OptionalIntSerializer(serializer);
+                return new OptionalIntValueSerializer(serializer);
             } else if (OptionalLong.class.equals(current)) {
-                return new OptionalLongSerializer(serializer);
+                return new OptionalLongValueSerializer(serializer);
             } else if (OptionalDouble.class.equals(current)) {
-                return new OptionalDoubleSerializer(serializer);
+                return new OptionalDoubleValueSerializer(serializer);
             } else {
                 throw new JsonbException("Unsupported Optional type for serialization: " + clazz);
             }

@@ -15,11 +15,11 @@ package org.eclipse.yasson.internal.serializer;
 /**
  * Abstract model serializer with delegate.
  */
-abstract class AbstractSerializer implements ModelSerializer {
+abstract class AbstractSerializer implements ModelMarshaller {
 
-    final ModelSerializer delegate;
+    final ModelMarshaller delegate;
 
-    AbstractSerializer(ModelSerializer delegate) {
+    AbstractSerializer(ModelMarshaller delegate) {
         this.delegate = delegate;
     }
 

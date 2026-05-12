@@ -17,23 +17,23 @@ import java.util.LinkedHashMap;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
 /**
  * Object container serializer.
  */
-class ObjectSerializer implements ModelSerializer {
+class ObjectSerializer implements ModelMarshaller {
 
-    private final LinkedHashMap<String, ModelSerializer> propertySerializers;
+    private final LinkedHashMap<String, ModelMarshaller> propertySerializers;
 
-    ObjectSerializer(LinkedHashMap<String, ModelSerializer> propertySerializers) {
+    ObjectSerializer(LinkedHashMap<String, ModelMarshaller> propertySerializers) {
         this.propertySerializers = propertySerializers;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.writeStartObject();
         propertySerializers.forEach((key, serializer) -> {
             try {

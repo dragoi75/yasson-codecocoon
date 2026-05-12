@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Type serializer.
@@ -22,15 +22,15 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  * All the instances are required to be reusable and without any states
  * stored in the class fields.
  */
-public interface ModelSerializer {
+public interface ModelMarshaller {
 
     /**
      * Serialize provided value or delegate serialization to the next serializer.
      *
-     * @param value     value to be serialized
-     * @param generator json generator
-     * @param context   serialization context
+     * @param input     value to be serialized
+     * @param jsonWriter json generator
+     * @param serializationState   serialization context
      */
-    void serialize(Object value, JsonGenerator generator, SerializationContextImpl context);
+    void marshal(Object input, JsonGenerator jsonWriter, DefaultSerializationContext serializationState);
 
 }

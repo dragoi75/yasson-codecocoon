@@ -14,31 +14,31 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Key name writer. Writes key name of the property if present.
  */
-public class KeyWriter implements ModelSerializer {
+public class KeyWriter implements ModelMarshaller {
 
-    private final ModelSerializer delegate;
+    private final ModelMarshaller delegate;
 
     /**
      * Create new instance.
      *
      * @param delegate delegate to be called after the key is written
      */
-    public KeyWriter(ModelSerializer delegate) {
+    public KeyWriter(ModelMarshaller delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (context.getKey() != null) {
             generator.writeKey(context.getKey());
             context.setKey(null);
         }
-        delegate.serialize(value, generator, context);
+        delegate.marshal(value, generator, context);
     }
 
 }

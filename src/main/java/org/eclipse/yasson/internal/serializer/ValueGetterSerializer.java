@@ -17,29 +17,29 @@ import java.lang.invoke.MethodHandle;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Extractor of the serialized value from the instance.
  */
-class ValueGetterSerializer implements ModelSerializer {
+class ValueGetterSerializer implements ModelMarshaller {
 
     private final MethodHandle valueGetter;
-    private final ModelSerializer delegate;
+    private final ModelMarshaller delegate;
 
-    ValueGetterSerializer(MethodHandle valueGetter, ModelSerializer delegate) {
+    ValueGetterSerializer(MethodHandle valueGetter, ModelMarshaller delegate) {
         this.valueGetter = valueGetter;
         this.delegate = delegate;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         Object object;
         try {
             object = valueGetter.invoke(value);
         } catch (Throwable e) {
             throw new JsonbException("Error getting value on: " + value.getClass().getName(), e);
         }
-        delegate.serialize(object, generator, context);
+        delegate.marshal(object, generator, context);
     }
 }

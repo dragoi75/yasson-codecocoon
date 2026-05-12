@@ -20,17 +20,17 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.stream.JsonGenerator;
 
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
 /**
  * Array container serializer.
  */
-abstract class ArraySerializer implements ModelSerializer {
+abstract class ArraySerializer implements ModelMarshaller {
 
-    private static final Map<Class<?>, Function<ModelSerializer, ArraySerializer>> ARRAY_SERIALIZERS;
+    private static final Map<Class<?>, Function<ModelMarshaller, ArraySerializer>> ARRAY_SERIALIZERS;
 
     static {
         ARRAY_SERIALIZERS = Map.of(boolean[].class, BooleanArraySerializer::new,
@@ -43,15 +43,15 @@ abstract class ArraySerializer implements ModelSerializer {
                                    short[].class, ShortArraySerializer::new);
     }
 
-    private final ModelSerializer valueSerializer;
+    private final ModelMarshaller valueSerializer;
 
-    protected ArraySerializer(ModelSerializer valueSerializer) {
+    protected ArraySerializer(ModelMarshaller valueSerializer) {
         this.valueSerializer = valueSerializer;
     }
 
-    public static ModelSerializer create(Class<?> arrayType,
+    public static ModelMarshaller create(Class<?> arrayType,
                                          JsonbContext jsonbContext,
-                                         ModelSerializer modelSerializer) {
+                                         ModelMarshaller modelSerializer) {
         String binaryDataStrategy = jsonbContext.getConfigProperties().getBinaryDataStrategy();
         if (byte[].class.equals(arrayType) && !binaryDataStrategy.equals(BinaryDataStrategy.BYTE)) {
             return new Base64ByteArraySerializer(binaryDataStrategy);
@@ -63,35 +63,35 @@ abstract class ArraySerializer implements ModelSerializer {
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.writeStartArray();
         serializeArray(value, generator, context);
         generator.writeEnd();
     }
 
-    abstract void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context);
+    abstract void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context);
 
-    protected ModelSerializer getValueSerializer() {
+    protected ModelMarshaller getValueSerializer() {
         return valueSerializer;
     }
 
     private static final class ByteArraySerializer extends ArraySerializer {
 
-        ByteArraySerializer(ModelSerializer valueSerializer) {
+        ByteArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             byte[] array = (byte[]) value;
             for (byte b : array) {
-                getValueSerializer().serialize(b, generator, context);
+                getValueSerializer().marshal(b, generator, context);
             }
         }
 
     }
 
-    private static final class Base64ByteArraySerializer implements ModelSerializer {
+    private static final class Base64ByteArraySerializer implements ModelMarshaller {
 
         private final Base64.Encoder encoder;
 
@@ -100,7 +100,7 @@ abstract class ArraySerializer implements ModelSerializer {
         }
 
         @Override
-        public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             byte[] array = (byte[]) value;
             generator.write(encoder.encodeToString(array));
         }
@@ -119,15 +119,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class ShortArraySerializer extends ArraySerializer {
 
-        ShortArraySerializer(ModelSerializer valueSerializer) {
+        ShortArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             short[] array = (short[]) value;
             for (short s : array) {
-                getValueSerializer().serialize(s, generator, context);
+                getValueSerializer().marshal(s, generator, context);
             }
         }
 
@@ -135,15 +135,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class IntegerArraySerializer extends ArraySerializer {
 
-        IntegerArraySerializer(ModelSerializer valueSerializer) {
+        IntegerArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             int[] array = (int[]) value;
             for (int i : array) {
-                getValueSerializer().serialize(i, generator, context);
+                getValueSerializer().marshal(i, generator, context);
             }
         }
 
@@ -151,15 +151,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class LongArraySerializer extends ArraySerializer {
 
-        LongArraySerializer(ModelSerializer valueSerializer) {
+        LongArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             long[] array = (long[]) value;
             for (long l : array) {
-                getValueSerializer().serialize(l, generator, context);
+                getValueSerializer().marshal(l, generator, context);
             }
         }
 
@@ -167,15 +167,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class FloatArraySerializer extends ArraySerializer {
 
-        FloatArraySerializer(ModelSerializer valueSerializer) {
+        FloatArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             float[] array = (float[]) value;
             for (float f : array) {
-                getValueSerializer().serialize(f, generator, context);
+                getValueSerializer().marshal(f, generator, context);
             }
         }
 
@@ -183,15 +183,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class DoubleArraySerializer extends ArraySerializer {
 
-        DoubleArraySerializer(ModelSerializer valueSerializer) {
+        DoubleArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             double[] array = (double[]) value;
             for (double d : array) {
-                getValueSerializer().serialize(d, generator, context);
+                getValueSerializer().marshal(d, generator, context);
             }
         }
 
@@ -199,15 +199,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class BooleanArraySerializer extends ArraySerializer {
 
-        BooleanArraySerializer(ModelSerializer valueSerializer) {
+        BooleanArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             boolean[] array = (boolean[]) value;
             for (boolean b : array) {
-                getValueSerializer().serialize(b, generator, context);
+                getValueSerializer().marshal(b, generator, context);
             }
         }
 
@@ -215,15 +215,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class CharacterArraySerializer extends ArraySerializer {
 
-        CharacterArraySerializer(ModelSerializer valueSerializer) {
+        CharacterArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             char[] array = (char[]) value;
             for (char c : array) {
-                getValueSerializer().serialize(c, generator, context);
+                getValueSerializer().marshal(c, generator, context);
             }
         }
 
@@ -231,15 +231,15 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private static final class ObjectArraySerializer extends ArraySerializer {
 
-        ObjectArraySerializer(ModelSerializer valueSerializer) {
+        ObjectArraySerializer(ModelMarshaller valueSerializer) {
             super(valueSerializer);
         }
 
         @Override
-        public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void serializeArray(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             Object[] array = (Object[]) value;
             for (Object o : array) {
-                getValueSerializer().serialize(o, generator, context);
+                getValueSerializer().marshal(o, generator, context);
             }
         }
 

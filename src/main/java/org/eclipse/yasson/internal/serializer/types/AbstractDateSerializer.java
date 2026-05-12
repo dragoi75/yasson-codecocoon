@@ -24,9 +24,9 @@ import java.util.function.Function;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 import jakarta.json.stream.JsonGenerator;
 
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
-import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -143,12 +143,12 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
     }
 
     @Override
-    void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(T value, JsonGenerator generator, DefaultSerializationContext context) {
         valueWriter.accept(value, generator);
     }
 
     @Override
-    void serializeKey(T key, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeKey(T key, JsonGenerator generator, DefaultSerializationContext context) {
         generator.writeKey(toStringSerializer.apply(key));
     }
 }

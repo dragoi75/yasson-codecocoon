@@ -16,7 +16,7 @@ import java.time.Period;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Period} type.
@@ -28,7 +28,7 @@ class PeriodSerializer extends TypeSerializer<Period> {
     }
 
     @Override
-    void serializeValue(Period value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Period value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

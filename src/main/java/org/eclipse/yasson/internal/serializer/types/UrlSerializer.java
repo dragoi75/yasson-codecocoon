@@ -16,7 +16,7 @@ import java.net.URL;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link URL} type.
@@ -28,7 +28,7 @@ class UrlSerializer extends TypeSerializer<URL> {
     }
 
     @Override
-    void serializeValue(URL value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(URL value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

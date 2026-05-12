@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link UUID} type.
@@ -28,7 +28,7 @@ class UuidSerializer extends TypeSerializer<UUID> {
     }
 
     @Override
-    void serializeValue(UUID value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(UUID value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

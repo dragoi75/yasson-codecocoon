@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Switching mechanism for default null value visibility in the JSON.
@@ -23,21 +23,21 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  * This class switches from the default parent null visibility to the current construct visibility. As soon as the current
  * construct is serialized, visibility is switched back to the parent ones.
  */
-class NullVisibilitySwitcher implements ModelSerializer {
+class NullVisibilitySwitcher implements ModelMarshaller {
 
     private final boolean nullsEnabled;
-    private final ModelSerializer delegate;
+    private final ModelMarshaller delegate;
 
-    NullVisibilitySwitcher(boolean nullsEnabled, ModelSerializer delegate) {
+    NullVisibilitySwitcher(boolean nullsEnabled, ModelMarshaller delegate) {
         this.nullsEnabled = nullsEnabled;
         this.delegate = delegate;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         boolean previous = context.isContainerWithNulls();
         context.setContainerWithNulls(nullsEnabled);
-        delegate.serialize(value, generator, context);
+        delegate.marshal(value, generator, context);
         context.setContainerWithNulls(previous);
     }
 }

@@ -16,7 +16,7 @@ import java.time.ZoneId;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link ZoneId} type.
@@ -28,7 +28,7 @@ class ZoneIdSerializer extends TypeSerializer<ZoneId> {
     }
 
     @Override
-    void serializeValue(ZoneId value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(ZoneId value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.getId());
     }
 

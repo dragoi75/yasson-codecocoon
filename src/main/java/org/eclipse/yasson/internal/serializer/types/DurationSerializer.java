@@ -16,7 +16,7 @@ import java.time.Duration;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Duration} type.
@@ -28,7 +28,7 @@ class DurationSerializer extends TypeSerializer<Duration> {
     }
 
     @Override
-    void serializeValue(Duration value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Duration value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

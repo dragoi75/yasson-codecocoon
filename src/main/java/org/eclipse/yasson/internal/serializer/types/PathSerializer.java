@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Path} type.
@@ -28,7 +28,7 @@ class PathSerializer extends TypeSerializer<Path> {
     }
 
     @Override
-    void serializeValue(Path value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Path value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
     }
 

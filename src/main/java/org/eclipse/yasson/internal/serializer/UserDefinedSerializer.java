@@ -15,12 +15,12 @@ package org.eclipse.yasson.internal.serializer;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * User defined serializer executor.
  */
-class UserDefinedSerializer<T> implements ModelSerializer {
+class UserDefinedSerializer<T> implements ModelMarshaller {
 
     private final JsonbSerializer<T> userDefinedSerializer;
 
@@ -30,7 +30,7 @@ class UserDefinedSerializer<T> implements ModelSerializer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         YassonGenerator yassonGenerator = new YassonGenerator(generator);
         userDefinedSerializer.serialize((T) value, yassonGenerator, context);
     }

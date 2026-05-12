@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer.types;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Enum} types.
@@ -26,12 +26,12 @@ class EnumSerializer extends TypeSerializer<Enum<?>> {
     }
 
     @Override
-    void serializeValue(Enum<?> value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Enum<?> value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.name());
     }
 
     @Override
-    void serializeKey(Enum<?> key, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeKey(Enum<?> key, JsonGenerator generator, DefaultSerializationContext context) {
         generator.writeKey(key.name());
     }
 }

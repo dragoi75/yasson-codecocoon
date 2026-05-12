@@ -30,7 +30,7 @@ class SerializerBuilderParams {
     private final boolean root;
     private final boolean key;
     private final boolean resolveRootAdapter;
-    private final ModelSerializer objectBaseSerializer;
+    private final ModelMarshaller objectBaseSerializer;
 
     private SerializerBuilderParams(Builder builder) {
         this.type = builder.type;
@@ -65,7 +65,7 @@ class SerializerBuilderParams {
         return resolveRootAdapter;
     }
 
-    public ModelSerializer getObjectBaseSerializer() {
+    public ModelMarshaller getObjectBaseSerializer() {
         return objectBaseSerializer;
     }
 
@@ -76,7 +76,7 @@ class SerializerBuilderParams {
         private boolean root;
         private boolean key;
         private boolean resolveRootAdapter;
-        private ModelSerializer objectBaseSerializer;
+        private ModelMarshaller objectBaseSerializer;
 
         private Builder(Type type) {
             this.type = Objects.requireNonNull(type);
@@ -110,7 +110,7 @@ class SerializerBuilderParams {
             return this;
         }
 
-        public Builder objectBaseSerializer(ModelSerializer objectBaseSerializer) {
+        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
             this.objectBaseSerializer = objectBaseSerializer;
             return this;
         }

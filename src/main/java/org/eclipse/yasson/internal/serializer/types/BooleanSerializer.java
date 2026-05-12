@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.serializer.types;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link Boolean} type.
@@ -26,7 +26,7 @@ class BooleanSerializer extends TypeSerializer<Boolean> {
     }
 
     @Override
-    void serializeValue(Boolean value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Boolean value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value);
     }
 }

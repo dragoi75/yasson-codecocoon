@@ -20,9 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 import org.eclipse.yasson.internal.serializer.SerializationModelCreator;
 
 /**
@@ -32,7 +32,7 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
 
     private final Customization customization;
 
-    private final Map<Class<?>, ModelSerializer> cache;
+    private final Map<Class<?>, ModelMarshaller> cache;
     private final List<Type> chain;
     private final boolean isKey;
 
@@ -45,13 +45,13 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
     }
 
     @Override
-    void serializeValue(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
         findSerializer(value, generator, context);
     }
 
     @Override
-    void serializeKey(Object key, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeKey(Object key, JsonGenerator generator, DefaultSerializationContext context) {
         if (key == null) {
             super.serializeKey(null, generator, context);
             return;
@@ -60,7 +60,7 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         findSerializer(key, generator, context);
     }
 
-    private void findSerializer(Object key, JsonGenerator generator, SerializationContextImpl context) {
+    private void findSerializer(Object key, JsonGenerator generator, DefaultSerializationContext context) {
         Class<?> clazz = key.getClass();
         cache.computeIfAbsent(clazz, aClass -> {
             SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
@@ -74,7 +74,7 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
      * @param clazz           class of the serializer
      * @param modelSerializer model serializer bound to the class
      */
-    public void addSpecificSerializer(Class<?> clazz, ModelSerializer modelSerializer) {
+    public void addSpecificSerializer(Class<?> clazz, ModelMarshaller modelSerializer) {
         cache.put(clazz, modelSerializer);
     }
 }

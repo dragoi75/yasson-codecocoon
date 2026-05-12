@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer.types;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link JsonValue} type.
@@ -27,7 +27,7 @@ class JsonValueSerializer extends TypeSerializer<JsonValue> {
     }
 
     @Override
-    void serializeValue(JsonValue value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(JsonValue value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value);
     }
 

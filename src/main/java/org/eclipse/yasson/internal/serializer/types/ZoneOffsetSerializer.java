@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Serializer of the {@link ZoneOffset} type.
@@ -28,7 +28,7 @@ class ZoneOffsetSerializer extends TypeSerializer<ZoneOffset> {
     }
 
     @Override
-    void serializeValue(ZoneOffset value, JsonGenerator generator, SerializationContextImpl context) {
+    void serializeValue(ZoneOffset value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.getId());
     }
 }

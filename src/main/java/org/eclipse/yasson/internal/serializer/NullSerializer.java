@@ -15,18 +15,18 @@ package org.eclipse.yasson.internal.serializer;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.stream.JsonGenerator;
 
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
  * Null value serializer. Determines proper behavior when the serialized value is null.
  */
-public class NullSerializer implements ModelSerializer {
+public class NullSerializer implements ModelMarshaller {
 
-    private final ModelSerializer delegate;
-    private final ModelSerializer nullSerializer;
-    private final ModelSerializer rootNullSerializer;
+    private final ModelMarshaller delegate;
+    private final ModelMarshaller nullSerializer;
+    private final ModelMarshaller rootNullSerializer;
 
     /**
      * Create new instance.
@@ -35,7 +35,7 @@ public class NullSerializer implements ModelSerializer {
      * @param customization component customization
      * @param jsonbContext  jsonb context
      */
-    public NullSerializer(ModelSerializer delegate,
+    public NullSerializer(ModelMarshaller delegate,
                           Customization customization,
                           JsonbContext jsonbContext) {
         this.delegate = delegate;
@@ -53,25 +53,25 @@ public class NullSerializer implements ModelSerializer {
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (value == null) {
             if (context.isRoot()) {
                 context.setRoot(false);
-                rootNullSerializer.serialize(null, generator, context);
+                rootNullSerializer.marshal(null, generator, context);
             } else {
-                nullSerializer.serialize(null, generator, context);
+                nullSerializer.marshal(null, generator, context);
             }
             context.setKey(null);
         } else {
             context.setRoot(false);
-            delegate.serialize(value, generator, context);
+            delegate.marshal(value, generator, context);
         }
     }
 
-    private static final class NullWritingEnabled implements ModelSerializer {
+    private static final class NullWritingEnabled implements ModelMarshaller {
 
         @Override
-        public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             if (context.getKey() == null) {
                 generator.writeNull();
             } else {
@@ -81,10 +81,10 @@ public class NullSerializer implements ModelSerializer {
 
     }
 
-    private static class NullWritingDisabled implements ModelSerializer {
+    private static class NullWritingDisabled implements ModelMarshaller {
 
         @Override
-        public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             if (context.isContainerWithNulls()) {
                 if (context.getKey() == null) {
                     generator.writeNull();

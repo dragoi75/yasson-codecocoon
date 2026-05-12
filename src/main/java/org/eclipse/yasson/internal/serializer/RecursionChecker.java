@@ -15,27 +15,27 @@ package org.eclipse.yasson.internal.serializer;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
 /**
  * Recursion checker serializer deals with possible instance recursion in instances.
  */
-class RecursionChecker implements ModelSerializer {
+class RecursionChecker implements ModelMarshaller {
 
-    private final ModelSerializer delegate;
+    private final ModelMarshaller delegate;
 
-    RecursionChecker(ModelSerializer delegate) {
+    RecursionChecker(ModelMarshaller delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (!context.addProcessedObject(value)) {
             throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, value.getClass()));
         }
-        delegate.serialize(value, generator, context);
+        delegate.marshal(value, generator, context);
         context.removeProcessedObject(value);
     }
 

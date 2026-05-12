@@ -16,26 +16,26 @@ import java.lang.reflect.Type;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.SerializationContextImpl;
+import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
  * Solution for cyclic references in serialization.
  * This approach helps us to avoid creation of multiple serializers for the same type.
  */
-class CyclicReferenceSerializer implements ModelSerializer {
+class CyclicReferenceSerializer implements ModelMarshaller {
 
     private final Type type;
-    private ModelSerializer delegate;
+    private ModelMarshaller delegate;
 
     CyclicReferenceSerializer(Type type) {
         this.type = type;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (delegate == null) {
             delegate = context.getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
         }
-        delegate.serialize(value, generator, context);
+        delegate.marshal(value, generator, context);
     }
 }
