@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- *     Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *      Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassModel;
@@ -20,7 +22,6 @@ import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
 import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 import org.eclipse.yasson.internal.serializer.SerializerBuilder;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
@@ -108,8 +109,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
     @SuppressWarnings("unchecked")
     public <T> void serializeRoot(T root, JsonGenerator generator) {
         final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
-        if (jsonbContext.getConfigProperties().isStrictIJson() &&
-                rootSerializer instanceof AbstractValueTypeSerializer) {
+        if (jsonbContext.getConfigProperties().isStrictIJson() && rootSerializer instanceof AbstractValueTypeSerializer) {
             throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSerializer.serialize(root, generator, this);
@@ -117,20 +117,14 @@ public class Marshaller extends ProcessingContext implements SerializationContex
 
     private JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
         final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
-        if (serializerProvider != null) {
-            return serializerProvider
-                    .provideSerializer(new JsonbPropertyInfo()
-                            .withRuntimeType(runtimeType));
+        if (null != serializerProvider) {
+            return serializerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(runtimeType));
         }
-        SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext)
-                .withObjectClass(rootClazz)
-                .withType(runtimeType);
-
+        SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext).withObjectClass(rootClazz).withType(runtimeType);
         if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClazz)) {
             ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
             serializerBuilder.withCustomization(classModel.getCustomization());
         }
         return serializerBuilder.build();
     }
-
 }

@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * David Kral
- ******************************************************************************/
-
+ *  Contributors:
+ *  David Kral
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import java.math.BigDecimal;
@@ -54,7 +55,7 @@ class BigNumberUtil {
         //bit value of scaled number
         int intBitsScaled = value.toBigInteger().bitLength();
         // Number whose bit length is than 53 or is not in range is considered as non IEEE 754-2008 binary64 compliant
-        return valBits <= MAX_BIT_SIZE && intBitsScaled <= MAX_BIT_SIZE && MIN_RANGE <= scale && scale <= MAX_RANGE;
+        return MAX_BIT_SIZE >= valBits && MAX_BIT_SIZE >= intBitsScaled && scale >= MIN_RANGE && MAX_RANGE >= scale;
     }
 
     /**
@@ -65,7 +66,7 @@ class BigNumberUtil {
      */
     static boolean isIEEE754(BigInteger value) {
         // Number whose bit length is than 53 is considered as non IEEE 754-2008 binary64 compliant
-        return value.abs().bitLength() <= MAX_BIT_SIZE;
+        return MAX_BIT_SIZE >= value.abs().bitLength();
     }
 
     /**
@@ -75,9 +76,6 @@ class BigNumberUtil {
      * @return true if value matches format IEEE-754
      */
     static boolean isIEEE754(Long value) {
-        return value >= MIN_JS_SAFE_VALUE && value <= MAX_JS_SAFE_VALUE;
+        return MIN_JS_SAFE_VALUE <= value && MAX_JS_SAFE_VALUE >= value;
     }
-
-
-
 }

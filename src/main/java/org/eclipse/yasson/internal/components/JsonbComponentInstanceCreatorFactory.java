@@ -1,21 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.components;
 
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.bind.JsonbException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +37,9 @@ public class JsonbComponentInstanceCreatorFactory {
      * JNDI bean manager name
      */
     public static final String BEAN_MANAGER_NAME = "java:comp/BeanManager";
+
     public static final String INITIAL_CONTEXT_CLASS = "javax.naming.InitialContext";
+
     private static final String CDI_SPI_CLASS = "javax.enterprise.inject.spi.CDI";
 
     /**
@@ -49,10 +51,10 @@ public class JsonbComponentInstanceCreatorFactory {
      */
     public static JsonbComponentInstanceCreator getComponentInstanceCreator() {
         Object beanManager = getCdiBeanManager();
-        if (beanManager == null) {
+        if (null == beanManager) {
             beanManager = getJndiBeanManager();
         }
-        if (beanManager == null) {
+        if (null == beanManager) {
             log.finest(Messages.getMessage(MessageKeys.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
             return new DefaultConstructorCreator();
         }
@@ -72,7 +74,7 @@ public class JsonbComponentInstanceCreatorFactory {
                     Method current = cdiClass.getMethod("current");
                     Method getBeanManager = cdiClass.getMethod("getBeanManager");
                     Object cdiObject = current.invoke(cdiClass);
-                    if (cdiObject == null) {
+                    if (null == cdiObject) {
                         return null;
                     }
                     return getBeanManager.invoke(cdiObject);
@@ -106,7 +108,6 @@ public class JsonbComponentInstanceCreatorFactory {
         });
     }
 
-
     /**
      * Handles common invocation exceptions for getting bean manager reflectively.
      *
@@ -124,7 +125,7 @@ public class JsonbComponentInstanceCreatorFactory {
             return null;
         } catch (InvocationTargetException e) {
             //likely no CDI container is running or bean manager JNDI lookup fails.
-            if (e.getCause() != null) {
+            if (null != e.getCause()) {
                 log.finest(e.getMessage());
             }
             log.finest(Messages.getMessage(MessageKeys.NO_CDI_ENVIRONMENT));
@@ -136,7 +137,7 @@ public class JsonbComponentInstanceCreatorFactory {
      * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
      */
     private interface BeanManagerProvider {
-        Object provide() throws InvocationTargetException, IllegalAccessException,
-                NoSuchMethodException, InstantiationException, ClassNotFoundException;
+
+        Object provide() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, ClassNotFoundException;
     }
 }

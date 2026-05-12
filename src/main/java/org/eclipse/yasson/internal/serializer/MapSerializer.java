@@ -1,20 +1,20 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ReflectionUtils;
-
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
 import java.lang.reflect.ParameterizedType;
@@ -24,11 +24,10 @@ import java.util.Optional;
 
 /**
  * Serializer for maps.
- * 
+ *
  * @author Roman Grigoriadi
  */
-public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializer<T> implements EmbeddedItem {
-
+public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSerializer<T> implements EmbeddedItem {
 
     protected MapSerializer(SerializerBuilder builder) {
         super(builder);
@@ -37,10 +36,10 @@ public class MapSerializer<T extends Map<?,?>> extends AbstractContainerSerializ
     @SuppressWarnings("unchecked")
     @Override
     protected void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx) {
-        for (Map.Entry<?,?> entry : obj.entrySet()) {
+        for (Map.Entry<?, ?> entry : obj.entrySet()) {
             final String keysString = String.valueOf(entry.getKey());
             final Object value = entry.getValue();
-            if (value == null) {
+            if (null == value) {
                 generator.writeNull(keysString);
                 continue;
             }
