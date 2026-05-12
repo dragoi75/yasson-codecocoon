@@ -1,17 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
@@ -19,7 +20,6 @@ import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
-
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -35,6 +35,7 @@ import java.util.function.Predicate;
  * @param <T> instantiated Optional type
  */
 public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentItem<T>, JsonbSerializer<T> {
+
     private final Customization customization;
 
     private final CurrentItem<?> wrapper;
@@ -81,28 +82,27 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         JsonbContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
-        if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller)ctx)) {
+        if (handleEmpty(obj, Optional::isPresent, customization, generator, (Marshaller) ctx)) {
             return;
         }
         Object optionalValue = obj.get();
-        final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass())
-                .withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
+        final JsonbSerializer<?> serializer = new SerializerBuilder(jsonbContext).withObjectClass(optionalValue.getClass()).withType(optionalValueType).withWrapper(wrapper).withCustomization(customization).build();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 
-    static <T> boolean handleEmpty(T value, Predicate<T> presentCheck,  Customization customization, JsonGenerator generator, Marshaller marshaller) {
-        if (value == null || !presentCheck.test(value)) {
-            if (customization != null) {
+    static <T> boolean handleEmpty(T value, Predicate<T> presentCheck, Customization customization, JsonGenerator generator, Marshaller marshaller) {
+        if (null != value && presentCheck.test(value)) {
+            return false;
+        } else {
+            if (null == customization) {
+                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
+            } else {
                 if (customization.isNillable()) {
                     generator.writeNull();
                     return true;
                 }
-            } else {
-                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
             }
             return true;
-        } else {
-            return false;
         }
     }
 

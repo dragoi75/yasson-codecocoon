@@ -1,21 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model;
 
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
 import org.eclipse.yasson.internal.model.customization.naming.CaseInsensitiveStrategy;
-
 import javax.json.bind.config.PropertyNamingStrategy;
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -89,7 +90,7 @@ public class ClassDescriptor {
     private BeanPropertyDescriptor findProperty(ClassDescriptor typeDescriptor, String jsonFieldName) {
         //Standard javabean properties without overridden name (most of the cases)
         final BeanPropertyDescriptor foundProperty = typeDescriptor.getPropertyModel(jsonFieldName);
-        if (foundProperty != null && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
             return foundProperty;
         }
         //Search for overridden name on setter with @JsonbProperty annotation
@@ -165,7 +166,7 @@ public class ClassDescriptor {
      * @param extractedProperties class properties
      */
     public void setProperties(List<BeanPropertyDescriptor> extractedProperties) {
-        orderedProperties = extractedProperties.toArray(new BeanPropertyDescriptor[]{});
+        orderedProperties = extractedProperties.toArray(new BeanPropertyDescriptor[] {});
         this.propertyMap = extractedProperties.stream().collect(Collectors.toMap(BeanPropertyDescriptor::getPropertyName, (modifier) -> modifier));
     }
 

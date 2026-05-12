@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
@@ -20,7 +21,6 @@ import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.adapter.JsonbAdapter;
 import javax.json.bind.serializer.JsonbSerializer;
@@ -56,17 +56,17 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         ProcessingContext context = (ProcessingContext) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (!context.addProcessedObject(obj)) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
+            } else {
                 final JsonbAdapter<T, A> adapter = (JsonbAdapter<T, A>) adapterInfo.getAdapter();
                 A adapted = adapter.adaptToJson(obj);
-                if (adapted == null) {
+                if (null == adapted) {
                     generator.writeNull();
                     return;
                 }
                 final JsonbSerializer<A> serializer = resolveSerializer((Marshaller) ctx, adapted);
                 serializer.serialize(adapted, generator, ctx);
-            } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } catch (Exception e) {
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
@@ -78,16 +78,10 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     @SuppressWarnings("unchecked")
     private JsonbSerializer<A> resolveSerializer(Marshaller ctx, A adapted) {
         final ContainerSerializerProvider cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
-        if (cached != null) {
-            return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo()
-                    .withWrapper(this)
-                    .withRuntimeType(classModel == null ? null : classModel.getType()));
+        if (null != cached) {
+            return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo().withWrapper(this).withRuntimeType(null == classModel ? null : classModel.getType()));
         }
-        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
-                .withObjectClass(adapted.getClass())
-                .withCustomization(classModel == null ? null : classModel.getCustomization())
-                .withWrapper(this)
-                .build();
+        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext()).withObjectClass(adapted.getClass()).withCustomization(null == classModel ? null : classModel.getCustomization()).withWrapper(this).build();
     }
 
     @Override

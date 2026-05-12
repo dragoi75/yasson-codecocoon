@@ -1,20 +1,21 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model.customization.ordering;
 
 import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 import org.eclipse.yasson.internal.model.ClassDescriptor;
-
 import javax.json.bind.JsonbConfig;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,22 +54,19 @@ public class PropertyOrderer {
     public List<BeanPropertyDescriptor> sortProperties(List<BeanPropertyDescriptor> propertyList, ClassDescriptor typeDescriptor) {
         Map<String, BeanPropertyDescriptor> readNameMap = new HashMap<>();
         propertyList.stream().forEach(propDescriptor -> readNameMap.put(propDescriptor.getReadName(), propDescriptor));
-
         String[] sequence = typeDescriptor.getClassCustomization().getPropertyOrder();
         List<BeanPropertyDescriptor> orderedPropertyList = new ArrayList<>();
-        if (sequence != null) {
+        if (null != sequence) {
             //if @JsonbPropertyOrder annotation is defined on a class
             for (String propertyName : sequence) {
                 final BeanPropertyDescriptor removedProperty = readNameMap.remove(propertyName);
-                if (removedProperty != null) {
+                if (null != removedProperty) {
                     orderedPropertyList.add(removedProperty);
                 }
             }
         }
-
         orderedPropertyList.addAll(orderStrategy.orderProperties(readNameMap.values()));
         return orderedPropertyList;
-
     }
 
     /**

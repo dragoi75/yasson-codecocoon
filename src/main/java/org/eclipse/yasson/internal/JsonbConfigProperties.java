@@ -1,16 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  Copyright (c) 2019 Payara Foundation and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.YassonProperties;
@@ -26,7 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.NullSerializer;
-
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
@@ -96,11 +97,10 @@ public class JsonbConfigProperties {
         this.nullSerializer = initNullSerializer();
     }
 
-
     private Class<?> initDefaultMapImplType() {
         Optional<String> os = getPropertyOrderStrategy();
         if (os.isPresent()) {
-            switch (os.get()) {
+            switch(os.get()) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return TreeMap.class;
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
@@ -117,7 +117,7 @@ public class JsonbConfigProperties {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Class<?>,Class<?>> initUserTypeMapping() {
+    private Map<Class<?>, Class<?>> initUserTypeMapping() {
         Optional<Object> property = jsonbConfig.getProperty(YassonProperties.USER_TYPE_MAPPING);
         if (!property.isPresent()) {
             return Collections.emptyMap();
@@ -158,7 +158,7 @@ public class JsonbConfigProperties {
     private PropertyOrderStrategy initOrderStrategy() {
         Optional<String> strategy = getPropertyOrderStrategy();
         if (strategy.isPresent()) {
-            switch (strategy.get()) {
+            switch(strategy.get()) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return new LexicographicalOrderStrategy();
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
@@ -180,11 +180,11 @@ public class JsonbConfigProperties {
             if (!(strategy instanceof String)) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
             }
-            switch ((String)strategy) {
+            switch((String) strategy) {
                 case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                 case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
                 case javax.json.bind.config.PropertyOrderStrategy.ANY:
-                    return Optional.of((String)strategy);
+                    return Optional.of((String) strategy);
                 default:
                     throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
             }
@@ -201,7 +201,7 @@ public class JsonbConfigProperties {
         if (propertyNamingStrategy instanceof String) {
             String namingStrategyName = (String) propertyNamingStrategy;
             final PropertyNamingStrategy foundNamingStrategy = DefaultNamingStrategies.getStrategy(namingStrategyName);
-            if (foundNamingStrategy == null) {
+            if (null == foundNamingStrategy) {
                 throw new JsonbException("No property naming strategy was found for: " + namingStrategyName);
             }
             return foundNamingStrategy;
@@ -225,7 +225,7 @@ public class JsonbConfigProperties {
     }
 
     private String initBinaryDataStrategy() {
-        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj->(Boolean)obj));
+        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj -> (Boolean) obj));
         if (iJson.isPresent() && iJson.get()) {
             return BinaryDataStrategy.BASE_64_URL;
         }
@@ -293,7 +293,7 @@ public class JsonbConfigProperties {
      *
      * @return Binary data strategy.
      */
-    public  String getBinaryDataStrategy() {
+    public String getBinaryDataStrategy() {
         return binaryDataStrategy;
     }
 
@@ -317,7 +317,7 @@ public class JsonbConfigProperties {
      */
     private Locale initConfigLocale() {
         final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
-        return  localeProperty.map(loc -> {
+        return localeProperty.map(loc -> {
             if (!(loc instanceof Locale)) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
             }
