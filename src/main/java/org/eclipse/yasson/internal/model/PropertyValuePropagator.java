@@ -1,16 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model;
 
 import javax.json.bind.config.PropertyVisibilityStrategy;
@@ -42,6 +43,7 @@ public abstract class PropertyValuePropagator {
      * Mode of property propagation get or set.
      */
     public enum OperationType {
+
         GET, SET
     }
 
@@ -71,45 +73,46 @@ public abstract class PropertyValuePropagator {
         this.visibilityResolver = visibilityPolicy;
         this.readAccessible = isMethodVisible(backingMember, readAccessor);
         this.writeAccessible = isMethodVisible(backingMember, writeAccessor);
-
         initializeReadable(backingMember, readAccessor);
         initializeWritable(backingMember, writeAccessor);
     }
 
     private void initializeReadable(Field backingMember, Method readAccessor) {
-
-        final boolean backingReadable = backingMember == null || (backingMember.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) == 0;
+        final boolean backingReadable = null == backingMember || 0 == (backingMember.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC));
         if (!backingReadable) {
             readable = false;
             return;
         }
-        if (readAccessor != null && readAccessible) {
+        if (null == readAccessor || !readAccessible) {
+            if (isFieldVisible(backingMember, readAccessor)) {
+                registerField(backingMember, OperationType.GET);
+                readable = true;
+            }
+        } else {
             registerMethod(readAccessor, OperationType.GET);
-            readable = true;
-        } else if (isFieldVisible(backingMember, readAccessor)) {
-            registerField(backingMember, OperationType.GET);
             readable = true;
         }
     }
 
     private void initializeWritable(Field backingMember, Method writeAccessor) {
-
-        final boolean backingWritable = backingMember == null || (backingMember.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL)) == 0;
+        final boolean backingWritable = null == backingMember || 0 == (backingMember.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
         if (!backingWritable) {
             writable = false;
             return;
         }
-        if (writeAccessor != null && writeAccessible && !writeAccessor.getDeclaringClass().isAnonymousClass()) {
+        if (null == writeAccessor || !writeAccessible || writeAccessor.getDeclaringClass().isAnonymousClass()) {
+            if (isFieldVisible(backingMember, writeAccessor) && !backingMember.getDeclaringClass().isAnonymousClass()) {
+                registerField(backingMember, OperationType.SET);
+                writable = true;
+            }
+        } else {
             registerMethod(writeAccessor, OperationType.SET);
-            writable = true;
-        } else if (isFieldVisible(backingMember, writeAccessor) && !backingMember.getDeclaringClass().isAnonymousClass()) {
-            registerField(backingMember, OperationType.SET);
             writable = true;
         }
     }
 
     private boolean isFieldVisible(Field backingMember, Method accessor) {
-        if (backingMember == null) {
+        if (null == backingMember) {
             return false;
         }
         Boolean isAccessAllowed = isVisible(visibilityPolicy -> visibilityPolicy.isVisible(backingMember), backingMember, accessor);
@@ -121,10 +124,9 @@ public abstract class PropertyValuePropagator {
     }
 
     private boolean isMethodVisible(Field backingMember, Method accessor) {
-        if (accessor == null || Modifier.isStatic(accessor.getModifiers())) {
+        if (null == accessor || Modifier.isStatic(accessor.getModifiers())) {
             return false;
         }
-
         Boolean isAccessAllowed = isVisible(visibilityPolicy -> visibilityPolicy.isVisible(accessor), backingMember, accessor);
         //overridden by strategy, anonymous class, or lambda
         if (isAccessAllowed && (!Modifier.isPublic(accessor.getModifiers()) || accessor.getDeclaringClass().isAnonymousClass() || accessor.getDeclaringClass().isSynthetic())) {
@@ -148,9 +150,7 @@ public abstract class PropertyValuePropagator {
      * @return Optional with result of visibility check, or empty optional if no strategy is found
      */
     private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityTester, Field backingMember, Method accessor) {
-        return visibilityResolver != null ?
-                visibilityTester.apply(visibilityResolver)
-                : visibilityTester.apply(new StandardVisibilityStrategy(backingMember, accessor));
+        return null != visibilityResolver ? visibilityTester.apply(visibilityResolver) : visibilityTester.apply(new StandardVisibilityStrategy(backingMember, accessor));
     }
 
     /**
@@ -247,7 +247,7 @@ public abstract class PropertyValuePropagator {
         @Override
         public boolean isVisible(Field backingMember) {
             //don't check field if getter is not visible (forced by spec)
-            if (accessor != null && !isVisible(accessor)) {
+            if (null != accessor && !isVisible(accessor)) {
                 return false;
             }
             return Modifier.isPublic(backingMember.getModifiers());

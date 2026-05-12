@@ -1,22 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Dmitry Kornilov - initial implementation
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Dmitry Kornilov - initial implementation
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.serializer.ContainerSerializerProvider;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -87,21 +88,22 @@ public class MappingContext {
      */
     public ClassModel getOrCreateClassModel(Class<?> clazz) {
         ClassModel classModel = classes.get(clazz);
-        if (classModel != null) {
+        if (null != classModel) {
             return classModel;
         }
         final Deque<Class> newClassModels = new ArrayDeque<>();
-        for (Class classToParse = clazz; classToParse != Object.class; classToParse = classToParse.getSuperclass()) {
-            if (classToParse == null){
+        Class classToParse = clazz;
+        while (Object.class != classToParse) {
+            if (null == classToParse) {
                 break;
             }
             newClassModels.push(classToParse);
+            classToParse = classToParse.getSuperclass();
         }
-        if (clazz == Object.class) {
+        if (Object.class == clazz) {
             classes.computeIfAbsent(clazz, (c) -> new ClassModel(c, null, null, null));
             return classes.get(clazz);
         }
-
         ClassModel parentClassModel = null;
         while (!newClassModels.isEmpty()) {
             Class toParse = newClassModels.pop();
@@ -119,11 +121,12 @@ public class MappingContext {
      */
     public Iterator<ClassModel> classModelIterator(final Class<?> clazz) {
         return new Iterator<ClassModel>() {
+
             private Class<?> next = clazz;
 
             @Override
             public boolean hasNext() {
-                return next != Object.class;
+                return Object.class != next;
             }
 
             @Override

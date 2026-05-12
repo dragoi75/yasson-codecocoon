@@ -1,16 +1,18 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- *     Dmitry Kornilov - initial implementation
- *     Maxence Laurent - parse default methods in interface as properties
- ******************************************************************************/
+ *  Contributors:
+ *      Dmitry Kornilov - initial implementation
+ *      Maxence Laurent - parse default methods in interface as properties
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassModel;
@@ -23,7 +25,6 @@ import org.eclipse.yasson.internal.model.ReflectionPropagation;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.bind.JsonbException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Objects;
-
 
 /**
  * Created a class internal model.
@@ -61,34 +61,24 @@ class ClassParser {
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
     public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
-
         final Map<String, PropertyDescriptor> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
         parseClassAndInterfaceMethods(classElement, classProperties);
-
         //add sorted properties from parent, if they are not overridden in current class
         //parent properties are by default first by alphabet, than properties from a subclass
         final List<PropertyModel> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
-
-        List<PropertyModel> classPropertyModels = classProperties.values().stream()
-                .map(property -> new PropertyModel(classModel, property, jsonbContext))
-                .collect(Collectors.toList());
-
+        List<PropertyModel> classPropertyModels = classProperties.values().stream().map(property -> new PropertyModel(classModel, property, jsonbContext)).collect(Collectors.toList());
         //check for collision on same property read name
         List<PropertyModel> unsortedMerged = new ArrayList<>();
         unsortedMerged.addAll(sortedParentProperties);
         unsortedMerged.addAll(classPropertyModels);
         checkPropertyNameClash(unsortedMerged, classModel.getType());
-
-
         List<PropertyModel> sortedPropertyModels = new ArrayList<>();
         sortedPropertyModels.addAll(sortedParentProperties);
-        sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering()
-                .orderProperties(classPropertyModels, classModel));
-
+        sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering().orderProperties(classPropertyModels, classModel));
         //reference property to creator parameter by name to merge configuration in runtime
         JsonbCreator creator = classModel.getClassCustomization().getCreator();
-        if (creator != null) {
+        if (null != creator) {
             sortedPropertyModels.forEach((propertyModel -> {
                 for (CreatorModel creatorModel : creator.getParams()) {
                     if (creatorModel.getName().equals(propertyModel.getPropertyName())) {
@@ -98,9 +88,7 @@ class ClassParser {
                 }
             }));
         }
-
         classModel.setProperties(sortedPropertyModels);
-
     }
 
     private void parseClassAndInterfaceMethods(JsonbAnnotatedElement<Class<?>> classElement, Map<String, PropertyDescriptor> classProperties) {
@@ -119,37 +107,33 @@ class ClassParser {
                 continue;
             }
             String propertyName = toPropertyMethod(methodName);
-
             PropertyDescriptor property = classProperties.get(propertyName);
-
             if (method.isDefault()) {
                 // Interface provides default implementation
-                if (property == null) {
-                    // the property does not yet exists : create it from scratch
-                    property = registerMethod(propertyName, method, classElement, classProperties);
-                } else {
+                if (null != property) {
                     // property already exists, take care not overriding already parsed implementation
-                    if (isSetter(method)) {
-                        if (property.getSetter() == null) {
-                            property.setSetter(method);
-                        }
-                    } else {
-                        if (property.getGetter() == null) {
+                    if (!isSetter(method)) {
+                        if (null == property.getGetter()) {
                             property.setGetter(method);
                         }
+                    } else {
+                        if (null == property.getSetter()) {
+                            property.setSetter(method);
+                        }
                     }
+                } else {
+                    // the property does not yet exists : create it from scratch
+                    property = registerMethod(propertyName, method, classElement, classProperties);
                 }
             }
-
-            if (property == null) {
+            if (null == property) {
                 //May happen for classes which both extend a class with some method and implement interface with same method.
                 continue;
             }
-            JsonbAnnotatedElement<Method> methodElement = isGetter(method)
-                    ? property.getGetterElement() : property.getSetterElement();
+            JsonbAnnotatedElement<Method> methodElement = isGetter(method) ? property.getGetterElement() : property.getSetterElement();
             //Only push iface annotations if not overridden on impl classes
             for (Annotation ann : method.getDeclaredAnnotations()) {
-                if (methodElement.getAnnotation(ann.annotationType()) == null) {
+                if (null == methodElement.getAnnotation(ann.annotationType())) {
                     methodElement.putAnnotation(ann);
                 }
             }
@@ -158,12 +142,11 @@ class ClassParser {
 
     private PropertyDescriptor registerMethod(String propertyName, Method method, JsonbAnnotatedElement<Class<?>> classElement, Map<String, PropertyDescriptor> classProperties) {
         PropertyDescriptor property = classProperties.computeIfAbsent(propertyName, n -> new PropertyDescriptor(n, classElement));
-        if (isSetter(method)) {
-            property.setSetter(method);
-        } else {
+        if (!isSetter(method)) {
             property.setGetter(method);
+        } else {
+            property.setSetter(method);
         }
-
         return property;
     }
 
@@ -176,17 +159,16 @@ class ClassParser {
                 continue;
             }
             final String propertyName = toPropertyMethod(name);
-
             PropertyDescriptor property = registerMethod(propertyName, method, classElement, classProperties);
         }
     }
 
     private boolean isGetter(Method m) {
-        return (m.getName().startsWith(GET_PREFIX) || m.getName().startsWith(IS_PREFIX)) && m.getParameterCount() == 0;
+        return (m.getName().startsWith(GET_PREFIX) || m.getName().startsWith(IS_PREFIX)) && 0 == m.getParameterCount();
     }
 
     private boolean isSetter(Method m) {
-        return m.getName().startsWith(SET_PREFIX) && m.getParameterCount() == 1;
+        return m.getName().startsWith(SET_PREFIX) && 1 == m.getParameterCount();
     }
 
     private String toPropertyMethod(String name) {
@@ -195,15 +177,14 @@ class ClassParser {
 
     private String lowerFirstLetter(String name) {
         Objects.requireNonNull(name);
-        if (name.length() == 0) {
+        if (0 == name.length()) {
             //methods named get() or set()
             return name;
         }
-        if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
-                Character.isUpperCase(name.charAt(0))){
+        if (1 < name.length() && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(name.charAt(0))) {
             return name;
         }
-        char chars[] = name.toCharArray();
+        char[] chars = name.toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
     }
@@ -213,8 +194,7 @@ class ClassParser {
     }
 
     private void parseFields(JsonbAnnotatedElement<Class<?>> classElement, Map<String, PropertyDescriptor> classProperties) {
-        Field[] declaredFields = AccessController.doPrivileged(
-                (PrivilegedAction<Field[]>) () -> classElement.getElement().getDeclaredFields());
+        Field[] declaredFields = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> classElement.getElement().getDeclaredFields());
         for (Field field : declaredFields) {
             final String name = field.getName();
             if (field.isSynthetic()) {
@@ -230,14 +210,8 @@ class ClassParser {
         final List<PropertyModel> checkedProperties = new ArrayList<>();
         for (PropertyModel collectedPropertyModel : collectedProperties) {
             for (PropertyModel checkedPropertyModel : checkedProperties) {
-
-                if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName())
-                        && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) ||
-                        (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
-                                && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH,
-                            checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(),
-                            cls.getName()));
+                if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName()) && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) || (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName())) && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
+                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(), cls.getName()));
                 }
             }
             checkedProperties.add(collectedPropertyModel);
@@ -257,23 +231,22 @@ class ClassParser {
     private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, PropertyDescriptor> classProperties) {
         List<PropertyModel> sortedProperties = new ArrayList<>();
         //Pull properties from parent
-        if (classModel.getParentClassModel() != null) {
+        if (null != classModel.getParentClassModel()) {
             for (PropertyModel parentProp : classModel.getParentClassModel().getSortedProperties()) {
                 final PropertyDescriptor current = classProperties.get(parentProp.getPropertyName());
                 //don't replace overridden properties
-                if (current == null) {
-                    sortedProperties.add(parentProp);
-                } else {
+                if (null != current) {
                     //merge
                     final PropertyDescriptor merged = mergeProperty(current, parentProp, classElement);
                     ReflectionPropagation propagation = new ReflectionPropagation(current, classModel.getClassCustomization().getPropertyVisibilityStrategy());
-                    if (propagation.isReadable()) {
-                        classProperties.replace(current.getName(), merged);
-                    } else {
+                    if (!propagation.isReadable()) {
                         sortedProperties.add(new PropertyModel(classModel, merged, jsonbContext));
                         classProperties.remove(current.getName());
+                    } else {
+                        classProperties.replace(current.getName(), merged);
                     }
-
+                } else {
+                    sortedProperties.add(parentProp);
                 }
             }
         }
@@ -301,29 +274,23 @@ class ClassParser {
      * @return effective method to register as getter or setter
      */
     private Method selectMostSpecificNonDefaultMethod(Method current, Method parent) {
-        return (current != null ? (parent != null && current.isDefault()
-                && !parent.isDefault() ? parent : current) : parent);
+        return (null != current ? (null != parent && current.isDefault() && !parent.isDefault() ? parent : current) : parent);
     }
 
     private PropertyDescriptor mergeProperty(PropertyDescriptor current, PropertyModel parentProp, JsonbAnnotatedElement<Class<?>> classElement) {
-        Field field = current.getField() != null
-                ? current.getField() : parentProp.getPropagation().getField();
-        Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(),
-                parentProp.getPropagation().getGetter());
-        Method setter = selectMostSpecificNonDefaultMethod(current.getSetter(),
-                parentProp.getPropagation().getSetter());
-
+        Field field = null != current.getField() ? current.getField() : parentProp.getPropagation().getField();
+        Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(), parentProp.getPropagation().getGetter());
+        Method setter = selectMostSpecificNonDefaultMethod(current.getSetter(), parentProp.getPropagation().getSetter());
         PropertyDescriptor merged = new PropertyDescriptor(parentProp.getPropertyName(), classElement);
-        if (field != null) {
+        if (null != field) {
             merged.setField(field);
         }
-        if (getter != null) {
+        if (null != getter) {
             merged.setGetter(getter);
         }
-        if (setter != null) {
+        if (null != setter) {
             merged.setSetter(setter);
         }
         return merged;
     }
-
 }

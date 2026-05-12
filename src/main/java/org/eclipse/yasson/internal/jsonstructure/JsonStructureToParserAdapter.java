@@ -1,13 +1,15 @@
-/*******************************************************************************
- * Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.jsonstructure;
 
 import javax.json.JsonArray;
@@ -47,27 +49,31 @@ public class JsonStructureToParserAdapter implements JsonParser {
     @Override
     public Event next() {
         if (iterators.isEmpty()) {
-            if (rootStructure instanceof JsonObject) {
+            if (!(rootStructure instanceof JsonObject)) {
+                if (rootStructure instanceof JsonArray) {
+                    iterators.push(new JsonArrayIterator((JsonArray) rootStructure));
+                    return Event.START_ARRAY;
+                }
+            } else {
                 iterators.push(new JsonObjectIterator((JsonObject) rootStructure));
                 return Event.START_OBJECT;
-            } else if (rootStructure instanceof JsonArray) {
-                iterators.push(new JsonArrayIterator((JsonArray) rootStructure));
-                return Event.START_ARRAY;
             }
         }
         JsonStructureIterator current = iterators.peek();
         Event next = current.next();
-        if (next == Event.START_OBJECT) {
+        if (Event.START_OBJECT != next) {
+            if (Event.START_ARRAY != next) {
+                if (Event.END_OBJECT == next || Event.END_ARRAY == next) {
+                    iterators.pop();
+                }
+            } else {
+                iterators.push(new JsonArrayIterator((JsonArray) iterators.peek().getValue()));
+            }
+        } else {
             iterators.push(new JsonObjectIterator((JsonObject) iterators.peek().getValue()));
-        } else if (next == Event.START_ARRAY) {
-            iterators.push(new JsonArrayIterator((JsonArray) iterators.peek().getValue()));
-        } else if (next == Event.END_OBJECT || next == Event.END_ARRAY) {
-            iterators.pop();
         }
         return next;
     }
-
-
 
     @Override
     public String getString() {
@@ -97,7 +103,7 @@ public class JsonStructureToParserAdapter implements JsonParser {
     private JsonNumber getJsonNumberValue() {
         JsonStructureIterator iterator = iterators.peek();
         JsonValue value = iterator.getValue();
-        if (value.getValueType() != JsonValue.ValueType.NUMBER) {
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
             throw iterator.createIncompatibleValueError();
         }
         return (JsonNumber) value;

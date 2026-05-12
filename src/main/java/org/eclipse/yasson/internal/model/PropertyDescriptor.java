@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.model;
 
 import javax.json.bind.JsonbException;
@@ -60,7 +62,7 @@ public class PropertyDescriptor {
      * @return field if present
      */
     public Field getField() {
-        if (backingFieldMeta == null) {
+        if (null == backingFieldMeta) {
             return null;
         }
         return backingFieldMeta.getElement();
@@ -79,7 +81,7 @@ public class PropertyDescriptor {
      * @return getter if present
      */
     public Method getGetter() {
-        if (readMethodElement == null) {
+        if (null == readMethodElement) {
             return null;
         }
         return readMethodElement.getElement();
@@ -98,7 +100,7 @@ public class PropertyDescriptor {
      * @return setter if present
      */
     public Method getSetter() {
-        if (writeMethodElement == null) {
+        if (null == writeMethodElement) {
             return null;
         }
         return writeMethodElement.getElement();
@@ -127,18 +129,22 @@ public class PropertyDescriptor {
      * @return type of a property
      */
     public Type getPropertyType() {
-        if (getField() != null) {
+        if (null == getField()) {
+            if (null == getGetter()) {
+                if (null != getSetter()) {
+                    return getSetterType();
+                }
+            } else {
+                return getGetterType();
+            }
+        } else {
             return getField().getGenericType();
-        } else if (getGetter() != null) {
-            return getGetterType();
-        } else if (getSetter() != null) {
-            return getSetterType();
         }
         throw new JsonbException("Empty property: " + identifier);
     }
 
     public Type getGetterType() {
-        if (getGetter() != null) {
+        if (null != getGetter()) {
             return getGetter().getGenericReturnType();
         }
         return null;
@@ -146,7 +152,7 @@ public class PropertyDescriptor {
 
     public Type getSetterType() {
         Type[] typeParameters = getSetter().getGenericParameterTypes();
-        if (typeParameters.length != 1) {
+        if (1 != typeParameters.length) {
             throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
         return typeParameters[0];
@@ -175,5 +181,4 @@ public class PropertyDescriptor {
     public JsonbAnnotatedElement<Method> getSetterElement() {
         return writeMethodElement;
     }
-
 }
