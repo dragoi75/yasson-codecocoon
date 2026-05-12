@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionTypeUtils;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.PropertyModel;
 
@@ -93,13 +93,13 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                 return;
             }
 
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, propertyModel.getPropertyType());
+            Optional<Type> runtimeTypeOptional = ReflectionTypeUtils.tryResolveType(this, propertyModel.getPropertyType());
             Type genericType = runtimeTypeOptional.orElse(null);
             final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext())
-                    .withWrapper(this)
+                    .setWrapper(this)
                     .withObjectClass(propertyValue.getClass())
-                    .withCustomization(propertyModel.getCustomization())
-                    .withType(genericType).build();
+                    .setCustomization(propertyModel.getCustomization())
+                    .setType(genericType).build();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
     }

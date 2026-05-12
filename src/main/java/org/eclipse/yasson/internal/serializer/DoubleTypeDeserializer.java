@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -42,7 +42,7 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
     }
 
     @Override
-    protected Double deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected Double deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         switch (jsonValue) {
             case NAN:
                 return Double.NaN;

@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbPropertyInfo;
@@ -54,9 +54,9 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     @Override
     @SuppressWarnings("unchecked")
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (ProcessingContext) ctx;
+        ObjectProcessingContext context = (ObjectProcessingContext) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.registerProcessedObject(obj)) {
                 final JsonbAdapter<T, A> adapter = (JsonbAdapter<T, A>) adapterInfo.getAdapter();
                 A adapted = adapter.adaptToJson(obj);
                 if (adapted == null) {
@@ -71,7 +71,7 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         } catch (Exception e) {
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         } finally {
-            context.removeProcessedObject(obj);
+            context.unregisterProcessedObject(obj);
         }
     }
 
@@ -85,8 +85,8 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         }
         return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext())
                 .withObjectClass(adapted.getClass())
-                .withCustomization(classModel == null ? null : classModel.getCustomization())
-                .withWrapper(this)
+                .setCustomization(classModel == null ? null : classModel.getCustomization())
+                .setWrapper(this)
                 .build();
     }
 

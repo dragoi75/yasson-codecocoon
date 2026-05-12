@@ -25,55 +25,55 @@ import java.util.TreeSet;
  * Creates instances for known types, caches constructors of unknown.
  * (Constructors of parsed types are stored in {@link org.eclipse.yasson.internal.model.ClassModel}).
  */
-public class InstanceCreator {
+public class InstanceFactory {
 
-    private interface Creator {
-        Object createInstance();
+    private interface InstanceFactory {
+        Object newInstance();
     }
 
     /**
      * Caches default constructor to create instance.
      */
-    private static final class ConstructorCreator implements Creator {
-        private final Constructor<?> constructor;
+    private static final class InstanceCreator implements InstanceFactory {
+        private final Constructor<?> instantiator;
 
-        public ConstructorCreator(Constructor<?> constructor) {
-            this.constructor = constructor;
+        public InstanceCreator(Constructor<?> instantiator) {
+            this.instantiator = instantiator;
         }
 
         @Override
-        public Object createInstance() {
-            return ReflectionUtils.createNoArgConstructorInstance(constructor);
+        public Object newInstance() {
+            return ReflectionTypeUtils.instantiateNoArgConstructor(instantiator);
         }
     }
 
-    private final Map<Class, Creator> creators;
+    private final Map<Class, InstanceFactory> factoryMap;
 
-    public InstanceCreator() {
-        creators = new HashMap<>();
-        creators.put(ArrayList.class, ArrayList::new);
-        creators.put(LinkedList.class, LinkedList::new);
-        creators.put(HashSet.class, HashSet::new);
-        creators.put(TreeSet.class, TreeSet::new);
-        creators.put(HashMap.class, HashMap::new);
-        creators.put(TreeMap.class, TreeMap::new);
+    public InstanceFactory() {
+        factoryMap = new HashMap<>();
+        factoryMap.put(ArrayList.class, ArrayList::new);
+        factoryMap.put(LinkedList.class, LinkedList::new);
+        factoryMap.put(HashSet.class, HashSet::new);
+        factoryMap.put(TreeSet.class, TreeSet::new);
+        factoryMap.put(HashMap.class, HashMap::new);
+        factoryMap.put(TreeMap.class, TreeMap::new);
     }
 
     /**
      * Create an instance of the given class with its default constructor.
-     * @param tClass class to create instance
+     * @param clazz class to create instance
      * @param <T> Type of the class/instance
      * @return crated instance
      */
     @SuppressWarnings("unchecked")
-    public <T> T createInstance(Class<T> tClass) {
-        Creator creator = creators.get(tClass);
+    public <T> T getOrCreateInstance(Class<T> clazz) {
+        InstanceFactory factory = factoryMap.get(clazz);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (creator == null) {
-            creator = new ConstructorCreator(ReflectionUtils.getDefaultConstructor(tClass, true));
-            creators.put(tClass, creator);
+        if (factory == null) {
+            factory = new InstanceCreator(ReflectionTypeUtils.getDefaultConstructor(clazz, true));
+            factoryMap.put(clazz, factory);
         }
 
-        return (T) creator.createInstance();
+        return (T) factory.newInstance();
     }
 }

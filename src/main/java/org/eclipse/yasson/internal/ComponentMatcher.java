@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ComponentMatcher {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     /**
      * Flag for searching for generic serializers and adapters in runtime.
@@ -61,7 +61,7 @@ public class ComponentMatcher {
      * Create component matcher.
      * @param context mandatory
      */
-    ComponentMatcher(JsonbContext context) {
+    ComponentMatcher(JsonbRuntimeContext context) {
         Objects.requireNonNull(context);
         this.jsonbContext = context;
         userComponents = new ConcurrentHashMap<>();
@@ -213,7 +213,7 @@ public class ComponentMatcher {
         }
 
         return runtimeType instanceof ParameterizedType && componentBindingType instanceof ParameterizedType &&
-                ReflectionUtils.getRawType(componentBindingType).isAssignableFrom(ReflectionUtils.getRawType(runtimeType)) &&
+                ReflectionTypeUtils.getRawType(componentBindingType).isAssignableFrom(ReflectionTypeUtils.getRawType(runtimeType)) &&
                 matchTypeArguments((ParameterizedType) runtimeType, (ParameterizedType) componentBindingType);
     }
 
@@ -243,7 +243,7 @@ public class ComponentMatcher {
      * @return introspected info with resolved typevar types.
      */
     AdapterBinding introspectAdapterBinding(Class<? extends JsonbAdapter> adapterClass, JsonbAdapter instance) {
-        final ParameterizedType adapterRuntimeType = ReflectionUtils.findParameterizedType(adapterClass, JsonbAdapter.class);
+        final ParameterizedType adapterRuntimeType = ReflectionTypeUtils.findParameterizedInterfaceType(adapterClass, JsonbAdapter.class);
         final Type[] adapterTypeArguments = adapterRuntimeType.getActualTypeArguments();
         Type adaptFromType = resolveTypeArg(adapterTypeArguments[0], adapterClass);
         Type adaptToType = resolveTypeArg(adapterTypeArguments[1], adapterClass);
@@ -265,7 +265,7 @@ public class ComponentMatcher {
      */
     @SuppressWarnings("unchecked")
     DeserializerBinding introspectDeserializerBinding(Class<? extends JsonbDeserializer> deserializerClass, JsonbDeserializer instance) {
-        final ParameterizedType deserializerRuntimeType = ReflectionUtils.findParameterizedType(deserializerClass, JsonbDeserializer.class);
+        final ParameterizedType deserializerRuntimeType = ReflectionTypeUtils.findParameterizedInterfaceType(deserializerClass, JsonbDeserializer.class);
         Type deserializerBindingType = resolveTypeArg(deserializerRuntimeType.getActualTypeArguments()[0], deserializerClass);
         final ComponentBindings componentBindings = getBindingInfo(deserializerBindingType);
         if (componentBindings.getDeserializer() != null && componentBindings.getDeserializer().getClass().equals(deserializerClass)) {
@@ -287,7 +287,7 @@ public class ComponentMatcher {
      */
     @SuppressWarnings("unchecked")
     SerializerBinding introspectSerializerBinding(Class<? extends JsonbSerializer> serializerClass, JsonbSerializer instance) {
-        final ParameterizedType serializerRuntimeType = ReflectionUtils.findParameterizedType(serializerClass, JsonbSerializer.class);
+        final ParameterizedType serializerRuntimeType = ReflectionTypeUtils.findParameterizedInterfaceType(serializerClass, JsonbSerializer.class);
         Type serBindingType = resolveTypeArg(serializerRuntimeType.getActualTypeArguments()[0], serializerClass.getClass());
         final ComponentBindings componentBindings = getBindingInfo(serBindingType);
         if (componentBindings.getSerializer() != null && componentBindings.getSerializer().getClass().equals(serializerClass)) {
@@ -303,9 +303,9 @@ public class ComponentMatcher {
 
     private Type resolveTypeArg(Type adapterTypeArg, Type adapterType) {
         if(adapterTypeArg instanceof ParameterizedType) {
-            return ReflectionUtils.resolveTypeArguments((ParameterizedType) adapterTypeArg, adapterType);
+            return ReflectionTypeUtils.resolveGenericArguments((ParameterizedType) adapterTypeArg, adapterType);
         } else if (adapterTypeArg instanceof TypeVariable) {
-            return ReflectionUtils.resolveItemVariableType(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg);
+            return ReflectionTypeUtils.resolveVariableTypeForItem(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg);
         } else {
             return adapterTypeArg;
         }

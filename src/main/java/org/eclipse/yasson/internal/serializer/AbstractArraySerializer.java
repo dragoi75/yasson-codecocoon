@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionTypeUtils;
 
 import javax.json.stream.JsonGenerator;
 import java.lang.reflect.GenericArrayType;
@@ -26,7 +26,7 @@ import java.lang.reflect.Type;
  * @author Roman Grigoriadi
  * @param <T> Type to serialize.
  */
-public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedElement {
 
     protected final Type arrayValType;
 
@@ -39,11 +39,11 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
         if (getRuntimeType() == null || getRuntimeType() == Object.class) {
             return Object.class;
         } else if (getRuntimeType() instanceof ParameterizedType) {
-            return ReflectionUtils.resolveType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
+            return ReflectionTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]);
         } else if (getRuntimeType() instanceof GenericArrayType) {
-            return ReflectionUtils.resolveRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+            return ReflectionTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
         } else {
-            return ReflectionUtils.getRawType(getRuntimeType()).getComponentType();
+            return ReflectionTypeUtils.getRawType(getRuntimeType()).getComponentType();
         }
     }
 

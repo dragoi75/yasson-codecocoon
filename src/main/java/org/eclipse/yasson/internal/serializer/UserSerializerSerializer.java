@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ProcessingContext;
+import org.eclipse.yasson.internal.ObjectProcessingContext;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -49,15 +49,15 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        ProcessingContext context = (Marshaller) ctx;
+        ObjectProcessingContext context = (Marshaller) ctx;
         try {
-            if (context.addProcessedObject(obj)) {
+            if (context.registerProcessedObject(obj)) {
                 userSerializer.serialize(obj, generator, ctx);
             } else {
                 throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, obj.getClass()));
             }
         } finally {
-            context.removeProcessedObject(obj);
+            context.unregisterProcessedObject(obj);
         }
     }
 }

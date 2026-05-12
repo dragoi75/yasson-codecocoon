@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
 
     private final List<Long> items = new ArrayList<>();
 
-    protected LongArrayDeserializer(DeserializerBuilder builder) {
+    protected LongArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -37,7 +37,7 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
     }
 
     @Override
-    public long[] getInstance(Unmarshaller unmarshaller) {
+    public long[] getInstance(JsonUnmarshaller unmarshaller) {
         final int size = items.size();
         final long[] longArray = new long[size];
         for(int i=0; i<size; i++) {

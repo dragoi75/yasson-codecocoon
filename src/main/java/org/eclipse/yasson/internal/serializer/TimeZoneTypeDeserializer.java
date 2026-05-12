@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -44,7 +44,7 @@ public class TimeZoneTypeDeserializer extends AbstractValueTypeDeserializer<Time
     }
 
     @Override
-    protected TimeZone deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected TimeZone deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         try {
             final ZoneId zoneId = ZoneId.of(jsonValue);
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);

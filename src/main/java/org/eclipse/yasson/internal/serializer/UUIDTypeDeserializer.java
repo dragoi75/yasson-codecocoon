@@ -13,7 +13,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import java.lang.reflect.Type;
@@ -34,7 +34,7 @@ public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
     }
 
     @Override
-    protected UUID deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected UUID deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         return UUID.fromString(jsonValue);
     }
 }

@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @author Roman Grigoriadi
  */
-public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
+public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
 
     /**
      * Not null with an exception of a root item.
@@ -54,54 +54,54 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      */
     protected Customization customization;
 
-    protected final JsonbContext jsonbContext;
+    protected final JsonbRuntimeContext jsonbContext;
 
     /**
      * Crates a builder.
      *
-     * @param jsonbContext Not null.
+     * @param runtimeContext Not null.
      */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
+    public BaseSerializerBuilder(JsonbRuntimeContext runtimeContext) {
+        Objects.requireNonNull(runtimeContext);
+        this.jsonbContext = runtimeContext;
     }
 
     /**
      * Wrapper item for this item.
      *
-     * @param wrapper not null.
+     * @param currentItem not null.
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public T setWrapper(CurrentItem<?> currentItem) {
+        this.wrapper = currentItem;
         return (T) this;
     }
 
     /**
      * Customization of the class
      *
-     * @param customization Class customization
+     * @param configuration Class customization
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
+    public T setCustomization(Customization configuration) {
+        this.customization = configuration;
         return (T) this;
     }
 
     /***
      * Gets or load class model for a class an its superclasses.
      *
-     * @param rawType Class to get model for.
+     * @param targetType Class to get model for.
      * @return Class model.
      */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (classModel == null) {
-            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+    protected ClassModel getClassModel(Class<?> targetType) {
+        ClassModel resolvedModel = jsonbContext.getMappingContext().getClassModel(targetType);
+        if (resolvedModel == null) {
+            resolvedModel = jsonbContext.getMappingContext().getOrCreateClassModel(targetType);
         }
-        return classModel;
+        return resolvedModel;
     }
 
     /**
@@ -137,12 +137,12 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * Type for underlying instance to be created from.
      * In case of type variable or wildcard, will be resolved recursively from parent items.
      *
-     * @param type type of instance not null
+     * @param valueType type of instance not null
      * @return builder instance for call chaining
      */
     @SuppressWarnings("unchecked")
-    public T withType(Type type) {
-        this.genericType = type;
+    public T setType(Type valueType) {
+        this.genericType = valueType;
         return (T) this;
     }
 
@@ -151,7 +151,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbRuntimeContext getJsonbContext() {
         return jsonbContext;
     }
 

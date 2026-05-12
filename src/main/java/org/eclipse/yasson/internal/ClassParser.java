@@ -25,7 +25,6 @@ import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
 import javax.json.bind.JsonbException;
-import javax.json.bind.config.PropertyVisibilityStrategy;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,9 +51,9 @@ class ClassParser {
 
     public static final String SET_PREFIX = "set";
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
-    ClassParser(JsonbContext jsonbContext) {
+    ClassParser(JsonbRuntimeContext jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 

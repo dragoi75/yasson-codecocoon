@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 
 import javax.json.bind.serializer.SerializationContext;
 import javax.json.stream.JsonGenerator;
@@ -24,9 +24,9 @@ import java.util.Collection;
  *
  * @author Roman Grigoriadi
  */
-public class CollectionSerializer<T extends Collection> extends AbstractContainerSerializer<T> implements EmbeddedItem {
+public class CollectionSerializer<T extends Collection> extends AbstractContainerSerializer<T> implements EmbeddedElement {
 
-    protected final JsonbContext jsonbContext;
+    protected final JsonbRuntimeContext jsonbContext;
 
     protected CollectionSerializer(SerializerBuilder builder) {
         super(builder);

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * @author Dmitry Kornilov
  * @author Roman Grigoriadi
  */
-public class Marshaller extends ProcessingContext implements SerializationContext {
+public class Marshaller extends ObjectProcessingContext implements SerializationContext {
 
     private static final Logger logger = Logger.getLogger(Marshaller.class.getName());
 
@@ -49,7 +49,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      * @param jsonbContext Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -59,7 +59,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
      *
      * @param jsonbContext Current context.
      */
-    public Marshaller(JsonbContext jsonbContext) {
+    public Marshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
     }
@@ -157,11 +157,11 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         }
         SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext)
                 .withObjectClass(rootClazz)
-                .withType(runtimeType);
+                .setType(runtimeType);
 
         if (!DefaultSerializers.getInstance().isKnownType(rootClazz)) {
             ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
-            serializerBuilder.withCustomization(classModel.getCustomization());
+            serializerBuilder.setCustomization(classModel.getCustomization());
         }
         return serializerBuilder.build();
     }

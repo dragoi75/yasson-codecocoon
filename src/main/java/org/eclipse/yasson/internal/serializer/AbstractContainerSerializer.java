@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionTypeUtils;
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.ContainerCustomization;
@@ -32,7 +32,7 @@ import java.util.Optional;
  *
  * @author Roman Grigoriadi
  */
-public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> implements JsonbSerializer<T> {
+public abstract class AbstractContainerSerializer<T> extends AbstractModelItem<T> implements JsonbSerializer<T> {
 
     private JsonbSerializer<?> valueSerializer;
 
@@ -136,18 +136,18 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
 
             SerializerBuilder builder = new SerializerBuilder(((Marshaller) ctx).getJsonbContext());
             builder.withObjectClass(itemClass);
-            builder.withWrapper(this);
-            builder.withType(instanceValueType);
+            builder.setWrapper(this);
+            builder.setType(instanceValueType);
 
 
             if (!DefaultSerializers.getInstance().isKnownType(itemClass)) {
                 //Need for class level annotations + user adapters/serializers bound to type
                 ClassModel classModel = ((Marshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
-                builder.withCustomization(new ContainerCustomization(classModel.getCustomization()));
+                builder.setCustomization(new ContainerCustomization(classModel.getCustomization()));
             } else {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers
                 //to preserve collections and array null elements
-                builder.withCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
+                builder.setCustomization(new ContainerCustomization(new ClassCustomizationBuilder()));
             }
             serializer = builder.build();
 
@@ -159,7 +159,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
 
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
+            Optional<Type> runtimeTypeOptional = ReflectionTypeUtils.tryResolveType(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
             return runtimeTypeOptional.orElse(Object.class);
         }
         return Object.class;

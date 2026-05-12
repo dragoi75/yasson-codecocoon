@@ -24,58 +24,58 @@ import java.lang.reflect.Type;
  * @param <T> Instantiated object type
  * @author Roman Grigoriadi
  */
-public abstract class AbstractItem<T> implements CurrentItem<T> {
+public abstract class AbstractModelItem<T> implements CurrentItem<T> {
 
     /**
      * Item containing instance of wrapping object and its metadata.
      * Null in case of a root object.
      */
-    private final CurrentItem<?> wrapper;
+    private final CurrentItem<?> currentItem;
 
-    private final Type runtimeType;
+    private final Type actualType;
 
     /**
      * Cached reference to mapping model of an item.
      */
-    private final ClassModel classModel;
+    private final ClassModel classMeta;
 
     /**
      * Creates and populates an instance from given builder.
      *
-     * @param builder Builder to initialize from.
+     * @param serializerFactory Builder to initialize from.
      */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.classModel = builder.getClassModel();
-        this.runtimeType = builder.getRuntimeType();
+    protected AbstractModelItem(BaseSerializerBuilder serializerFactory) {
+        this.currentItem = serializerFactory.getWrapper();
+        this.classMeta = serializerFactory.getClassModel();
+        this.actualType = serializerFactory.getRuntimeType();
     }
 
     /**
      * Creates an instance.
      *
-     * @param wrapper Item wrapper.
-     * @param runtimeType Runtime type.
-     * @param classModel Class model.
+     * @param currentItem Item wrapper.
+     * @param actualType Runtime type.
+     * @param classMeta Class model.
      */
-    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        this.wrapper = wrapper;
-        this.runtimeType = runtimeType;
-        this.classModel = classModel;
+    public AbstractModelItem(CurrentItem<?> currentItem, Type actualType, ClassModel classMeta) {
+        this.currentItem = currentItem;
+        this.actualType = actualType;
+        this.classMeta = classMeta;
     }
 
     @Override
     public ClassModel getClassModel() {
-        return classModel;
+        return classMeta;
     }
 
     @Override
     public CurrentItem<?> getWrapper() {
-        return wrapper;
+        return currentItem;
     }
 
     @Override
     public Type getRuntimeType() {
-        return runtimeType;
+        return actualType;
     }
 
 }

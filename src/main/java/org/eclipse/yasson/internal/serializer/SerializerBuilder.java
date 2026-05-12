@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
@@ -34,7 +34,7 @@ import java.util.Optional;
  *
  * @author Roman Grigoriadi
  */
-public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuilder> {
+public class SerializerBuilder extends BaseSerializerBuilder<SerializerBuilder> {
 
     private Class<?> objectClass;
 
@@ -43,7 +43,7 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
      *
      * @param jsonbContext JSON-B context.
      */
-    public SerializerBuilder(JsonbContext jsonbContext) {
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 

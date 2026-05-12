@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
+import org.eclipse.yasson.internal.JsonbNavigator;
 
 import javax.json.JsonArray;
 
@@ -32,17 +32,17 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
      *
      * @param builder Builder to initialize from.
      */
-    protected JsonArrayDeserializer(DeserializerBuilder builder) {
+    protected JsonArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
     @Override
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+    protected void deserializeContents(JsonbNavigator parser, JsonUnmarshaller context) {
         this.jsonArray = parser.getArray();
     }
 
     @Override
-    public JsonArray getInstance(Unmarshaller unmarshaller) {
+    public JsonArray getInstance(JsonUnmarshaller unmarshaller) {
         return jsonArray;
     }
 }

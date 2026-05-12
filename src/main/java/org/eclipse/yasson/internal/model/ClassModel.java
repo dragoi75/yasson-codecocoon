@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model;
 
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionTypeUtils;
 import org.eclipse.yasson.internal.model.customization.naming.CaseInsensitiveStrategy;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 
@@ -71,7 +71,7 @@ public class ClassModel {
         this.classCustomization = customization;
         this.parentClassModel = parentClassModel;
         this.propertyNamingStrategy = propertyNamingStrategy;
-        this.defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
+        this.defaultConstructor = ReflectionTypeUtils.getDefaultConstructor(clazz, false);
         setProperties(new ArrayList<>());
     }
 

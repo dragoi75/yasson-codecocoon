@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -42,7 +42,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
         super(clazz, customization);
     }
 
-    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContext jsonbContext) {
+    protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbRuntimeContext jsonbContext) {
         if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
             return Optional.empty();
         }

@@ -13,8 +13,8 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.JsonbRiParser;
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonbRiEventParser;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -43,7 +43,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
 
     @Override
     public JsonValue deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        final JsonParser.Event next = ((JsonbRiParser)parser).getLastEvent();
+        final JsonParser.Event next = ((JsonbRiEventParser)parser).getLastEvent();
         switch (next) {
             case VALUE_TRUE:
                 return JsonValue.TRUE;
@@ -60,7 +60,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
     }
 
     @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+    protected JsonValue deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
 }

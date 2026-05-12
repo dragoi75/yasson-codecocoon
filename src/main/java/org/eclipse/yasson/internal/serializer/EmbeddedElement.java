@@ -17,6 +17,6 @@ package org.eclipse.yasson.internal.serializer;
  *
  * @author Roman Grigoriadi
  */
-public interface EmbeddedItem {
+public interface EmbeddedElement {
 
 }

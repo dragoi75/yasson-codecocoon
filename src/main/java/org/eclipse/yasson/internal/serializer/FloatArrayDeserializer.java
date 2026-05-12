@@ -13,7 +13,7 @@
 
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.Unmarshaller;
+import org.eclipse.yasson.internal.JsonUnmarshaller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
 public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     private final List<Float> items = new ArrayList<>();
 
-    protected FloatArrayDeserializer(DeserializerBuilder builder) {
+    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
 
@@ -36,7 +36,7 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     }
 
     @Override
-    public float[] getInstance(Unmarshaller unmarshaller) {
+    public float[] getInstance(JsonUnmarshaller unmarshaller) {
         final int size = items.size();
         final float[] floatArray = new float[size];
         for(int i=0; i<size; i++) {

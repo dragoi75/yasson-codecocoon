@@ -18,27 +18,27 @@ import java.util.Set;
 
 /**
  * Jsonb processing (serializing/deserializing) context.
- * Instance is thread bound (in contrast to {@link JsonbContext}.
+ * Instance is thread bound (in contrast to {@link JsonbRuntimeContext}.
  *
  * @author Roman Grigoriadi
  */
-public abstract class ProcessingContext {
+public abstract class ObjectProcessingContext {
 
-    protected final JsonbContext jsonbContext;
+    protected final JsonbRuntimeContext jsonbContext;
 
     /**
      * Used to avoid StackOverflowError, when adapted / serialized object
      * contains contains instance of its type inside it or when object has recursive reference.
      */
-    private final Set<Object> currentlyProcessedObjects = new HashSet<>();
+    private final Set<Object> processedItems = new HashSet<>();
 
     /**
      * Parent instance for marshaller and unmarshaller.
      *
-     * @param jsonbContext context of Jsonb
+     * @param runtimeContext context of Jsonb
      */
-    public ProcessingContext(JsonbContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
+    public ObjectProcessingContext(JsonbRuntimeContext runtimeContext) {
+        this.jsonbContext = runtimeContext;
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class ProcessingContext {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbRuntimeContext getJsonbContext() {
         return jsonbContext;
     }
 
@@ -60,12 +60,12 @@ public abstract class ProcessingContext {
     }
 
 
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
+    public boolean registerProcessedObject(Object processedEntity) {
+        return this.processedItems.add(processedEntity);
     }
 
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
+    public boolean unregisterProcessedObject(Object processedEntity) {
+        return processedItems.remove(processedEntity);
     }
 
 }
