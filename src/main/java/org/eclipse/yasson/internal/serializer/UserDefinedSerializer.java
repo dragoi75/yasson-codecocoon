@@ -31,7 +31,7 @@ class UserDefinedSerializer<T> implements ModelSerializer {
     @SuppressWarnings("unchecked")
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        YassonGenerator yassonGenerator = new YassonGenerator(generator);
+        YassonJsonGenerator yassonGenerator = new YassonJsonGenerator(generator);
         userDefinedSerializer.serialize((T) value, yassonGenerator, context);
     }
 
