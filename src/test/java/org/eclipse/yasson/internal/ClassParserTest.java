@@ -12,13 +12,13 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.JsonbAnnotationHolder;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.eclipse.yasson.defaultmapping.modifiers.model.FieldModifiersClass;
 import org.eclipse.yasson.defaultmapping.modifiers.model.MethodModifiersClass;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.spi.JsonProvider;
@@ -31,15 +31,15 @@ import java.util.function.Consumer;
  * @author Roman Grigoriadi
  */
 public class ClassParserTest {
-    private static final JsonbContext jsonbContext = new JsonbContext(new JsonbConfig(), JsonProvider.provider());
-    private static final ClassParser classParser = new ClassParser(jsonbContext);
-    private static final AnnotationIntrospector introspector = new AnnotationIntrospector(jsonbContext);
+    private static final JsonbRuntimeContext jsonbContext = new JsonbRuntimeContext(new JsonbConfig(), JsonProvider.provider());
+    private static final ClassModelParser classParser = new ClassModelParser(jsonbContext);
+    private static final JsonbAnnotationIntrospector introspector = new JsonbAnnotationIntrospector(jsonbContext);
 
     @Test
     public void testDefaultMappingFieldModifiers() {
-        final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(FieldModifiersClass.class);
-        ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement), null, null);
-        classParser.parseProperties(model, clsElement);
+        final JsonbAnnotationHolder<Class<?>> clsElement = introspector.gatherAnnotations(FieldModifiersClass.class);
+        ClassDescriptor model = new ClassDescriptor(FieldModifiersClass.class, introspector.inspectCustomization(clsElement), null, null);
+        classParser.extractProperties(model, clsElement);
         assertTrue(model.getPropertyModel("finalString").isReadable());
         assertFalse(model.getPropertyModel("finalString").isWritable());
         assertFalse(model.getPropertyModel("staticString").isReadable());
@@ -50,9 +50,9 @@ public class ClassParserTest {
 
     @Test
     public void testDefaultMappingMethodModifiers() {
-        final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(MethodModifiersClass.class);
-        ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement), null, null);
-        classParser.parseProperties(model, clsElement);
+        final JsonbAnnotationHolder<Class<?>> clsElement = introspector.gatherAnnotations(MethodModifiersClass.class);
+        ClassDescriptor model = new ClassDescriptor(FieldModifiersClass.class, introspector.inspectCustomization(clsElement), null, null);
+        classParser.extractProperties(model, clsElement);
         assertFalse(model.getPropertyModel("publicFieldWithPrivateMethods").isReadable());
         assertFalse(model.getPropertyModel("publicFieldWithPrivateMethods").isWritable());
         assertTrue(model.getPropertyModel("publicFieldWithoutMethods").isReadable());

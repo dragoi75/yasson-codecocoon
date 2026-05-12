@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 /**
@@ -35,7 +35,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * In case of unknown object genericType.
      * Null for embedded objects such as collections, or known conversion types.
      */
-    private ClassModel classModel;
+    private ClassDescriptor classModel;
 
     /**
      * Runtime type resolved after expanding type variables and wildcards.
@@ -56,14 +56,14 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     /**
      * Jsonb context.
      */
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     /**
      * Crates a builder.
      *
      * @param jsonbContext Not null.
      */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
+    public AbstractSerializerBuilder(JsonbRuntimeContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
     }
@@ -99,7 +99,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withClassModel(ClassModel classModel) {
+    public T withClassModel(ClassDescriptor classModel) {
         this.classModel = classModel;
         return (T) this;
     }
@@ -122,8 +122,8 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @param rawType Class to get model for.
      * @return Class model.
      */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
+    protected ClassDescriptor getClassModel(Class<?> rawType) {
+        ClassDescriptor classModel = jsonbContext.getMappingContext().getClassModel(rawType);
         if (classModel == null) {
             classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
         }
@@ -145,7 +145,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return model of a class
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
@@ -178,7 +178,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return jsonb context
      */
-    public JsonbContext getJsonbContext() {
+    public JsonbRuntimeContext getJsonbContext() {
         return jsonbContext;
     }
 

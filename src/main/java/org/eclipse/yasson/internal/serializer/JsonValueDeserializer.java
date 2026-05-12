@@ -22,8 +22,8 @@ import jakarta.json.stream.JsonParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link JsonValue} containing null, false, true, string and number.
@@ -53,7 +53,7 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
         case VALUE_NUMBER:
             return parser.getValue();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + next));
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + next));
         }
     }
 

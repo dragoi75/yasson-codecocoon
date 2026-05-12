@@ -28,15 +28,15 @@ import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.ComponentMatcher;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.components.AdapterBinding;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Builder for currently processed items by unmarshaller.
@@ -53,7 +53,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      *
      * @param jsonbContext Context.
      */
-    public DeserializerBuilder(JsonbContext jsonbContext) {
+    public DeserializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -129,7 +129,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
                 if (jsonEvent == JsonParser.Event.VALUE_NULL) {
                     return NullDeserializer.INSTANCE;
                 }
-                throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.DESERIALIZE_VALUE_ERROR, getRuntimeType()));
             }
             return wrapAdapted(adapterInfoOptional, supportedTypeDeserializer.get());
         }
@@ -159,7 +159,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             } else if (rawType.isInterface()) {
                 Class<?> mappedType = getInterfaceMappedType(rawType);
                 if (mappedType == null) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
+                    throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INFER_TYPE_FOR_UNMARSHALL, rawType.getName()));
                 }
                 withRuntimeType(mappedType);
                 withClassModel(getClassModel(mappedType));
@@ -260,7 +260,7 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             }
             if (implementationClass != null) {
                 if (!interfaceType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE,
+                    throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.IMPL_CLASS_INCOMPATIBLE,
                                                                  implementationClass,
                                                                  interfaceType));
                 }

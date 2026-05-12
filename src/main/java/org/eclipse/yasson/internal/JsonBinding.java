@@ -35,18 +35,18 @@ import jakarta.json.stream.JsonParser;
 import org.eclipse.yasson.YassonJsonb;
 import org.eclipse.yasson.internal.jsonstructure.JsonGeneratorToStructureAdapter;
 import org.eclipse.yasson.internal.jsonstructure.JsonStructureToParserAdapter;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Implementation of Jsonb interface.
  */
 public class JsonBinding implements YassonJsonb {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+        this.jsonbContext = new JsonbRuntimeContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
         Set<Class<?>> eagerInitClasses = this.jsonbContext.getConfigProperties().getEagerInitClasses();
         for (Class<?> eagerInitClass : eagerInitClasses) {
             // Eagerly initialize requested ClassModels and Serializers
@@ -232,7 +232,7 @@ public class JsonBinding implements YassonJsonb {
         if (property.isPresent()) {
             final Object value = property.get();
             if (!(value instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
             }
             if ((Boolean) value) {
                 factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);

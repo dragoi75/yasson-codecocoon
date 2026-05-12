@@ -38,7 +38,7 @@ import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomizati
  */
 public class ComponentMatcher {
 
-    private final JsonbContext jsonbContext;
+    private final JsonbRuntimeContext jsonbContext;
 
     /**
      * Flag for searching for generic serializers and adapters in runtime.
@@ -52,7 +52,7 @@ public class ComponentMatcher {
      *
      * @param context mandatory
      */
-    ComponentMatcher(JsonbContext context) {
+    ComponentMatcher(JsonbRuntimeContext context) {
         Objects.requireNonNull(context);
         this.jsonbContext = context;
         userComponents = new ConcurrentHashMap<>();

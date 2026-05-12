@@ -18,8 +18,8 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link Integer} type.
@@ -43,7 +43,7 @@ public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer>
                     try {
                         return Integer.parseInt(jsonValue);
                     } catch (NumberFormatException e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR,
+                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.DESERIALIZE_VALUE_ERROR,
                                                                      Integer.class));
                     }
                 });

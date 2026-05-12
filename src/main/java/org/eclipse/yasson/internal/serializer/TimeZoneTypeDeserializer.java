@@ -24,8 +24,8 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link TimeZone} type.
@@ -48,7 +48,7 @@ public class TimeZoneTypeDeserializer extends AbstractValueTypeDeserializer<Time
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
             return new SimpleTimeZone(zonedDateTime.getOffset().getTotalSeconds() * 1000, zoneId.getId());
         } catch (ZoneRulesException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ZONE_PARSE_ERROR, jsonValue), e);
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.ZONE_PARSE_ERROR, jsonValue), e);
         }
     }
 

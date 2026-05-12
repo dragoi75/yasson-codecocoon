@@ -12,34 +12,34 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.PropertyMetadata;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 /**
  * Customization for creator (constructor / factory methods) parameters.
  */
-public class CreatorCustomization extends CustomizationBase {
+public class CreatorConfiguration extends CustomizationBase {
 
-    private JsonbNumberFormatter numberFormatter;
+    private JsonbNumberFormatter numericFormatter;
 
-    private JsonbDateFormatter dateFormatter;
+    private JsonbDateFormatter temporalFormatter;
 
-    private PropertyModel propertyModel;
+    private PropertyMetadata fieldMetadata;
 
     /**
      * Creates new creator customization instance.
      *
-     * @param customization   builder of the customization
-     * @param numberFormatter number formatter
-     * @param dateFormatter   date formatter
+     * @param customBuilder   builder of the customization
+     * @param numericFormatter number formatter
+     * @param temporalFormatter   date formatter
      */
-    public CreatorCustomization(CustomizationBuilder customization,
-                                JsonbNumberFormatter numberFormatter,
-                                JsonbDateFormatter dateFormatter) {
-        super(customization);
-        this.numberFormatter = numberFormatter;
-        this.dateFormatter = dateFormatter;
+    public CreatorConfiguration(CustomizationBuilder customBuilder,
+                                JsonbNumberFormatter numericFormatter,
+                                JsonbDateFormatter temporalFormatter) {
+        super(customBuilder);
+        this.numericFormatter = numericFormatter;
+        this.temporalFormatter = temporalFormatter;
     }
 
     @Override
@@ -49,10 +49,10 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (numberFormatter != null) {
-            return numberFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeNumberFormatter();
+        if (numericFormatter != null) {
+            return numericFormatter;
+        } else if (fieldMetadata != null) {
+            return fieldMetadata.getCustomization().getDeserializeNumberFormatter();
         }
         return null;
     }
@@ -64,10 +64,10 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (dateFormatter != null) {
-            return dateFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeDateFormatter();
+        if (temporalFormatter != null) {
+            return temporalFormatter;
+        } else if (fieldMetadata != null) {
+            return fieldMetadata.getCustomization().getDeserializeDateFormatter();
         }
         return null;
     }
@@ -80,9 +80,9 @@ public class CreatorCustomization extends CustomizationBase {
     /**
      * Set property referenced model.
      *
-     * @param propertyModel referenced property model
+     * @param fieldMetadata referenced property model
      */
-    public void setPropertyModel(PropertyModel propertyModel) {
-        this.propertyModel = propertyModel;
+    public void setPropertyModel(PropertyMetadata fieldMetadata) {
+        this.fieldMetadata = fieldMetadata;
     }
 }

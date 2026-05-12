@@ -22,10 +22,10 @@ import java.util.TreeMap;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.RuntimeTypeInfo;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 /**
  * Internal container de-serializing interface.
@@ -100,14 +100,14 @@ class ContainerDeserializerUtils {
      */
     public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper,
                                                               Type valueType,
-                                                              JsonbContext ctx,
+                                                              JsonbRuntimeContext ctx,
                                                               JsonParser.Event event) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
         Type actualValueType = ReflectionUtils.resolveType(wrapper, valueType);
         DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(wrapper, ctx, event).withType(actualValueType);
         if (!DefaultSerializers.isKnownType(ReflectionUtils.getRawType(actualValueType))) {
-            ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
+            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
             deserializerBuilder.withCustomization(classModel == null ? null : classModel.getClassCustomization());
         }
         return deserializerBuilder.build();
@@ -122,7 +122,7 @@ class ContainerDeserializerUtils {
      * @return new instance of {@code DeserializerBuilder}
      */
     public static DeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper,
-                                                                 JsonbContext ctx,
+                                                                 JsonbRuntimeContext ctx,
                                                                  JsonParser.Event event) {
         return new DeserializerBuilder(ctx).withWrapper(wrapper).withJsonValueType(event);
     }

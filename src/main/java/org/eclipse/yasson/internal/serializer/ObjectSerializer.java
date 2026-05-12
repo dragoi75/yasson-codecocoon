@@ -25,10 +25,10 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.PropertyMetadata;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Serializes arbitrary object by reading its properties.
@@ -53,7 +53,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
      * @param runtimeType class type
      * @param classModel  model of the class
      */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         super(wrapper, runtimeType, classModel);
     }
 
@@ -62,18 +62,18 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         Marshaller context = (Marshaller) ctx;
         try {
             if (context.addProcessedObject(object)) {
-                final PropertyModel[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass())
+                final PropertyMetadata[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass())
                         .getSortedProperties();
-                for (PropertyModel model : allProperties) {
+                for (PropertyMetadata model : allProperties) {
                     try {
                         marshallProperty(object, generator, context, model);
                     } catch (Exception e) {
-                        throw new JsonbException(Messages.getMessage(MessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(),
+                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(),
                                                                      object.getClass().getCanonicalName()), e);
                     }
                 }
             } else {
-                throw new JsonbException(Messages.getMessage(MessageKeys.RECURSIVE_REFERENCE, object.getClass()));
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.RECURSIVE_REFERENCE, object.getClass()));
             }
         } finally {
             context.removeProcessedObject(object);
@@ -90,7 +90,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         generator.writeStartObject(key);
     }
 
-    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
+    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyMetadata propertyModel) {
         Marshaller marshaller = (Marshaller) ctx;
 
         if (propertyModel.isReadable()) {

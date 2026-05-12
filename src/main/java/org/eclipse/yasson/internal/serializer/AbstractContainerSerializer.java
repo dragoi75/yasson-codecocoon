@@ -23,7 +23,7 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.model.customization.ContainerCustomization;
 
@@ -54,7 +54,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @param runtimeType Runtime type of the item.
      * @param classModel  Class model.
      */
-    public AbstractContainerSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public AbstractContainerSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         super(wrapper, runtimeType, classModel);
     }
 
@@ -179,7 +179,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
 
             if (!DefaultSerializers.isKnownType(itemClass)) {
                 //Need for class level annotations + user adapters/serializers bound to type
-                ClassModel classModel = ((Marshaller) ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
+                ClassDescriptor classModel = ((Marshaller) ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
                 builder.withCustomization(new ContainerCustomization(classModel.getClassCustomization()));
             } else {
                 //Still need to override isNillable to true with ContainerCustomization for all serializers

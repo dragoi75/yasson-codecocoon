@@ -12,6 +12,8 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import java.util.function.Supplier;
 
 /**
  * Creates instances for known types, caches constructors of unknown.
- * (Constructors of parsed types are stored in {@link org.eclipse.yasson.internal.model.ClassModel}).
+ * (Constructors of parsed types are stored in {@link ClassDescriptor}).
  */
 public class InstanceCreator {
 

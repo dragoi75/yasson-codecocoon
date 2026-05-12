@@ -26,7 +26,7 @@ import jakarta.json.bind.annotation.JsonbTransient;
 /**
  * Contains all message keys present in language property files.
  */
-public enum MessageKeys {
+public enum ErrorMessageKeys {
 
     /**
      * An error has occurred while json deserialization.
@@ -312,15 +312,15 @@ public enum MessageKeys {
     /**
      * Message bundle key.
      */
-    private final String key;
+    private final String messageId;
 
     /**
      * Creates an instance of message bundle key.
      *
-     * @param key Message key from bundle.
+     * @param messageId Message key from bundle.
      */
-    MessageKeys(final String key) {
-        this.key = key;
+    ErrorMessageKeys(final String messageId) {
+        this.messageId = messageId;
     }
 
     /**
@@ -329,6 +329,6 @@ public enum MessageKeys {
      * @return message bundle key
      */
     public String getKey() {
-        return key;
+        return messageId;
     }
 }

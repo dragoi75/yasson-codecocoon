@@ -20,8 +20,8 @@ import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link String} type.
@@ -43,7 +43,7 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
             try {
                 String newString = new String(jsonValue.getBytes("UTF-8"), "UTF-8");
                 if (!newString.equals(jsonValue)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                    throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.UNPAIRED_SURROGATE));
                 }
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

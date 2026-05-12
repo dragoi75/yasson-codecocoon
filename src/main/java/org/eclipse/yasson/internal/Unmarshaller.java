@@ -19,9 +19,9 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.serializer.DeserializerBuilder;
 
 /**
@@ -37,7 +37,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
      *
      * @param jsonbContext context to use
      */
-    public Unmarshaller(JsonbContext jsonbContext) {
+    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
     }
 
@@ -57,7 +57,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
             DeserializerBuilder deserializerBuilder = new DeserializerBuilder(getJsonbContext())
                     .withType(type).withJsonValueType(getRootEvent(parser));
             Class<?> rawType = ReflectionUtils.getRawType(type);
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
+            ClassDescriptor classModel = getMappingContext().getOrCreateClassModel(rawType);
             deserializerBuilder.withCustomization(classModel.getClassCustomization());
             return (T) deserializerBuilder.build().deserialize(parser, this, type);
         } catch (JsonbException e) {
@@ -65,7 +65,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
             throw e;
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, e.getMessage()), e);
         }
     }
 

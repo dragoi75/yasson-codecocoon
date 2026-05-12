@@ -23,13 +23,13 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Base class for all deserializers producing non single value result.
@@ -110,7 +110,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
             case END_ARRAY:
                 return;
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.NOT_VALUE_TYPE, event));
             }
         }
     }
@@ -138,7 +138,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param ctx jsonb context
      * @return deserialization builder
      */
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
+    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbRuntimeContext ctx) {
         return ContainerDeserializerUtils.newUnmarshallerItemBuilder(this, ctx, parserContext.getLastEvent());
     }
 
@@ -149,7 +149,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param ctx       jsonb context
      * @return deserialization builder
      */
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbRuntimeContext ctx) {
         return ContainerDeserializerUtils.newCollectionOrMapItem(this, valueType, ctx, parserContext.getLastEvent());
     }
 

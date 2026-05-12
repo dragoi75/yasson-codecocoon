@@ -22,8 +22,8 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * De-serialize JSON array of map entries JSON objects as {@link Map}.
@@ -294,7 +294,7 @@ public class MapEntriesArrayDeserializer<K, V> extends AbstractItem<Map<K, V>> i
                 endObject(ctx, event);
                 break;
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.NOT_VALUE_TYPE, event));
             }
         }
         return instance;

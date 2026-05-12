@@ -21,9 +21,9 @@ import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Decorator for an item which builds adapted type instance by a {@link JsonbAdapter}.
@@ -52,7 +52,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         throw new UnsupportedOperationException();
     }
 
@@ -66,7 +66,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
         if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
             return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
         }
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR,
                                                      "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }
 
@@ -87,7 +87,7 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
             final T adapted = ((JsonbAdapter<T, A>) adapterInfo.getAdapter()).adaptFromJson(result);
             return adapted;
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.ADAPTER_EXCEPTION,
                                                          adapterInfo.getBindingType(),
                                                          adapterInfo.getToType(),
                                                          adapterInfo.getAdapter().getClass()), e);

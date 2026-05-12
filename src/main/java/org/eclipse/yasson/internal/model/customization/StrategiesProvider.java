@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.model.PropertyMetadata;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 import static java.util.Comparator.comparing;
 
@@ -55,17 +55,17 @@ public final class StrategiesProvider {
      * @param strategy ordering strategy name
      * @return ordering strategy
      */
-    public static Consumer<List<PropertyModel>> getOrderingFunction(String strategy) {
+    public static Consumer<List<PropertyMetadata>> getOrderingFunction(String strategy) {
         switch (strategy) {
         case LEXICOGRAPHICAL:
-            return props -> props.sort(comparing(PropertyModel::getWriteName));
+            return props -> props.sort(comparing(PropertyMetadata::getWriteName));
         case ANY:
             return props -> {
             };
         case REVERSE:
-            return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
+            return props -> props.sort(comparing(PropertyMetadata::getWriteName).reversed());
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.PROPERTY_ORDER, strategy));
         }
     }
 

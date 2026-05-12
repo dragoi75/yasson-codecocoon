@@ -20,8 +20,8 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.ErrorMessageKeys;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserializer for {@link Boolean} type.
@@ -48,7 +48,7 @@ public class BooleanTypeDeserializer extends AbstractValueTypeDeserializer<Boole
         case VALUE_STRING:
             return Boolean.parseBoolean(parser.getString());
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + event));
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + event));
         }
     }
 

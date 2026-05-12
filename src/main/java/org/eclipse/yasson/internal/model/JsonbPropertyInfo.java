@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Type;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.serializer.CurrentItem;
 
 /**
@@ -22,11 +22,11 @@ import org.eclipse.yasson.internal.serializer.CurrentItem;
  */
 public class JsonbPropertyInfo {
 
-    private JsonbContext context;
+    private JsonbRuntimeContext context;
 
     private Type runtimeType;
 
-    private ClassModel classModel;
+    private ClassDescriptor classModel;
 
     private CurrentItem<?> wrapper;
 
@@ -35,7 +35,7 @@ public class JsonbPropertyInfo {
      *
      * @return Context.
      */
-    public JsonbContext getContext() {
+    public JsonbRuntimeContext getContext() {
         return context;
     }
 
@@ -45,7 +45,7 @@ public class JsonbPropertyInfo {
      * @param context Context to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo setContext(JsonbContext context) {
+    public JsonbPropertyInfo setContext(JsonbRuntimeContext context) {
         this.context = context;
         return this;
     }
@@ -75,7 +75,7 @@ public class JsonbPropertyInfo {
      *
      * @return Class model.
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
@@ -85,7 +85,7 @@ public class JsonbPropertyInfo {
      * @param classModel Class model to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withClassModel(ClassModel classModel) {
+    public JsonbPropertyInfo withClassModel(ClassDescriptor classModel) {
         this.classModel = classModel;
         return this;
     }
