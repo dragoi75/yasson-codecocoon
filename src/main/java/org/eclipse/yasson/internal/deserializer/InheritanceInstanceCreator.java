@@ -9,20 +9,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import jakarta.json.JsonObject;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.jsonstructure.JsonStructureToParserAdapter;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
-
 import static jakarta.json.stream.JsonParser.Event;
 
 /**
@@ -31,15 +27,16 @@ import static jakarta.json.stream.JsonParser.Event;
 class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private final Class<?> processedType;
+
     private final Map<String, Class<?>> resolvedClasses = new ConcurrentHashMap<>();
+
     private final DeserializationModelCreator deserializationModelCreator;
+
     private final TypeInheritanceConfiguration typeInheritanceConfiguration;
+
     private final ModelDeserializer<JsonParser> defaultProcessor;
 
-    InheritanceInstanceCreator(Class<?> processedType,
-                               DeserializationModelCreator deserializationModelCreator,
-                               TypeInheritanceConfiguration typeInheritanceConfiguration,
-                               ModelDeserializer<JsonParser> defaultProcessor) {
+    InheritanceInstanceCreator(Class<?> processedType, DeserializationModelCreator deserializationModelCreator, TypeInheritanceConfiguration typeInheritanceConfiguration, ModelDeserializer<JsonParser> defaultProcessor) {
         this.processedType = processedType;
         this.deserializationModelCreator = deserializationModelCreator;
         this.typeInheritanceConfiguration = typeInheritanceConfiguration;
@@ -53,15 +50,13 @@ class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
         String polymorphismKeyName = typeInheritanceConfiguration.getFieldName();
         JsonObject object = parser.getObject();
         alias = object.getString(polymorphismKeyName, null);
-        JsonObject newJsonObject = context.getJsonbContext().getJsonProvider().createObjectBuilder(object)
-                .remove(polymorphismKeyName)
-                .build();
+        JsonObject newJsonObject = context.getJsonbContext().getJsonProvider().createObjectBuilder(object).remove(polymorphismKeyName).build();
         jsonParser = new JsonStructureToParserAdapter(newJsonObject);
         //To get to the first event
         Event event = jsonParser.next();
         context.setLastValueEvent(event);
         Class<?> polymorphicTypeClass;
-        if (alias == null) {
+        if (null == alias) {
             return defaultProcessor.deserialize(jsonParser, context);
         }
         polymorphicTypeClass = getPolymorphicTypeClass(alias);
@@ -87,8 +82,6 @@ class InheritanceInstanceCreator implements ModelDeserializer<JsonParser> {
                 return entry.getKey();
             }
         }
-        throw new JsonbException("Unknown alias \"" + alias + "\" of the type " + processedType.getName() + ". Known aliases: "
-                                         + typeInheritanceConfiguration.getAliases().values());
+        throw new JsonbException("Unknown alias \"" + alias + "\" of the type " + processedType.getName() + ". Known aliases: " + typeInheritanceConfiguration.getAliases().values());
     }
-
 }

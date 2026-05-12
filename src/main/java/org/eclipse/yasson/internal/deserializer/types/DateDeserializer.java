@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.time.Instant;
@@ -46,12 +45,11 @@ class DateDeserializer extends AbstractDateDeserializer<Date> {
 
     private static Date parseWithOrWithoutZone(String jsonValue, DateTimeFormatter formatter) {
         ZonedDateTime parsed;
-        if (formatter.getZone() == null) {
-            parsed = ZonedDateTime.parse(jsonValue, formatter.withZone(UTC));
-        } else {
+        if (null != formatter.getZone()) {
             parsed = ZonedDateTime.parse(jsonValue, formatter);
+        } else {
+            parsed = ZonedDateTime.parse(jsonValue, formatter.withZone(UTC));
         }
         return Date.from(parsed.toInstant());
     }
-
 }

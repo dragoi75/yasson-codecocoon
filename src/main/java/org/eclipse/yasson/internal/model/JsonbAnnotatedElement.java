@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.annotation.Annotation;
@@ -38,13 +37,12 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
      */
     public JsonbAnnotatedElement(T element) {
         for (Annotation ann : element.getAnnotations()) {
-            if (element instanceof Class) {
-                putAnnotation(ann, false, (Class<?>) element);
-            } else {
+            if (!(element instanceof Class)) {
                 putAnnotation(ann, false, null);
+            } else {
+                putAnnotation(ann, false, (Class<?>) element);
             }
         }
-
         this.element = element;
     }
 
@@ -65,10 +63,7 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
      * @return Annotation by passed type
      */
     public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationClass) {
-        return Optional.ofNullable(annotations.get(annotationClass))
-                .map(LinkedList::getFirst)
-                .map(AnnotationWrapper::getAnnotation)
-                .map(annotationClass::cast);
+        return Optional.ofNullable(annotations.get(annotationClass)).map(LinkedList::getFirst).map(AnnotationWrapper::getAnnotation).map(annotationClass::cast);
     }
 
     public <AT extends Annotation> LinkedList<AnnotationWrapper<?>> getAnnotations(Class<AT> annotationClass) {
@@ -81,10 +76,7 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
     }
 
     public Annotation[] getAnnotations() {
-        return annotations.values().stream()
-                .flatMap(Collection::stream)
-                .map(AnnotationWrapper::getAnnotation)
-                .toArray(Annotation[]::new);
+        return annotations.values().stream().flatMap(Collection::stream).map(AnnotationWrapper::getAnnotation).toArray(Annotation[]::new);
     }
 
     /**
@@ -94,24 +86,24 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
      * @param definedType
      */
     public void putAnnotation(Annotation annotation, boolean inherited, Class<?> definedType) {
-//        if (annotations.containsKey(annotation.annotationType())) {
-//            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-//                                                         "Annotation already present: " + annotation));
-//        }
-//        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
-        annotations.computeIfAbsent(annotation.annotationType(), aClass -> new LinkedList<>())
-                        .add(new AnnotationWrapper(annotation, inherited, definedType));
+        //        if (annotations.containsKey(annotation.annotationType())) {
+        //            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        //                                                         "Annotation already present: " + annotation));
+        //        }
+        //        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
+        annotations.computeIfAbsent(annotation.annotationType(), aClass -> new LinkedList<>()).add(new AnnotationWrapper(annotation, inherited, definedType));
     }
 
     public void putAnnotationWrapper(AnnotationWrapper<?> annotationWrapper) {
-        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>())
-                .add(annotationWrapper);
+        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(annotationWrapper);
     }
 
     public static final class AnnotationWrapper<T extends Annotation> {
 
         private final T annotation;
+
         private final boolean inherited;
+
         private final Class<?> definedType;
 
         public AnnotationWrapper(T annotation, boolean inherited, Class<?> definedType) {

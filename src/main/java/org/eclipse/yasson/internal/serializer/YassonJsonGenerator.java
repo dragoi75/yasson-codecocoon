@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
@@ -27,6 +25,7 @@ import jakarta.json.stream.JsonGenerator;
 class YassonJsonGenerator implements JsonGenerator {
 
     private final JsonGenerator innerGenerator;
+
     private int indentDepth;
 
     YassonJsonGenerator(JsonGenerator innerGenerator) {
@@ -36,35 +35,35 @@ class YassonJsonGenerator implements JsonGenerator {
     @Override
     public JsonGenerator writeStartObject() {
         validateWrite("writeStartObject()");
-        indentDepth++;
+        indentDepth += 1;
         return innerGenerator.writeStartObject();
     }
 
     @Override
     public JsonGenerator writeStartObject(String fieldKey) {
         validateWrite("writeStartObject(String name)");
-        indentDepth++;
+        indentDepth += 1;
         return innerGenerator.writeStartObject(fieldKey);
     }
 
     @Override
     public JsonGenerator writeKey(String fieldKey) {
         validateWrite("writeKey(String name)");
-        indentDepth++;
+        indentDepth += 1;
         return innerGenerator.writeKey(fieldKey);
     }
 
     @Override
     public JsonGenerator writeStartArray() {
         validateWrite("writeStartArray()");
-        indentDepth++;
+        indentDepth += 1;
         return innerGenerator.writeStartArray();
     }
 
     @Override
     public JsonGenerator writeStartArray(String fieldKey) {
         validateWrite("writeStartArray(String name)");
-        indentDepth++;
+        indentDepth += 1;
         return innerGenerator.writeStartArray(fieldKey);
     }
 
@@ -124,12 +123,13 @@ class YassonJsonGenerator implements JsonGenerator {
 
     @Override
     public JsonGenerator writeEnd() {
-        indentDepth--;
-        if (indentDepth < 0) {
+        indentDepth -= 1;
+        if (0 > indentDepth) {
             throw new JsonbException("writeEnd() cannot be called outside of the scope of user generator.");
         }
-        if (indentDepth == 0) {
-            indentDepth--; //if user has closed array or object and is on the same level he started. There is no more allowed writing.
+        if (0 == indentDepth) {
+            //if user has closed array or object and is on the same level he started. There is no more allowed writing.
+            indentDepth -= 1;
         }
         return innerGenerator.writeEnd();
     }
@@ -137,63 +137,63 @@ class YassonJsonGenerator implements JsonGenerator {
     @Override
     public JsonGenerator write(JsonValue jsonNode) {
         validateWrite("write(JsonValue value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(String jsonNode) {
         validateWrite("write(String value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(BigDecimal jsonNode) {
         validateWrite("write(BigDecimal value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(BigInteger jsonNode) {
         validateWrite("write(BigInteger value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(int jsonNode) {
         validateWrite("write(int value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(long jsonNode) {
         validateWrite("write(long value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(double jsonNode) {
         validateWrite("write(double value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator write(boolean jsonNode) {
         validateWrite("write(boolean value)");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
 
     @Override
     public JsonGenerator writeNull() {
         validateWrite("writeNull()");
-        indentDepth--;
+        indentDepth -= 1;
         return innerGenerator.writeNull();
     }
 
@@ -208,7 +208,7 @@ class YassonJsonGenerator implements JsonGenerator {
     }
 
     private void validateWrite(String operation) {
-        if (indentDepth < 0) {
+        if (0 > indentDepth) {
             throw new JsonbException(operation + " cannot be called outside of the scope of user generator.");
         }
     }

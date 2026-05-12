@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.util.OptionalLong;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.serializer.ModelSerializer;
 
@@ -33,10 +30,10 @@ class OptionalLongSerializer implements ModelSerializer {
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalLong optionalLong = (OptionalLong) value;
-        if (optionalLong.isPresent()) {
-            typeSerializer.serialize(optionalLong.getAsLong(), generator, context);
-        } else {
+        if (!optionalLong.isPresent()) {
             typeSerializer.serialize(null, generator, context);
+        } else {
+            typeSerializer.serialize(optionalLong.getAsLong(), generator, context);
         }
     }
 }

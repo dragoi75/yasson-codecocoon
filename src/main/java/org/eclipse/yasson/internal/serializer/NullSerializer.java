@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.JsonbContext;
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -25,7 +23,9 @@ import org.eclipse.yasson.internal.model.customization.Customization;
 public class NullSerializer implements ModelSerializer {
 
     private final ModelSerializer delegate;
+
     private final ModelSerializer nullSerializer;
+
     private final ModelSerializer rootNullSerializer;
 
     /**
@@ -35,36 +35,34 @@ public class NullSerializer implements ModelSerializer {
      * @param customization component customization
      * @param jsonbContext  jsonb context
      */
-    public NullSerializer(ModelSerializer delegate,
-                          Customization customization,
-                          JsonbContext jsonbContext) {
+    public NullSerializer(ModelSerializer delegate, Customization customization, JsonbContext jsonbContext) {
         this.delegate = delegate;
-        if (customization.isNillable()) {
-            nullSerializer = new NullWritingEnabled();
-        } else {
+        if (!customization.isNillable()) {
             nullSerializer = new NullWritingDisabled();
+        } else {
+            nullSerializer = new NullWritingEnabled();
         }
         JsonbSerializer<?> userDefinedNullSerializer = jsonbContext.getConfigProperties().getNullSerializer();
-        if (userDefinedNullSerializer != null) {
-            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
-        } else {
+        if (null == userDefinedNullSerializer) {
             rootNullSerializer = nullSerializer;
+        } else {
+            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
         }
     }
 
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        if (value == null) {
-            if (context.isRoot()) {
-                context.setRoot(false);
-                rootNullSerializer.serialize(null, generator, context);
-            } else {
-                nullSerializer.serialize(null, generator, context);
-            }
-            context.setKey(null);
-        } else {
+        if (null != value) {
             context.setRoot(false);
             delegate.serialize(value, generator, context);
+        } else {
+            if (!context.isRoot()) {
+                nullSerializer.serialize(null, generator, context);
+            } else {
+                context.setRoot(false);
+                rootNullSerializer.serialize(null, generator, context);
+            }
+            context.setKey(null);
         }
     }
 
@@ -72,13 +70,12 @@ public class NullSerializer implements ModelSerializer {
 
         @Override
         public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-            if (context.getKey() == null) {
-                generator.writeNull();
-            } else {
+            if (null != context.getKey()) {
                 generator.writeNull(context.getKey());
+            } else {
+                generator.writeNull();
             }
         }
-
     }
 
     private static class NullWritingDisabled implements ModelSerializer {
@@ -86,15 +83,14 @@ public class NullSerializer implements ModelSerializer {
         @Override
         public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
             if (context.isContainerWithNulls()) {
-                if (context.getKey() == null) {
-                    generator.writeNull();
-                } else {
+                if (null != context.getKey()) {
                     generator.writeNull(context.getKey());
+                } else {
+                    generator.writeNull();
                 }
             }
             context.setKey(null);
             //Do nothing
         }
-
     }
 }

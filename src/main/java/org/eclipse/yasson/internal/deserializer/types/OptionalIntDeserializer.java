@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.util.OptionalInt;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
 
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
 class OptionalIntDeserializer implements ModelDeserializer<JsonParser> {
 
     private final ModelDeserializer<JsonParser> extractor;
+
     private final ModelDeserializer<Object> delegate;
 
     OptionalIntDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> delegate) {
@@ -34,7 +32,7 @@ class OptionalIntDeserializer implements ModelDeserializer<JsonParser> {
 
     @Override
     public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == context.getLastValueEvent()) {
             return delegate.deserialize(OptionalInt.empty(), context);
         }
         OptionalInt optional = OptionalInt.of((Integer) extractor.deserialize(value, context));

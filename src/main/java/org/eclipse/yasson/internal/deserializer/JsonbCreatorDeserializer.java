@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.Arrays;
@@ -19,10 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
@@ -35,21 +32,22 @@ import org.eclipse.yasson.internal.properties.Messages;
 class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
 
     private final Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains;
+
     private final Map<String, ModelDeserializer<Object>> defaultCreatorValues;
+
     private final List<String> creatorParams;
+
     private final Set<String> ignoredProperties;
+
     private final JsonbCreator creator;
+
     private final Class<?> clazz;
+
     private final Function<String, String> renamer;
+
     private final boolean failOnUnknownProperties;
 
-    JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains,
-                             Map<String, ModelDeserializer<Object>> defaultCreatorValues,
-                             JsonbCreator creator,
-                             Class<?> clazz,
-                             Function<String, String> renamer,
-                             boolean failOnUnknownProperties,
-                             Set<String> ignoredProperties) {
+    JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains, Map<String, ModelDeserializer<Object>> defaultCreatorValues, JsonbCreator creator, Class<?> clazz, Function<String, String> renamer, boolean failOnUnknownProperties, Set<String> ignoredProperties) {
         this.propertyDeserializerChains = propertyDeserializerChains;
         this.defaultCreatorValues = defaultCreatorValues;
         this.creatorParams = Arrays.stream(creator.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
@@ -67,46 +65,48 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
         while (parser.hasNext()) {
             final JsonParser.Event next = parser.next();
             context.setLastValueEvent(next);
-            switch (next) {
-            case KEY_NAME:
-                key = renamer.apply(parser.getString());
-                break;
-            case VALUE_NULL:
-            case START_OBJECT:
-            case START_ARRAY:
-            case VALUE_STRING:
-            case VALUE_NUMBER:
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                if (propertyDeserializerChains.containsKey(key)) {
-                    try {
-                        Object o = propertyDeserializerChains.get(key).deserialize(parser, context);
-                        if (creatorParams.contains(key)) {
-                            paramValues.put(key, o);
+            switch(next) {
+                case KEY_NAME:
+                    key = renamer.apply(parser.getString());
+                    break;
+                case VALUE_NULL:
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    if (!propertyDeserializerChains.containsKey(key)) {
+                        if (failOnUnknownProperties && !ignoredProperties.contains(key)) {
+                            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, key, clazz));
                         }
-                    } catch (JsonbException e) {
-                        throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
-                    }
-                } else if (failOnUnknownProperties && !ignoredProperties.contains(key)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, key, clazz));
-                }
-                break;
-            case END_OBJECT:
-                Object[] params = new Object[creatorParams.size()];
-                for (int i = 0; i < creatorParams.size(); i++) {
-                    String param = creatorParams.get(i);
-                    if (paramValues.containsKey(param)) {
-                        params[i] = paramValues.get(param);
                     } else {
-                        params[i] = defaultCreatorValues.get(param).deserialize(null, context);
+                        try {
+                            Object o = propertyDeserializerChains.get(key).deserialize(parser, context);
+                            if (creatorParams.contains(key)) {
+                                paramValues.put(key, o);
+                            }
+                        } catch (JsonbException e) {
+                            throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
+                        }
                     }
-                }
-                context.setInstance(creator.call(params, clazz));
-                context.getDeferredDeserializers().forEach(Runnable::run);
-                context.getDeferredDeserializers().clear();
-                return context.getInstance();
-            default:
-                throw new JsonbException("Unexpected state: " + next);
+                    break;
+                case END_OBJECT:
+                    Object[] params = new Object[creatorParams.size()];
+                    for (int i = 0; creatorParams.size() > i; i += 1) {
+                        String param = creatorParams.get(i);
+                        if (!paramValues.containsKey(param)) {
+                            params[i] = defaultCreatorValues.get(param).deserialize(null, context);
+                        } else {
+                            params[i] = paramValues.get(param);
+                        }
+                    }
+                    context.setInstance(creator.call(params, clazz));
+                    context.getDeferredDeserializers().forEach(Runnable::run);
+                    context.getDeferredDeserializers().clear();
+                    return context.getInstance();
+                default:
+                    throw new JsonbException("Unexpected state: " + next);
             }
         }
         return context.getInstance();
@@ -114,9 +114,6 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
 
     @Override
     public String toString() {
-        return "ObjectInstanceCreator{"
-                + "parameters=" + creatorParams
-                + ", clazz=" + clazz
-                + '}';
+        return "ObjectInstanceCreator{" + "parameters=" + creatorParams + ", clazz=" + clazz + '}';
     }
 }
