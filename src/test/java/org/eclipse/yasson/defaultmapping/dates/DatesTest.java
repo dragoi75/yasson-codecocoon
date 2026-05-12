@@ -25,7 +25,7 @@ import org.eclipse.yasson.defaultmapping.dates.model.OffsetTimePojo;
 import org.eclipse.yasson.defaultmapping.dates.model.ZonedDateTimePojo;
 import org.eclipse.yasson.defaultmapping.generics.model.ScalarValueWrapper;
 import org.eclipse.yasson.internal.JsonBindingBuilder;
-import org.eclipse.yasson.internal.serializer.SqlDateTypeDeserializer;
+import org.eclipse.yasson.internal.serializer.SqlDateDeserializer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -85,7 +85,7 @@ public class DatesTest {
     public static class SqlDateObj implements Serializable {
         public java.sql.Date sqlDate = new java.sql.Date(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli());
         //no way for runtime to choose java.sql.Date deserializer here without a hint
-        @JsonbTypeDeserializer(SqlDateTypeDeserializer.class)
+        @JsonbTypeDeserializer(SqlDateDeserializer.class)
         public java.util.Date utilDate = new java.sql.Date(localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli());
 
     }

@@ -20,10 +20,10 @@ import org.eclipse.yasson.internal.components.SerializerBinding;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomization;
 import org.eclipse.yasson.internal.model.customization.PropertyCustomizationBuilder;
 import org.eclipse.yasson.internal.serializer.AdaptedObjectSerializer;
-import org.eclipse.yasson.internal.serializer.DefaultSerializers;
+import org.eclipse.yasson.internal.serializer.DefaultSerializerRegistry;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.serializer.SerializerProviderWrapper;
+import org.eclipse.yasson.internal.serializer.SerializerDeserializerProviderWrapper;
 import org.eclipse.yasson.internal.serializer.UserSerializerSerializer;
 
 import javax.json.bind.config.PropertyNamingStrategy;
@@ -121,7 +121,7 @@ public class PropertyModel implements Comparable<PropertyModel> {
         }
 
         final Class<?> propertyRawType = ReflectionUtils.getRawType(serializationType);
-        final Optional<SerializerProviderWrapper> valueSerializerProvider = DefaultSerializers.getInstance().findValueSerializerProvider(propertyRawType);
+        final Optional<SerializerDeserializerProviderWrapper> valueSerializerProvider = DefaultSerializerRegistry.getInstance().locateValueSerializerProvider(propertyRawType);
         if (valueSerializerProvider.isPresent()) {
             return valueSerializerProvider.get().getSerializerProvider().provideSerializer(customization);
         }

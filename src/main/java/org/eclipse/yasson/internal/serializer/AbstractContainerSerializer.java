@@ -140,7 +140,7 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
             builder.withType(instanceValueType);
 
 
-            if (!DefaultSerializers.getInstance().isKnownType(itemClass)) {
+            if (!DefaultSerializerRegistry.getInstance().isKnownType(itemClass)) {
                 //Need for class level annotations + user adapters/serializers bound to type
                 ClassModel classModel = ((Marshaller)ctx).getJsonbContext().getMappingContext().getOrCreateClassModel(itemClass);
                 builder.withCustomization(new ContainerCustomization(classModel.getCustomization()));

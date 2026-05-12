@@ -124,7 +124,7 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         //TODO In contrast to serialization value type cannot change here
         Type actualValueType = ReflectionUtils.resolveType(this, valueType);
         DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).withType(actualValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(ReflectionUtils.getRawType(actualValueType))) {
             ClassModel classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionUtils.getRawType(actualValueType));
             deserializerBuilder.withCustomization(classModel == null ? null : classModel.getCustomization());
         }

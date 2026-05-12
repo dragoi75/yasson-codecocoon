@@ -46,7 +46,7 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
         DateTimeFormatter formatter = getDefaultFormatter();
         //in case field is of property is java.util.Date type with java.sql.Date instance
         if (value instanceof java.sql.Date) {
-            formatter = SqlDateTypeSerializer.DEFAULT_FORMATTER;
+            formatter = SqlDateSerializer.DEFAULT_FORMATTER;
         }
         return formatter.withLocale(locale).format(toInstant(value));
     }
