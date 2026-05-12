@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.deserializer;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Json null value checker.
@@ -23,10 +23,10 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  * {@link JsonParser.Event#VALUE_NULL} or not. If the event has been {@link JsonParser.Event#VALUE_NULL}, null value
  * deserializer will be called. In all other cases non-null deserializer is called.
  */
-public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
+public class NullCheckDeserializer implements ModelUnmarshaller<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> nonNullDeserializer;
-    private final ModelDeserializer<Object> nullDeserializer;
+    private final ModelUnmarshaller<JsonParser> nonNullDeserializer;
+    private final ModelUnmarshaller<Object> nullDeserializer;
 
     /**
      * Create new instance.
@@ -34,18 +34,18 @@ public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
      * @param nonNullDeserializer deserializer called when value is not null
      * @param nullDeserializer    deserializer called when value is null
      */
-    public NullCheckDeserializer(ModelDeserializer<JsonParser> nonNullDeserializer,
-                                 ModelDeserializer<Object> nullDeserializer) {
+    public NullCheckDeserializer(ModelUnmarshaller<JsonParser> nonNullDeserializer,
+                                 ModelUnmarshaller<Object> nullDeserializer) {
         this.nonNullDeserializer = nonNullDeserializer;
         this.nullDeserializer = nullDeserializer;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         if (context.getLastValueEvent() != JsonParser.Event.VALUE_NULL) {
-            return nonNullDeserializer.deserialize(value, context);
+            return nonNullDeserializer.unmarshal(value, context);
         }
-        return nullDeserializer.deserialize(null, context);
+        return nullDeserializer.unmarshal(null, context);
     }
 
     @Override

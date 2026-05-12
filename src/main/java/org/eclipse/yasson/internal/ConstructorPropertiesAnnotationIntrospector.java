@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 class ConstructorPropertiesAnnotationIntrospector {
 
@@ -68,7 +68,7 @@ class ConstructorPropertiesAnnotationIntrospector {
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(Messages.getMessage(MessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
+                LOG.warning(MessageBundle.getMessage(MessageKeyConstants.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
                                                 constructor.getDeclaringClass().getName()));
                 return null;
             }

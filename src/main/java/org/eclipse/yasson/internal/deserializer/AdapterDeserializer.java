@@ -15,34 +15,34 @@ package org.eclipse.yasson.internal.deserializer;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.adapter.JsonbAdapter;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * User defined type adapter executor.
  */
-class AdapterDeserializer implements ModelDeserializer<Object> {
+class AdapterDeserializer implements ModelUnmarshaller<Object> {
 
     private final JsonbAdapter<Object, Object> adapter;
     private final AdapterBinding adapterBinding;
-    private final ModelDeserializer<Object> delegate;
+    private final ModelUnmarshaller<Object> delegate;
 
     @SuppressWarnings("unchecked")
     AdapterDeserializer(AdapterBinding adapterBinding,
-                        ModelDeserializer<Object> delegate) {
+                        ModelUnmarshaller<Object> delegate) {
         this.adapterBinding = adapterBinding;
         this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
         this.delegate = delegate;
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
+    public Object unmarshal(Object value, DeserializationContextImplementation context) {
         try {
-            return delegate.deserialize(adapter.adaptFromJson(value), context);
+            return delegate.unmarshal(adapter.adaptFromJson(value), context);
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION,
                                                          adapterBinding.getBindingType(),
                                                          adapterBinding.getToType(),
                                                          adapterBinding.getAdapter().getClass()), e);

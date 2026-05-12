@@ -48,14 +48,14 @@ public class CreatorModel {
 
         AnnotationIntrospector annotationIntrospector = context.getAnnotationIntrospector();
 
-        JsonbAnnotatedElement<Parameter> annotated = new JsonbAnnotatedElement<>(parameter);
+        JsonbAnnotationContainer<Parameter> annotated = new JsonbAnnotationContainer<>(parameter);
         boolean required = context.getAnnotationIntrospector().requiredParameters(executable, annotated);
         JsonbNumberFormatter constructorNumberFormatter = context.getAnnotationIntrospector()
                 .getConstructorNumberFormatter(annotated);
         JsonbDateFormatter constructorDateFormatter = context.getAnnotationIntrospector().getConstructorDateFormatter(annotated);
         DeserializerBinding<?> deserializerBinding = annotationIntrospector.getDeserializerBinding(parameter);
         AdapterBinding adapterBinding = annotationIntrospector.getAdapterBinding(parameter);
-        final JsonbAnnotatedElement<Class<?>> clsElement = annotationIntrospector.collectAnnotations(parameter.getType());
+        final JsonbAnnotationContainer<Class<?>> clsElement = annotationIntrospector.collectAnnotations(parameter.getType());
         deserializerBinding = deserializerBinding == null
                 ? annotationIntrospector.getDeserializerBinding(clsElement)
                 : deserializerBinding;

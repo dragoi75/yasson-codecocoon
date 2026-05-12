@@ -39,8 +39,8 @@ import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.ComponentBoundCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceConfiguration;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.serializer.types.ObjectTypeSerializer;
 import org.eclipse.yasson.internal.serializer.types.TypeSerializers;
 
@@ -180,7 +180,7 @@ public class SerializationModelCreator {
         }
         if (typeSerializer != null) {
             if (jsonbContext.getConfigProperties().isStrictIJson() && rootValue) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
             }
             return typeSerializer;
         }

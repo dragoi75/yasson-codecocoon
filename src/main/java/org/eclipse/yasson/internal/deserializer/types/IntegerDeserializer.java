@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Deserializer of the {@link Integer} type.
@@ -33,7 +33,7 @@ class IntegerDeserializer extends AbstractNumberDeserializer<Integer> {
     }
 
     @Override
-    Object deserializeNumberValue(JsonParser value, DeserializationContextImpl context, Type rType) {
+    Object deserializeNumberValue(JsonParser value, DeserializationContextImplementation context, Type rType) {
         return value.getInt();
     }
 }

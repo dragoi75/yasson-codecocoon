@@ -18,8 +18,8 @@ import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * User defined adapter invoker.
@@ -42,7 +42,7 @@ class AdapterSerializer extends AbstractSerializer {
         try {
             delegate.serialize(adapter.adaptToJson(value), generator, context);
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION,
                                                          adapterBinding.getBindingType(),
                                                          adapterBinding.getToType(),
                                                          adapter.getClass()), e);

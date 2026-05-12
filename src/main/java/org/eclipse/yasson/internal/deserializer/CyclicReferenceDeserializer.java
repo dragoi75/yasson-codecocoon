@@ -16,25 +16,25 @@ import java.lang.reflect.Type;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Deserialization solution for cyclic references.
  */
-class CyclicReferenceDeserializer implements ModelDeserializer<JsonParser> {
+class CyclicReferenceDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final Type type;
-    private ModelDeserializer<JsonParser> delegate;
+    private ModelUnmarshaller<JsonParser> delegate;
 
     CyclicReferenceDeserializer(Type type) {
         this.type = type;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         if (delegate == null) {
             delegate = context.getJsonbContext().getChainModelCreator().deserializerChain(type);
         }
-        return delegate.deserialize(value, context);
+        return delegate.unmarshal(value, context);
     }
 }

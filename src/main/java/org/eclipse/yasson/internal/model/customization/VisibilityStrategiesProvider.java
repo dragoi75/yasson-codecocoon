@@ -19,8 +19,8 @@ import java.lang.reflect.Modifier;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Provider of the JSON-B visibility strategies.
@@ -47,7 +47,7 @@ public class VisibilityStrategiesProvider {
         case "ALL_FIELD_AND_ACCESSORS":
             return ALL_FIELDS_AND_METHODS;
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_VISIBILITY_STRATEGY, strategy));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNKNOWN_VISIBILITY_STRATEGY, strategy));
         }
     }
 

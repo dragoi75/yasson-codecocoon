@@ -19,18 +19,18 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Iterates over {@link JsonObject} managing internal state.
  */
-public class JsonObjectIterator extends JsonStructureIterator {
+public class JsonObjectKeyIterator extends JsonStructureWalker {
 
     /**
      * Location pointer.
      */
-    public enum State {
+    public enum ParseState {
         /**
          * Start of the object.
          */
@@ -49,49 +49,49 @@ public class JsonObjectIterator extends JsonStructureIterator {
         END
     }
 
-    private final JsonObject jsonObject;
+    private final JsonObject rootObject;
 
-    private final Iterator<String> keyIterator;
+    private final Iterator<String> keyCursor;
 
-    private String currentKey;
+    private String activeKey;
 
-    private State state = State.START;
+    private ParseState parseMode = ParseState.START;
 
-    JsonObjectIterator(JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
-        this.keyIterator = jsonObject.keySet().iterator();
+    JsonObjectKeyIterator(JsonObject rootObject) {
+        this.rootObject = rootObject;
+        this.keyCursor = rootObject.keySet().iterator();
     }
 
-    private void nextKey() {
-        if (!keyIterator.hasNext()) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Object is empty"));
+    private void getNextKey() {
+        if (!keyCursor.hasNext()) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Object is empty"));
         }
-        currentKey = keyIterator.next();
+        activeKey = keyCursor.next();
     }
 
     @Override
     public JsonParser.Event next() {
-        switch (state) {
+        switch (parseMode) {
         case START:
-            if (keyIterator.hasNext()) {
-                nextKey();
-                setState(JsonObjectIterator.State.KEY);
+            if (keyCursor.hasNext()) {
+                getNextKey();
+                setState(ParseState.KEY);
                 return JsonParser.Event.KEY_NAME;
             } else {
-                setState(State.END);
+                setState(ParseState.END);
                 return JsonParser.Event.END_OBJECT;
             }
         case KEY:
-            setState(JsonObjectIterator.State.VALUE);
-            JsonValue value = getValue();
-            return getValueEvent(value);
+            setState(ParseState.VALUE);
+            JsonValue jsonNode = getValue();
+            return getValueEvent(jsonNode);
         case VALUE:
-            if (keyIterator.hasNext()) {
-                nextKey();
-                setState(JsonObjectIterator.State.KEY);
+            if (keyCursor.hasNext()) {
+                getNextKey();
+                setState(ParseState.KEY);
                 return JsonParser.Event.KEY_NAME;
             }
-            setState(State.END);
+            setState(ParseState.END);
             return JsonParser.Event.END_OBJECT;
         default:
             throw new JsonbException("Illegal state");
@@ -102,7 +102,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
     @Override
     public boolean hasNext() {
         //From the perspective of JsonParser not finished until END_OBJECT is being read.
-        return state != State.END;
+        return parseMode != ParseState.END;
     }
 
     /**
@@ -111,29 +111,29 @@ public class JsonObjectIterator extends JsonStructureIterator {
      * @return Current JsonValue.
      */
     public JsonValue getValue() {
-        if (state == State.START && currentKey == null) {
-            return jsonObject;
+        if (parseMode == ParseState.START && activeKey == null) {
+            return rootObject;
         }
-        return jsonObject.get(currentKey);
+        return rootObject.get(activeKey);
     }
 
     @Override
     String getString() {
-        if (state == JsonObjectIterator.State.KEY) {
-            return currentKey;
+        if (parseMode == ParseState.KEY) {
+            return activeKey;
         }
         return super.getString();
     }
 
     @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
+    JsonbException createIncompatibleValueException() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
                                                       getValue().getValueType(),
-                                                      currentKey));
+                activeKey));
     }
 
-    private void setState(State state) {
-        this.state = state;
+    private void setState(ParseState parseMode) {
+        this.parseMode = parseMode;
     }
 
     /**
@@ -142,6 +142,6 @@ public class JsonObjectIterator extends JsonStructureIterator {
      * @return Current key.
      */
     public String getKey() {
-        return currentKey;
+        return activeKey;
     }
 }

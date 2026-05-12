@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Finds an annotation including inherited annotations (e.g. meta-annotations).
@@ -95,8 +95,8 @@ class AnnotationFinder {
         try {
             return annotation.annotationType().getMethod("value").invoke(annotation);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = Messages
-                    .getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
+            String message = MessageBundle
+                    .getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
             LOGGER.finest(message);
             return null;
         }
@@ -107,7 +107,7 @@ class AnnotationFinder {
         try {
             return (Class<T>) Class.forName(classname);
         } catch (ClassNotFoundException e) {
-            String message = Messages.getMessage(MessageKeys.ANNOTATION_NOT_AVAILABLE, classname);
+            String message = MessageBundle.getMessage(MessageKeyConstants.ANNOTATION_NOT_AVAILABLE, classname);
             LOGGER.finest(message);
             return null;
         }

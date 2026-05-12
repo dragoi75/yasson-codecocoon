@@ -19,13 +19,13 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Iterates over {@link jakarta.json.JsonStructure}.
  */
-abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
+abstract class JsonStructureWalker implements Iterator<JsonParser.Event> {
 
     /**
      * Get current {@link JsonValue}, that the parser is pointing on.
@@ -40,7 +40,7 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
      *
      * @return JsonbException with error description.
      */
-    abstract JsonbException createIncompatibleValueError();
+    abstract JsonbException createIncompatibleValueException();
 
     /**
      * Check the type of current  {@link JsonValue} and return a string representing a value.
@@ -48,22 +48,22 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
      * @return String value for current JsonValue
      */
     String getString() {
-        JsonValue value = getValue();
-        if (value instanceof JsonString) {
-            return ((JsonString) value).getString();
+        JsonValue stringElement = getValue();
+        if (stringElement instanceof JsonString) {
+            return ((JsonString) stringElement).getString();
         } else {
-            return value.toString();
+            return stringElement.toString();
         }
     }
 
     /**
      * Convert {@link JsonValue} type to {@link JsonParser.Event}.
      *
-     * @param value JsonValue
+     * @param stringElement JsonValue
      * @return JsonParser event
      */
-    JsonParser.Event getValueEvent(JsonValue value) {
-        switch (value.getValueType()) {
+    JsonParser.Event getValueEvent(JsonValue stringElement) {
+        switch (stringElement.getValueType()) {
         case NUMBER:
             return JsonParser.Event.VALUE_NUMBER;
         case STRING:
@@ -77,8 +77,8 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
         case NULL:
             return JsonParser.Event.VALUE_NULL;
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-                                                         "unknown json value: " + value.getValueType()));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR,
+                                                         "unknown json value: " + stringElement.getValueType()));
         }
 
     }

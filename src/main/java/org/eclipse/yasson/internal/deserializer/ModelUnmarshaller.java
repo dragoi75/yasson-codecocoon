@@ -12,7 +12,7 @@
 
 package org.eclipse.yasson.internal.deserializer;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Type deserializer.
@@ -22,15 +22,15 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  *
  * @param <T> represents the content value this deserializer is using
  */
-public interface ModelDeserializer<T> {
+public interface ModelUnmarshaller<T> {
 
     /**
      * Deserialize provided value or delegate deserialization to the next deserializer.
      *
-     * @param value   value to be deserialized
-     * @param context deserialization context
+     * @param item   value to be deserialized
+     * @param deserializer deserialization context
      * @return deserialized value
      */
-    Object deserialize(T value, DeserializationContextImpl context);
+    Object unmarshal(T item, DeserializationContextImplementation deserializer);
 
 }

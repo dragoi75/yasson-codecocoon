@@ -23,7 +23,7 @@ import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Yasson {@link YassonParser} parser wrapper.
@@ -33,10 +33,10 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
 class YassonParser implements JsonParser {
 
     private final JsonParser delegate;
-    private final DeserializationContextImpl context;
+    private final DeserializationContextImplementation context;
     private int level;
 
-    YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextImpl context) {
+    YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextImplementation context) {
         this.delegate = delegate;
         this.context = context;
         this.level = determineLevelValue(firstEvent);

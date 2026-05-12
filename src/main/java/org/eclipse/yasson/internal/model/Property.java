@@ -26,13 +26,13 @@ public class Property {
 
     private final String name;
 
-    private final JsonbAnnotatedElement<Class<?>> declaringClassElement;
+    private final JsonbAnnotationContainer<Class<?>> declaringClassElement;
 
-    private JsonbAnnotatedElement<Field> fieldElement;
+    private JsonbAnnotationContainer<Field> fieldElement;
 
-    private JsonbAnnotatedElement<Method> getterElement;
+    private JsonbAnnotationContainer<Method> getterElement;
 
-    private JsonbAnnotatedElement<Method> setterElement;
+    private JsonbAnnotationContainer<Method> setterElement;
 
     /**
      * Create instance of property.
@@ -40,7 +40,7 @@ public class Property {
      * @param name                not null
      * @param declaringClassModel Class model for a class declaring property.
      */
-    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
+    public Property(String name, JsonbAnnotationContainer<Class<?>> declaringClassModel) {
         this.name = name;
         this.declaringClassElement = declaringClassModel;
     }
@@ -70,7 +70,7 @@ public class Property {
      * @param field field not null
      */
     public void setField(Field field) {
-        this.fieldElement = new JsonbAnnotatedElement<>(field);
+        this.fieldElement = new JsonbAnnotationContainer<>(field);
     }
 
     /**
@@ -89,7 +89,7 @@ public class Property {
      * @param getter not null
      */
     public void setGetter(Method getter) {
-        this.getterElement = new JsonbAnnotatedElement<>(getter);
+        this.getterElement = new JsonbAnnotationContainer<>(getter);
     }
 
     /**
@@ -108,7 +108,7 @@ public class Property {
      * @param setter setter not null
      */
     public void setSetter(Method setter) {
-        this.setterElement = new JsonbAnnotatedElement<>(setter);
+        this.setterElement = new JsonbAnnotationContainer<>(setter);
     }
 
     /**
@@ -117,7 +117,7 @@ public class Property {
      *
      * @return ClassModel
      */
-    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
+    public JsonbAnnotationContainer<Class<?>> getDeclaringClassElement() {
         return declaringClassElement;
     }
 
@@ -158,7 +158,7 @@ public class Property {
      *
      * @return field with annotations
      */
-    public JsonbAnnotatedElement<Field> getFieldElement() {
+    public JsonbAnnotationContainer<Field> getFieldElement() {
         return fieldElement;
     }
 
@@ -167,7 +167,7 @@ public class Property {
      *
      * @return getter with annotations
      */
-    public JsonbAnnotatedElement<Method> getGetterElement() {
+    public JsonbAnnotationContainer<Method> getGetterElement() {
         return getterElement;
     }
 
@@ -176,7 +176,7 @@ public class Property {
      *
      * @return setter with annotations
      */
-    public JsonbAnnotatedElement<Method> getSetterElement() {
+    public JsonbAnnotationContainer<Method> getSetterElement() {
         return setterElement;
     }
 

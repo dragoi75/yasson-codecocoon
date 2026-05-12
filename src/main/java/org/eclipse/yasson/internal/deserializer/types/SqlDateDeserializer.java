@@ -23,7 +23,7 @@ import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Deserializer of the {@link Date} type.
@@ -60,7 +60,7 @@ public class SqlDateDeserializer extends AbstractDateDeserializer<Date> implemen
 
     @Override
     public Date deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        DeserializationContextImpl context = (DeserializationContextImpl) ctx;
-        return (Date) deserialize(parser.getString(), context);
+        DeserializationContextImplementation context = (DeserializationContextImplementation) ctx;
+        return (Date) unmarshal(parser.getString(), context);
     }
 }

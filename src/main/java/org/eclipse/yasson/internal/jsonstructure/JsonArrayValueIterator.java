@@ -20,25 +20,25 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Iterates over {@link JsonArray}.
  */
-public class JsonArrayIterator extends JsonStructureIterator {
+public class JsonArrayValueIterator extends JsonStructureWalker {
 
-    private final Iterator<JsonValue> valueIterator;
+    private final Iterator<JsonValue> elementIterator;
 
-    private JsonValue currentValue;
+    private JsonValue currentElement;
 
     /**
      * Creates new array iterator.
      *
-     * @param jsonArray json array
+     * @param arrayNode json array
      */
-    public JsonArrayIterator(JsonArray jsonArray) {
-        this.valueIterator = jsonArray.iterator();
+    public JsonArrayValueIterator(JsonArray arrayNode) {
+        this.elementIterator = arrayNode.iterator();
     }
 
     /**
@@ -53,29 +53,29 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     @Override
     public JsonParser.Event next() {
-        if (valueIterator.hasNext()) {
-            currentValue = valueIterator.next();
-            return getValueEvent(currentValue);
+        if (elementIterator.hasNext()) {
+            currentElement = elementIterator.next();
+            return getValueEvent(currentElement);
         }
         return JsonParser.Event.END_ARRAY;
     }
 
     @Override
     JsonValue getValue() {
-        return currentValue;
+        return currentElement;
     }
 
     @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
+    JsonbException createIncompatibleValueException() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
                                                       getValue().getValueType()));
     }
 
     @Override
     String getString() {
-        if (currentValue instanceof JsonString) {
-            return ((JsonString) currentValue).getString();
+        if (currentElement instanceof JsonString) {
+            return ((JsonString) currentElement).getString();
         }
-        return currentValue.toString();
+        return currentElement.toString();
     }
 }

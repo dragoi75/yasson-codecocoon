@@ -16,17 +16,17 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
+import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Deserializer of the {@link JsonValue} type.
  */
-class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
+class JsonValueDeserializer implements ModelUnmarshaller<JsonParser> {
 
-    private final ModelDeserializer<Object> delegate;
+    private final ModelUnmarshaller<Object> delegate;
     private final JsonValue nullValue;
 
     JsonValueDeserializer(TypeDeserializerBuilder builder, JsonValue nullValue) {
@@ -35,9 +35,9 @@ class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         JsonParser.Event last = context.getLastValueEvent();
-        return delegate.deserialize(deserializeValue(last, value), context);
+        return delegate.unmarshal(deserializeValue(last, value), context);
     }
 
     private JsonValue deserializeValue(JsonParser.Event last, JsonParser parser) {
@@ -56,7 +56,7 @@ class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
         case START_ARRAY:
             return parser.getArray();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + last));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: " + last));
         }
     }
 }

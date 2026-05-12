@@ -12,6 +12,7 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.JsonbAnnotationContainer;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.eclipse.yasson.defaultmapping.modifiers.model.FieldModifiersClass;
 import org.eclipse.yasson.defaultmapping.modifiers.model.MethodModifiersClass;
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.spi.JsonProvider;
@@ -38,7 +38,7 @@ public class ClassParserTest {
 
     @Test
     public void testDefaultMappingFieldModifiers() {
-        final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(FieldModifiersClass.class);
+        final JsonbAnnotationContainer<Class<?>> clsElement = introspector.collectAnnotations(FieldModifiersClass.class);
         ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement,
                                                                                                           ClassCustomization.empty(), jsonbContext.getConfigProperties().getPropertyNamingStrategy()), null, null);
         classParser.parseProperties(model, clsElement);
@@ -52,7 +52,7 @@ public class ClassParserTest {
 
     @Test
     public void testDefaultMappingMethodModifiers() {
-        final JsonbAnnotatedElement<Class<?>> clsElement = introspector.collectAnnotations(MethodModifiersClass.class);
+        final JsonbAnnotationContainer<Class<?>> clsElement = introspector.collectAnnotations(MethodModifiersClass.class);
         ClassModel model = new ClassModel(FieldModifiersClass.class, introspector.introspectCustomization(clsElement,
                                                                                                           ClassCustomization.empty(), jsonbContext.getConfigProperties().getPropertyNamingStrategy()), null, null);
         classParser.parseProperties(model, clsElement);

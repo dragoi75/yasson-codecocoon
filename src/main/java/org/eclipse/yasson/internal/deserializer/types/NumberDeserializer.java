@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
  * Deserializer of the {@link Number} type.
@@ -27,7 +27,7 @@ class NumberDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
         return new BigDecimal(value);
     }
 

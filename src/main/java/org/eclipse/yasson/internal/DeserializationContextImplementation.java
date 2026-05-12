@@ -20,38 +20,38 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Deserialization context implementation.
  */
-public class DeserializationContextImpl extends ProcessingContext implements DeserializationContext {
-    private final List<Runnable> delayedSetters = new ArrayList<>();
-    private JsonParser.Event lastValueEvent;
-    private Customization customization = ClassCustomization.empty();
-    private Object instance;
+public class DeserializationContextImplementation extends ProcessingContext implements DeserializationContext {
+    private final List<Runnable> pendingActions = new ArrayList<>();
+    private JsonParser.Event previousEvent;
+    private Customization customConfig = ClassCustomization.empty();
+    private Object currentObject;
 
     /**
      * Parent instance for marshaller and unmarshaller.
      *
-     * @param jsonbContext context of Jsonb
+     * @param jsonbCtx context of Jsonb
      */
-    public DeserializationContextImpl(JsonbContext jsonbContext) {
-        super(jsonbContext);
+    public DeserializationContextImplementation(JsonbContext jsonbCtx) {
+        super(jsonbCtx);
     }
 
     /**
      * Create new instance based on previous context.
      *
-     * @param context previous deserialization context
+     * @param deserState previous deserialization context
      */
-    public DeserializationContextImpl(DeserializationContextImpl context) {
-        super(context.getJsonbContext());
-        this.lastValueEvent = context.lastValueEvent;
+    public DeserializationContextImplementation(DeserializationContextImplementation deserState) {
+        super(deserState.getJsonbContext());
+        this.previousEvent = deserState.previousEvent;
     }
 
     /**
@@ -60,16 +60,16 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
      * @return null if instance has not been created yet
      */
     public Object getInstance() {
-        return instance;
+        return currentObject;
     }
 
     /**
      * Set currently deserialized type instance.
      *
-     * @param instance deserialized type instance
+     * @param currentObject deserialized type instance
      */
-    public void setInstance(Object instance) {
-        this.instance = instance;
+    public void setInstance(Object currentObject) {
+        this.currentObject = currentObject;
     }
 
     /**
@@ -78,7 +78,7 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
      * @return list of deferred deserializers
      */
     public List<Runnable> getDeferredDeserializers() {
-        return delayedSetters;
+        return pendingActions;
     }
 
     /**
@@ -87,16 +87,16 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
      * @return last obtained event
      */
     public JsonParser.Event getLastValueEvent() {
-        return lastValueEvent;
+        return previousEvent;
     }
 
     /**
      * Set last obtained {@link JsonParser.Event} event.
      *
-     * @param lastValueEvent last obtained event
+     * @param previousEvent last obtained event
      */
-    public void setLastValueEvent(JsonParser.Event lastValueEvent) {
-        this.lastValueEvent = lastValueEvent;
+    public void setLastValueEvent(JsonParser.Event previousEvent) {
+        this.previousEvent = previousEvent;
     }
 
     /**
@@ -105,46 +105,46 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
      * @return currently used customization
      */
     public Customization getCustomization() {
-        return customization;
+        return customConfig;
     }
 
     /**
      * Set customization used by currently processed user defined deserializer.
      *
-     * @param customization currently used customization
+     * @param customConfig currently used customization
      */
-    public void setCustomization(Customization customization) {
-        this.customization = customization;
+    public void setCustomization(Customization customConfig) {
+        this.customConfig = customConfig;
     }
 
     @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
     }
 
     @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
+    public <T> T deserialize(Type targetDescriptor, JsonParser jsonReader) {
+        return deserializeValue(targetDescriptor, jsonReader);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T deserializeItem(Type type, JsonParser parser) {
+    private <T> T deserializeValue(Type targetDescriptor, JsonParser jsonReader) {
         try {
-            if (lastValueEvent == null) {
-                lastValueEvent = parser.next();
-                checkState();
+            if (previousEvent == null) {
+                previousEvent = jsonReader.next();
+                validateState();
             }
-            ModelDeserializer<JsonParser> modelDeserializer = getJsonbContext().getChainModelCreator().deserializerChain(type);
-            return (T) modelDeserializer.deserialize(parser, this);
+            ModelUnmarshaller<JsonParser> modelDeserializer = getJsonbContext().getChainModelCreator().deserializerChain(targetDescriptor);
+            return (T) modelDeserializer.unmarshal(jsonReader, this);
         } catch (JsonbException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, e.getMessage()), e);
         }
     }
 
-    private void checkState() {
-        if (lastValueEvent == JsonParser.Event.KEY_NAME) {
+    private void validateState() {
+        if (previousEvent == JsonParser.Event.KEY_NAME) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
     }

@@ -27,14 +27,14 @@ import java.util.TreeSet;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.InstanceCreator;
 import org.eclipse.yasson.internal.ReflectionUtils;
 
 /**
  * Collection instance creator.
  */
-class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
+class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final CollectionDeserializer delegate;
     private final Type type;
@@ -50,7 +50,7 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         Object instance;
         if (isEnumSet) {
             instance = EnumSet.noneOf((Class<Enum>) type);
@@ -58,7 +58,7 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
             instance = InstanceCreator.createInstance(clazz);
         }
         context.setInstance(instance);
-        return delegate.deserialize(value, context);
+        return delegate.unmarshal(value, context);
     }
 
     private Class<?> implementationClass(Class<?> type) {

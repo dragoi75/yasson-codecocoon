@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
+import org.eclipse.yasson.internal.model.JsonbAnnotationContainer;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 
 /**
@@ -83,7 +83,7 @@ public class MappingContext {
                                                                                 ClassParser classParser,
                                                                                 JsonbContext jsonbContext) {
         return aClass -> {
-            JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
+            JsonbAnnotationContainer<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
             ClassCustomization customization = jsonbContext.getAnnotationIntrospector()
                     .introspectCustomization(clsElement,
                                              parentClassModel == null

@@ -30,12 +30,12 @@ import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.CreatorModel;
-import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
+import org.eclipse.yasson.internal.model.JsonbAnnotationContainer;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Created a class internal model.
@@ -57,7 +57,7 @@ class ClassParser {
     /**
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
-    void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
+    void parseProperties(ClassModel classModel, JsonbAnnotationContainer<Class<?>> classElement) {
         final Map<String, Property> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
         parseClassAndInterfaceMethods(classElement, classProperties);
@@ -121,7 +121,7 @@ class ClassParser {
         }
     }
 
-    private void parseClassAndInterfaceMethods(JsonbAnnotatedElement<Class<?>> classElement,
+    private void parseClassAndInterfaceMethods(JsonbAnnotationContainer<Class<?>> classElement,
                                                Map<String, Property> classProperties) {
         Class<?> concreteClass = classElement.getElement();
         parseMethods(concreteClass, classElement, classProperties);
@@ -131,7 +131,7 @@ class ClassParser {
     }
 
     private void parseIfaceMethodAnnotations(Class<?> ifc,
-                                             JsonbAnnotatedElement<Class<?>> classElement,
+                                             JsonbAnnotationContainer<Class<?>> classElement,
                                              Map<String, Property> classProperties) {
         Method[] declaredMethods = AccessController.doPrivileged((PrivilegedAction<Method[]>) ifc::getDeclaredMethods);
         for (Method method : declaredMethods) {
@@ -166,12 +166,12 @@ class ClassParser {
                 //May happen for classes which both extend a class with some method and implement interface with same method.
                 continue;
             }
-            JsonbAnnotatedElement<Method> methodElement = isGetter(method)
+            JsonbAnnotationContainer<Method> methodElement = isGetter(method)
                     ? property.getGetterElement() : property.getSetterElement();
             //Only push iface annotations if not overridden on impl classes
             for (Annotation ann : method.getDeclaredAnnotations()) {
                 if (methodElement.getAnnotation(ann.annotationType()).isEmpty()) {
-                    methodElement.putAnnotation(ann, true, null);
+                    methodElement.addAnnotation(ann, true, null);
                 }
             }
         }
@@ -179,7 +179,7 @@ class ClassParser {
 
     private Property registerMethod(String propertyName,
                                     Method method,
-                                    JsonbAnnotatedElement<Class<?>> classElement,
+                                    JsonbAnnotationContainer<Class<?>> classElement,
                                     Map<String, Property> classProperties) {
         Property property = classProperties.computeIfAbsent(propertyName, n -> new Property(n, classElement));
         if (isSetter(method)) {
@@ -192,7 +192,7 @@ class ClassParser {
     }
 
     private void parseMethods(Class<?> clazz,
-                              JsonbAnnotatedElement<Class<?>> classElement,
+                              JsonbAnnotationContainer<Class<?>> classElement,
                               Map<String, Property> classProperties) {
         Method[] declaredMethods = AccessController.doPrivileged((PrivilegedAction<Method[]>) clazz::getDeclaredMethods);
         for (Method method : declaredMethods) {
@@ -265,7 +265,7 @@ class ClassParser {
         return isGetter(m) || isSetter(m);
     }
 
-    private static void parseFields(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+    private static void parseFields(JsonbAnnotationContainer<Class<?>> classElement, Map<String, Property> classProperties) {
         Field[] declaredFields = AccessController.doPrivileged(
                 (PrivilegedAction<Field[]>) () -> classElement.getElement().getDeclaredFields());
         for (Field field : declaredFields) {
@@ -290,7 +290,7 @@ class ClassParser {
                                 && checkedPropertyModel.isWritable() //
                                 && collectedPropertyModel.isWritable())) {
                     throw new JsonbException(
-                            Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
+                            MessageBundle.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
                                     collectedPropertyModel.getPropertyName(), cls.getName()));
                 }
             }
@@ -309,7 +309,7 @@ class ClassParser {
      * Such property is sorted based on where its getter or field is located.
      */
     private List<PropertyModel> getSortedParentProperties(ClassModel classModel,
-                                                          JsonbAnnotatedElement<Class<?>> classElement,
+                                                          JsonbAnnotationContainer<Class<?>> classElement,
                                                           Map<String, Property> classProperties) {
         List<PropertyModel> sortedProperties = new ArrayList<>();
         //Pull properties from parent
@@ -367,7 +367,7 @@ class ClassParser {
 
     private static Property mergeProperty(Property current,
                                           PropertyModel parentProp,
-                                          JsonbAnnotatedElement<Class<?>> classElement) {
+                                          JsonbAnnotationContainer<Class<?>> classElement) {
         Field field = current.getField() != null
                 ? current.getField() : parentProp.getField();
         Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(),

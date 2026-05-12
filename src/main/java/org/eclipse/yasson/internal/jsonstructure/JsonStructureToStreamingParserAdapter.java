@@ -32,52 +32,52 @@ import jakarta.json.stream.JsonParser;
  * This adapter allows deserialization of {@link JsonStructure} into java content tree using same components
  * as when parsing JSON text.
  */
-public class JsonStructureToParserAdapter implements JsonParser {
+public class JsonStructureToStreamingParserAdapter implements JsonParser {
 
-    private Deque<JsonStructureIterator> iterators = new ArrayDeque<>();
+    private Deque<JsonStructureWalker> structureWalkers = new ArrayDeque<>();
 
-    private final JsonStructure rootStructure;
+    private final JsonStructure rootNode;
 
     /**
      * Creates new {@link JsonStructure} parser.
      *
-     * @param structure json structure
+     * @param inputNode json structure
      */
-    public JsonStructureToParserAdapter(JsonStructure structure) {
-        this.rootStructure = structure;
+    public JsonStructureToStreamingParserAdapter(JsonStructure inputNode) {
+        this.rootNode = inputNode;
     }
 
     @Override
     public boolean hasNext() {
-        return iterators.peek().hasNext();
+        return structureWalkers.peek().hasNext();
     }
 
     @Override
     public Event next() {
-        if (iterators.isEmpty()) {
-            if (rootStructure instanceof JsonObject) {
-                iterators.push(new JsonObjectIterator((JsonObject) rootStructure));
+        if (structureWalkers.isEmpty()) {
+            if (rootNode instanceof JsonObject) {
+                structureWalkers.push(new JsonObjectKeyIterator((JsonObject) rootNode));
                 return Event.START_OBJECT;
-            } else if (rootStructure instanceof JsonArray) {
-                iterators.push(new JsonArrayIterator((JsonArray) rootStructure));
+            } else if (rootNode instanceof JsonArray) {
+                structureWalkers.push(new JsonArrayValueIterator((JsonArray) rootNode));
                 return Event.START_ARRAY;
             }
         }
-        JsonStructureIterator current = iterators.peek();
-        Event next = current.next();
-        if (next == Event.START_OBJECT) {
-            iterators.push(new JsonObjectIterator((JsonObject) iterators.peek().getValue()));
-        } else if (next == Event.START_ARRAY) {
-            iterators.push(new JsonArrayIterator((JsonArray) iterators.peek().getValue()));
-        } else if (next == Event.END_OBJECT || next == Event.END_ARRAY) {
-            iterators.pop();
+        JsonStructureWalker activeWalker = structureWalkers.peek();
+        Event upcomingEvent = activeWalker.next();
+        if (upcomingEvent == Event.START_OBJECT) {
+            structureWalkers.push(new JsonObjectKeyIterator((JsonObject) structureWalkers.peek().getValue()));
+        } else if (upcomingEvent == Event.START_ARRAY) {
+            structureWalkers.push(new JsonArrayValueIterator((JsonArray) structureWalkers.peek().getValue()));
+        } else if (upcomingEvent == Event.END_OBJECT || upcomingEvent == Event.END_ARRAY) {
+            structureWalkers.pop();
         }
-        return next;
+        return upcomingEvent;
     }
 
     @Override
     public String getString() {
-        return iterators.peek().getString();
+        return structureWalkers.peek().getString();
     }
 
     @Override
@@ -103,16 +103,16 @@ public class JsonStructureToParserAdapter implements JsonParser {
     @Override
     public JsonObject getObject() {
 //        ((JsonObjectIterator) iterators.peek()).jsonObject
-        return iterators.peek().getValue().asJsonObject();
+        return structureWalkers.peek().getValue().asJsonObject();
     }
 
     private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (value.getValueType() != JsonValue.ValueType.NUMBER) {
-            throw iterator.createIncompatibleValueError();
+        JsonStructureWalker walkerFrame = structureWalkers.peek();
+        JsonValue numberNode = walkerFrame.getValue();
+        if (numberNode.getValueType() != JsonValue.ValueType.NUMBER) {
+            throw walkerFrame.createIncompatibleValueException();
         }
-        return (JsonNumber) value;
+        return (JsonNumber) numberNode;
     }
 
     @Override

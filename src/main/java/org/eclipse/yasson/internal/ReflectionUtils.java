@@ -30,8 +30,8 @@ import java.util.logging.Logger;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageBundle;
+import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
 /**
  * Utility class for resolution of generics during unmarshalling.
@@ -89,7 +89,7 @@ public class ReflectionUtils {
      */
     public static Class<?> getRawType(Type type) {
         return getOptionalRawType(type)
-                .orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.TYPE_RESOLUTION_ERROR, type)));
+                .orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TYPE_RESOLUTION_ERROR, type)));
     }
 
     /**
@@ -245,7 +245,7 @@ public class ReflectionUtils {
                         return Object.class;
                     }
                     //No generic information available
-                    throw new IllegalStateException(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND,
+                    throw new IllegalStateException(MessageBundle.getMessage(MessageKeyConstants.GENERIC_BOUND_NOT_FOUND,
                                                                         variableType,
                                                                         typeToSearch));
                 }
@@ -297,7 +297,7 @@ public class ReflectionUtils {
                 return declaredConstructor;
             } catch (NoSuchMethodException | RuntimeException e) {
                 if (required) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NO_DEFAULT_CONSTRUCTOR, clazz), e);
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NO_DEFAULT_CONSTRUCTOR, clazz), e);
                 }
                 return null;
             }
@@ -331,7 +331,7 @@ public class ReflectionUtils {
             }
             current = current.getSuperclass();
         }
-        throw new JsonbException(Messages.getMessage(MessageKeys.NON_PARAMETRIZED_TYPE, parameterizedInterface));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NON_PARAMETRIZED_TYPE, parameterizedInterface));
     }
 
     /**

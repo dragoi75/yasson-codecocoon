@@ -20,7 +20,7 @@ import java.util.Set;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 import static jakarta.json.stream.JsonParser.Event;
 
@@ -31,13 +31,13 @@ import static jakarta.json.stream.JsonParser.Event;
  * if user defined components are involved, it is possible to expect incorrect states in terms of the last expected events.
  * If this checker is still not in expected state, an exception is thrown.
  */
-public class PositionChecker implements ModelDeserializer<JsonParser> {
+public class PositionChecker implements ModelUnmarshaller<JsonParser> {
 
     private static final Map<Event, Event> CLOSING_EVENTS = Map.of(Event.START_ARRAY, Event.END_ARRAY,
                                                                    Event.START_OBJECT, Event.END_OBJECT);
 
     private final Set<Event> expectedEvents;
-    private final ModelDeserializer<JsonParser> delegate;
+    private final ModelUnmarshaller<JsonParser> delegate;
     private final Type rType;
 
     /**
@@ -47,7 +47,7 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
      * @param rType    runtime type
      * @param checker  bound group of events
      */
-    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Checker checker) {
+    public PositionChecker(ModelUnmarshaller<JsonParser> delegate, Type rType, Checker checker) {
         this(checker.events, delegate, rType);
     }
 
@@ -58,19 +58,19 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
      * @param rType    runtime type
      * @param events   customized checked events
      */
-    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Event... events) {
+    public PositionChecker(ModelUnmarshaller<JsonParser> delegate, Type rType, Event... events) {
         this(Set.copyOf(Arrays.asList(events)), delegate, rType);
     }
 
     private PositionChecker(Set<Event> expectedEvents,
-                            ModelDeserializer<JsonParser> delegate, Type rType) {
+                            ModelUnmarshaller<JsonParser> delegate, Type rType) {
         this.expectedEvents = expectedEvents;
         this.delegate = delegate;
         this.rType = rType;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         Event original = context.getLastValueEvent();
         Event startEvent = original;
         if (!expectedEvents.contains(startEvent)) {
@@ -82,7 +82,7 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
                                                  + "Allowed: " + expectedEvents);
             }
         }
-        Object o = delegate.deserialize(value, context);
+        Object o = delegate.unmarshal(value, context);
         if (CLOSING_EVENTS.containsKey(startEvent)
                 && CLOSING_EVENTS.get(startEvent) != context.getLastValueEvent()) {
             throw new JsonbException("Incorrect parser position after processing of the type: " + rType + ". "

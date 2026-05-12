@@ -15,13 +15,13 @@ package org.eclipse.yasson.internal.deserializer;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.deserializer.types.TypeDeserializer;
 
 /**
  * Extracts the value out of the {@link JsonParser} based upon the last obtained event.
  */
-public class ValueExtractor implements ModelDeserializer<JsonParser> {
+public class ValueExtractor implements ModelUnmarshaller<JsonParser> {
 
     private final TypeDeserializer delegate;
 
@@ -35,7 +35,7 @@ public class ValueExtractor implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         JsonParser.Event last = context.getLastValueEvent();
         switch (last) {
         case VALUE_TRUE:
@@ -44,7 +44,7 @@ public class ValueExtractor implements ModelDeserializer<JsonParser> {
             return delegate.deserialize(Boolean.FALSE, context);
         case KEY_NAME:
         case VALUE_STRING:
-            return delegate.deserialize(value.getString(), context);
+            return delegate.unmarshal(value.getString(), context);
         case VALUE_NUMBER:
             //We don't know for sure how to handle the number value, it can be int, long etc.
             //Value extraction has to be delegated to the TypeDeserializer

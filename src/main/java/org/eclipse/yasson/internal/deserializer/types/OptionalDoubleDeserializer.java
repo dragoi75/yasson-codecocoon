@@ -16,28 +16,28 @@ import java.util.OptionalDouble;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.DeserializationContextImplementation;
+import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 
 /**
  * Deserializer of the {@link OptionalDouble} type.
  */
-class OptionalDoubleDeserializer implements ModelDeserializer<JsonParser> {
+class OptionalDoubleDeserializer implements ModelUnmarshaller<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> extractor;
-    private final ModelDeserializer<Object> nullValueDelegate;
+    private final ModelUnmarshaller<JsonParser> extractor;
+    private final ModelUnmarshaller<Object> nullValueDelegate;
 
-    OptionalDoubleDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> nullValueDelegate) {
+    OptionalDoubleDeserializer(ModelUnmarshaller<JsonParser> extractor, ModelUnmarshaller<Object> nullValueDelegate) {
         this.extractor = extractor;
         this.nullValueDelegate = nullValueDelegate;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
-            return nullValueDelegate.deserialize(OptionalDouble.empty(), context);
+            return nullValueDelegate.unmarshal(OptionalDouble.empty(), context);
         }
-        OptionalDouble optional = OptionalDouble.of((Double) extractor.deserialize(value, context));
-        return nullValueDelegate.deserialize(optional, context);
+        OptionalDouble optional = OptionalDouble.of((Double) extractor.unmarshal(value, context));
+        return nullValueDelegate.unmarshal(optional, context);
     }
 }
