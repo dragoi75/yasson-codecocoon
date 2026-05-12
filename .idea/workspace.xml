@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5354c28a-611a-48b0-85a9-753601aaa2c5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/AnnotationIntrospector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/AnnotationIntrospector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/ClassParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/ClassParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/InstanceCreator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/InstanceCreator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/JsonbConfigProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/JsonbConfigProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/MappingContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/MappingContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Marshaller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Marshaller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Unmarshaller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/Unmarshaller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/ClassModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/ClassDescriptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/JsonbPropertyInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/JsonbPropertyInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/PropertyModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/BeanPropertyDescriptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassCustomization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassSerializationConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassCustomizationBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ClassCustomizationBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ContainerCustomization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ContainerCustomization.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/CreatorCustomization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/CreatorCustomization.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/CustomizationBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/CustomizationBase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/AnyOrderStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/AnyOrderStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/LexicographicalOrderStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/LexicographicalOrderStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/PropOrderStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/PropertyOrderStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/PropertyOrdering.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/PropertyOrderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/ReverseOrderStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/model/customization/ordering/ReverseOrderStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArrayDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractArrayDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractContainerSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractDateTimeDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractDateTimeDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractSerializerBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AbstractSerializerBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/AdaptedObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CurrentItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/CurrentItem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LocalDateTypeDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/LocalDateTypeDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectDeserializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectDeserializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/ObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/OptionalObjectSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/UserSerializerSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/eclipse/yasson/internal/serializer/UserSerializerSerializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/org/eclipse/yasson/internal/ClassParserTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/eclipse/yasson/internal/ClassParserTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectId" id="3DbzMDzJdgb3lBCPM7uugQKv2Sv" />
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.git.unshallow": "true",
+    "kotlin-language-version-configured": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5354c28a-611a-48b0-85a9-753601aaa2c5" name="Changes" comment="" />
+      <created>1778565507091</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1778565507091</updated>
+    </task>
+    <servers />
+  </component>
+</project>

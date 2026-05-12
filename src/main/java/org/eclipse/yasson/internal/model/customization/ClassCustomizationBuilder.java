@@ -13,14 +13,13 @@
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.serializer.JsonbDateFormatter;
 import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 
 import javax.json.bind.config.PropertyVisibilityStrategy;
 
 /**
- * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
+ * The customization builder that would be used to build an instance of {@link ClassSerializationConfig} to ensure its immutability.
  *
  * @author Ehsan Zaery Moghaddam (zaerymoghaddam@gmail.com)
  */
@@ -49,8 +48,8 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      *
      * @return A new instance of {@link PropertyCustomization}
      */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
+    public ClassSerializationConfig buildClassCustomization() {
+        return new ClassSerializationConfig(this);
     }
 
     /**

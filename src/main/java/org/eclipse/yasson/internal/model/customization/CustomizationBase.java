@@ -5,7 +5,7 @@ import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.components.SerializerBinding;
 
 /**
- * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
+ * Common properties of {@link ClassSerializationConfig} and {@link PropertyCustomization}.
  */
 abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
 

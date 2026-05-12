@@ -13,16 +13,14 @@
 package org.eclipse.yasson.internal;
 
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.internal.serializer.CurrentItem;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
 import org.eclipse.yasson.internal.serializer.DeserializerBuilder;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
-import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
@@ -63,7 +61,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
                     .withType(type).withJsonValueType(getRootEvent(parser));
             Class<?> rawType = ReflectionUtils.getRawType(type);
             if (!DefaultSerializers.getInstance().isKnownType(rawType)) {
-                ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
+                ClassDescriptor classModel = getMappingContext().getOrCreateClassModel(rawType);
                 deserializerBuilder.withCustomization(classModel.getCustomization());
             }
 

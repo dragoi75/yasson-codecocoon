@@ -22,7 +22,7 @@ import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
-import org.eclipse.yasson.internal.model.customization.ClassCustomization;
+import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
 import org.eclipse.yasson.internal.model.customization.ClassCustomizationBuilder;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -666,9 +666,9 @@ public class AnnotationIntrospector {
      * Processes customizations.
      *
      * @param clsElement Element to process.
-     * @return Populated {@link ClassCustomization} instance.
+     * @return Populated {@link ClassSerializationConfig} instance.
      */
-    public ClassCustomization introspectCustomization(JsonbAnnotatedElement<Class<?>> clsElement) {
+    public ClassSerializationConfig introspectCustomization(JsonbAnnotatedElement<Class<?>> clsElement) {
         final ClassCustomizationBuilder builder = new ClassCustomizationBuilder();
         builder.setNillable(isClassNillable(clsElement));
         builder.setDateFormatter(getJsonbDateFormat(clsElement));

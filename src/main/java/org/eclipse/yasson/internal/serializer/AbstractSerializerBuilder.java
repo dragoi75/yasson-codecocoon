@@ -14,7 +14,7 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 import java.lang.reflect.Type;
@@ -36,7 +36,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * In case of unknown object genericType.
      * Null for embedded objects such as collections, or known conversion types.
      */
-    protected ClassModel classModel;
+    protected ClassDescriptor classModel;
 
     /**
      * Runtime type resolved after expanding type variables and wildcards.
@@ -96,8 +96,8 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      * @param rawType Class to get model for.
      * @return Class model.
      */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
+    protected ClassDescriptor getClassModel(Class<?> rawType) {
+        ClassDescriptor classModel = jsonbContext.getMappingContext().getClassModel(rawType);
         if (classModel == null) {
             classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
         }
@@ -119,7 +119,7 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      *
      * @return model of a class
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 

@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ReflectionUtils;
-import org.eclipse.yasson.internal.model.ClassModel;
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 
 import javax.json.bind.serializer.JsonbSerializer;
 import javax.json.bind.serializer.SerializationContext;
@@ -50,14 +50,14 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
      * @param runtimeType class type
      * @param classModel model of the class
      */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         super(wrapper, runtimeType, classModel);
     }
 
     @Override
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
-        for (PropertyModel model : allProperties) {
+        final BeanPropertyDescriptor[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+        for (BeanPropertyDescriptor model : allProperties) {
             marshallProperty(object, generator, ctx, model);
         }
     }
@@ -73,7 +73,7 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
+    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, BeanPropertyDescriptor propertyModel) {
         Marshaller marshaller = (Marshaller) ctx;
 
         if (propertyModel.isReadable()) {

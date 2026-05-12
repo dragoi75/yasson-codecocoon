@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization.ordering;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,10 +23,10 @@ import java.util.List;
  *
  * @author David Kral
  */
-public class AnyOrderStrategy extends PropOrderStrategy {
+public class AnyOrderStrategy extends PropertyOrderStrategy {
 
     @Override
-    public List<PropertyModel> sortProperties(Collection<PropertyModel> properties) {
+    public List<BeanPropertyDescriptor> orderProperties(Collection<BeanPropertyDescriptor> properties) {
         return new ArrayList<>(properties);
     }
 

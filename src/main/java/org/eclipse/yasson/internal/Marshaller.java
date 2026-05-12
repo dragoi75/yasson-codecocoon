@@ -13,7 +13,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.AbstractValueTypeSerializer;
@@ -160,7 +160,7 @@ public class Marshaller extends ProcessingContext implements SerializationContex
                 .withType(runtimeType);
 
         if (!DefaultSerializers.getInstance().isKnownType(rootClazz)) {
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
+            ClassDescriptor classModel = getMappingContext().getOrCreateClassModel(rootClazz);
             serializerBuilder.withCustomization(classModel.getCustomization());
         }
         return serializerBuilder.build();

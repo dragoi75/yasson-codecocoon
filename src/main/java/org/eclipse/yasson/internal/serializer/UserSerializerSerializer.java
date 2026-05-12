@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.ProcessingContext;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 
@@ -34,7 +34,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     private final JsonbSerializer<T> userSerializer;
 
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Create instance of current item with its builder.
@@ -42,7 +42,7 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
      * @param classModel model
      * @param userSerializer user serializer
      */
-    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
+    public UserSerializerSerializer(ClassDescriptor classModel, JsonbSerializer<T> userSerializer) {
         this.classModel = classModel;
         this.userSerializer = userSerializer;
     }

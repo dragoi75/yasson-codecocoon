@@ -17,7 +17,7 @@ package org.eclipse.yasson.internal.model.customization;
  *
  * @author Roman Grigoriadi
  */
-public class ContainerCustomization extends ClassCustomization {
+public class ContainerCustomization extends ClassSerializationConfig {
 
     /**
      * Creates a new instance.
@@ -33,7 +33,7 @@ public class ContainerCustomization extends ClassCustomization {
      *
      * @param other Class customization to initialize from.
      */
-    public ContainerCustomization(ClassCustomization other) {
+    public ContainerCustomization(ClassSerializationConfig other) {
         super(other);
     }
 

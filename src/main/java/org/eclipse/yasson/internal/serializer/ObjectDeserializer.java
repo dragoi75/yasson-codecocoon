@@ -13,11 +13,11 @@
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.*;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.model.PropertyModel;
 
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.JsonbDeserializer;
@@ -43,9 +43,9 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
     private static class LastPropertyModel {
 
         private final String jsonKeyName;
-        private final PropertyModel propertyModel;
+        private final BeanPropertyDescriptor propertyModel;
 
-        public LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
+        public LastPropertyModel(String jsonKeyName, BeanPropertyDescriptor propertyModel) {
             this.jsonKeyName = jsonKeyName;
             this.propertyModel = propertyModel;
         }
@@ -54,7 +54,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             return jsonKeyName;
         }
 
-        public PropertyModel getPropertyModel() {
+        public BeanPropertyDescriptor getPropertyModel() {
             return propertyModel;
         }
     }
@@ -99,7 +99,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             if (wrapper.getCreatorModel() != null) {
                 return;
             }
-            final PropertyModel propertyModel = wrapper.getPropertyModel();
+            final BeanPropertyDescriptor propertyModel = wrapper.getPropertyModel();
             propertyModel.setValue(instance, wrapper.getValue());
         });
 
@@ -132,7 +132,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
      */
     @Override
     public void appendResult(Object result) {
-        final PropertyModel model = getModel();
+        final BeanPropertyDescriptor model = getModel();
         //missing property for null values
         if (model == null) {
             return;
@@ -159,7 +159,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         }
 
         //identify field model of currently processed class model
-        PropertyModel newPropertyModel = getModel();
+        BeanPropertyDescriptor newPropertyModel = getModel();
         if (newPropertyModel != null && newPropertyModel.isWritable()) {
             //create current item instance of identified object field
             final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext())
@@ -191,19 +191,19 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         return parser.getCurrentLevel();
     }
 
-    protected PropertyModel getModel() {
+    protected BeanPropertyDescriptor getModel() {
         final String lastKeyName = parserContext.getLastKeyName();
         if (lastPropertyModel != null && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
             return lastPropertyModel.getPropertyModel();
         }
-        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByJsonReadName(lastKeyName));
+        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().getPropertyModelByJsonReadName(lastKeyName));
         return lastPropertyModel.getPropertyModel();
     }
 
     private static class ValueWrapper {
 
         private final CreatorModel creatorModel;
-        private final PropertyModel propertyModel;
+        private final BeanPropertyDescriptor propertyModel;
         private final Object value;
 
         public ValueWrapper(CreatorModel creator, Object value) {
@@ -212,7 +212,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             propertyModel = null;
         }
 
-        public ValueWrapper(PropertyModel propertyModel, Object value) {
+        public ValueWrapper(BeanPropertyDescriptor propertyModel, Object value) {
             this.propertyModel = propertyModel;
             this.value = value;
             creatorModel = null;
@@ -222,7 +222,7 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
             return creatorModel;
         }
 
-        public PropertyModel getPropertyModel() {
+        public BeanPropertyDescriptor getPropertyModel() {
             return propertyModel;
         }
 

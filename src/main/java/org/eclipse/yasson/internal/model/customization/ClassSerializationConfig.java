@@ -24,44 +24,44 @@ import javax.json.bind.config.PropertyVisibilityStrategy;
  *
  * @author Roman Grigoriadi
  */
-public class ClassCustomization extends CustomizationBase {
+public class ClassSerializationConfig extends CustomizationBase {
 
-    private final JsonbCreator creator;
+    private final JsonbCreator instanceFactory;
 
-    private String[] propertyOrder;
+    private String[] fieldSequence;
 
-    private final JsonbNumberFormatter numberFormatter;
+    private final JsonbNumberFormatter decimalFormatter;
 
-    private final JsonbDateFormatter dateTimeFormatter;
+    private final JsonbDateFormatter timestampFormatter;
 
-    private final PropertyVisibilityStrategy propertyVisibilityStrategy;
+    private final PropertyVisibilityStrategy fieldVisibilityPolicy;
 
     /**
      * Copies properties from builder an creates immutable instance.
      *
-     * @param builder not null
+     * @param classCustomizer not null
      */
-    ClassCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
-        this.creator = builder.getCreator();
-        this.propertyOrder = builder.getPropertyOrder();
-        this.numberFormatter = builder.getNumberFormatter();
-        this.dateTimeFormatter = builder.getDateFormatter();
-        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
+    ClassSerializationConfig(ClassCustomizationBuilder classCustomizer) {
+        super(classCustomizer);
+        this.instanceFactory = classCustomizer.getCreator();
+        this.fieldSequence = classCustomizer.getPropertyOrder();
+        this.decimalFormatter = classCustomizer.getNumberFormatter();
+        this.timestampFormatter = classCustomizer.getDateFormatter();
+        this.fieldVisibilityPolicy = classCustomizer.getPropertyVisibilityStrategy();
     }
 
     /**
      * Copy constructor.
      *
-     * @param other other customization instance
+     * @param sourceConfig other customization instance
      */
-    public ClassCustomization(ClassCustomization other) {
-        super(other);
-        this.creator = other.getCreator();
-        this.propertyOrder = other.getPropertyOrder();
-        this.numberFormatter = other.getSerializeNumberFormatter();
-        this.dateTimeFormatter = other.getSerializeDateFormatter();
-        this.propertyVisibilityStrategy = other.getPropertyVisibilityStrategy();
+    public ClassSerializationConfig(ClassSerializationConfig sourceConfig) {
+        super(sourceConfig);
+        this.instanceFactory = sourceConfig.getCreator();
+        this.fieldSequence = sourceConfig.getPropertyOrder();
+        this.decimalFormatter = sourceConfig.getSerializeNumberFormatter();
+        this.timestampFormatter = sourceConfig.getSerializeDateFormatter();
+        this.fieldVisibilityPolicy = sourceConfig.getPropertyVisibilityStrategy();
     }
 
     /**
@@ -70,7 +70,7 @@ public class ClassCustomization extends CustomizationBase {
      * @return instance of creator
      */
     public JsonbCreator getCreator() {
-        return creator;
+        return instanceFactory;
     }
 
     /**
@@ -79,16 +79,16 @@ public class ClassCustomization extends CustomizationBase {
      * @return sorted names of properties
      */
     public String[] getPropertyOrder() {
-        return propertyOrder;
+        return fieldSequence;
     }
 
     /**
      * Sets sorted properties.
      *
-     * @param propertyOrder sorted names of properties
+     * @param fieldSequence sorted names of properties
      */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
+    public void setPropertyOrder(String[] fieldSequence) {
+        this.fieldSequence = fieldSequence;
     }
 
     /**
@@ -96,27 +96,27 @@ public class ClassCustomization extends CustomizationBase {
      * @return visibility strategy
      */
     public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
+        return fieldVisibilityPolicy;
     }
 
     @Override
     public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
+        return decimalFormatter;
     }
 
     @Override
     public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
+        return decimalFormatter;
     }
 
     @Override
     public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
+        return timestampFormatter;
     }
 
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
+        return timestampFormatter;
     }
 
 }

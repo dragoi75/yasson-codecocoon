@@ -28,7 +28,7 @@ public class JsonbPropertyInfo {
 
     private Type runtimeType;
 
-    private ClassModel classModel;
+    private ClassDescriptor classModel;
 
     private CurrentItem<?> wrapper;
 
@@ -77,7 +77,7 @@ public class JsonbPropertyInfo {
      *
      * @return Class model.
      */
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 
@@ -87,7 +87,7 @@ public class JsonbPropertyInfo {
      * @param classModel Class model to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withClassModel(ClassModel classModel) {
+    public JsonbPropertyInfo withClassModel(ClassDescriptor classModel) {
         this.classModel = classModel;
         return this;
     }

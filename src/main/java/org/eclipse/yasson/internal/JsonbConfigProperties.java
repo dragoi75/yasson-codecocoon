@@ -19,8 +19,8 @@ import org.eclipse.yasson.internal.model.customization.naming.DefaultNamingStrat
 import org.eclipse.yasson.internal.model.customization.naming.IdentityStrategy;
 import org.eclipse.yasson.internal.model.customization.ordering.AnyOrderStrategy;
 import org.eclipse.yasson.internal.model.customization.ordering.LexicographicalOrderStrategy;
-import org.eclipse.yasson.internal.model.customization.ordering.PropOrderStrategy;
-import org.eclipse.yasson.internal.model.customization.ordering.PropertyOrdering;
+import org.eclipse.yasson.internal.model.customization.ordering.PropertyOrderStrategy;
+import org.eclipse.yasson.internal.model.customization.ordering.PropertyOrderer;
 import org.eclipse.yasson.internal.model.customization.ordering.ReverseOrderStrategy;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -32,7 +32,6 @@ import javax.json.bind.JsonbException;
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.config.BinaryDataStrategy;
 import javax.json.bind.config.PropertyNamingStrategy;
-import javax.json.bind.config.PropertyOrderStrategy;
 import javax.json.bind.config.PropertyVisibilityStrategy;
 import javax.json.bind.serializer.JsonbSerializer;
 import java.time.format.DateTimeFormatter;
@@ -58,7 +57,7 @@ public class JsonbConfigProperties {
 
     private final PropertyNamingStrategy propertyNamingStrategy;
 
-    private final PropertyOrdering propertyOrdering;
+    private final PropertyOrderer propertyOrdering;
 
     private final JsonbDateFormatter dateFormatter;
 
@@ -85,7 +84,7 @@ public class JsonbConfigProperties {
         this.binaryDataStrategy = initBinaryDataStrategy();
         this.propertyNamingStrategy = initPropertyNamingStrategy();
         this.propertyVisibilityStrategy = initPropertyVisibilityStrategy();
-        this.propertyOrdering = new PropertyOrdering(initOrderStrategy());
+        this.propertyOrdering = new PropertyOrderer(initOrderStrategy());
         this.locale = initConfigLocale();
         this.dateFormatter = initDateFormatter(this.locale);
         this.nullable = initConfigNullable();
@@ -102,9 +101,9 @@ public class JsonbConfigProperties {
         Optional<String> os = getPropertyOrderStrategy();
         if (os.isPresent()) {
             switch (os.get()) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return TreeMap.class;
-                case PropertyOrderStrategy.REVERSE:
+                case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
                     return ReverseTreeMap.class;
                 default:
                     return HashMap.class;
@@ -156,15 +155,15 @@ public class JsonbConfigProperties {
         }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
     }
 
-    private PropOrderStrategy initOrderStrategy() {
+    private PropertyOrderStrategy initOrderStrategy() {
         Optional<String> strategy = getPropertyOrderStrategy();
         if (strategy.isPresent()) {
             switch (strategy.get()) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
                     return new LexicographicalOrderStrategy();
-                case PropertyOrderStrategy.REVERSE:
+                case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
                     return new ReverseOrderStrategy();
-                case PropertyOrderStrategy.ANY:
+                case javax.json.bind.config.PropertyOrderStrategy.ANY:
                     return new AnyOrderStrategy();
                 default:
                     throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
@@ -182,9 +181,9 @@ public class JsonbConfigProperties {
                 throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
             }
             switch ((String)strategy) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
-                case PropertyOrderStrategy.REVERSE:
-                case PropertyOrderStrategy.ANY:
+                case javax.json.bind.config.PropertyOrderStrategy.LEXICOGRAPHICAL:
+                case javax.json.bind.config.PropertyOrderStrategy.REVERSE:
+                case javax.json.bind.config.PropertyOrderStrategy.ANY:
                     return Optional.of((String)strategy);
                 default:
                     throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
@@ -362,7 +361,7 @@ public class JsonbConfigProperties {
      *
      * @return Component for ordering properties.
      */
-    public PropertyOrdering getPropertyOrdering() {
+    public PropertyOrderer getPropertyOrdering() {
         return propertyOrdering;
     }
 

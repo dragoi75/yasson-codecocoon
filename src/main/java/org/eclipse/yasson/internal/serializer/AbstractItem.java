@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.serializer;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import java.lang.reflect.Type;
 
@@ -37,7 +37,7 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
     /**
      * Cached reference to mapping model of an item.
      */
-    private final ClassModel classModel;
+    private final ClassDescriptor classModel;
 
     /**
      * Creates and populates an instance from given builder.
@@ -57,14 +57,14 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
      * @param runtimeType Runtime type.
      * @param classModel Class model.
      */
-    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+    public AbstractItem(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
         this.wrapper = wrapper;
         this.runtimeType = runtimeType;
         this.classModel = classModel;
     }
 
     @Override
-    public ClassModel getClassModel() {
+    public ClassDescriptor getClassModel() {
         return classModel;
     }
 

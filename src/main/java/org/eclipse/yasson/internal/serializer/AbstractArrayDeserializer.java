@@ -17,7 +17,7 @@ import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.ReflectionUtils;
 import org.eclipse.yasson.internal.Unmarshaller;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 
 import javax.json.bind.serializer.JsonbDeserializer;
 import javax.json.stream.JsonParser;
@@ -36,7 +36,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
      */
     protected final Class<?> componentClass;
 
-    protected final ClassModel componentClassModel;
+    protected final ClassDescriptor componentClassModel;
 
     protected AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);

@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.yasson.internal.model.customization.ordering;
 
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,15 +25,15 @@ import static java.util.stream.Collectors.toList;
  *
  * @author David Kral
  */
-public class LexicographicalOrderStrategy extends PropOrderStrategy implements Comparator<PropertyModel> {
+public class LexicographicalOrderStrategy extends PropertyOrderStrategy implements Comparator<BeanPropertyDescriptor> {
 
     @Override
-    public List<PropertyModel> sortProperties(Collection<PropertyModel> properties) {
+    public List<BeanPropertyDescriptor> orderProperties(Collection<BeanPropertyDescriptor> properties) {
         return properties.stream().sorted(this).collect(toList());
     }
 
     @Override
-    public int compare(PropertyModel object1, PropertyModel object2) {
+    public int compare(BeanPropertyDescriptor object1, BeanPropertyDescriptor object2) {
         return object1.getWriteName().compareTo(object2.getWriteName());
     }
 }
