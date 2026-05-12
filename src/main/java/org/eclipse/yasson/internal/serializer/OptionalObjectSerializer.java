@@ -10,18 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Predicate;
-
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.ObjectProcessingContext;
@@ -34,6 +31,7 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  * @param <T> instantiated Optional type
  */
 public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentItem<T>, JsonbSerializer<T> {
+
     private final Customization customization;
 
     private final CurrentItem<?> wrapper;
@@ -84,36 +82,28 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
             return;
         }
         Object optionalValue = obj.get();
-        final JsonbSerializer<?> serializer = new TypeSerializerBuilder(jsonbContext).setObjectClass(optionalValue.getClass())
-                .setType(optionalValueType).setWrapper(wrapper).setCustomization(customization).buildSerializer();
+        final JsonbSerializer<?> serializer = new TypeSerializerBuilder(jsonbContext).setObjectClass(optionalValue.getClass()).setType(optionalValueType).setWrapper(wrapper).setCustomization(customization).buildSerializer();
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 
-    static <T> boolean handleEmpty(T value,
-                                   Predicate<T> presentCheck,
-                                   Customization customization,
-                                   JsonGenerator generator,
-                                   JsonbMarshaller marshaller) {
-        if (value == null || !presentCheck.test(value)) {
-            if (customization != null) {
+    static <T> boolean handleEmpty(T value, Predicate<T> presentCheck, Customization customization, JsonGenerator generator, JsonbMarshaller marshaller) {
+        if (null != value && presentCheck.test(value)) {
+            return false;
+        } else {
+            if (null == customization) {
+                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
+            } else {
                 if (customization.isNillable()) {
                     generator.writeNull();
                     return true;
                 }
-            } else {
-                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
             }
             return true;
-        } else {
-            return false;
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void serialCaptor(JsonbSerializer<?> serializer,
-                                  T object,
-                                  JsonGenerator generator,
-                                  SerializationContext context) {
+    private <T> void serialCaptor(JsonbSerializer<?> serializer, T object, JsonGenerator generator, SerializationContext context) {
         ((JsonbSerializer<T>) serializer).serialize(object, generator, context);
     }
 }

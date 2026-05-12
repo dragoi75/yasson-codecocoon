@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.Iterator;
 import java.util.Map;
-
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
@@ -75,7 +73,6 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
          * @param ctx       JSON serialization context
          */
         void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx);
-
     }
 
     /**
@@ -107,38 +104,42 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
      */
     @Override
     protected void beforeSerialize(Map<K, V> obj) {
-        if (serializer == null) {
+        if (null == serializer) {
             // All keys can be serialized as String
             boolean allStrings = true;
             boolean first = true;
             Class<? extends Object> cls = null;
-            // Cycle shall exit on first negative check
-            for (Iterator<? extends Object> i = obj.keySet().iterator(); allStrings && i.hasNext(); ) {
+            Iterator<? extends Object> i = obj.keySet().iterator();
+            while (allStrings && i.hasNext()) {
                 Object key = i.next();
                 // 2nd and later pass: check whether all Map keys are of the same type
-                if (cls != null) {
-                    if (key == null) {
-                        allStrings = false;
+                if (null == cls) {
+                    if (!(key instanceof String) && !(key instanceof Number) && !(key instanceof Enum)) {
+                        if (null != key || !first) {
+                            allStrings = false;
+                        } else {
+                            first = false;
+                        }
                     } else {
+                        cls = key.getClass();
+                        first = false;
+                        // 1st pass: check whether key is null, which is also supported for Map to JSON Object serialization
+                        // Map shall contain only single mapping for null value and nothing else
+                    }
+                } else {
+                    if (null != key) {
                         allStrings = cls.equals(key.getClass());
+                    } else {
+                        allStrings = false;
                     }
                     // 1st pass: check whether key type is supported for Map to JSON Object serialization
-                } else if (key instanceof String || key instanceof Number || key instanceof Enum) {
-                    cls = key.getClass();
-                    first = false;
-                    // 1st pass: check whether key is null, which is also supported for Map to JSON Object serialization
-                    // Map shall contain only single mapping for null value and nothing else
-                } else if (key == null && first) {
-                    first = false;
-                } else {
-                    allStrings = false;
                 }
             }
             // Set proper serializing algorithm
-            if (allStrings) {
-                serializer = new MapToObjectSerializer<>(this);
-            } else {
+            if (!allStrings) {
                 serializer = new MapToEntriesArraySerializer<>(this);
+            } else {
+                serializer = new MapToObjectSerializer<>(this);
             }
         }
     }
@@ -198,5 +199,4 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
     protected boolean isNullable() {
         return nullable;
     }
-
 }

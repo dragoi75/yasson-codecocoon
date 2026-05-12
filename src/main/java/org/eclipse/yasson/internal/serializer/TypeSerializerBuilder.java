@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.GenericArrayType;
@@ -17,12 +16,10 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
-
 import org.eclipse.yasson.internal.ComponentBindingRegistry;
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.components.JsonbSerializerBinding;
@@ -63,62 +60,64 @@ public class TypeSerializerBuilder extends SerializerBuilderBase<TypeSerializerB
      */
     public JsonbSerializer<?> buildSerializer() {
         setRuntimeType(determineRuntimeType());
-
         if (getCustomization() instanceof ComponentBoundCustomization) {
             ComponentBoundCustomization componentConfig = (ComponentBoundCustomization) this.getCustomization();
             //First check if user deserializer is registered for such type
             final ComponentBindingRegistry bindingRegistry = getJsonbContext().getComponentMatcher();
-            Optional<JsonbSerializerBinding<?>> serializerBindingOpt = bindingRegistry
-                    .getSerializerBinding(getRuntimeType(), componentConfig);
+            Optional<JsonbSerializerBinding<?>> serializerBindingOpt = bindingRegistry.getSerializerBinding(getRuntimeType(), componentConfig);
             if (serializerBindingOpt.isPresent()) {
                 return new UserSerializerSerializer<>(getClassModel(), serializerBindingOpt.get().getJsonbSerializer());
             }
-
             //Second user components is registered.
-            Optional<TypeAdapterBinding> adapterBindingOpt = bindingRegistry
-                    .getSerializeAdapterBinding(getRuntimeType(), componentConfig);
+            Optional<TypeAdapterBinding> adapterBindingOpt = bindingRegistry.getSerializeAdapterBinding(getRuntimeType(), componentConfig);
             if (adapterBindingOpt.isPresent()) {
                 return new AdaptedObjectSerializer<>(getClassModel(), adapterBindingOpt.get());
             }
         }
-
         final Optional<AbstractValueSerializer<?>> valueSerializerOpt = getSupportedTypeSerializer(targetType);
         if (valueSerializerOpt.isPresent()) {
             return valueSerializerOpt.get();
         }
-
-        if (Collection.class.isAssignableFrom(targetType)) {
-            return new CollectionSerializer<>(this);
-        } else if (Map.class.isAssignableFrom(targetType)) {
-            return new MapSerializer<>(this);
-        } else if (isByteArray(targetType)) {
-            String approach = getJsonbContext().getConfigProperties().getBinaryDataStrategy();
-            switch (approach) {
-            case BinaryDataStrategy.BYTE:
-                return new ByteArraySerializer(this);
-            default:
-                return new ByteArrayBase64Serializer(getCustomization());
-            }
-        } else if (targetType.isArray() || getRuntimeType() instanceof GenericArrayType) {
-            return createArraySerializer(targetType.getComponentType());
-
-        } else if (JsonValue.class.isAssignableFrom(targetType)) {
-            if (JsonObject.class.isAssignableFrom(targetType)) {
-                return new JsonObjectSerializer(this);
+        if (!Collection.class.isAssignableFrom(targetType)) {
+            if (!Map.class.isAssignableFrom(targetType)) {
+                if (!isByteArray(targetType)) {
+                    if (!targetType.isArray() && !(getRuntimeType() instanceof GenericArrayType)) {
+                        if (!JsonValue.class.isAssignableFrom(targetType)) {
+                            if (!Optional.class.isAssignableFrom(targetType)) {
+                                getJsonbContext().getMappingContext().registerSerializerProvider(targetType, new ObjectSerializerProvider());
+                                return new ObjectSerializer<>(this);
+                            } else {
+                                return new OptionalObjectSerializer<>(this);
+                            }
+                        } else {
+                            if (!JsonObject.class.isAssignableFrom(targetType)) {
+                                return new JsonArraySerializer(this);
+                            } else {
+                                return new JsonObjectSerializer(this);
+                            }
+                        }
+                    } else {
+                        return createArraySerializer(targetType.getComponentType());
+                    }
+                } else {
+                    String approach = getJsonbContext().getConfigProperties().getBinaryDataStrategy();
+                    switch(approach) {
+                        case BinaryDataStrategy.BYTE:
+                            return new ByteArraySerializer(this);
+                        default:
+                            return new ByteArrayBase64Serializer(getCustomization());
+                    }
+                }
             } else {
-                return new JsonArraySerializer(this);
+                return new MapSerializer<>(this);
             }
-        } else if (Optional.class.isAssignableFrom(targetType)) {
-            return new OptionalObjectSerializer<>(this);
         } else {
-            getJsonbContext().getMappingContext().registerSerializerProvider(targetType, new ObjectSerializerProvider());
-            return new ObjectSerializer<>(this);
+            return new CollectionSerializer<>(this);
         }
-
     }
 
     private boolean isByteArray(Class<?> candidateType) {
-        return candidateType.isArray() && candidateType.getComponentType() == Byte.TYPE;
+        return candidateType.isArray() && Byte.TYPE == candidateType.getComponentType();
     }
 
     /**
@@ -126,38 +125,48 @@ public class TypeSerializerBuilder extends SerializerBuilderBase<TypeSerializerB
      * till parser ends parsing.
      */
     private JsonbSerializer<?> createArraySerializer(Class<?> elementType) {
-        if (elementType == byte.class) {
-            return new ByteArraySerializer(this);
-        } else if (elementType == short.class) {
-            return new ShortArraySerializer(this);
-        } else if (elementType == char.class) {
-            return new CharArraySerializer(this);
-        } else if (elementType == int.class) {
-            return new IntArraySerializer(this);
-        } else if (elementType == long.class) {
-            return new LongArraySerializer(this);
-        } else if (elementType == float.class) {
-            return new FloatArraySerializer(this);
-        } else if (elementType == double.class) {
-            return new DoubleArraySerializer(this);
+        if (byte.class != elementType) {
+            if (short.class != elementType) {
+                if (char.class != elementType) {
+                    if (int.class != elementType) {
+                        if (long.class != elementType) {
+                            if (float.class != elementType) {
+                                if (double.class != elementType) {
+                                    return new ObjectArraySerializer<>(this);
+                                } else {
+                                    return new DoubleArraySerializer(this);
+                                }
+                            } else {
+                                return new FloatArraySerializer(this);
+                            }
+                        } else {
+                            return new LongArraySerializer(this);
+                        }
+                    } else {
+                        return new IntArraySerializer(this);
+                    }
+                } else {
+                    return new CharArraySerializer(this);
+                }
+            } else {
+                return new ShortArraySerializer(this);
+            }
         } else {
-            return new ObjectArraySerializer<>(this);
+            return new ByteArraySerializer(this);
         }
     }
 
     private Optional<AbstractValueSerializer<?>> getSupportedTypeSerializer(Class<?> candidateType) {
-        final Optional<? extends SerializerProviderWrapper> serializerProviderOpt = DefaultSerializerRegistry.getInstance()
-                .findSerializerProvider(candidateType);
+        final Optional<? extends SerializerProviderWrapper> serializerProviderOpt = DefaultSerializerRegistry.getInstance().findSerializerProvider(candidateType);
         if (serializerProviderOpt.isPresent()) {
-            return Optional
-                    .of(serializerProviderOpt.get().getSerializerProvider().provideSerializer(getCustomization()));
+            return Optional.of(serializerProviderOpt.get().getSerializerProvider().provideSerializer(getCustomization()));
         }
         return Optional.empty();
     }
 
     private Type determineRuntimeType() {
         Type runtimeType = getGenericType();
-        if (runtimeType != null && runtimeType != Object.class) {
+        if (null != runtimeType && Object.class != runtimeType) {
             return runtimeType;
         }
         return targetType;

@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import java.util.ArrayList;
@@ -18,10 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.config.PropertyOrderStrategy;
-
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.PropertyModel;
 
@@ -53,19 +50,17 @@ public class PropertyOrdering {
     public List<PropertyModel> orderProperties(List<PropertyModel> properties, ClassDescriptor classModel) {
         Map<String, PropertyModel> byReadName = new HashMap<>();
         properties.forEach(propertyModel -> byReadName.put(propertyModel.getPropertyName(), propertyModel));
-
         String[] order = classModel.getClassCustomization().getPropertyOrder();
         List<PropertyModel> sortedProperties = new ArrayList<>();
-        if (order != null) {
+        if (null != order) {
             //if @JsonbPropertyOrder annotation is defined on a class
             for (String propName : order) {
                 final PropertyModel remove = byReadName.remove(propName);
-                if (remove != null) {
+                if (null != remove) {
                     sortedProperties.add(remove);
                 }
             }
         }
-
         List<PropertyModel> readNamesToSort = new ArrayList<>(byReadName.values());
         propertyOrderStrategy.accept(readNamesToSort);
         sortedProperties.addAll(readNamesToSort);

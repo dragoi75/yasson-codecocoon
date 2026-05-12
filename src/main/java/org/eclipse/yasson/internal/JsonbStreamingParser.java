@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.math.BigDecimal;
@@ -19,14 +18,12 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 
@@ -39,9 +36,13 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
      * State holder for current json structure level.
      */
     public static class LevelParseContext {
+
         private final LevelParseContext enclosingContext;
+
         private JsonParser.Event previousEvent;
+
         private String previousKey;
+
         private boolean isProcessed;
 
         /**
@@ -140,22 +141,22 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
     public JsonParser.Event next() {
         final JsonParser.Event upcomingEvent = parser.next();
         contextStack.peek().setLastEvent(upcomingEvent);
-        switch (upcomingEvent) {
-        case START_ARRAY:
-        case START_OBJECT:
-            final LevelParseContext createdParseContext = new LevelParseContext(contextStack.peek());
-            createdParseContext.setLastEvent(upcomingEvent);
-            contextStack.push(createdParseContext);
-            break;
-        case END_ARRAY:
-        case END_OBJECT:
-            contextStack.pop().finish();
-            break;
-        case KEY_NAME:
-            getCurrentLevel().setLastKeyName(parser.getString());
-            break;
-        default:
-            break;
+        switch(upcomingEvent) {
+            case START_ARRAY:
+            case START_OBJECT:
+                final LevelParseContext createdParseContext = new LevelParseContext(contextStack.peek());
+                createdParseContext.setLastEvent(upcomingEvent);
+                contextStack.push(createdParseContext);
+                break;
+            case END_ARRAY:
+            case END_OBJECT:
+                contextStack.pop().finish();
+                break;
+            case KEY_NAME:
+                getCurrentLevel().setLastKeyName(parser.getString());
+                break;
+            default:
+                break;
         }
         return upcomingEvent;
     }
@@ -187,17 +188,14 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
 
     @Override
     public void moveTo(JsonParser.Event targetEvent) {
-        if (!contextStack.isEmpty() && contextStack.peek().getLastEvent() == targetEvent) {
+        if (!contextStack.isEmpty() && targetEvent == contextStack.peek().getLastEvent()) {
             return;
         }
-
         final Event upcomingEvent = next();
-        if (upcomingEvent == targetEvent) {
+        if (targetEvent == upcomingEvent) {
             return;
         }
-
-        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                     "Event " + targetEvent + " not found." + getLastDataMsg()));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + targetEvent + " not found." + getLastDataMsg()));
     }
 
     @Override
@@ -214,20 +212,16 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
         if (!contextStack.isEmpty() && containsEvent(eventSequence, contextStack.peek().getLastEvent())) {
             return contextStack.peek().getLastEvent();
         }
-
         final Event upcomingEvent = next();
         if (containsEvent(eventSequence, upcomingEvent)) {
             return upcomingEvent;
         }
-
-        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                     "Parser event [" + Arrays
-                                                             .toString(eventSequence) + "] not found." + getLastDataMsg()));
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(eventSequence) + "] not found." + getLastDataMsg()));
     }
 
     private boolean containsEvent(Event[] eventSequence, Event potentialMatch) {
         for (Event occurrence : eventSequence) {
-            if (occurrence == potentialMatch) {
+            if (potentialMatch == occurrence) {
                 return true;
             }
         }
@@ -237,8 +231,7 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
     private String getLastDataMsg() {
         StringBuilder sb = new StringBuilder();
         final LevelParseContext activeContext = getCurrentLevel();
-        sb.append(" Last data: [").append("EVENT: ").append(activeContext.getLastEvent()).append(" KEY_NAME: ")
-                .append(activeContext.getLastKeyName()).append("]");
+        sb.append(" Last data: [").append("EVENT: ").append(activeContext.getLastEvent()).append(" KEY_NAME: ").append(activeContext.getLastKeyName()).append("]");
         return sb.toString();
     }
 
@@ -250,15 +243,15 @@ public class JsonbStreamingParser implements JsonParser, JsonbNavigator {
     @Override
     public void skipJsonStructure() {
         final LevelParseContext activeContext = contextStack.peek();
-        switch (activeContext.getLastEvent()) {
-        case START_ARRAY:
-        case START_OBJECT:
-            while (!activeContext.isParsed()) {
-                next();
-            }
-            return;
-        default:
-            return;
+        switch(activeContext.getLastEvent()) {
+            case START_ARRAY:
+            case START_OBJECT:
+                while (!activeContext.isParsed()) {
+                    next();
+                }
+                return;
+            default:
+                return;
         }
     }
 

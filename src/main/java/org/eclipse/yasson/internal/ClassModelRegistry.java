@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.util.ArrayDeque;
@@ -17,7 +16,6 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbAnnotationHolder;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
@@ -30,6 +28,7 @@ import org.eclipse.yasson.internal.serializer.ContainerSerializerFactory;
  * Thread safe.
  */
 public class ClassModelRegistry {
+
     private final JsonbRuntimeContext serializationContext;
 
     private final ConcurrentHashMap<Class<?>, ClassDescriptor> classDescriptorMap = new ConcurrentHashMap<>();
@@ -58,40 +57,34 @@ public class ClassModelRegistry {
      */
     public ClassDescriptor getOrCreateClassModel(Class<?> type) {
         ClassDescriptor descriptor = classDescriptorMap.get(type);
-        if (descriptor != null) {
+        if (null != descriptor) {
             return descriptor;
         }
-
         Deque<Class<?>> pendingClassesDeque = new ArrayDeque<>();
-        for (Class<?> typeToParse = type; typeToParse != Object.class; typeToParse = typeToParse.getSuperclass()) {
-            if (typeToParse == null) {
+        Class<?> typeToParse = type;
+        while (Object.class != typeToParse) {
+            if (null == typeToParse) {
                 break;
             }
             pendingClassesDeque.push(typeToParse);
+            typeToParse = typeToParse.getSuperclass();
         }
-        if (type == Object.class) {
+        if (Object.class == type) {
             return classDescriptorMap.computeIfAbsent(type, (candidate) -> new ClassDescriptor(candidate, null, null, null));
         }
-
         ClassDescriptor parentDescriptor = null;
         while (!pendingClassesDeque.isEmpty()) {
             Class<?> parseTarget = pendingClassesDeque.pop();
-            parentDescriptor = classDescriptorMap
-                    .computeIfAbsent(parseTarget, createClassModelParserFunction(parentDescriptor, modelParser, serializationContext));
+            parentDescriptor = classDescriptorMap.computeIfAbsent(parseTarget, createClassModelParserFunction(parentDescriptor, modelParser, serializationContext));
         }
         return classDescriptorMap.get(type);
     }
 
-    private static Function<Class<?>, ClassDescriptor> createClassModelParserFunction(ClassDescriptor parentDescriptor,
-                                                                                      ClassModelParser modelParser,
-                                                                                      JsonbRuntimeContext serializationContext) {
+    private static Function<Class<?>, ClassDescriptor> createClassModelParserFunction(ClassDescriptor parentDescriptor, ClassModelParser modelParser, JsonbRuntimeContext serializationContext) {
         return inputType -> {
             JsonbAnnotationHolder<Class<?>> classAnnotationHolder = serializationContext.getAnnotationIntrospector().gatherAnnotations(inputType);
             ClassSerializationConfig serializationConfig = serializationContext.getAnnotationIntrospector().analyzeCustomization(classAnnotationHolder);
-            ClassDescriptor createdDescriptor = new ClassDescriptor(inputType,
-                    serializationConfig,
-                    parentDescriptor,
-                                                      serializationContext.getConfigProperties().getPropertyNamingStrategy());
+            ClassDescriptor createdDescriptor = new ClassDescriptor(inputType, serializationConfig, parentDescriptor, serializationContext.getConfigProperties().getPropertyNamingStrategy());
             modelParser.collectProperties(createdDescriptor, classAnnotationHolder);
             return createdDescriptor;
         };

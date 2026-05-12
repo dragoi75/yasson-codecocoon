@@ -9,14 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.JsonbMarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
@@ -36,9 +33,7 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
      */
     public AbstractNumberSerializer(Customization customization) {
         super(customization);
-        formatter = customization != null
-                ? customization.getSerializeNumberFormatter()
-                : null;
+        formatter = null != customization ? customization.getSerializeNumberFormatter() : null;
     }
 
     /**
@@ -52,13 +47,12 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
 
     @Override
     protected void serializeValue(T obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        if (formatter != null) {
-            final NumberFormat format = NumberFormat
-                    .getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
+        if (null == formatter) {
+            serializeNonFormatted(obj, generator);
+        } else {
+            final NumberFormat format = NumberFormat.getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
             ((DecimalFormat) format).applyPattern(formatter.getFormat());
             generator.write(format.format(obj));
-        } else {
-            serializeNonFormatted(obj, generator);
         }
     }
 
@@ -69,5 +63,4 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
      * @param generator generator to use
      */
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
-
 }

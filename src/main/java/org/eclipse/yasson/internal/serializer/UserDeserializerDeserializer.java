@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbNavigator;
 import org.eclipse.yasson.internal.JsonbStreamingParser;
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
@@ -62,11 +60,10 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
         setParserContext(moveToFirst(parser));
         JsonParser.Event lastEvent = getParserContext().getLastEvent();
         final UserDeserializerParser userDeserializerParser = new UserDeserializerParser(parser);
-        deserializerResult = (T) deserializerBinding.getJsonbDeserializer()
-                .deserialize(userDeserializerParser, context, getRuntimeType());
+        deserializerResult = (T) deserializerBinding.getJsonbDeserializer().deserialize(userDeserializerParser, context, getRuntimeType());
         //In case deserialized structure is json object or array and the parser is not advanced
         //after enclosing bracket of deserialized object.
-        if (parser.getCurrentLevel() == getParserContext() && !JsonDeserializerBuilder.isJsonValueEvent(lastEvent)) {
+        if (getParserContext() == parser.getCurrentLevel() && !JsonDeserializerBuilder.isJsonValueEvent(lastEvent)) {
             userDeserializerParser.advanceParserToEnd();
         }
     }
@@ -83,5 +80,4 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         return parser.getCurrentLevel();
     }
-
 }

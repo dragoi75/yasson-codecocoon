@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -18,10 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.ReflectionTypeResolver;
 import org.eclipse.yasson.internal.RuntimeTypeDescriptor;
@@ -46,9 +43,7 @@ class ContainerDeserializerUtils {
      * @return resolved {@code Map} key type
      */
     public static Type mapKeyType(RuntimeTypeDescriptor item, Type mapType) {
-        return mapType instanceof ParameterizedType
-                ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0])
-                : Object.class;
+        return mapType instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0]) : Object.class;
     }
 
     /**
@@ -59,9 +54,7 @@ class ContainerDeserializerUtils {
      * @return resolved {@code Map} value type
      */
     public static Type mapValueType(RuntimeTypeDescriptor item, Type mapType) {
-        return mapType instanceof ParameterizedType
-                ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[1])
-                : Object.class;
+        return mapType instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[1]) : Object.class;
     }
 
     /**
@@ -75,17 +68,15 @@ class ContainerDeserializerUtils {
     @SuppressWarnings("unchecked")
     public static <T extends Map<?, ?>> T createMapInstance(JsonDeserializerBuilder builder, Type mapType) {
         Class<?> rawType = ReflectionTypeResolver.getRawType(mapType);
-        if (rawType.isInterface()) {
-            if (SortedMap.class.isAssignableFrom(rawType)) {
-                Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
-                return SortedMap.class.isAssignableFrom(defaultMapImplType)
-                        ? (T) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType)
-                        : (T) new TreeMap<>();
-            } else {
-                return (T) new HashMap<>();
-            }
-        } else {
+        if (!rawType.isInterface()) {
             return (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
+        } else {
+            if (!SortedMap.class.isAssignableFrom(rawType)) {
+                return (T) new HashMap<>();
+            } else {
+                Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
+                return SortedMap.class.isAssignableFrom(defaultMapImplType) ? (T) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType) : (T) new TreeMap<>();
+            }
         }
     }
 
@@ -98,17 +89,14 @@ class ContainerDeserializerUtils {
      * @param event     JSON parser event
      * @return de-serializer for {@code Collection} or {@code Map} item
      */
-    public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper,
-                                                              Type valueType,
-                                                              JsonbRuntimeContext ctx,
-                                                              JsonParser.Event event) {
+    public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper, Type valueType, JsonbRuntimeContext ctx, JsonParser.Event event) {
         //TODO needs performance optimization on not to create deserializer each time
         //TODO In contrast to serialization value type cannot change here
         Type actualValueType = ReflectionTypeResolver.resolveTypeDefault(wrapper, valueType);
         JsonDeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(wrapper, ctx, event).setType(actualValueType);
         if (!DefaultSerializerRegistry.getInstance().isKnownType(ReflectionTypeResolver.getRawType(actualValueType))) {
             ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionTypeResolver.getRawType(actualValueType));
-            deserializerBuilder.setCustomization(classModel == null ? null : classModel.getClassCustomization());
+            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getClassCustomization());
         }
         return deserializerBuilder.buildDeserializer();
     }
@@ -121,10 +109,7 @@ class ContainerDeserializerUtils {
      * @param event   JSON parser event
      * @return new instance of {@code DeserializerBuilder}
      */
-    public static JsonDeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper,
-                                                                     JsonbRuntimeContext ctx,
-                                                                     JsonParser.Event event) {
+    public static JsonDeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper, JsonbRuntimeContext ctx, JsonParser.Event event) {
         return new JsonDeserializerBuilder(ctx).setWrapper(wrapper).withJsonEvent(event);
     }
-
 }

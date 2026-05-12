@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -25,10 +24,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbNavigator;
 import org.eclipse.yasson.internal.JsonbStreamingParser;
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
@@ -51,24 +48,22 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
      */
     protected CollectionDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
-        collectionValueType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
-                : Object.class;
-
+        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
         instance = createInstance(builder);
     }
 
     @SuppressWarnings("unchecked")
     private T createInstance(JsonDeserializerBuilder builder) {
         Class<T> rawType = (Class<T>) ReflectionTypeResolver.getRawType(getRuntimeType());
-
-        if (rawType.isInterface()) {
+        if (!rawType.isInterface()) {
+            if (EnumSet.class.isAssignableFrom(rawType)) {
+                return (T) EnumSet.noneOf((Class<Enum>) collectionValueType);
+            }
+        } else {
             final T x = createInterfaceInstance(rawType);
-            if (x != null) {
+            if (null != x) {
                 return x;
             }
-        } else if (EnumSet.class.isAssignableFrom(rawType)) {
-            return (T) EnumSet.noneOf((Class<Enum>) collectionValueType);
         }
         return builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
     }
@@ -76,7 +71,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     @SuppressWarnings("unchecked")
     private T createInterfaceInstance(Class<?> ifcType) {
         if (List.class.isAssignableFrom(ifcType)) {
-            if (LinkedList.class == ifcType) {
+            if (ifcType == LinkedList.class) {
                 return (T) new LinkedList();
             }
             return (T) new ArrayList<>();
@@ -90,7 +85,7 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
         if (Queue.class.isAssignableFrom(ifcType)) {
             return (T) new ArrayDeque<>();
         }
-        if (Collection.class == ifcType) {
+        if (ifcType == Collection.class) {
             return (T) new ArrayList();
         }
         return null;

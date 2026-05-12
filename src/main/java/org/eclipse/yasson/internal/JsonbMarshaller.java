@@ -10,19 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.JsonbPropertyMetadata;
 import org.eclipse.yasson.internal.properties.MessageBundle;
@@ -80,10 +77,10 @@ public class JsonbMarshaller extends ObjectProcessingContext implements Serializ
             throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, jsonbError.getMessage()), jsonbError);
         } finally {
             try {
-                if (terminateAfterWrite) {
-                    generator.close();
-                } else {
+                if (!terminateAfterWrite) {
                     generator.flush();
+                } else {
+                    generator.close();
                 }
             } catch (JsonGenerationException generationEx) {
                 JSONB_MARSHAL_LOG.severe(generationEx.getMessage());
@@ -136,13 +133,12 @@ public class JsonbMarshaller extends ObjectProcessingContext implements Serializ
      */
     @SuppressWarnings("unchecked")
     public <T> void serializeRootValue(T rootValue, JsonGenerator jsonWriter) {
-        if (rootValue == null) {
+        if (null == rootValue) {
             getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, jsonWriter, this);
             return;
         }
         final JsonbSerializer<T> rootSer = (JsonbSerializer<T>) getRootSerializer(rootValue.getClass());
-        if (getJsonbContext().getConfigProperties().isStrictIJson()
-                && rootSer instanceof AbstractValueSerializer) {
+        if (getJsonbContext().getConfigProperties().isStrictIJson() && rootSer instanceof AbstractValueSerializer) {
             throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
         }
         rootSer.serialize(rootValue, jsonWriter, this);
@@ -150,20 +146,14 @@ public class JsonbMarshaller extends ObjectProcessingContext implements Serializ
 
     JsonbSerializer<?> getRootSerializer(Class<?> rootClass) {
         final ContainerSerializerFactory serializerFactory = getMappingContext().getSerializerProvider(rootClass);
-        if (serializerFactory != null) {
-            return serializerFactory
-                    .createSerializer(new JsonbPropertyMetadata()
-                                               .setRuntimeType(actualType));
+        if (null != serializerFactory) {
+            return serializerFactory.createSerializer(new JsonbPropertyMetadata().setRuntimeType(actualType));
         }
-        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(getJsonbContext())
-                .setObjectClass(rootClass)
-                .setType(actualType);
-
+        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(getJsonbContext()).setObjectClass(rootClass).setType(actualType);
         if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClass)) {
             ClassDescriptor classDescriptor = getMappingContext().getOrCreateClassModel(rootClass);
             typeBuilder.setCustomization(classDescriptor.getClassCustomization());
         }
         return typeBuilder.buildSerializer();
     }
-    
 }

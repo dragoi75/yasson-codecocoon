@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.components;
 
 import java.lang.reflect.Constructor;
@@ -17,9 +16,7 @@ import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.InstanceCreator;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.MessageBundle;
@@ -45,6 +42,7 @@ public class JsonbComponentInstanceCreatorFactory {
      * Initial context class.
      */
     public static final String INITIAL_CONTEXT_CLASS = "javax.naming.InitialContext";
+
     private static final String CDI_SPI_CLASS = "javax.enterprise.inject.spi.CDI";
 
     /**
@@ -58,10 +56,10 @@ public class JsonbComponentInstanceCreatorFactory {
      */
     public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceCreator creator) {
         Object beanManager = getCdiBeanManager();
-        if (beanManager == null) {
+        if (null == beanManager) {
             beanManager = getJndiBeanManager();
         }
-        if (beanManager == null) {
+        if (null == beanManager) {
             LOGGER.finest(MessageBundle.getMessage(MessageKeyConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
             return new DefaultConstructorCreator(creator);
         }
@@ -81,7 +79,7 @@ public class JsonbComponentInstanceCreatorFactory {
                     Method current = cdiClass.getMethod("current");
                     Method getBeanManager = cdiClass.getMethod("getBeanManager");
                     Object cdiObject = current.invoke(cdiClass);
-                    if (cdiObject == null) {
+                    if (null == cdiObject) {
                         return null;
                     }
                     return getBeanManager.invoke(cdiObject);
@@ -134,7 +132,7 @@ public class JsonbComponentInstanceCreatorFactory {
             throw e;
         } catch (ReflectiveOperationException e) {
             //likely no CDI container is running or bean manager JNDI lookup fails.
-            if (e.getCause() != null) {
+            if (null != e.getCause()) {
                 LOGGER.finest(e.getMessage());
             }
             LOGGER.finest(MessageBundle.getMessage(MessageKeyConstants.NO_CDI_ENVIRONMENT));
@@ -146,6 +144,7 @@ public class JsonbComponentInstanceCreatorFactory {
      * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
      */
     private interface BeanManagerProvider {
+
         Object provide() throws ReflectiveOperationException;
     }
 }

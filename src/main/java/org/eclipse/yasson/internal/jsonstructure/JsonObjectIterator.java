@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.util.Iterator;
-
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
@@ -31,6 +28,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
      * Location pointer.
      */
     public enum State {
+
         /**
          * Start of the object.
          */
@@ -71,38 +69,37 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     public JsonParser.Event next() {
-        switch (state) {
-        case START:
-            if (keyIterator.hasNext()) {
-                nextKey();
-                setState(JsonObjectIterator.State.KEY);
-                return JsonParser.Event.KEY_NAME;
-            } else {
+        switch(state) {
+            case START:
+                if (!keyIterator.hasNext()) {
+                    setState(State.END);
+                    return JsonParser.Event.END_OBJECT;
+                } else {
+                    nextKey();
+                    setState(JsonObjectIterator.State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
+            case KEY:
+                setState(JsonObjectIterator.State.VALUE);
+                JsonValue value = getValue();
+                return getValueEvent(value);
+            case VALUE:
+                if (keyIterator.hasNext()) {
+                    nextKey();
+                    setState(JsonObjectIterator.State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
                 setState(State.END);
                 return JsonParser.Event.END_OBJECT;
-            }
-        case KEY:
-            setState(JsonObjectIterator.State.VALUE);
-            JsonValue value = getValue();
-            return getValueEvent(value);
-        case VALUE:
-            if (keyIterator.hasNext()) {
-                nextKey();
-                setState(JsonObjectIterator.State.KEY);
-                return JsonParser.Event.KEY_NAME;
-            }
-            setState(State.END);
-            return JsonParser.Event.END_OBJECT;
-        default:
-            throw new JsonbException("Illegal state");
+            default:
+                throw new JsonbException("Illegal state");
         }
-
     }
 
     @Override
     public boolean hasNext() {
         //From the perspective of JsonParser not finished until END_OBJECT is being read.
-        return state != State.END;
+        return State.END != state;
     }
 
     /**
@@ -116,7 +113,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     String getString() {
-        if (state == JsonObjectIterator.State.KEY) {
+        if (JsonObjectIterator.State.KEY == state) {
             return currentKey;
         }
         return super.getString();
@@ -124,9 +121,7 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     @Override
     JsonbException createIncompatibleValueError() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
-                                                      getValue().getValueType(),
-                                                      currentKey));
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
     }
 
     private void setState(State state) {

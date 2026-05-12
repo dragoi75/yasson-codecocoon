@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -67,7 +66,7 @@ public class ResolvedParameterizedTypeImpl implements ParameterizedType {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(baseType.toString());
-        if (typeArguments != null && typeArguments.length > 0) {
+        if (null != typeArguments && 0 < typeArguments.length) {
             builder.append(" resolved arguments: [");
             for (Type argumentType : typeArguments) {
                 builder.append(String.valueOf(argumentType));
@@ -79,22 +78,18 @@ public class ResolvedParameterizedTypeImpl implements ParameterizedType {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (obj == this) {
             return true;
         }
-        if (obj == null || !(obj instanceof ParameterizedType)) {
+        if (null == obj || !(obj instanceof ParameterizedType)) {
             return false;
         }
         final ParameterizedType otherType = (ParameterizedType) obj;
-        return this.getRawType().equals(otherType.getRawType())
-                && Objects.equals(this.getOwnerType(), otherType.getOwnerType())
-                && Arrays.equals(typeArguments, otherType.getActualTypeArguments());
+        return this.getRawType().equals(otherType.getRawType()) && Objects.equals(this.getOwnerType(), otherType.getOwnerType()) && Arrays.equals(typeArguments, otherType.getActualTypeArguments());
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(typeArguments)
-                ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
-                ^ (getRawType() == null ? 0 : getRawType().hashCode());
+        return Arrays.hashCode(typeArguments) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
     }
 }

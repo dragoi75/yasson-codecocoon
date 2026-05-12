@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.annotation.Annotation;
@@ -24,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.CreatorProfile;
 import org.eclipse.yasson.internal.model.JsonbAnnotationHolder;
@@ -62,31 +59,22 @@ class ClassModelParser {
         final Map<String, PropertyDescriptor> propertyMap = new HashMap<>();
         collectFields(annotationHolder, propertyMap);
         parseClassAndInterfaceMethodsImpl(annotationHolder, propertyMap);
-
         //add sorted properties from parent, if they are not overridden in current class
         //parent properties are by default first by alphabet, than properties from a subclass
         final List<PropertyModel> parentPropertiesSorted = getSortedParentProperties(classDescriptor, annotationHolder, propertyMap);
-
-        List<PropertyModel> propertyModelsList = propertyMap.values().stream()
-                .map(propModel -> new PropertyModel(classDescriptor, propModel, runtimeContext))
-                .collect(Collectors.toList());
-
+        List<PropertyModel> propertyModelsList = propertyMap.values().stream().map(propModel -> new PropertyModel(classDescriptor, propModel, runtimeContext)).collect(Collectors.toList());
         //check for collision on same property read name
         List<PropertyModel> mergedUnsortedList = new ArrayList<>(parentPropertiesSorted.size() + propertyModelsList.size());
         mergedUnsortedList.addAll(parentPropertiesSorted);
         mergedUnsortedList.addAll(propertyModelsList);
         detectPropertyNameClash(mergedUnsortedList, classDescriptor.getType());
-
         combinePropertyModels(propertyModelsList);
-
         List<PropertyModel> orderedPropertyModels = new ArrayList<>(parentPropertiesSorted.size() + propertyModelsList.size());
         orderedPropertyModels.addAll(parentPropertiesSorted);
-        orderedPropertyModels.addAll(runtimeContext.getConfigProperties().getPropertyOrdering()
-                                            .orderProperties(propertyModelsList, classDescriptor));
-
+        orderedPropertyModels.addAll(runtimeContext.getConfigProperties().getPropertyOrdering().orderProperties(propertyModelsList, classDescriptor));
         //reference property to creator parameter by name to merge configuration in runtime
         JsonbCreatorInvoker factoryInvoker = classDescriptor.getClassCustomization().getCreator();
-        if (factoryInvoker != null) {
+        if (null != factoryInvoker) {
             orderedPropertyModels.forEach(modelParam -> {
                 for (CreatorProfile creationProfile : factoryInvoker.getParams()) {
                     if (creationProfile.getName().equals(modelParam.getPropertyName())) {
@@ -96,27 +84,28 @@ class ClassModelParser {
                 }
             });
         }
-
         classDescriptor.setProperties(orderedPropertyModels);
-
     }
 
     private void combinePropertyModels(List<PropertyModel> mergedUnsortedList) {
         PropertyModel[] clonedArray = mergedUnsortedList.toArray(new PropertyModel[mergedUnsortedList.size()]);
-        for (int idx = 0; idx < clonedArray.length; idx++) {
-            for (int jdx = idx + 1; jdx < clonedArray.length; jdx++) {
+        int idx = 0;
+        while (clonedArray.length > idx) {
+            int jdx = idx + 1;
+            while (clonedArray.length > jdx) {
                 if (clonedArray[idx].equals(clonedArray[jdx])) {
                     // Need to merge two properties
                     mergedUnsortedList.remove(clonedArray[idx]);
                     mergedUnsortedList.remove(clonedArray[jdx]);
                     mergedUnsortedList.add(new PropertyModel(clonedArray[idx], clonedArray[jdx]));
                 }
+                jdx += 1;
             }
+            idx += 1;
         }
     }
 
-    private void parseClassAndInterfaceMethodsImpl(JsonbAnnotationHolder<Class<?>> annotationHolder,
-                                                   Map<String, PropertyDescriptor> propertyMap) {
+    private void parseClassAndInterfaceMethodsImpl(JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
         Class<?> concreteType = annotationHolder.getElement();
         collectMethods(concreteType, annotationHolder, propertyMap);
         for (Class<?> iface : runtimeContext.getAnnotationIntrospector().collectAllInterfaces(concreteType)) {
@@ -124,9 +113,7 @@ class ClassModelParser {
         }
     }
 
-    private void parseInterfaceMethodAnnotations(Class<?> iface,
-                                                 JsonbAnnotationHolder<Class<?>> annotationHolder,
-                                                 Map<String, PropertyDescriptor> propertyMap) {
+    private void parseInterfaceMethodAnnotations(Class<?> iface, JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
         Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) iface::getDeclaredMethods);
         for (Method m : methodsArray) {
             final String name = m.getName();
@@ -134,60 +121,50 @@ class ClassModelParser {
                 continue;
             }
             String propKey = toPropertyName(name);
-
             PropertyDescriptor propModel = propertyMap.get(propKey);
-
             if (m.isDefault()) {
                 // Interface provides default implementation
-                if (propModel == null) {
-                    // the property does not yet exists : create it from scratch
-                    propModel = registerPropertyMethod(propKey, m, annotationHolder, propertyMap);
-                } else {
+                if (null != propModel) {
                     // property already exists, take care not overriding already parsed implementation
-                    if (isSetter(m)) {
-                        if (propModel.getSetter() == null) {
-                            propModel.setSetter(m);
-                        }
-                    } else {
-                        if (propModel.getGetter() == null) {
+                    if (!isSetter(m)) {
+                        if (null == propModel.getGetter()) {
                             propModel.setGetter(m);
                         }
+                    } else {
+                        if (null == propModel.getSetter()) {
+                            propModel.setSetter(m);
+                        }
                     }
+                } else {
+                    // the property does not yet exists : create it from scratch
+                    propModel = registerPropertyMethod(propKey, m, annotationHolder, propertyMap);
                 }
             }
-
-            if (propModel == null) {
+            if (null == propModel) {
                 //May happen for classes which both extend a class with some method and implement interface with same method.
                 continue;
             }
-            JsonbAnnotationHolder<Method> methodAnnotationHolder = isGetter(m)
-                    ? propModel.getGetterElement() : propModel.getSetterElement();
+            JsonbAnnotationHolder<Method> methodAnnotationHolder = isGetter(m) ? propModel.getGetterElement() : propModel.getSetterElement();
             //Only push iface annotations if not overridden on impl classes
             for (Annotation annotation : m.getDeclaredAnnotations()) {
-                if (methodAnnotationHolder.getAnnotation(annotation.annotationType()) == null) {
+                if (null == methodAnnotationHolder.getAnnotation(annotation.annotationType())) {
                     methodAnnotationHolder.addAnnotation(annotation);
                 }
             }
         }
     }
 
-    private PropertyDescriptor registerPropertyMethod(String name,
-                                                      Method m,
-                                                      JsonbAnnotationHolder<Class<?>> annotationHolder,
-                                                      Map<String, PropertyDescriptor> propertyMap) {
+    private PropertyDescriptor registerPropertyMethod(String name, Method m, JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
         PropertyDescriptor propModel = propertyMap.computeIfAbsent(name, idx -> new PropertyDescriptor(idx, annotationHolder));
-        if (isSetter(m)) {
-            propModel.setSetter(m);
-        } else {
+        if (!isSetter(m)) {
             propModel.setGetter(m);
+        } else {
+            propModel.setSetter(m);
         }
-
         return propModel;
     }
 
-    private void collectMethods(Class<?> targetType,
-                                JsonbAnnotationHolder<Class<?>> annotationHolder,
-                                Map<String, PropertyDescriptor> propertyMap) {
+    private void collectMethods(Class<?> targetType, JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
         Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) targetType::getDeclaredMethods);
         for (Method m : methodsArray) {
             String identifier = m.getName();
@@ -196,7 +173,6 @@ class ClassModelParser {
                 continue;
             }
             final String name = toPropertyName(identifier);
-
             registerPropertyMethod(name, m, annotationHolder, propertyMap);
         }
     }
@@ -211,24 +187,22 @@ class ClassModelParser {
         }
         // Groovy objects will have public groovy.lang.MetaClass X.getMetaClass()
         // which causes an infinite loop in serialization
-        if (candidateMethod.getName().equals("getMetaClass")
-                && candidateMethod.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
+        if (candidateMethod.getName().equals("getMetaClass") && candidateMethod.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
             return true;
         }
         // WELD proxy objects will have 'public org.jboss.weld
-        if (candidateMethod.getName().equals("getMetadata")
-                && candidateMethod.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
+        if (candidateMethod.getName().equals("getMetadata") && candidateMethod.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
             return true;
         }
         return false;
     }
 
     private boolean isGetter(Method candidateMethod) {
-        return (candidateMethod.getName().startsWith(ACCESSOR_PREFIX) || candidateMethod.getName().startsWith(PREDICATE_PREFIX)) && candidateMethod.getParameterCount() == 0;
+        return (candidateMethod.getName().startsWith(ACCESSOR_PREFIX) || candidateMethod.getName().startsWith(PREDICATE_PREFIX)) && 0 == candidateMethod.getParameterCount();
     }
 
     private boolean isSetter(Method candidateMethod) {
-        return candidateMethod.getName().startsWith(MUTATOR_PREFIX) && candidateMethod.getParameterCount() == 1;
+        return candidateMethod.getName().startsWith(MUTATOR_PREFIX) && 1 == candidateMethod.getParameterCount();
     }
 
     private String toPropertyName(String identifier) {
@@ -237,13 +211,11 @@ class ClassModelParser {
 
     private String decapitalize(String identifier) {
         Objects.requireNonNull(identifier);
-        if (identifier.length() == 0) {
+        if (0 == identifier.length()) {
             //methods named get() or set()
             return identifier;
         }
-        if (identifier.length() > 1
-                && Character.isUpperCase(identifier.charAt(1))
-                && Character.isUpperCase(identifier.charAt(0))) {
+        if (1 < identifier.length() && Character.isUpperCase(identifier.charAt(1)) && Character.isUpperCase(identifier.charAt(0))) {
             return identifier;
         }
         char[] charArray = identifier.toCharArray();
@@ -256,8 +228,7 @@ class ClassModelParser {
     }
 
     private void collectFields(JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
-        Field[] fieldArray = AccessController.doPrivileged(
-                (PrivilegedAction<Field[]>) () -> annotationHolder.getElement().getDeclaredFields());
+        Field[] fieldArray = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> annotationHolder.getElement().getDeclaredFields());
         for (Field member : fieldArray) {
             final String identifier = member.getName();
             if (member.isSynthetic()) {
@@ -273,15 +244,10 @@ class ClassModelParser {
         final List<PropertyModel> verifiedModels = new ArrayList<>();
         for (PropertyModel candidateModel : collectedModels) {
             for (PropertyModel verifiedModel : verifiedModels) {
-                if ((verifiedModel.getReadName().equals(candidateModel.getReadName())
-                        && verifiedModel.isReadable() //
-                        && candidateModel.isReadable())
-                        || (verifiedModel.getWriteName().equals(candidateModel.getWriteName())
-                                && verifiedModel.isWritable() //
-                                && candidateModel.isWritable())) {
-                    throw new JsonbException(
-                            MessageBundle.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, verifiedModel.getPropertyName(),
-                                    candidateModel.getPropertyName(), targetType.getName()));
+                if ((//
+                verifiedModel.getReadName().equals(candidateModel.getReadName()) && verifiedModel.isReadable() && candidateModel.isReadable()) || (//
+                verifiedModel.getWriteName().equals(candidateModel.getWriteName()) && verifiedModel.isWritable() && candidateModel.isWritable())) {
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.PROPERTY_NAME_CLASH, verifiedModel.getPropertyName(), candidateModel.getPropertyName(), targetType.getName()));
                 }
             }
             verifiedModels.add(candidateModel);
@@ -298,30 +264,25 @@ class ClassModelParser {
      * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private List<PropertyModel> getSortedParentProperties(ClassDescriptor classDescriptor,
-                                                          JsonbAnnotationHolder<Class<?>> annotationHolder,
-                                                          Map<String, PropertyDescriptor> propertyMap) {
+    private List<PropertyModel> getSortedParentProperties(ClassDescriptor classDescriptor, JsonbAnnotationHolder<Class<?>> annotationHolder, Map<String, PropertyDescriptor> propertyMap) {
         List<PropertyModel> sortedList = new ArrayList<>();
         //Pull properties from parent
-        if (classDescriptor.getParentClassModel() != null) {
+        if (null != classDescriptor.getParentClassModel()) {
             for (PropertyModel parentModel : classDescriptor.getParentClassModel().getSortedProperties()) {
                 final PropertyDescriptor activeDescriptor = propertyMap.get(parentModel.getPropertyName());
                 //don't replace overridden properties
-                if (activeDescriptor == null) {
-                    sortedList.add(parentModel);
-                } else {
+                if (null != activeDescriptor) {
                     //merge
                     final PropertyDescriptor combinedDescriptor = mergePropertyDescriptors(activeDescriptor, parentModel, annotationHolder);
-                    ReflectionPropagation reflectionHandler = new ReflectionPropagation(activeDescriptor,
-                                                                                  classDescriptor.getClassCustomization()
-                                                                                          .getPropertyVisibilityStrategy());
-                    if (reflectionHandler.isReadable()) {
-                        propertyMap.replace(activeDescriptor.getName(), combinedDescriptor);
-                    } else {
+                    ReflectionPropagation reflectionHandler = new ReflectionPropagation(activeDescriptor, classDescriptor.getClassCustomization().getPropertyVisibilityStrategy());
+                    if (!reflectionHandler.isReadable()) {
                         sortedList.add(new PropertyModel(classDescriptor, combinedDescriptor, runtimeContext));
                         propertyMap.remove(activeDescriptor.getName());
+                    } else {
+                        propertyMap.replace(activeDescriptor.getName(), combinedDescriptor);
                     }
-
+                } else {
+                    sortedList.add(parentModel);
                 }
             }
         }
@@ -349,31 +310,23 @@ class ClassModelParser {
      * @return effective method to register as getter or setter
      */
     private Method selectMostSpecificNonDefault(Method activeDescriptor, Method ancestorMethod) {
-        return (
-                activeDescriptor != null ? (
-                        ancestorMethod != null && activeDescriptor.isDefault()
-                                && !ancestorMethod.isDefault() ? ancestorMethod : activeDescriptor) : ancestorMethod);
+        return (null != activeDescriptor ? (null != ancestorMethod && activeDescriptor.isDefault() && !ancestorMethod.isDefault() ? ancestorMethod : activeDescriptor) : ancestorMethod);
     }
 
     private PropertyDescriptor mergePropertyDescriptors(PropertyDescriptor activeDescriptor, PropertyModel parentModel, JsonbAnnotationHolder<Class<?>> annotationHolder) {
-        Field member = activeDescriptor.getField() != null
-                ? activeDescriptor.getField() : parentModel.getPropagation().getField();
-        Method accessorMethod = selectMostSpecificNonDefault(activeDescriptor.getGetter(),
-                                                           parentModel.getPropagation().getGetter());
-        Method mutatorMethod = selectMostSpecificNonDefault(activeDescriptor.getSetter(),
-                                                           parentModel.getPropagation().getSetter());
-
+        Field member = null != activeDescriptor.getField() ? activeDescriptor.getField() : parentModel.getPropagation().getField();
+        Method accessorMethod = selectMostSpecificNonDefault(activeDescriptor.getGetter(), parentModel.getPropagation().getGetter());
+        Method mutatorMethod = selectMostSpecificNonDefault(activeDescriptor.getSetter(), parentModel.getPropagation().getSetter());
         PropertyDescriptor combinedDescriptor = new PropertyDescriptor(parentModel.getPropertyName(), annotationHolder);
-        if (member != null) {
+        if (null != member) {
             combinedDescriptor.setField(member);
         }
-        if (accessorMethod != null) {
+        if (null != accessorMethod) {
             combinedDescriptor.setGetter(accessorMethod);
         }
-        if (mutatorMethod != null) {
+        if (null != mutatorMethod) {
             combinedDescriptor.setSetter(mutatorMethod);
         }
         return combinedDescriptor;
     }
-
 }

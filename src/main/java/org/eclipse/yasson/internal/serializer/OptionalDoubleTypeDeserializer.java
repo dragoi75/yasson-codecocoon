@@ -10,16 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
 import java.util.OptionalDouble;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbNavigator;
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -43,7 +40,7 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
     @Override
     public OptionalDouble deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         final JsonParser.Event next = ((JsonbNavigator) parser).moveToValue();
-        if (next == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == next) {
             return OptionalDouble.empty();
         }
         String value = parser.getString();

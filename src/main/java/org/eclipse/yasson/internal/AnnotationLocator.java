@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.annotation.Annotation;
@@ -20,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 
@@ -30,10 +28,13 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
 class AnnotationLocator {
 
     private static final String CONSTRUCTOR_PROPERTIES_KEY = "java.beans.ConstructorProperties";
+
     private static final Logger LOG = Logger.getLogger(AnnotationLocator.class.getName());
 
     private final String annotationTypeName;
-    private final Class<? extends Annotation> annotationType; // may be null
+
+    // may be null
+    private final Class<? extends Annotation> annotationType;
 
     /**
      * Gets the {@link AnnotationLocator} for the given Annotation-Type.
@@ -71,7 +72,7 @@ class AnnotationLocator {
 
     @SuppressWarnings("unchecked")
     public <T extends Annotation> T findAnnotationIn(Annotation[] annArray) {
-        if (annotationType == null) {
+        if (null == annotationType) {
             return null;
         }
         return (T) locateAnnotation(annArray, annotationType, new HashSet<>());
@@ -89,14 +90,13 @@ class AnnotationLocator {
     }
 
     private Object invokeValueMethod(Annotation annClass) {
-        if (annClass == null) {
+        if (null == annClass) {
             return null;
         }
         try {
             return annClass.annotationType().getMethod("value").invoke(annClass);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String msg = MessageBundle
-                    .getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annClass.annotationType().getName());
+            String msg = MessageBundle.getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annClass.annotationType().getName());
             LOG.finest(msg);
             return null;
         }
@@ -118,9 +118,7 @@ class AnnotationLocator {
      */
     // "static" to use it in a hybrid procedural and object oriented manner.
     @SuppressWarnings("unchecked")
-    public static <T extends Annotation> T locateAnnotation(Annotation[] baseAnnotations,
-                                                            Class<T> annotationDescriptor,
-                                                            Set<Annotation> seenAnnotations) {
+    public static <T extends Annotation> T locateAnnotation(Annotation[] baseAnnotations, Class<T> annotationDescriptor, Set<Annotation> seenAnnotations) {
         for (Annotation contender : baseAnnotations) {
             final Class<? extends Annotation> annotationType = contender.annotationType();
             if (annotationType.equals(annotationDescriptor)) {
@@ -129,11 +127,9 @@ class AnnotationLocator {
             seenAnnotations.add(contender);
             final List<Annotation> inheritedAnnotationList = new ArrayList<>(Arrays.asList(annotationType.getDeclaredAnnotations()));
             inheritedAnnotationList.removeAll(seenAnnotations);
-            if (inheritedAnnotationList.size() > 0) {
-                final T parent = locateAnnotation(inheritedAnnotationList.toArray(new Annotation[inheritedAnnotationList.size()]),
-                        annotationDescriptor,
-                        seenAnnotations);
-                if (parent != null) {
+            if (0 < inheritedAnnotationList.size()) {
+                final T parent = locateAnnotation(inheritedAnnotationList.toArray(new Annotation[inheritedAnnotationList.size()]), annotationDescriptor, seenAnnotations);
+                if (null != parent) {
                     return parent;
                 }
             }

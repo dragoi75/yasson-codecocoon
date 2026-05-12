@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.Map;
-
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerator;
 
@@ -83,13 +81,13 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
         for (Map.Entry<K, V> entry : obj.entrySet()) {
             final String keyString;
             K key = entry.getKey();
-            if (key instanceof Enum<?>) {
-                keyString = ((Enum<?>) key).name();
-            } else {
+            if (!(key instanceof Enum<?>)) {
                 keyString = String.valueOf(key);
+            } else {
+                keyString = ((Enum<?>) key).name();
             }
             final Object value = entry.getValue();
-            if (value == null) {
+            if (null == value) {
                 if (serializer.isNullable()) {
                     generator.writeNull(keyString);
                 }
@@ -99,5 +97,4 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
             serializer.serializeItem(value, generator, ctx);
         }
     }
-
 }

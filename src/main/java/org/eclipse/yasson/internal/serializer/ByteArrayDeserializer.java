@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
 
 /**
@@ -42,8 +40,10 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
     public byte[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int size = items.size();
         final byte[] byteArray = new byte[size];
-        for (int i = 0; i < size; i++) {
+        int i = 0;
+        while (size > i) {
             byteArray[i] = items.get(i);
+            i += 1;
         }
         return byteArray;
     }

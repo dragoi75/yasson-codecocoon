@@ -9,15 +9,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
-
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbNavigator;
 import org.eclipse.yasson.internal.JsonbUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -56,10 +53,9 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         JsonbUnmarshaller unmarshaller = (JsonbUnmarshaller) ctx;
         final JsonParser.Event event = ((JsonbNavigator) parser).getCurrentLevel().getLastEvent();
-        if (event == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == event) {
             return null;
         }
-
         final String value = parser.getString();
         return deserialize(value, unmarshaller, rtType);
     }

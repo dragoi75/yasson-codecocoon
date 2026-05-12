@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
@@ -55,14 +52,12 @@ public class JsonbUnmarshaller extends ObjectProcessingContext implements Deseri
     @SuppressWarnings("unchecked")
     private <T> T deserializeValue(Type targetKind, JsonParser jsonReader) {
         try {
-            JsonDeserializerBuilder deserializerFactory = new JsonDeserializerBuilder(getJsonbContext())
-                    .setType(targetKind).withJsonEvent(getRootEvent(jsonReader));
+            JsonDeserializerBuilder deserializerFactory = new JsonDeserializerBuilder(getJsonbContext()).setType(targetKind).withJsonEvent(getRootEvent(jsonReader));
             Class<?> rawClass = ReflectionTypeResolver.getRawType(targetKind);
             if (!DefaultSerializerRegistry.getInstance().isKnownType(rawClass)) {
                 ClassDescriptor classDescriptor = getMappingContext().getOrCreateClassModel(rawClass);
                 deserializerFactory.setCustomization(classDescriptor.getClassCustomization());
             }
-
             return (T) deserializerFactory.buildDeserializer().deserialize(jsonReader, this, targetKind);
         } catch (JsonbException ex) {
             JSONB_UNMARSHALLER_LOG.severe(ex.getMessage());
@@ -80,11 +75,10 @@ public class JsonbUnmarshaller extends ObjectProcessingContext implements Deseri
     private JsonParser.Event getRootEvent(JsonParser jsonReader) {
         JsonbStreamingParser.LevelParseContext levelContext = ((JsonbNavigator) jsonReader).getCurrentLevel();
         //Wrapper parser is at start
-        if (levelContext.getParent() == null) {
+        if (null == levelContext.getParent()) {
             return jsonReader.next();
         }
         final JsonParser.Event finalEvent = levelContext.getLastEvent();
-        return finalEvent == JsonParser.Event.KEY_NAME ? jsonReader.next() : finalEvent;
+        return JsonParser.Event.KEY_NAME == finalEvent ? jsonReader.next() : finalEvent;
     }
-
 }

@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.util.Iterator;
-
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 
@@ -49,10 +46,10 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
      */
     String getString() {
         JsonValue value = getValue();
-        if (value instanceof JsonString) {
-            return ((JsonString) value).getString();
-        } else {
+        if (!(value instanceof JsonString)) {
             return value.toString();
+        } else {
+            return ((JsonString) value).getString();
         }
     }
 
@@ -63,23 +60,21 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
      * @return JsonParser event
      */
     JsonParser.Event getValueEvent(JsonValue value) {
-        switch (value.getValueType()) {
-        case NUMBER:
-            return JsonParser.Event.VALUE_NUMBER;
-        case STRING:
-        case TRUE:
-        case FALSE:
-            return JsonParser.Event.VALUE_STRING;
-        case OBJECT:
-            return JsonParser.Event.START_OBJECT;
-        case ARRAY:
-            return JsonParser.Event.START_ARRAY;
-        case NULL:
-            return JsonParser.Event.VALUE_NULL;
-        default:
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                         "unknown json value: " + value.getValueType()));
+        switch(value.getValueType()) {
+            case NUMBER:
+                return JsonParser.Event.VALUE_NUMBER;
+            case STRING:
+            case TRUE:
+            case FALSE:
+                return JsonParser.Event.VALUE_STRING;
+            case OBJECT:
+                return JsonParser.Event.START_OBJECT;
+            case ARRAY:
+                return JsonParser.Event.START_ARRAY;
+            case NULL:
+                return JsonParser.Event.VALUE_NULL;
+            default:
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "unknown json value: " + value.getValueType()));
         }
-
     }
 }

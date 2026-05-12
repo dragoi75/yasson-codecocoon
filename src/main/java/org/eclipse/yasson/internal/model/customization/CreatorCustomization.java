@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.model.PropertyModel;
@@ -34,9 +33,7 @@ public class CreatorCustomization extends CustomizationBase {
      * @param numberFormatter number formatter
      * @param dateFormatter   date formatter
      */
-    public CreatorCustomization(SerializationCustomizationBuilder customization,
-                                JsonbNumericFormatter numberFormatter,
-                                JsonbDateTimeFormatter dateFormatter) {
+    public CreatorCustomization(SerializationCustomizationBuilder customization, JsonbNumericFormatter numberFormatter, JsonbDateTimeFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
         this.dateFormatter = dateFormatter;
@@ -49,10 +46,12 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbNumericFormatter getDeserializeNumberFormatter() {
-        if (numberFormatter != null) {
+        if (null == numberFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
             return numberFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeNumberFormatter();
         }
         return null;
     }
@@ -64,10 +63,12 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbDateTimeFormatter getDeserializeDateFormatter() {
-        if (dateFormatter != null) {
+        if (null == dateFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeDateFormatter();
+            }
+        } else {
             return dateFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeDateFormatter();
         }
         return null;
     }
