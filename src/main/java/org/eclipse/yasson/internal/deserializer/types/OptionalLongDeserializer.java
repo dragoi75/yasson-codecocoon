@@ -16,28 +16,28 @@ import java.util.OptionalLong;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
 
 /**
  * Deserializer of the {@link OptionalLong} type.
  */
-class OptionalLongDeserializer implements ModelDeserializer<JsonParser> {
+class OptionalLongDeserializer implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> extractor;
-    private final ModelDeserializer<Object> nullValueDelegate;
+    private final ModelParser<JsonParser> extractor;
+    private final ModelParser<Object> nullValueDelegate;
 
-    OptionalLongDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> nullValueDelegate) {
+    OptionalLongDeserializer(ModelParser<JsonParser> extractor, ModelParser<Object> nullValueDelegate) {
         this.extractor = extractor;
         this.nullValueDelegate = nullValueDelegate;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
-            return nullValueDelegate.deserialize(OptionalLong.empty(), context);
+            return nullValueDelegate.deserializeModel(OptionalLong.empty(), context);
         }
-        OptionalLong optional = OptionalLong.of((Long) extractor.deserialize(value, context));
-        return nullValueDelegate.deserialize(optional, context);
+        OptionalLong optional = OptionalLong.of((Long) extractor.deserializeModel(value, context));
+        return nullValueDelegate.deserializeModel(optional, context);
     }
 }

@@ -22,16 +22,16 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Creator of the array instance based upon the array type.
  */
-abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
+abstract class ArrayInstanceCreator implements ModelParser<JsonParser> {
 
-    private static final Map<Class<?>, Function<ModelDeserializer<JsonParser>, ArrayInstanceCreator>> CACHE;
+    private static final Map<Class<?>, Function<ModelParser<JsonParser>, ArrayInstanceCreator>> CACHE;
 
     static {
         CACHE = Map.of(boolean[].class, BooleanArrayCreator::new,
@@ -44,28 +44,28 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
                        short[].class, ShortArrayCreator::new);
     }
 
-    private final ModelDeserializer<JsonParser> delegate;
+    private final ModelParser<JsonParser> delegate;
 
-    private ArrayInstanceCreator(ModelDeserializer<JsonParser> delegate) {
+    private ArrayInstanceCreator(ModelParser<JsonParser> delegate) {
         this.delegate = delegate;
     }
 
-    static ArrayInstanceCreator create(Class<?> arrayType, Class<?> componentClass, ModelDeserializer<JsonParser> delegate) {
+    static ArrayInstanceCreator create(Class<?> arrayType, Class<?> componentClass, ModelParser<JsonParser> delegate) {
         if (CACHE.containsKey(arrayType)) {
             return CACHE.get(arrayType).apply(delegate);
         }
         return new ObjectArrayCreator(delegate, componentClass);
     }
 
-    static ModelDeserializer<JsonParser> createBase64Deserializer(String strategy,
-                                                                  ModelDeserializer<JsonParser> delegate) {
+    static ModelParser<JsonParser> createBase64Deserializer(String strategy,
+                                                            ModelParser<JsonParser> delegate) {
         return new Base64ByteArray(strategy, delegate);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        Collection<Object> collection = (Collection<Object>) delegate.deserialize(value, context);
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        Collection<Object> collection = (Collection<Object>) delegate.deserializeModel(value, context);
         return resolveArrayInstance(collection);
     }
 
@@ -73,7 +73,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class IntegerArrayCreator extends ArrayInstanceCreator {
 
-        private IntegerArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private IntegerArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -92,7 +92,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class ByteArrayCreator extends ArrayInstanceCreator {
 
-        private ByteArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private ByteArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -111,7 +111,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class ShortArrayCreator extends ArrayInstanceCreator {
 
-        private ShortArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private ShortArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -130,7 +130,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class LongArrayCreator extends ArrayInstanceCreator {
 
-        private LongArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private LongArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -149,7 +149,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class FloatArrayCreator extends ArrayInstanceCreator {
 
-        private FloatArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private FloatArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -168,7 +168,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class DoubleArrayCreator extends ArrayInstanceCreator {
 
-        private DoubleArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private DoubleArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -187,7 +187,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class BooleanArrayCreator extends ArrayInstanceCreator {
 
-        private BooleanArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private BooleanArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -206,7 +206,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     private static final class CharArrayCreator extends ArrayInstanceCreator {
 
-        private CharArrayCreator(ModelDeserializer<JsonParser> delegate) {
+        private CharArrayCreator(ModelParser<JsonParser> delegate) {
             super(delegate);
         }
 
@@ -227,7 +227,7 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
         private final Class<?> componentClass;
 
-        private ObjectArrayCreator(ModelDeserializer<JsonParser> delegate, Class<?> componentClass) {
+        private ObjectArrayCreator(ModelParser<JsonParser> delegate, Class<?> componentClass) {
             super(delegate);
             this.componentClass = componentClass;
         }
@@ -245,13 +245,13 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
 
     }
 
-    private static final class Base64ByteArray implements ModelDeserializer<JsonParser> {
+    private static final class Base64ByteArray implements ModelParser<JsonParser> {
 
         private final Base64.Decoder decoder;
-        private final ModelDeserializer<JsonParser> delegate;
+        private final ModelParser<JsonParser> delegate;
 
         private Base64ByteArray(String strategy,
-                                ModelDeserializer<JsonParser> delegate) {
+                                ModelParser<JsonParser> delegate) {
             this.decoder = getDecoder(strategy);
             this.delegate = delegate;
         }
@@ -263,13 +263,13 @@ abstract class ArrayInstanceCreator implements ModelDeserializer<JsonParser> {
             case BinaryDataStrategy.BASE_64_URL:
                 return Base64.getUrlDecoder();
             default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + strategy));
             }
         }
 
         @Override
-        public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-            return decoder.decode((String) delegate.deserialize(value, context));
+        public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+            return decoder.decode((String) delegate.deserializeModel(value, context));
         }
     }
 }

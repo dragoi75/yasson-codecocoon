@@ -21,9 +21,9 @@ import java.util.SimpleTimeZone;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Deserializer of the {@link java.util.TimeZone} type.
@@ -35,13 +35,13 @@ class TimeZoneDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         try {
             final ZoneId zoneId = ZoneId.of(value);
             final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
             return new SimpleTimeZone(zonedDateTime.getOffset().getTotalSeconds() * 1000, zoneId.getId());
         } catch (ZoneRulesException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ZONE_PARSE_ERROR, value), e);
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.ZONE_PARSE_ERROR, value), e);
         }
     }
 }

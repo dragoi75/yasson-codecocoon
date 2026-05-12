@@ -24,14 +24,14 @@ import java.util.Optional;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.JsonbConfigProperties;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.deserializer.JustReturn;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Base deserializer for all the date related types.
@@ -40,7 +40,7 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
 
     static final ZoneId UTC = ZoneId.of("UTC");
 
-    private ModelDeserializer<String> actualDeserializer;
+    private ModelParser<String> actualDeserializer;
 
     AbstractDateDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
@@ -52,7 +52,7 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         this.actualDeserializer = null;
     }
 
-    private ModelDeserializer<String> actualDeserializer(JsonbConfigProperties properties, Customization customization) {
+    private ModelParser<String> actualDeserializer(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(properties, customization);
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return (value, context) -> fromInstant(Instant.ofEpochMilli(Long.parseLong(value)));
@@ -72,22 +72,22 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
             try {
                 return parseDefault(value, locale);
             } catch (DateTimeException e) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, value, getType()), e);
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.DATE_PARSE_ERROR, value, getType()), e);
             }
         };
     }
 
-    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
+    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
         return Optional.ofNullable(customization.getDeserializeDateFormatter())
                 .orElse(properties.getConfigDateFormatter());
     }
 
     @Override
-    public Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         if (actualDeserializer == null) {
             actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
         }
-        return actualDeserializer.deserialize(value, context);
+        return actualDeserializer.deserializeModel(value, context);
     }
 
     /**
@@ -122,7 +122,7 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         try {
             return parseWithFormatter(jsonValue, formatter);
         } catch (DateTimeException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATE_PARSE_ERROR, jsonValue, getType()), e);
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.DATE_PARSE_ERROR, jsonValue, getType()), e);
         }
     }
 

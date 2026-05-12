@@ -21,7 +21,7 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
 import org.eclipse.yasson.YassonConfig;
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.junit.jupiter.api.Test;
 
 public class JsonBindingTest {
@@ -53,12 +53,12 @@ public class JsonBindingTest {
         assertNotNull(getClassModel(jsonb, EagerParseClass.class));
     }
     
-    private ClassModel getClassModel(Jsonb jsonb, Class<?> clazz) throws Exception {
+    private ClassDescriptor getClassModel(Jsonb jsonb, Class<?> clazz) throws Exception {
         // Do some hacks to ensure that the class had a ClassModel registered
         JsonBinding yasson = (JsonBinding) jsonb;
         Field jsonbContext = yasson.getClass().getDeclaredField("jsonbContext");
         jsonbContext.setAccessible(true);
-        JsonbContext ctx = (JsonbContext) jsonbContext.get(yasson);
+        JsonBindingContext ctx = (JsonBindingContext) jsonbContext.get(yasson);
         return ctx.getMappingContext().getClassModel(clazz);
     }
 

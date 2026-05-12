@@ -21,29 +21,29 @@ import java.util.logging.Logger;
 
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 class ConstructorPropertiesAnnotationIntrospector {
 
     private static final Logger LOG = Logger.getLogger(ConstructorPropertiesAnnotationIntrospector.class.getName());
 
-    private final JsonbContext jsonbContext;
+    private final JsonBindingContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
-    public static ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
+    public static ConstructorPropertiesAnnotationIntrospector forContext(JsonBindingContext jsonbContext) {
         return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
     /**
      * Only for testing and internal purposes.
      * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonbContext)}.
+     * Please use static factory methods e.g. {@link #forContext(JsonBindingContext)}.
      *
-     * @param context          {@link JsonbContext}
+     * @param context          {@link JsonBindingContext}
      * @param annotationFinder {@link AnnotationFinder}
      */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonbContext context, AnnotationFinder annotationFinder) {
+    protected ConstructorPropertiesAnnotationIntrospector(JsonBindingContext context, AnnotationFinder annotationFinder) {
         this.jsonbContext = context;
         this.constructorProperties = annotationFinder;
     }
@@ -68,7 +68,7 @@ class ConstructorPropertiesAnnotationIntrospector {
                 // @ConstructorProperties-Annotation in general.
                 // It is just undefined, which constructor to choose for JSON in this case.
                 // The behavior should be the same (null), as if there is no ConstructorProperties-Annotation at all.
-                LOG.warning(Messages.getMessage(MessageKeys.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
+                LOG.warning(MessageProvider.getMessage(MessageConstants.MULTIPLE_CONSTRUCTOR_PROPERTIES_CREATORS,
                                                 constructor.getDeclaringClass().getName()));
                 return null;
             }

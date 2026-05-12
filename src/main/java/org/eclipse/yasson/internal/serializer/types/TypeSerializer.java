@@ -15,14 +15,14 @@ package org.eclipse.yasson.internal.serializer.types;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
 /**
  * Base for all the type serializers.
  */
-abstract class TypeSerializer<T> implements ModelSerializer {
+abstract class TypeSerializer<T> implements ModelMarshaller {
 
-    private final ModelSerializer serializer;
+    private final ModelMarshaller serializer;
 
     TypeSerializer(TypeSerializerBuilder serializerBuilder) {
         if (serializerBuilder.isKey()) {
@@ -33,8 +33,8 @@ abstract class TypeSerializer<T> implements ModelSerializer {
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        serializer.serialize(value, generator, context);
+    public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        serializer.marshal(value, generator, context);
     }
 
     abstract void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context);
@@ -43,21 +43,21 @@ abstract class TypeSerializer<T> implements ModelSerializer {
         generator.writeKey(String.valueOf(key));
     }
 
-    private final class ValueSerializer implements ModelSerializer {
+    private final class ValueSerializer implements ModelMarshaller {
 
         @SuppressWarnings("unchecked")
         @Override
-        public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
             serializeValue((T) value, generator, context);
         }
 
     }
 
-    private final class KeySerializer implements ModelSerializer {
+    private final class KeySerializer implements ModelMarshaller {
 
         @SuppressWarnings("unchecked")
         @Override
-        public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
             serializeKey((T) value, generator, context);
         }
 

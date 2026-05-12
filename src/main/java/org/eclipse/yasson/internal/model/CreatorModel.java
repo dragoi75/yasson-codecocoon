@@ -17,10 +17,10 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
 import org.eclipse.yasson.internal.AnnotationIntrospector;
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonBindingContext;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingInfo;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
 import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
 
@@ -42,7 +42,7 @@ public class CreatorModel {
      * @param executable creator executable
      * @param context   jsonb context
      */
-    public CreatorModel(String name, Parameter parameter, Executable executable, JsonbContext context) {
+    public CreatorModel(String name, Parameter parameter, Executable executable, JsonBindingContext context) {
         this.name = name;
         this.type = parameter.getParameterizedType();
 
@@ -54,7 +54,7 @@ public class CreatorModel {
                 .getConstructorNumberFormatter(annotated);
         JsonbDateFormatter constructorDateFormatter = context.getAnnotationIntrospector().getConstructorDateFormatter(annotated);
         DeserializerBinding<?> deserializerBinding = annotationIntrospector.getDeserializerBinding(parameter);
-        AdapterBinding adapterBinding = annotationIntrospector.getAdapterBinding(parameter);
+        AdapterBindingInfo adapterBinding = annotationIntrospector.getAdapterBinding(parameter);
         final JsonbAnnotatedElement<Class<?>> clsElement = annotationIntrospector.collectAnnotations(parameter.getType());
         deserializerBinding = deserializerBinding == null
                 ? annotationIntrospector.getDeserializerBinding(clsElement)

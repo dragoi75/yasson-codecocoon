@@ -17,26 +17,26 @@ import java.util.OptionalInt;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
 /**
  * Serializer of the {@link OptionalInt} type.
  */
-class OptionalIntSerializer implements ModelSerializer {
+class OptionalIntSerializer implements ModelMarshaller {
 
-    private final ModelSerializer typeSerializer;
+    private final ModelMarshaller typeSerializer;
 
-    OptionalIntSerializer(ModelSerializer typeSerializer) {
+    OptionalIntSerializer(ModelMarshaller typeSerializer) {
         this.typeSerializer = typeSerializer;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalInt optionalInt = (OptionalInt) value;
         if (optionalInt.isPresent()) {
-            typeSerializer.serialize(optionalInt.getAsInt(), generator, context);
+            typeSerializer.marshal(optionalInt.getAsInt(), generator, context);
         } else {
-            typeSerializer.serialize(null, generator, context);
+            typeSerializer.marshal(null, generator, context);
         }
     }
 }

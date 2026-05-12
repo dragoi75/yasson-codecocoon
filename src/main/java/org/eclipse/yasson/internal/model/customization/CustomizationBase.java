@@ -12,17 +12,17 @@
 
 package org.eclipse.yasson.internal.model.customization;
 
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingInfo;
 import org.eclipse.yasson.internal.components.DeserializerBinding;
-import org.eclipse.yasson.internal.components.SerializerBinding;
+import org.eclipse.yasson.internal.components.JsonbSerializerBinding;
 
 /**
- * Common properties of {@link ClassCustomization} and {@link PropertyCustomization}.
+ * Common properties of {@link ClassSerializationConfig} and {@link PropertyCustomization}.
  */
-abstract class CustomizationBase implements Customization, ComponentBoundCustomization {
+abstract class CustomizationBase implements SerializationCustomizer, ComponentBindingCustomization {
 
-    private final AdapterBinding adapterBinding;
-    private final SerializerBinding<?> serializerBinding;
+    private final AdapterBindingInfo adapterBinding;
+    private final JsonbSerializerBinding<?> serializerBinding;
     private final DeserializerBinding<?> deserializerBinding;
     private final boolean nillable;
 
@@ -47,12 +47,12 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         return nillable;
     }
 
-    public AdapterBinding getSerializeAdapterBinding() {
+    public AdapterBindingInfo getSerializeAdapterBinding() {
         return adapterBinding;
     }
 
     @Override
-    public AdapterBinding getDeserializeAdapterBinding() {
+    public AdapterBindingInfo getDeserializeAdapterBinding() {
         return adapterBinding;
     }
 
@@ -61,7 +61,7 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
      *
      * @return serializer wrapper
      */
-    public SerializerBinding<?> getSerializerBinding() {
+    public JsonbSerializerBinding<?> getSerializerBinding() {
         return serializerBinding;
     }
 
@@ -77,8 +77,8 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     @SuppressWarnings("unchecked")
     abstract static class Builder<T extends Builder<T, B>, B extends CustomizationBase> {
 
-        private AdapterBinding adapterBinding;
-        private SerializerBinding<?> serializerBinding;
+        private AdapterBindingInfo adapterBinding;
+        private JsonbSerializerBinding<?> serializerBinding;
         private DeserializerBinding<?> deserializerBinding;
         private boolean nillable;
 
@@ -93,12 +93,12 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
             return (T) this;
         }
 
-        public T adapterBinding(AdapterBinding adapterBinding) {
+        public T adapterBinding(AdapterBindingInfo adapterBinding) {
             this.adapterBinding = adapterBinding;
             return (T) this;
         }
 
-        public T serializerBinding(SerializerBinding<?> serializerBinding) {
+        public T serializerBinding(JsonbSerializerBinding<?> serializerBinding) {
             this.serializerBinding = serializerBinding;
             return (T) this;
         }

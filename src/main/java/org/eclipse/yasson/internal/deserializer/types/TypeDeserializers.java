@@ -51,13 +51,13 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.JsonbConfigProperties;
+import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.deserializer.JustReturn;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
 import org.eclipse.yasson.internal.deserializer.NullCheckDeserializer;
 import org.eclipse.yasson.internal.deserializer.PositionChecker;
 import org.eclipse.yasson.internal.deserializer.ValueExtractor;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
 
@@ -140,11 +140,11 @@ public class TypeDeserializers {
      * @param events        expected parser events at the beginning when deserializing the type
      * @return type deserializer
      */
-    public static ModelDeserializer<JsonParser> getTypeDeserializer(Class<?> clazz,
-                                                                    Customization customization,
-                                                                    JsonbConfigProperties properties,
-                                                                    ModelDeserializer<Object> delegate,
-                                                                    Set<JsonParser.Event> events) {
+    public static ModelParser<JsonParser> getTypeDeserializer(Class<?> clazz,
+                                                              SerializationCustomizer customization,
+                                                              JsonbConfigurationProperties properties,
+                                                              ModelParser<Object> delegate,
+                                                              Set<JsonParser.Event> events) {
         JsonParser.Event[] eventArray = events.toArray(new JsonParser.Event[0]);
         if (OPTIONAL_TYPES.containsKey(clazz)) {
             Class<?> optionalType = OPTIONAL_TYPES.get(clazz);
@@ -174,15 +174,15 @@ public class TypeDeserializers {
         if (JsonValue.class.isAssignableFrom(builder.getClazz())) {
             return new JsonValueDeserializer(builder);
         }
-        ModelDeserializer<JsonParser> deserializer = assignableCases(builder, eventArray);
+        ModelParser<JsonParser> deserializer = assignableCases(builder, eventArray);
         if (deserializer != null) {
             return new NullCheckDeserializer(deserializer, delegate);
         }
         return null;
     }
 
-    private static ModelDeserializer<JsonParser> assignableCases(TypeDeserializerBuilder builder,
-                                                                 JsonParser.Event[] checker) {
+    private static ModelParser<JsonParser> assignableCases(TypeDeserializerBuilder builder,
+                                                           JsonParser.Event[] checker) {
         if (Enum.class.isAssignableFrom(builder.getClazz())) {
             return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)),
                                        builder.getClazz(),

@@ -12,6 +12,7 @@
 
 package org.eclipse.yasson.internal.model.customization.naming;
 
+import org.eclipse.yasson.internal.model.customization.PropertyNamingStrategyProvider;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,8 +20,6 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
-import org.eclipse.yasson.internal.model.customization.StrategiesProvider;
 
 /**
  * Tests naming strategies.
@@ -33,7 +32,7 @@ public class PropertyNamingStrategyTest {
 
     @Test
     public void testLowerCase() throws Exception {
-        PropertyNamingStrategy strategy = StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES);
+        PropertyNamingStrategy strategy = PropertyNamingStrategyProvider.getPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES);
         assertEquals("camel_case_property", strategy.translateName("camelCaseProperty"));
         assertEquals("camelcase_property", strategy.translateName("CamelcaseProperty"));
         assertEquals("camel_case_property", strategy.translateName("CamelCaseProperty"));
@@ -49,7 +48,7 @@ public class PropertyNamingStrategyTest {
 
     @Test
     public void testLowerDashes() throws Exception {
-        PropertyNamingStrategy strategy = StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CASE_WITH_DASHES);
+        PropertyNamingStrategy strategy = PropertyNamingStrategyProvider.getPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CASE_WITH_DASHES);
         assertEquals("camel-case-property", strategy.translateName("camelCaseProperty"));
         assertEquals("camelcase-property", strategy.translateName("CamelcaseProperty"));
         assertEquals("camel-case-property", strategy.translateName("CamelCaseProperty"));
@@ -65,7 +64,7 @@ public class PropertyNamingStrategyTest {
 
     @Test
     public void testUpperCase() {
-        PropertyNamingStrategy upperCaseStrategy = StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE);
+        PropertyNamingStrategy upperCaseStrategy = PropertyNamingStrategyProvider.getPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE);
         assertEquals("UpperCamelCase", upperCaseStrategy.translateName("upperCamelCase"));
         assertEquals("UpperCamelCase", upperCaseStrategy.translateName("UpperCamelCase"));
 
@@ -78,7 +77,7 @@ public class PropertyNamingStrategyTest {
 
     @Test
     public void testUpperCaseWithSpaces() {
-        PropertyNamingStrategy upperCaseWithSpacesStrategy = StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE_WITH_SPACES);
+        PropertyNamingStrategy upperCaseWithSpacesStrategy = PropertyNamingStrategyProvider.getPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE_WITH_SPACES);
         assertEquals("Upper Camel Case", upperCaseWithSpacesStrategy.translateName("upperCamelCase"));
         assertEquals("Upper Camel Case", upperCaseWithSpacesStrategy.translateName("UpperCamelCase"));
 

@@ -12,6 +12,8 @@
 
 package org.eclipse.yasson.internal;
 
+import org.eclipse.yasson.internal.model.ClassDescriptor;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import java.util.function.Supplier;
 
 /**
  * Creates instances for known types, caches constructors of unknown.
- * (Constructors of parsed types are stored in {@link org.eclipse.yasson.internal.model.ClassModel}).
+ * (Constructors of parsed types are stored in {@link ClassDescriptor}).
  */
 public class InstanceCreator {
 
@@ -55,8 +57,8 @@ public class InstanceCreator {
         Supplier<T> creator = (Supplier<T>) CREATORS.get(tClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
         if (creator == null) {
-            Constructor<T> constructor = ReflectionUtils.getDefaultConstructor(tClass, true);
-            creator = () -> ReflectionUtils.createNoArgConstructorInstance(constructor);
+            Constructor<T> constructor = ReflectionHelper.getDefaultConstructor(tClass, true);
+            creator = () -> ReflectionHelper.instantiateNoArgConstructor(constructor);
             CREATORS.put(tClass, creator);
         }
 

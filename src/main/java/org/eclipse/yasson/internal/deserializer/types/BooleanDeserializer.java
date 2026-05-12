@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 
 import java.lang.reflect.Type;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer of the {@link Boolean} type.
@@ -26,12 +26,12 @@ class BooleanDeserializer extends TypeDeserializer {
     }
 
     @Override
-    public Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return Boolean.parseBoolean(value);
     }
 
     @Override
-    Object deserializeBooleanValue(boolean value, DeserializationContextImpl context, Type rType) {
+    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
         return value;
     }
 }

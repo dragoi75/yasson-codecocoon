@@ -23,19 +23,19 @@ import java.util.stream.Collectors;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbCreator;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Creator of the Object instance with the usage of the {@link JsonbCreator}.
  */
-class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
+class JsonbCreatorDeserializer implements ModelParser<JsonParser> {
 
-    private final Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains;
-    private final Map<String, ModelDeserializer<Object>> defaultCreatorValues;
+    private final Map<String, ModelParser<JsonParser>> propertyDeserializerChains;
+    private final Map<String, ModelParser<Object>> defaultCreatorValues;
     private final List<String> creatorParams;
     private final Set<String> ignoredProperties;
     private final JsonbCreator creator;
@@ -43,8 +43,8 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
     private final Function<String, String> renamer;
     private final boolean failOnUnknownProperties;
 
-    JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains,
-                             Map<String, ModelDeserializer<Object>> defaultCreatorValues,
+    JsonbCreatorDeserializer(Map<String, ModelParser<JsonParser>> propertyDeserializerChains,
+                             Map<String, ModelParser<Object>> defaultCreatorValues,
                              JsonbCreator creator,
                              Class<?> clazz,
                              Function<String, String> renamer,
@@ -61,7 +61,7 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser parser, DefaultDeserializationContext context) {
         String key = null;
         Map<String, Object> paramValues = new HashMap<>();
         while (parser.hasNext()) {
@@ -88,7 +88,7 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
                         throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
                     }
                 } else if (failOnUnknownProperties && !ignoredProperties.contains(key)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, key, clazz));
+                    throw new JsonbException(MessageProvider.getMessage(MessageConstants.UNKNOWN_JSON_PROPERTY, key, clazz));
                 }
                 break;
             case END_OBJECT:

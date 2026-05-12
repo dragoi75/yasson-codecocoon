@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.model.PropertyModel;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 
 /**
  * Customization for creator (constructor / factory methods) parameters.
@@ -24,7 +24,7 @@ public class CreatorCustomization extends CustomizationBase {
     private final JsonbNumberFormatter numberFormatter;
     private final JsonbDateFormatter dateFormatter;
     private final boolean required;
-    private PropertyModel propertyModel;
+    private BeanPropertyDescriptor propertyModel;
 
     /**
      * Creates new creator customization instance.
@@ -82,7 +82,7 @@ public class CreatorCustomization extends CustomizationBase {
      *
      * @param propertyModel referenced property model
      */
-    public void setPropertyModel(PropertyModel propertyModel) {
+    public void setPropertyModel(BeanPropertyDescriptor propertyModel) {
         this.propertyModel = propertyModel;
     }
 

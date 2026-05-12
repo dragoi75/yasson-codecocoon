@@ -17,18 +17,18 @@ import java.text.NumberFormat;
 
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbContext;
+import org.eclipse.yasson.internal.JsonBindingContext;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
 /**
  * Base for all number related serializers.
  */
 abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
 
-    private final ModelSerializer actualSerializer;
+    private final ModelMarshaller actualSerializer;
 
     AbstractNumberSerializer(TypeSerializerBuilder builder) {
         super(builder);
@@ -36,7 +36,7 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private ModelSerializer actualSerializer(Customization customization, JsonbContext jsonbContext) {
+    private ModelMarshaller actualSerializer(SerializationCustomizer customization, JsonBindingContext jsonbContext) {
         JsonbNumberFormatter formatter = customization.getSerializeNumberFormatter();
         if (formatter == null) {
             return (value, generator, context) -> writeValue((T) value, generator);
@@ -49,7 +49,7 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
 
     @Override
     void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context) {
-        actualSerializer.serialize(value, generator, context);
+        actualSerializer.marshal(value, generator, context);
     }
 
     abstract void writeValue(T value, JsonGenerator generator);

@@ -22,19 +22,19 @@ import java.util.function.Function;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.model.customization.Customization;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Base deserializer for all the number types.
  */
 abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserializer {
 
-    private final ModelDeserializer<String> actualDeserializer;
+    private final ModelParser<String> actualDeserializer;
     private final boolean integerOnly;
 
     AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
@@ -43,14 +43,14 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
         this.integerOnly = integerOnly;
     }
 
-    private ModelDeserializer<String> actualDeserializer(TypeDeserializerBuilder builder) {
-        Customization customization = builder.getCustomization();
+    private ModelParser<String> actualDeserializer(TypeDeserializerBuilder builder) {
+        SerializationCustomizer customization = builder.getCustomization();
         if (customization.getDeserializeNumberFormatter() == null) {
             return (value, context) -> {
                 try {
                     return parseNumberValue(value);
                 } catch (NumberFormatException e) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, getType()), e);
+                    throw new JsonbException(MessageProvider.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, getType()), e);
                 }
             };
         }
@@ -67,7 +67,7 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
                 String updated = valueChanger.apply(value);
                 return parseNumberValue(String.valueOf(format.parse(updated)));
             } catch (ParseException e) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.PARSING_NUMBER, value, numberFormat.getFormat()), e);
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.PARSING_NUMBER, value, numberFormat.getFormat()), e);
             }
         };
     }
@@ -85,8 +85,8 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
     abstract T parseNumberValue(String value);
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
-        return actualDeserializer.deserialize(value, context);
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
+        return actualDeserializer.deserializeModel(value, context);
     }
 
 }

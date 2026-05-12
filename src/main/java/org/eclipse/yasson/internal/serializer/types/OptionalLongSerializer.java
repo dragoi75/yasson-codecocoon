@@ -17,26 +17,26 @@ import java.util.OptionalLong;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
 /**
  * Serializer of the {@link OptionalLong} type.
  */
-class OptionalLongSerializer implements ModelSerializer {
+class OptionalLongSerializer implements ModelMarshaller {
 
-    private final ModelSerializer typeSerializer;
+    private final ModelMarshaller typeSerializer;
 
-    OptionalLongSerializer(ModelSerializer typeSerializer) {
+    OptionalLongSerializer(ModelMarshaller typeSerializer) {
         this.typeSerializer = typeSerializer;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalLong optionalLong = (OptionalLong) value;
         if (optionalLong.isPresent()) {
-            typeSerializer.serialize(optionalLong.getAsLong(), generator, context);
+            typeSerializer.marshal(optionalLong.getAsLong(), generator, context);
         } else {
-            typeSerializer.serialize(null, generator, context);
+            typeSerializer.marshal(null, generator, context);
         }
     }
 }

@@ -17,10 +17,10 @@ import java.nio.charset.StandardCharsets;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbConfigProperties;
+import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Serializer of the {@link String} type.
@@ -33,11 +33,11 @@ class StringSerializer extends TypeSerializer<String> {
 
     @Override
     void serializeValue(String value, JsonGenerator generator, SerializationContextImpl context) {
-        JsonbConfigProperties configProperties = context.getJsonbContext().getConfigProperties();
+        JsonbConfigurationProperties configProperties = context.getJsonbContext().getConfigProperties();
         if (configProperties.isStrictIJson()) {
             String newString = new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
             if (!newString.equals(value)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.UNPAIRED_SURROGATE));
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.UNPAIRED_SURROGATE));
             }
         }
         generator.write(value);

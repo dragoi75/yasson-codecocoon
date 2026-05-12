@@ -23,10 +23,10 @@ import java.util.function.Function;
 import jakarta.json.bind.annotation.JsonbDateFormat;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.JsonbConfigProperties;
+import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 /**
  * Base for all date related serializers.
@@ -43,8 +43,8 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
     }
 
     private Function<T, String> valueSerializer(TypeSerializerBuilder serializerBuilder) {
-        Customization customization = serializerBuilder.getCustomization();
-        JsonbConfigProperties properties = serializerBuilder.getJsonbContext().getConfigProperties();
+        SerializationCustomizer customization = serializerBuilder.getCustomization();
+        JsonbConfigurationProperties properties = serializerBuilder.getJsonbContext().getConfigProperties();
         final JsonbDateFormatter formatter = getJsonbDateFormatter(properties, customization);
         if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
             return value -> String.valueOf(toInstant(value).toEpochMilli());
@@ -64,7 +64,7 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
         return value -> formatDefault(value, locale);
     }
 
-    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
+    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
         return Optional.ofNullable(customization.getSerializeDateFormatter())
                 .orElse(properties.getConfigDateFormatter());
     }

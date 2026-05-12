@@ -17,12 +17,12 @@ import java.util.Objects;
 
 import jakarta.json.bind.JsonbException;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Value setter. Invokes created {@link MethodHandle} to set deserialized value to the instance.
  */
-class ValueSetterDeserializer implements ModelDeserializer<Object> {
+class ValueSetterDeserializer implements ModelParser<Object> {
 
     private final MethodHandle valueSetter;
 
@@ -31,7 +31,7 @@ class ValueSetterDeserializer implements ModelDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
+    public Object deserializeModel(Object value, DefaultDeserializationContext context) {
         Object object = context.getInstance();
         try {
             valueSetter.invoke(object, value);

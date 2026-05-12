@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.lang.reflect.Type;
 import java.time.Duration;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer of the {@link Duration} type.
@@ -27,7 +27,7 @@ class DurationDeserializer extends TypeDeserializer {
     }
 
     @Override
-    public Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return Duration.parse(value);
     }
 

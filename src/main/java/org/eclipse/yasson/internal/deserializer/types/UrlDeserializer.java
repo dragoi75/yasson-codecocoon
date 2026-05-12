@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer of the {@link URL} type.
@@ -28,7 +28,7 @@ class UrlDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         URL url = null;
         try {
             url = new URL(value);

@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.lang.reflect.Type;
 import java.net.URI;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer of the {@link URI} type.
@@ -27,7 +27,7 @@ class UriDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return URI.create(value);
     }
 }

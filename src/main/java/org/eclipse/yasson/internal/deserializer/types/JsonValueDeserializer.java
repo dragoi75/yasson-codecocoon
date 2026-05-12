@@ -16,26 +16,26 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Deserializer of the {@link JsonValue} type.
  */
-class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
+class JsonValueDeserializer implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<Object> delegate;
 
     JsonValueDeserializer(TypeDeserializerBuilder builder) {
         delegate = builder.getDelegate();
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         JsonParser.Event last = context.getLastValueEvent();
-        return delegate.deserialize(deserializeValue(last, value), context);
+        return delegate.deserializeModel(deserializeValue(last, value), context);
     }
 
     private JsonValue deserializeValue(JsonParser.Event last, JsonParser parser) {
@@ -54,7 +54,7 @@ class JsonValueDeserializer implements ModelDeserializer<JsonParser> {
         case START_ARRAY:
             return parser.getArray();
         default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + last));
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, "Unknown JSON value: " + last));
         }
     }
 }

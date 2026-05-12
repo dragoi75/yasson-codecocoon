@@ -32,79 +32,79 @@ import jakarta.json.stream.JsonParser;
 
 import org.eclipse.yasson.YassonJsonb;
 import org.eclipse.yasson.internal.jsonstructure.JsonGeneratorToStructureAdapter;
-import org.eclipse.yasson.internal.jsonstructure.JsonStructureToParserAdapter;
+import org.eclipse.yasson.internal.jsonstructure.JsonStructureParserAdapter;
 
 /**
  * Implementation of Jsonb interface.
  */
 public class JsonBinding implements YassonJsonb {
 
-    private final JsonbContext jsonbContext;
+    private final JsonBindingContext jsonbContext;
 
     JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+        this.jsonbContext = new JsonBindingContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
         Set<Class<?>> eagerInitClasses = this.jsonbContext.getConfigProperties().getEagerInitClasses();
         for (Class<?> eagerInitClass : eagerInitClasses) {
             // Eagerly initialize requested ClassModels and Serializers
-            jsonbContext.getChainModelCreator().deserializerChain(eagerInitClass);
-            jsonbContext.getSerializationModelCreator().serializerChain(eagerInitClass, true, true);
+            jsonbContext.getChainModelCreator().createDeserializerChain(eagerInitClass);
+            jsonbContext.getSerializationModelCreator().buildSerializerChain(eagerInitClass, true, true);
         }
     }
 
-    private <T> T deserialize(final Type type, final JsonParser parser, final DeserializationContextImpl unmarshaller) {
+    private <T> T deserialize(final Type type, final JsonParser parser, final DefaultDeserializationContext unmarshaller) {
         return unmarshaller.deserialize(type, parser);
     }
 
     @Override
     public <T> T fromJson(String str, Class<T> type) throws JsonbException {
         final JsonParser parser = jsonbContext.getJsonProvider().createParser(new StringReader(str));
-        final DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        final DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(String str, Type type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(new StringReader(str));
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(reader);
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(Reader reader, Type type) throws JsonbException {
         JsonParser parser = jsonbContext.getJsonProvider().createParser(reader);
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(type, parser, unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Class<T> clazz) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(clazz, inputStreamParser(stream), unmarshaller);
     }
 
     @Override
     public <T> T fromJson(InputStream stream, Type type) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return deserialize(type, inputStreamParser(stream), unmarshaller);
     }
 
     @Override
     public <T> T fromJsonStructure(JsonStructure jsonStructure, Class<T> type) throws JsonbException {
-        JsonParser parser = new JsonStructureToParserAdapter(jsonStructure);
-        return deserialize(type, parser, new DeserializationContextImpl(jsonbContext));
+        JsonParser parser = new JsonStructureParserAdapter(jsonStructure);
+        return deserialize(type, parser, new DefaultDeserializationContext(jsonbContext));
     }
 
     @Override
     public <T> T fromJsonStructure(JsonStructure jsonStructure, Type runtimeType) throws JsonbException {
-        JsonParser parser = new JsonStructureToParserAdapter(jsonStructure);
-        return deserialize(runtimeType, parser, new DeserializationContextImpl(jsonbContext));
+        JsonParser parser = new JsonStructureParserAdapter(jsonStructure);
+        return deserialize(runtimeType, parser, new DefaultDeserializationContext(jsonbContext));
     }
 
     private JsonParser inputStreamParser(InputStream stream) {
@@ -143,7 +143,7 @@ public class JsonBinding implements YassonJsonb {
     }
 
     private JsonGenerator writerGenerator(Writer writer) {
-        Map<String, ?> factoryProperties = jsonbContext.createJsonpProperties(jsonbContext.getConfig());
+        Map<String, ?> factoryProperties = jsonbContext.generateJsonpProperties(jsonbContext.getConfig());
         if (factoryProperties.isEmpty()) {
             return jsonbContext.getJsonProvider().createGenerator(writer);
         }
@@ -164,13 +164,13 @@ public class JsonBinding implements YassonJsonb {
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return unmarshaller.deserialize(type, jsonParser);
     }
 
     @Override
     public <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException {
-        DeserializationContextImpl unmarshaller = new DeserializationContextImpl(jsonbContext);
+        DefaultDeserializationContext unmarshaller = new DefaultDeserializationContext(jsonbContext);
         return unmarshaller.deserialize(runtimeType, jsonParser);
     }
 
@@ -203,7 +203,7 @@ public class JsonBinding implements YassonJsonb {
     }
 
     private JsonGenerator streamGenerator(OutputStream stream) {
-        Map<String, ?> factoryProperties = jsonbContext.createJsonpProperties(jsonbContext.getConfig());
+        Map<String, ?> factoryProperties = jsonbContext.generateJsonpProperties(jsonbContext.getConfig());
         final String encoding = (String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8");
         return jsonbContext.getJsonProvider().createGeneratorFactory(factoryProperties)
                 .createGenerator(stream, Charset.forName(encoding));

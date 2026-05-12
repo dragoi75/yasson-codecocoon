@@ -17,18 +17,18 @@ import java.lang.reflect.Type;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 /**
  * Deserializer used to invoke user defined deserializers.
  */
-class UserDefinedDeserializer implements ModelDeserializer<JsonParser> {
+class UserDefinedDeserializer implements ModelParser<JsonParser> {
 
     private final JsonbDeserializer<?> userDefinedDeserializer;
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<Object> delegate;
     private final Type rType;
-    private final Customization customization;
+    private final SerializationCustomizer customization;
 
     //TODO remove or not? deserializer cycle
     //    public UserDefinedDeserializer(JsonbDeserializer<?> userDefinedDeserializer,
@@ -43,9 +43,9 @@ class UserDefinedDeserializer implements ModelDeserializer<JsonParser> {
     //        this.customization = customization;
     //    }
     UserDefinedDeserializer(JsonbDeserializer<?> userDefinedDeserializer,
-                            ModelDeserializer<Object> delegate,
+                            ModelParser<Object> delegate,
                             Type rType,
-                            Customization customization) {
+                            SerializationCustomizer customization) {
         this.userDefinedDeserializer = userDefinedDeserializer;
         this.delegate = delegate;
         this.rType = rType;
@@ -53,8 +53,8 @@ class UserDefinedDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        DeserializationContextImpl newContext = new DeserializationContextImpl(context);
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        DefaultDeserializationContext newContext = new DefaultDeserializationContext(context);
         newContext.setCustomization(customization);
         //TODO remove or not? deserializer cycle
         //        if (context.getUserProcessorChain().contains(userDefinedDeserializer.getClass())) {
@@ -69,7 +69,7 @@ class UserDefinedDeserializer implements ModelDeserializer<JsonParser> {
         Object object = userDefinedDeserializer.deserialize(yassonParser, newContext, rType);
         yassonParser.skipRemaining();
         context.setLastValueEvent(newContext.getLastValueEvent());
-        return delegate.deserialize(object, context);
+        return delegate.deserializeModel(object, context);
     }
 
 }

@@ -15,7 +15,7 @@ package org.eclipse.yasson.internal.deserializer.types;
 import java.lang.reflect.Type;
 import java.time.ZoneId;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer of the {@link ZoneId} type.
@@ -27,7 +27,7 @@ class ZoneIdDeserializer extends TypeDeserializer {
     }
 
     @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return ZoneId.of(value);
     }
 }

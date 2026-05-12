@@ -17,26 +17,26 @@ import java.util.OptionalDouble;
 import jakarta.json.stream.JsonGenerator;
 
 import org.eclipse.yasson.internal.SerializationContextImpl;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
 /**
  * Serializer of the {@link OptionalDouble} type.
  */
-class OptionalDoubleSerializer implements ModelSerializer {
+class OptionalDoubleSerializer implements ModelMarshaller {
 
-    private final ModelSerializer typeSerializer;
+    private final ModelMarshaller typeSerializer;
 
-    OptionalDoubleSerializer(ModelSerializer typeSerializer) {
+    OptionalDoubleSerializer(ModelMarshaller typeSerializer) {
         this.typeSerializer = typeSerializer;
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+    public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalDouble optionalDouble = (OptionalDouble) value;
         if (optionalDouble.isPresent()) {
-            typeSerializer.serialize(optionalDouble.getAsDouble(), generator, context);
+            typeSerializer.marshal(optionalDouble.getAsDouble(), generator, context);
         } else {
-            typeSerializer.serialize(null, generator, context);
+            typeSerializer.marshal(null, generator, context);
         }
     }
 }

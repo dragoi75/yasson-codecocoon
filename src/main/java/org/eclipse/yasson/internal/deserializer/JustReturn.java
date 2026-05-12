@@ -12,12 +12,12 @@
 
 package org.eclipse.yasson.internal.deserializer;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Return passed in object value.
  */
-public final class JustReturn implements ModelDeserializer<Object> {
+public final class JustReturn implements ModelParser<Object> {
 
     private static final JustReturn INSTANCE = new JustReturn();
 
@@ -34,7 +34,7 @@ public final class JustReturn implements ModelDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
+    public Object deserializeModel(Object value, DefaultDeserializationContext context) {
         return value;
     }
 

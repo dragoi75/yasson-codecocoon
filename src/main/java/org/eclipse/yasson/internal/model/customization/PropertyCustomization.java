@@ -14,7 +14,7 @@ package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.JsonbDateFormatter;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
-import org.eclipse.yasson.internal.components.AdapterBinding;
+import org.eclipse.yasson.internal.components.AdapterBindingInfo;
 
 /**
  * Customization for a property of a class.
@@ -30,8 +30,8 @@ public class PropertyCustomization extends CustomizationBase {
     private final JsonbDateFormatter serializeDateFormatter;
     private final JsonbDateFormatter deserializeDateFormatter;
 
-    private final AdapterBinding serializeAdapter;
-    private final AdapterBinding deserializeAdapter;
+    private final AdapterBindingInfo serializeAdapter;
+    private final AdapterBindingInfo deserializeAdapter;
 
     private final boolean readTransient;
     private final boolean writeTransient;
@@ -132,12 +132,12 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     @Override
-    public AdapterBinding getDeserializeAdapterBinding() {
+    public AdapterBindingInfo getDeserializeAdapterBinding() {
         return deserializeAdapter;
     }
 
     @Override
-    public AdapterBinding getSerializeAdapterBinding() {
+    public AdapterBindingInfo getSerializeAdapterBinding() {
         return serializeAdapter;
     }
 
@@ -149,8 +149,8 @@ public class PropertyCustomization extends CustomizationBase {
         private JsonbNumberFormatter deserializeNumberFormatter;
         private JsonbDateFormatter serializeDateFormatter;
         private JsonbDateFormatter deserializeDateFormatter;
-        private AdapterBinding serializeAdapter;
-        private AdapterBinding deserializeAdapter;
+        private AdapterBindingInfo serializeAdapter;
+        private AdapterBindingInfo deserializeAdapter;
         private boolean readTransient;
         private boolean writeTransient;
         private Class<?> implementationClass;
@@ -234,12 +234,12 @@ public class PropertyCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder serializeAdapter(AdapterBinding serializeAdapter) {
+        public Builder serializeAdapter(AdapterBindingInfo serializeAdapter) {
             this.serializeAdapter = serializeAdapter;
             return this;
         }
 
-        public Builder deserializeAdapter(AdapterBinding deserializeAdapter) {
+        public Builder deserializeAdapter(AdapterBindingInfo deserializeAdapter) {
             this.deserializeAdapter = deserializeAdapter;
             return this;
         }

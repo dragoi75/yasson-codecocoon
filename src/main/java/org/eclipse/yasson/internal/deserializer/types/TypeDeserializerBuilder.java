@@ -14,24 +14,24 @@ package org.eclipse.yasson.internal.deserializer.types;
 
 import java.util.Objects;
 
-import org.eclipse.yasson.internal.JsonbConfigProperties;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
-import org.eclipse.yasson.internal.model.customization.ClassCustomization;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonbConfigurationProperties;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
+import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 class TypeDeserializerBuilder {
 
     private final Class<?> clazz;
-    private final Customization customization;
-    private final JsonbConfigProperties configProperties;
-    private final ModelDeserializer<Object> delegate;
+    private final SerializationCustomizer customization;
+    private final JsonbConfigurationProperties configProperties;
+    private final ModelParser<Object> delegate;
 
     TypeDeserializerBuilder(Class<?> clazz,
-                            Customization customization,
-                            JsonbConfigProperties configProperties,
-                            ModelDeserializer<Object> delegate) {
+                            SerializationCustomizer customization,
+                            JsonbConfigurationProperties configProperties,
+                            ModelParser<Object> delegate) {
         this.clazz = Objects.requireNonNull(clazz);
-        this.customization = customization == null ? ClassCustomization.empty() : customization;
+        this.customization = customization == null ? ClassSerializationConfig.emptyConfig() : customization;
         this.configProperties = configProperties;
         this.delegate = Objects.requireNonNull(delegate);
     }
@@ -40,15 +40,15 @@ class TypeDeserializerBuilder {
         return clazz;
     }
 
-    public JsonbConfigProperties getConfigProperties() {
+    public JsonbConfigurationProperties getConfigProperties() {
         return configProperties;
     }
 
-    public ModelDeserializer<Object> getDelegate() {
+    public ModelParser<Object> getDelegate() {
         return delegate;
     }
 
-    public Customization getCustomization() {
+    public SerializationCustomizer getCustomization() {
         return customization;
     }
 

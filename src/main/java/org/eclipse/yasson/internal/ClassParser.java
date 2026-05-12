@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 
-import org.eclipse.yasson.internal.model.ClassModel;
+import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
+import org.eclipse.yasson.internal.model.ClassDescriptor;
 import org.eclipse.yasson.internal.model.CreatorModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
-import org.eclipse.yasson.internal.model.PropertyModel;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Created a class internal model.
@@ -48,37 +48,37 @@ class ClassParser {
 
     private static final String SET_PREFIX = "set";
 
-    private final JsonbContext jsonbContext;
+    private final JsonBindingContext jsonbContext;
 
-    ClassParser(JsonbContext jsonbContext) {
+    ClassParser(JsonBindingContext jsonbContext) {
         this.jsonbContext = jsonbContext;
     }
 
     /**
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
-    void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
+    void parseProperties(ClassDescriptor classModel, JsonbAnnotatedElement<Class<?>> classElement) {
         final Map<String, Property> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
         parseClassAndInterfaceMethods(classElement, classProperties);
 
         //add sorted properties from parent, if they are not overridden in current class
         //parent properties are by default first by alphabet, than properties from a subclass
-        final List<PropertyModel> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
+        final List<BeanPropertyDescriptor> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
 
-        List<PropertyModel> classPropertyModels = classProperties.values().stream()
-                .map(property -> new PropertyModel(classModel, property, jsonbContext))
+        List<BeanPropertyDescriptor> classPropertyModels = classProperties.values().stream()
+                .map(property -> new BeanPropertyDescriptor(classModel, property, jsonbContext))
                 .collect(Collectors.toList());
 
         //check for collision on same property read name
-        List<PropertyModel> unsortedMerged = new ArrayList<>(sortedParentProperties.size() + classPropertyModels.size());
+        List<BeanPropertyDescriptor> unsortedMerged = new ArrayList<>(sortedParentProperties.size() + classPropertyModels.size());
         unsortedMerged.addAll(sortedParentProperties);
         unsortedMerged.addAll(classPropertyModels);
         checkPropertyNameClash(unsortedMerged, classModel.getType());
 
         mergePropertyModels(classPropertyModels);
 
-        List<PropertyModel> sortedPropertyModels = new ArrayList<>(sortedParentProperties.size() + classPropertyModels.size());
+        List<BeanPropertyDescriptor> sortedPropertyModels = new ArrayList<>(sortedParentProperties.size() + classPropertyModels.size());
         sortedPropertyModels.addAll(sortedParentProperties);
         sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering()
                                             .orderProperties(classPropertyModels, classModel));
@@ -99,12 +99,12 @@ class ClassParser {
 
     }
 
-    private static void mergePropertyModels(List<PropertyModel> unsortedMerged) {
-        PropertyModel[] clone = unsortedMerged.toArray(new PropertyModel[0]);
+    private static void mergePropertyModels(List<BeanPropertyDescriptor> unsortedMerged) {
+        BeanPropertyDescriptor[] clone = unsortedMerged.toArray(new BeanPropertyDescriptor[0]);
         for (int i = 0; i < clone.length; i++) {
             for (int j = i + 1; j < clone.length; j++) {
-                PropertyModel firstPropertyModel = clone[i];
-                PropertyModel secondPropertyModel = clone[j];
+                BeanPropertyDescriptor firstPropertyModel = clone[i];
+                BeanPropertyDescriptor secondPropertyModel = clone[j];
                 if (firstPropertyModel.equals(secondPropertyModel)) {
                     // Need to merge two properties
                     unsortedMerged.remove(firstPropertyModel);
@@ -114,7 +114,7 @@ class ClassParser {
                     } else if (!secondPropertyModel.isReadable() && !secondPropertyModel.isWritable()) {
                         unsortedMerged.add(firstPropertyModel);
                     } else {
-                        unsortedMerged.add(new PropertyModel(firstPropertyModel, secondPropertyModel));
+                        unsortedMerged.add(new BeanPropertyDescriptor(firstPropertyModel, secondPropertyModel));
                     }
                 }
             }
@@ -279,10 +279,10 @@ class ClassParser {
         }
     }
 
-    private static void checkPropertyNameClash(List<PropertyModel> collectedProperties, Class<?> cls) {
-        final List<PropertyModel> checkedProperties = new ArrayList<>();
-        for (PropertyModel collectedPropertyModel : collectedProperties) {
-            for (PropertyModel checkedPropertyModel : checkedProperties) {
+    private static void checkPropertyNameClash(List<BeanPropertyDescriptor> collectedProperties, Class<?> cls) {
+        final List<BeanPropertyDescriptor> checkedProperties = new ArrayList<>();
+        for (BeanPropertyDescriptor collectedPropertyModel : collectedProperties) {
+            for (BeanPropertyDescriptor checkedPropertyModel : checkedProperties) {
                 if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName())
                         && checkedPropertyModel.isReadable() //
                         && collectedPropertyModel.isReadable())
@@ -290,7 +290,7 @@ class ClassParser {
                                 && checkedPropertyModel.isWritable() //
                                 && collectedPropertyModel.isWritable())) {
                     throw new JsonbException(
-                            Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
+                            MessageProvider.getMessage(MessageConstants.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(),
                                     collectedPropertyModel.getPropertyName(), cls.getName()));
                 }
             }
@@ -308,13 +308,13 @@ class ClassParser {
      * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private List<PropertyModel> getSortedParentProperties(ClassModel classModel,
-                                                          JsonbAnnotatedElement<Class<?>> classElement,
-                                                          Map<String, Property> classProperties) {
-        List<PropertyModel> sortedProperties = new ArrayList<>();
+    private List<BeanPropertyDescriptor> getSortedParentProperties(ClassDescriptor classModel,
+                                                                   JsonbAnnotatedElement<Class<?>> classElement,
+                                                                   Map<String, Property> classProperties) {
+        List<BeanPropertyDescriptor> sortedProperties = new ArrayList<>();
         //Pull properties from parent
         if (classModel.getParentClassModel() != null) {
-            for (PropertyModel parentProp : classModel.getParentClassModel().getSortedProperties()) {
+            for (BeanPropertyDescriptor parentProp : classModel.getParentClassModel().getSortedProperties()) {
                 final Property current = classProperties.get(parentProp.getPropertyName());
                 //don't replace overridden properties
                 if (current == null) {
@@ -325,10 +325,10 @@ class ClassParser {
                     PropertyVisibilityStrategy propertyVisibilityStrategy = classModel.getClassCustomization()
                             .getPropertyVisibilityStrategy();
 
-                    if (PropertyModel.isPropertyReadable(current.getField(), current.getGetter(), propertyVisibilityStrategy)) {
+                    if (BeanPropertyDescriptor.isPropertyReadable(current.getField(), current.getGetter(), propertyVisibilityStrategy)) {
                         classProperties.replace(current.getName(), merged);
                     } else {
-                        sortedProperties.add(new PropertyModel(classModel, merged, jsonbContext));
+                        sortedProperties.add(new BeanPropertyDescriptor(classModel, merged, jsonbContext));
                         classProperties.remove(current.getName());
                     }
 
@@ -366,7 +366,7 @@ class ClassParser {
     }
 
     private static Property mergeProperty(Property current,
-                                          PropertyModel parentProp,
+                                          BeanPropertyDescriptor parentProp,
                                           JsonbAnnotatedElement<Class<?>> classElement) {
         Field field = current.getField() != null
                 ? current.getField() : parentProp.getField();

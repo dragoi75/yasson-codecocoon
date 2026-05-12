@@ -17,25 +17,25 @@ import java.util.Map;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Map container deserializer.
  */
-class MapDeserializer implements ModelDeserializer<JsonParser> {
+class MapDeserializer implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> keyDelegate;
-    private final ModelDeserializer<JsonParser> valueDelegate;
+    private final ModelParser<JsonParser> keyDelegate;
+    private final ModelParser<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelDeserializer<JsonParser> keyDelegate,
-                    ModelDeserializer<JsonParser> valueDelegate) {
+    MapDeserializer(ModelParser<JsonParser> keyDelegate,
+                    ModelParser<JsonParser> valueDelegate) {
         this.keyDelegate = keyDelegate;
         this.valueDelegate = valueDelegate;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser parser, DefaultDeserializationContext context) {
         Map<Object, Object> map = (Map<Object, Object>) context.getInstance();
         Object key = null;
         Object keyValue = null;
@@ -104,10 +104,10 @@ class MapDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     private Object deserializeValue(JsonParser parser,
-                                    DeserializationContextImpl context,
-                                    ModelDeserializer<JsonParser> deserializer) {
-        DeserializationContextImpl keyContext = new DeserializationContextImpl(context);
-        return deserializer.deserialize(parser, keyContext);
+                                    DefaultDeserializationContext context,
+                                    ModelParser<JsonParser> deserializer) {
+        DefaultDeserializationContext keyContext = new DefaultDeserializationContext(context);
+        return deserializer.deserializeModel(parser, keyContext);
     }
 
     private enum Mode {

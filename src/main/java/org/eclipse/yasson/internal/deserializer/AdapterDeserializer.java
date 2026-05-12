@@ -15,34 +15,34 @@ package org.eclipse.yasson.internal.deserializer;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.adapter.JsonbAdapter;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.components.AdapterBinding;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.components.AdapterBindingInfo;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * User defined type adapter executor.
  */
-class AdapterDeserializer implements ModelDeserializer<Object> {
+class AdapterDeserializer implements ModelParser<Object> {
 
     private final JsonbAdapter<Object, Object> adapter;
-    private final AdapterBinding adapterBinding;
-    private final ModelDeserializer<Object> delegate;
+    private final AdapterBindingInfo adapterBinding;
+    private final ModelParser<Object> delegate;
 
     @SuppressWarnings("unchecked")
-    AdapterDeserializer(AdapterBinding adapterBinding,
-                        ModelDeserializer<Object> delegate) {
+    AdapterDeserializer(AdapterBindingInfo adapterBinding,
+                        ModelParser<Object> delegate) {
         this.adapterBinding = adapterBinding;
         this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
         this.delegate = delegate;
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
+    public Object deserializeModel(Object value, DefaultDeserializationContext context) {
         try {
-            return delegate.deserialize(adapter.adaptFromJson(value), context);
+            return delegate.deserializeModel(adapter.adaptFromJson(value), context);
         } catch (Exception e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION,
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.ADAPTER_EXCEPTION,
                                                          adapterBinding.getBindingType(),
                                                          adapterBinding.getToType(),
                                                          adapterBinding.getAdapter().getClass()), e);

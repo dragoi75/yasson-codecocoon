@@ -12,23 +12,23 @@
 
 package org.eclipse.yasson.internal.deserializer;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deferred deserializer used for postponed value setting. Such as when {@link jakarta.json.bind.annotation.JsonbCreator}
  * is used.
  */
-class DeferredDeserializer implements ModelDeserializer<Object> {
+class DeferredDeserializer implements ModelParser<Object> {
 
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<Object> delegate;
 
-    DeferredDeserializer(ModelDeserializer<Object> delegate) {
+    DeferredDeserializer(ModelParser<Object> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
-        context.getDeferredDeserializers().add(() -> delegate.deserialize(value, context));
+    public Object deserializeModel(Object value, DefaultDeserializationContext context) {
+        context.getDeferredDeserializers().add(() -> delegate.deserializeModel(value, context));
         return value;
     }
 

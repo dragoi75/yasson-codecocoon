@@ -16,28 +16,28 @@ import java.util.OptionalInt;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
 
 /**
  * Deserializer of the {@link OptionalInt} type.
  */
-class OptionalIntDeserializer implements ModelDeserializer<JsonParser> {
+class OptionalIntDeserializer implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> extractor;
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<JsonParser> extractor;
+    private final ModelParser<Object> delegate;
 
-    OptionalIntDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> delegate) {
+    OptionalIntDeserializer(ModelParser<JsonParser> extractor, ModelParser<Object> delegate) {
         this.extractor = extractor;
         this.delegate = delegate;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
-            return delegate.deserialize(OptionalInt.empty(), context);
+            return delegate.deserializeModel(OptionalInt.empty(), context);
         }
-        OptionalInt optional = OptionalInt.of((Integer) extractor.deserialize(value, context));
-        return delegate.deserialize(optional, context);
+        OptionalInt optional = OptionalInt.of((Integer) extractor.deserializeModel(value, context));
+        return delegate.deserializeModel(optional, context);
     }
 }

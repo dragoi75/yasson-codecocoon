@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer.types;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import org.eclipse.yasson.internal.JsonbContext;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.JsonBindingContext;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 /**
  * Type serializer data holder object used during serializer creation.
@@ -25,14 +25,14 @@ class TypeSerializerBuilder {
 
     private final List<Type> chain;
     private final Class<?> clazz;
-    private final Customization customization;
-    private final JsonbContext jsonbContext;
+    private final SerializationCustomizer customization;
+    private final JsonBindingContext jsonbContext;
     private final boolean key;
 
     TypeSerializerBuilder(List<Type> chain,
                           Class<?> clazz,
-                          Customization customization,
-                          JsonbContext jsonbContext,
+                          SerializationCustomizer customization,
+                          JsonBindingContext jsonbContext,
                           boolean key) {
         this.chain = chain;
         this.clazz = clazz;
@@ -49,11 +49,11 @@ class TypeSerializerBuilder {
         return clazz;
     }
 
-    public Customization getCustomization() {
+    public SerializationCustomizer getCustomization() {
         return customization;
     }
 
-    public JsonbContext getJsonbContext() {
+    public JsonBindingContext getJsonbContext() {
         return jsonbContext;
     }
 

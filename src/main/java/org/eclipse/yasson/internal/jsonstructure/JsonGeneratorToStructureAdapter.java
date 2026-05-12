@@ -23,8 +23,8 @@ import jakarta.json.bind.JsonbException;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Adapter for {@link JsonGenerator}, that builds a {@link JsonStructure} content tree instead of JSON text.
@@ -134,8 +134,8 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     private JsonObjectBuilder getJsonObjectBuilder(String keyName) {
         JsonStructureBuilder current = builders.peek();
         if (!(current instanceof JsonObjectBuilder)) {
-            throw new JsonbException(Messages.getMessage(
-                    MessageKeys.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
+            throw new JsonbException(MessageProvider.getMessage(
+                    MessageConstants.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
                             + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
         }
         return (JsonObjectBuilder) current;

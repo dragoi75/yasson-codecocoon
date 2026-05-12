@@ -19,17 +19,17 @@ import java.util.List;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
 
 /**
  * Deserializer of the {@link Object} type.
  */
-class ObjectTypeDeserializer implements ModelDeserializer<JsonParser> {
+class ObjectTypeDeserializer implements ModelParser<JsonParser> {
 
     private static final Type LIST = List.class;
 
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<Object> delegate;
     private final Class<?> mapClass;
 
     ObjectTypeDeserializer(TypeDeserializerBuilder builder) {
@@ -38,7 +38,7 @@ class ObjectTypeDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         Object toSet;
         switch (context.getLastValueEvent()) {
         case VALUE_TRUE:
@@ -55,17 +55,17 @@ class ObjectTypeDeserializer implements ModelDeserializer<JsonParser> {
             toSet = value.getString();
             break;
         case START_OBJECT:
-            DeserializationContextImpl newContext = new DeserializationContextImpl(context);
+            DefaultDeserializationContext newContext = new DefaultDeserializationContext(context);
             toSet = newContext.deserialize(mapClass, value);
             break;
         case START_ARRAY:
-            DeserializationContextImpl newContext1 = new DeserializationContextImpl(context);
+            DefaultDeserializationContext newContext1 = new DefaultDeserializationContext(context);
             toSet = newContext1.deserialize(LIST, value);
             break;
         default:
             throw new JsonbException("Unexpected event: " + context.getLastValueEvent());
         }
-        return delegate.deserialize(toSet, context);
+        return delegate.deserializeModel(toSet, context);
     }
 
 }

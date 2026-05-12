@@ -16,15 +16,15 @@ import java.lang.reflect.Type;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.deserializer.ModelDeserializer;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.deserializer.ModelParser;
 
 /**
  * Base for all type deserializers.
  */
-public abstract class TypeDeserializer implements ModelDeserializer<String> {
+public abstract class TypeDeserializer implements ModelParser<String> {
 
-    private final ModelDeserializer<Object> delegate;
+    private final ModelParser<Object> delegate;
     private final Class<?> clazz;
 
     TypeDeserializer(TypeDeserializerBuilder builder) {
@@ -33,25 +33,25 @@ public abstract class TypeDeserializer implements ModelDeserializer<String> {
     }
 
     @Override
-    public final Object deserialize(String value, DeserializationContextImpl context) {
-        return delegate.deserialize(deserializeStringValue(value, context, clazz), context);
+    public final Object deserializeModel(String value, DefaultDeserializationContext context) {
+        return delegate.deserializeModel(deserializeStringValue(value, context, clazz), context);
     }
 
-    public final Object deserialize(boolean value, DeserializationContextImpl context) {
-        return delegate.deserialize(deserializeBooleanValue(value, context, clazz), context);
+    public final Object deserialize(boolean value, DefaultDeserializationContext context) {
+        return delegate.deserializeModel(deserializeBooleanValue(value, context, clazz), context);
     }
 
-    public final Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        return delegate.deserialize(deserializeNumberValue(value, context, clazz), context);
+    public final Object deserialize(JsonParser value, DefaultDeserializationContext context) {
+        return delegate.deserializeModel(deserializeNumberValue(value, context, clazz), context);
     }
 
-    abstract Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType);
+    abstract Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType);
 
-    Object deserializeBooleanValue(boolean value, DeserializationContextImpl context, Type rType) {
+    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
         return deserializeStringValue(String.valueOf(value), context, rType);
     }
 
-    Object deserializeNumberValue(JsonParser value, DeserializationContextImpl context, Type rType) {
+    Object deserializeNumberValue(JsonParser value, DefaultDeserializationContext context, Type rType) {
         return deserializeStringValue(value.getString(), context, rType);
     }
 

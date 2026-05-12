@@ -19,22 +19,22 @@ import java.util.function.Function;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 
 /**
  * Object container deserializer.
  */
-class ObjectDeserializer implements ModelDeserializer<JsonParser> {
+class ObjectDeserializer implements ModelParser<JsonParser> {
 
-    private final Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains;
+    private final Map<String, ModelParser<JsonParser>> propertyDeserializerChains;
     private final Function<String, String> renamer;
     private final Class<?> rawClass;
     private final boolean failOnUnknownProperty;
     private final Set<String> ignoredProperties;
 
-    ObjectDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains,
+    ObjectDeserializer(Map<String, ModelParser<JsonParser>> propertyDeserializerChains,
                        Function<String, String> renamer,
                        Class<?> rawClass,
                        boolean failOnUnknownProperty,
@@ -47,7 +47,7 @@ class ObjectDeserializer implements ModelDeserializer<JsonParser> {
     }
 
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser parser, DefaultDeserializationContext context) {
         String key = null;
         while (parser.hasNext()) {
             final JsonParser.Event next = parser.next();
@@ -70,7 +70,7 @@ class ObjectDeserializer implements ModelDeserializer<JsonParser> {
                         throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
                     }
                 } else if (failOnUnknownProperty && !ignoredProperties.contains(key)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, key, rawClass));
+                    throw new JsonbException(MessageProvider.getMessage(MessageConstants.UNKNOWN_JSON_PROPERTY, key, rawClass));
                 }
                 break;
             case END_ARRAY:

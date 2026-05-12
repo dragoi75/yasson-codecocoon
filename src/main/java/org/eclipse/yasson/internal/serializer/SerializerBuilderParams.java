@@ -15,8 +15,8 @@ package org.eclipse.yasson.internal.serializer;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-import org.eclipse.yasson.internal.model.customization.ClassCustomization;
-import org.eclipse.yasson.internal.model.customization.Customization;
+import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
+import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 
 /**
  * Not currently supported. Possibly implemented in the future.
@@ -26,11 +26,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
 class SerializerBuilderParams {
 
     private final Type type;
-    private final Customization customization;
+    private final SerializationCustomizer customization;
     private final boolean root;
     private final boolean key;
     private final boolean resolveRootAdapter;
-    private final ModelSerializer objectBaseSerializer;
+    private final ModelMarshaller objectBaseSerializer;
 
     private SerializerBuilderParams(Builder builder) {
         this.type = builder.type;
@@ -49,7 +49,7 @@ class SerializerBuilderParams {
         return type;
     }
 
-    public Customization getCustomization() {
+    public SerializationCustomizer getCustomization() {
         return customization;
     }
 
@@ -65,22 +65,22 @@ class SerializerBuilderParams {
         return resolveRootAdapter;
     }
 
-    public ModelSerializer getObjectBaseSerializer() {
+    public ModelMarshaller getObjectBaseSerializer() {
         return objectBaseSerializer;
     }
 
     static final class Builder {
 
         private Type type;
-        private Customization customization;
+        private SerializationCustomizer customization;
         private boolean root;
         private boolean key;
         private boolean resolveRootAdapter;
-        private ModelSerializer objectBaseSerializer;
+        private ModelMarshaller objectBaseSerializer;
 
         private Builder(Type type) {
             this.type = Objects.requireNonNull(type);
-            this.customization = ClassCustomization.empty();
+            this.customization = ClassSerializationConfig.emptyConfig();
             this.root = true;
             this.key = false;
         }
@@ -90,7 +90,7 @@ class SerializerBuilderParams {
             return this;
         }
 
-        public Builder customization(Customization customization) {
+        public Builder customization(SerializationCustomizer customization) {
             this.customization = Objects.requireNonNull(customization);
             return this;
         }
@@ -110,7 +110,7 @@ class SerializerBuilderParams {
             return this;
         }
 
-        public Builder objectBaseSerializer(ModelSerializer objectBaseSerializer) {
+        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
             this.objectBaseSerializer = objectBaseSerializer;
             return this;
         }

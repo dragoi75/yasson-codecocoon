@@ -24,14 +24,15 @@ import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
 
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.internal.serializer.ModelSerializer;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
+import org.eclipse.yasson.internal.serializer.ModelMarshaller;
+import org.eclipse.yasson.internal.serializer.NullValueSerializer;
 
 /**
  * JSONB marshaller. Created each time marshalling operation called.
  */
-public class SerializationContextImpl extends ProcessingContext implements SerializationContext {
+public class SerializationContextImpl extends ProcessingScope implements SerializationContext {
 
     private static final Logger LOGGER = Logger.getLogger(SerializationContextImpl.class.getName());
 
@@ -52,7 +53,7 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
      * @param jsonbContext    Current context.
      * @param rootRuntimeType Type of root object.
      */
-    public SerializationContextImpl(JsonbContext jsonbContext, Type rootRuntimeType) {
+    public SerializationContextImpl(JsonBindingContext jsonbContext, Type rootRuntimeType) {
         super(jsonbContext);
         this.runtimeType = rootRuntimeType;
     }
@@ -62,7 +63,7 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
      *
      * @param jsonbContext Current context.
      */
-    public SerializationContextImpl(JsonbContext jsonbContext) {
+    public SerializationContextImpl(JsonBindingContext jsonbContext) {
         this(jsonbContext, null);
     }
 
@@ -103,7 +104,7 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Value from this property is only used in {@link org.eclipse.yasson.internal.serializer.NullSerializer}.
+     * Value from this property is only used in {@link NullValueSerializer}.
      * It should not be used anywhere else.
      *
      * @return if container supports nulls
@@ -136,7 +137,7 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
             throw e;
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
                 if (close) {
@@ -195,12 +196,12 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
      */
     public <T> void serializeObject(T root, JsonGenerator generator) {
         Type type = runtimeType == null ? (root == null ? Object.class : root.getClass()) : runtimeType;
-        final ModelSerializer rootSerializer = getRootSerializer(type);
-        rootSerializer.serialize(root, generator, this);
+        final ModelMarshaller rootSerializer = getRootSerializer(type);
+        rootSerializer.marshal(root, generator, this);
     }
 
-    public ModelSerializer getRootSerializer(Type type) {
-        return getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
+    public ModelMarshaller getRootSerializer(Type type) {
+        return getJsonbContext().getSerializationModelCreator().buildSerializerChain(type, true, true);
     }
 
     /**

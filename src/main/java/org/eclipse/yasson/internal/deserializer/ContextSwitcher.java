@@ -14,26 +14,26 @@ package org.eclipse.yasson.internal.deserializer;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Deserializer which creates new deserialization context and invokes delegate with it.
  */
-class ContextSwitcher implements ModelDeserializer<JsonParser> {
+class ContextSwitcher implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<Object> delegate;
-    private final ModelDeserializer<JsonParser> modelDeserializer;
+    private final ModelParser<Object> delegate;
+    private final ModelParser<JsonParser> modelDeserializer;
 
-    ContextSwitcher(ModelDeserializer<Object> delegate,
-                    ModelDeserializer<JsonParser> modelDeserializer) {
+    ContextSwitcher(ModelParser<Object> delegate,
+                    ModelParser<JsonParser> modelDeserializer) {
         this.delegate = delegate;
         this.modelDeserializer = modelDeserializer;
     }
 
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        DeserializationContextImpl ctx = new DeserializationContextImpl(context);
-        Object returnedValue = delegate.deserialize(modelDeserializer.deserialize(value, ctx), context);
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        DefaultDeserializationContext ctx = new DefaultDeserializationContext(context);
+        Object returnedValue = delegate.deserializeModel(modelDeserializer.deserializeModel(value, ctx), context);
         context.setLastValueEvent(ctx.getLastValueEvent());
         return returnedValue;
     }

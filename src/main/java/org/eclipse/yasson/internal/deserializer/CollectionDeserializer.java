@@ -17,22 +17,22 @@ import java.util.Collection;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
  * Collection container deserializer.
  */
-class CollectionDeserializer implements ModelDeserializer<JsonParser> {
+class CollectionDeserializer implements ModelParser<JsonParser> {
 
-    private final ModelDeserializer<JsonParser> delegate;
+    private final ModelParser<JsonParser> delegate;
 
-    CollectionDeserializer(ModelDeserializer<JsonParser> delegate) {
+    CollectionDeserializer(ModelParser<JsonParser> delegate) {
         this.delegate = delegate;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser parser, DefaultDeserializationContext context) {
         Collection<Object> collection = (Collection<Object>) context.getInstance();
         while (parser.hasNext()) {
             final JsonParser.Event next = parser.next();
@@ -45,8 +45,8 @@ class CollectionDeserializer implements ModelDeserializer<JsonParser> {
             case VALUE_TRUE:
             case VALUE_FALSE:
             case VALUE_NUMBER:
-                DeserializationContextImpl newContext = new DeserializationContextImpl(context);
-                collection.add(delegate.deserialize(parser, newContext));
+                DefaultDeserializationContext newContext = new DefaultDeserializationContext(context);
+                collection.add(delegate.deserializeModel(parser, newContext));
                 break;
             case END_ARRAY:
                 return collection;

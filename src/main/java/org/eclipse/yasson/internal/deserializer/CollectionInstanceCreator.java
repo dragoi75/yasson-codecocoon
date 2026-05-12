@@ -27,14 +27,14 @@ import java.util.TreeSet;
 
 import jakarta.json.stream.JsonParser;
 
-import org.eclipse.yasson.internal.DeserializationContextImpl;
+import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.InstanceCreator;
-import org.eclipse.yasson.internal.ReflectionUtils;
+import org.eclipse.yasson.internal.ReflectionHelper;
 
 /**
  * Collection instance creator.
  */
-class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
+class CollectionInstanceCreator implements ModelParser<JsonParser> {
 
     private final CollectionDeserializer delegate;
     private final Type type;
@@ -43,14 +43,14 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
 
     CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
         this.delegate = delegate;
-        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
+        this.clazz = implementationClass(ReflectionHelper.getRawType(type));
         this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
         this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         Object instance;
         if (isEnumSet) {
             instance = EnumSet.noneOf((Class<Enum>) type);
@@ -58,7 +58,7 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
             instance = InstanceCreator.createInstance(clazz);
         }
         context.setInstance(instance);
-        return delegate.deserialize(value, context);
+        return delegate.deserializeModel(value, context);
     }
 
     private Class<?> implementationClass(Class<?> type) {
