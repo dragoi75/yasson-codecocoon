@@ -1,22 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2018 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2018 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
-
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal.serializer;
 
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
-
 import javax.json.bind.JsonbException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -38,7 +38,9 @@ import java.util.TimeZone;
 public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeserializer<XMLGregorianCalendar> {
 
     private final Calendar calendarTemplate;
+
     private final DatatypeFactory datatypeFactory;
+
     private final LocalTime ZERO_LOCAL_TIME = LocalTime.parse("00:00:00");
 
     /**
@@ -58,7 +60,6 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         }
     }
 
-
     @Override
     protected XMLGregorianCalendar fromInstant(Instant instant) {
         final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
@@ -68,8 +69,7 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
 
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
-        DateTimeFormatter formatter = jsonValue.contains("T") ?
-                DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
+        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
         return parseWithFormatter(jsonValue, formatter.withLocale(locale));
     }
 
@@ -78,10 +78,10 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         final TemporalAccessor parsed = formatter.parse(jsonValue);
         LocalTime time = parsed.query(TemporalQueries.localTime());
         ZoneId zone = parsed.query(TemporalQueries.zone());
-        if (zone == null) {
+        if (null == zone) {
             zone = UTC;
         }
-        if (time == null) {
+        if (null == time) {
             time = ZERO_LOCAL_TIME;
         }
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);

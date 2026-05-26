@@ -1,24 +1,24 @@
-/*******************************************************************************
- * Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
- * <p>
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2016, 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *  <p>
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
-
 
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.DefaultSerializers;
 import org.eclipse.yasson.internal.serializer.JsonDeserializerBuilder;
-
 import javax.json.bind.JsonbException;
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.stream.JsonParser;
@@ -57,14 +57,12 @@ public class JsonUnmarshaller extends ObjectProcessingContext implements Deseria
     @SuppressWarnings("unchecked")
     private <T> T unmarshalItem(Type targetType, JsonParser jsonReader) {
         try {
-            JsonDeserializerBuilder deserializerFactory = new JsonDeserializerBuilder(jsonbContext)
-                    .setType(targetType).setJsonValueType(getRootEvent(jsonReader));
+            JsonDeserializerBuilder deserializerFactory = new JsonDeserializerBuilder(jsonbContext).setType(targetType).setJsonValueType(getRootEvent(jsonReader));
             Class<?> rawClass = ReflectionTypeUtils.getRawType(targetType);
             if (!DefaultSerializers.getInstance().isKnownType(rawClass)) {
                 ClassModel typeModel = getMappingContext().getOrCreateClassModel(rawClass);
                 deserializerFactory.setCustomization(typeModel.getCustomization());
             }
-
             return (T) deserializerFactory.buildDeserializer().deserialize(jsonReader, this, targetType);
         } catch (JsonbException jsonbException) {
             JSONB_UNMARSHALLER_LOG.severe(jsonbException.getMessage());
@@ -82,11 +80,10 @@ public class JsonUnmarshaller extends ObjectProcessingContext implements Deseria
     private JsonParser.Event getRootEvent(JsonParser jsonReader) {
         JsonbRiEventParser.LevelParseContext levelContext = ((JsonbNavigator) jsonReader).getCurrentLevel();
         //Wrapper parser is at start
-        if (levelContext.getParent() == null) {
+        if (null == levelContext.getParent()) {
             return jsonReader.next();
         }
         final JsonParser.Event terminalEvent = levelContext.getLastEvent();
-        return terminalEvent == JsonParser.Event.KEY_NAME ? jsonReader.next() : terminalEvent;
+        return JsonParser.Event.KEY_NAME == terminalEvent ? jsonReader.next() : terminalEvent;
     }
-
 }

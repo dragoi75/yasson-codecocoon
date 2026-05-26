@@ -1,15 +1,17 @@
-/*******************************************************************************
- * Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
- * which accompanies this distribution.
- * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- * http://www.eclipse.org/org/documents/edl-v10.php.
+/**
+ * ****************************************************************************
+ *  Copyright (c) 2019 Oracle and/or its affiliates. All rights reserved.
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
+ *  which accompanies this distribution.
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
  *
- * Contributors:
- * Roman Grigoriadi
- ******************************************************************************/
+ *  Contributors:
+ *  Roman Grigoriadi
+ * ****************************************************************************
+ */
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
@@ -28,6 +30,7 @@ import java.util.TreeSet;
 public class InstanceFactory {
 
     private interface Creator {
+
         Object newInstance();
     }
 
@@ -35,6 +38,7 @@ public class InstanceFactory {
      * Caches default constructor to create instance.
      */
     private static final class InstanceCreator implements Creator {
+
         private final Constructor<?> instantiator;
 
         public InstanceCreator(Constructor<?> instantiator) {
@@ -69,11 +73,10 @@ public class InstanceFactory {
     public <T> T getOrCreateInstance(Class<T> clazz) {
         Creator factory = factoryMap.get(clazz);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (factory == null) {
+        if (null == factory) {
             factory = new InstanceCreator(ReflectionTypeUtils.getDefaultConstructor(clazz, true));
             factoryMap.put(clazz, factory);
         }
-
         return (T) factory.newInstance();
     }
 }
