@@ -22,8 +22,8 @@ import jakarta.json.bind.config.PropertyNamingStrategy;
 
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageKeysEnum;
+import org.eclipse.yasson.internal.properties.MessageBundle;
 
 /**
  * Search for instance creator from other sources.
@@ -65,7 +65,7 @@ public class ClassMultiReleaseExtension {
     public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
         if (clazz.isRecord()) {
             if (clazz.getDeclaredConstructors().length > 1) {
-                return Optional.of(new JsonbException(Messages.getMessage(MessageKeys.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
+                return Optional.of(new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
             }
         }
         return Optional.empty();
