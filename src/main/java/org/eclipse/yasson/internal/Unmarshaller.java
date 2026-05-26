@@ -29,20 +29,6 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
 
     private static final Logger LOGGER = Logger.getLogger(Unmarshaller.class.getName());
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param jsonbContext context to use
-     */
-    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
-    }
-
     @Override
     public <T> T deserialize(Type type, JsonParser parser) {
         return deserializeItem(type, parser);
@@ -78,4 +64,19 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
         final JsonParser.Event lastEvent = currentLevel.getLastEvent();
         return JsonParser.Event.KEY_NAME == lastEvent ? parser.next() : lastEvent;
     }
+
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param jsonbContext context to use
+     */
+    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
+        return deserializeItem(clazz, parser);
+    }
+
 }

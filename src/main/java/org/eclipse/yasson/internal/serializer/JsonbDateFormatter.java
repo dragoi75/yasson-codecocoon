@@ -53,6 +53,28 @@ public class JsonbDateFormatter {
     private final String locale;
 
     /**
+     * Locale to use with formatter.
+     *
+     * @return Locale.
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    /**
      * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
      * @param dateTimeFormatter Reused time formatter.
@@ -78,13 +100,8 @@ public class JsonbDateFormatter {
         this.dateTimeFormatter = null;
     }
 
-    /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
-     *
-     * @return Formatter instance.
-     */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
     }
 
     /**
@@ -98,20 +115,4 @@ public class JsonbDateFormatter {
         return format;
     }
 
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
 }

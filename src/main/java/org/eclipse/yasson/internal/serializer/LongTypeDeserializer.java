@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class LongTypeDeserializer extends AbstractNumberDeserializer<Long> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public LongTypeDeserializer(Customization customization) {
-        super(Long.class, customization);
-    }
-
     @Override
     protected Long deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
@@ -47,4 +38,14 @@ public class LongTypeDeserializer extends AbstractNumberDeserializer<Long> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public LongTypeDeserializer(Customization customization) {
+        super(Long.class, customization);
+    }
+
 }

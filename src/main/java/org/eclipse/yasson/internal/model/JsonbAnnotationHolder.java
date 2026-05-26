@@ -34,6 +34,33 @@ public class JsonbAnnotationHolder<T extends AnnotatedElement> {
     private final T item;
 
     /**
+     * Get an annotation by type.
+     * @param <AT> Type of annotation
+     * @param annotationType Type of annotation
+     * @return Annotation by passed type
+     */
+    public <AT extends Annotation> AT getAnnotation(Class<AT> annotationType) {
+        return annotationType.cast(annotationMap.get(annotationType));
+    }
+
+    /**
+     * Adds annotation.
+     *
+     * @param metaTag Annotation to add.
+     */
+    public void addAnnotation(Annotation metaTag) {
+        if (annotationMap.containsKey(metaTag.annotationType())) {
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR,
+                                                         "Annotation already present: " + metaTag));
+        }
+        annotationMap.put(metaTag.annotationType(), metaTag);
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotationMap.values().toArray(new Annotation[0]);
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param item Element.
@@ -55,30 +82,4 @@ public class JsonbAnnotationHolder<T extends AnnotatedElement> {
         return item;
     }
 
-    /**
-     * Get an annotation by type.
-     * @param <AT> Type of annotation
-     * @param annotationType Type of annotation
-     * @return Annotation by passed type
-     */
-    public <AT extends Annotation> AT getAnnotation(Class<AT> annotationType) {
-        return annotationType.cast(annotationMap.get(annotationType));
-    }
-
-    public Annotation[] getAnnotations() {
-        return annotationMap.values().toArray(new Annotation[0]);
-    }
-
-    /**
-     * Adds annotation.
-     *
-     * @param metaTag Annotation to add.
-     */
-    public void addAnnotation(Annotation metaTag) {
-        if (annotationMap.containsKey(metaTag.annotationType())) {
-            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR,
-                                                         "Annotation already present: " + metaTag));
-        }
-        annotationMap.put(metaTag.annotationType(), metaTag);
-    }
 }

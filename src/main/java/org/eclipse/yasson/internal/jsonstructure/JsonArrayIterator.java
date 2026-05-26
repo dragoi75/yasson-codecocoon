@@ -32,25 +32,6 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     private JsonValue currentValue;
 
-    /**
-     * Creates new array iterator.
-     *
-     * @param jsonArray json array
-     */
-    public JsonArrayIterator(JsonArray jsonArray) {
-        this.valueIterator = jsonArray.iterator();
-    }
-
-    /**
-     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
-     *
-     * @return always true
-     */
-    @Override
-    public boolean hasNext() {
-        return true;
-    }
-
     @Override
     public JsonParser.Event next() {
         if (valueIterator.hasNext()) {
@@ -58,6 +39,14 @@ public class JsonArrayIterator extends JsonStructureIterator {
             return getValueEvent(currentValue);
         }
         return JsonParser.Event.END_ARRAY;
+    }
+
+    @Override
+    String getString() {
+        if (currentValue instanceof JsonString) {
+            return ((JsonString) currentValue).getString();
+        }
+        return currentValue.toString();
     }
 
     @Override
@@ -71,11 +60,23 @@ public class JsonArrayIterator extends JsonStructureIterator {
                                                       getValue().getValueType()));
     }
 
+    /**
+     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
+     *
+     * @return always true
+     */
     @Override
-    String getString() {
-        if (currentValue instanceof JsonString) {
-            return ((JsonString) currentValue).getString();
-        }
-        return currentValue.toString();
+    public boolean hasNext() {
+        return true;
     }
+
+    /**
+     * Creates new array iterator.
+     *
+     * @param jsonArray json array
+     */
+    public JsonArrayIterator(JsonArray jsonArray) {
+        this.valueIterator = jsonArray.iterator();
+    }
+
 }

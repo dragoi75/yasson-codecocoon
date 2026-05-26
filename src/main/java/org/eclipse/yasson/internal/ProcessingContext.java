@@ -30,33 +30,6 @@ public abstract class ProcessingContext {
     private final Set<Object> currentlyProcessedObjects = new HashSet<>();
 
     /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param jsonbContext context of Jsonb
-     */
-    public ProcessingContext(JsonbRuntimeContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
-    }
-
-    /**
-     * Jsonb context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    /**
-     * Mapping context.
-     *
-     * @return mapping context
-     */
-    public MappingContext getMappingContext() {
-        return getJsonbContext().getMappingContext();
-    }
-
-    /**
      * Adds currently processed object to the {@link Set}.
      *
      * @param object processed object
@@ -74,6 +47,33 @@ public abstract class ProcessingContext {
      */
     public boolean removeProcessedObject(Object object) {
         return currentlyProcessedObjects.remove(object);
+    }
+
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param jsonbContext context of Jsonb
+     */
+    public ProcessingContext(JsonbRuntimeContext jsonbContext) {
+        this.jsonbContext = jsonbContext;
+    }
+
+    /**
+     * Mapping context.
+     *
+     * @return mapping context
+     */
+    public MappingContext getMappingContext() {
+        return getJsonbContext().getMappingContext();
+    }
+
+    /**
+     * Jsonb context.
+     *
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
     }
 
 }

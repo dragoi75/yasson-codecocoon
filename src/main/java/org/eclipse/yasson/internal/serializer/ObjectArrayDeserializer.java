@@ -27,15 +27,6 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
-    /**
-     * Creates new instance of object array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected ObjectArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -49,4 +40,14 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
         }
         return items.toArray(arrayInstance);
     }
+
+    /**
+     * Creates new instance of object array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected ObjectArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

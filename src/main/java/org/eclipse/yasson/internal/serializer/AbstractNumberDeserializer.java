@@ -29,16 +29,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
 public abstract class AbstractNumberDeserializer<T extends Number> extends AbstractValueTypeDeserializer<T> {
 
     /**
-     * Creates a new instance.
-     *
-     * @param clazz         Class to work with.
-     * @param customization Model customization.
-     */
-    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
-        super(clazz, customization);
-    }
-
-    /**
      * Returns formatted number value.
      *
      * @param jsonValue    value to be formatted
@@ -61,4 +51,15 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
             throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param clazz         Class to work with.
+     * @param customization Model customization.
+     */
+    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
+        super(clazz, customization);
+    }
+
 }

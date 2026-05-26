@@ -22,6 +22,18 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
 
     private final List<Float> items = new ArrayList<>();
 
+    @Override
+    public float[] getInstance(Unmarshaller unmarshaller) {
+        final int size = items.size();
+        final float[] floatArray = new float[size];
+        int i = 0;
+        while (size > i) {
+            floatArray[i] = items.get(i);
+            i += 1;
+        }
+        return floatArray;
+    }
+
     /**
      * Creates new instance of float array deserializer.
      *
@@ -36,15 +48,4 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
         return items;
     }
 
-    @Override
-    public float[] getInstance(Unmarshaller unmarshaller) {
-        final int size = items.size();
-        final float[] floatArray = new float[size];
-        int i = 0;
-        while (size > i) {
-            floatArray[i] = items.get(i);
-            i += 1;
-        }
-        return floatArray;
-    }
 }

@@ -22,20 +22,6 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
 
     private final List<Character> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of char array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected CharArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public char[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
         }
         return charArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new instance of char array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected CharArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

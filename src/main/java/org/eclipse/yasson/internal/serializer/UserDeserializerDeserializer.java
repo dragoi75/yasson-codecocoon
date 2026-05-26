@@ -29,6 +29,25 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     private T deserializerResult;
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public T getInstance(Unmarshaller unmarshaller) {
+        return deserializerResult;
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
+    }
+
+    /**
+     * Don't move anywhere in case of user deserializer.
+     */
+    @Override
+    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+        return parser.getCurrentLevel();
+    }
+
     /**
      * Create instance of current item with its builder.
      * Contains user provided component for custom deserialization.
@@ -48,12 +67,6 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
         //ignore internal deserialize() call in custom deserializer
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(Unmarshaller unmarshaller) {
-        return deserializerResult;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void deserializeInternal(JsonbParser parser, Unmarshaller context) {
@@ -68,16 +81,4 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
         }
     }
 
-    @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
-    }
-
-    /**
-     * Don't move anywhere in case of user deserializer.
-     */
-    @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
-        return parser.getCurrentLevel();
-    }
 }

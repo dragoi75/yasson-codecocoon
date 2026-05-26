@@ -34,55 +34,33 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(SerializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param wrapper     wrapped item
-     * @param runtimeType class type
-     * @param classModel  model of the class
-     */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
-        super(wrapper, runtimeType, classModel);
-    }
-
-    @Override
-    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        Marshaller context = (Marshaller) ctx;
-        try {
-            if (!context.addProcessedObject(object)) {
-                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.RECURSIVE_REFERENCE, object.getClass()));
-            } else {
-                final PropertyMetadata[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
-                for (PropertyMetadata model : allProperties) {
-                    try {
-                        marshallProperty(object, generator, context, model);
-                    } catch (Exception e) {
-                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(), object.getClass().getCanonicalName()), e);
+    private boolean isEmptyOptional(Object object) {
+        if (!(object instanceof Optional)) {
+            if (!(object instanceof OptionalInt)) {
+                if (!(object instanceof OptionalLong)) {
+                    if (object instanceof OptionalDouble) {
+                        return !((OptionalDouble) object).isPresent();
                     }
+                } else {
+                    return !((OptionalLong) object).isPresent();
                 }
+            } else {
+                return !((OptionalInt) object).isPresent();
             }
-        } finally {
-            context.removeProcessedObject(object);
+        } else {
+            return !((Optional) object).isPresent();
         }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
+        return false;
     }
 
     @Override
     protected void writeStart(String key, JsonGenerator generator) {
         generator.writeStartObject(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
     }
 
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyMetadata propertyModel) {
@@ -108,22 +86,45 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
     }
 
-    private boolean isEmptyOptional(Object object) {
-        if (!(object instanceof Optional)) {
-            if (!(object instanceof OptionalInt)) {
-                if (!(object instanceof OptionalLong)) {
-                    if (object instanceof OptionalDouble) {
-                        return !((OptionalDouble) object).isPresent();
-                    }
-                } else {
-                    return !((OptionalLong) object).isPresent();
-                }
-            } else {
-                return !((OptionalInt) object).isPresent();
-            }
-        } else {
-            return !((Optional) object).isPresent();
-        }
-        return false;
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(SerializerBuilder builder) {
+        super(builder);
     }
+
+    @Override
+    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
+        Marshaller context = (Marshaller) ctx;
+        try {
+            if (!context.addProcessedObject(object)) {
+                throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.RECURSIVE_REFERENCE, object.getClass()));
+            } else {
+                final PropertyMetadata[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+                for (PropertyMetadata model : allProperties) {
+                    try {
+                        marshallProperty(object, generator, context, model);
+                    } catch (Exception e) {
+                        throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.SERIALIZE_PROPERTY_ERROR, model.getWriteName(), object.getClass().getCanonicalName()), e);
+                    }
+                }
+            }
+        } finally {
+            context.removeProcessedObject(object);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper     wrapped item
+     * @param runtimeType class type
+     * @param classModel  model of the class
+     */
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
 }

@@ -24,22 +24,6 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class CollectionSerializer<V> extends AbstractContainerSerializer<Collection<V>> implements EmbeddedItem {
 
-    /**
-     * Creates new collection serializer.
-     *
-     * @param builder serializer builder
-     */
-    protected CollectionSerializer(SerializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(Collection<V> collection, JsonGenerator generator, SerializationContext ctx) {
-        for (Object item : collection) {
-            serializeItem(item, generator, ctx);
-        }
-    }
-
     @Override
     protected void writeStart(JsonGenerator generator) {
         generator.writeStartArray();
@@ -49,4 +33,21 @@ public class CollectionSerializer<V> extends AbstractContainerSerializer<Collect
     protected void writeStart(String key, JsonGenerator generator) {
         generator.writeStartArray(key);
     }
+
+    @Override
+    protected void serializeInternal(Collection<V> collection, JsonGenerator generator, SerializationContext ctx) {
+        for (Object item : collection) {
+            serializeItem(item, generator, ctx);
+        }
+    }
+
+    /**
+     * Creates new collection serializer.
+     *
+     * @param builder serializer builder
+     */
+    protected CollectionSerializer(SerializerBuilder builder) {
+        super(builder);
+    }
+
 }

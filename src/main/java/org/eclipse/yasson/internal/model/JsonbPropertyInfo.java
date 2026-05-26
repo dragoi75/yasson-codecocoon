@@ -31,32 +31,23 @@ public class JsonbPropertyInfo {
     private CurrentItem<?> wrapper;
 
     /**
-     * Gets context.
+     * Sets wrapper.
      *
-     * @return Context.
-     */
-    public JsonbRuntimeContext getContext() {
-        return context;
-    }
-
-    /**
-     * Sets context.
-     *
-     * @param context Context to set.
+     * @param wrapper Wrapper to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo setContext(JsonbRuntimeContext context) {
-        this.context = context;
+    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
         return this;
     }
 
     /**
-     * Gets runtime type.
+     * Gets wrapper.
      *
-     * @return Runtime type.
+     * @return Wrapper.
      */
-    public Type getRuntimeType() {
-        return runtimeType;
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
     }
 
     /**
@@ -71,12 +62,12 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets class model.
+     * Gets runtime type.
      *
-     * @return Class model.
+     * @return Runtime type.
      */
-    public ClassDescriptor getClassModel() {
-        return classModel;
+    public Type getRuntimeType() {
+        return runtimeType;
     }
 
     /**
@@ -91,22 +82,32 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets wrapper.
+     * Gets context.
      *
-     * @return Wrapper.
+     * @return Context.
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    public JsonbRuntimeContext getContext() {
+        return context;
     }
 
     /**
-     * Sets wrapper.
+     * Gets class model.
      *
-     * @param wrapper Wrapper to set.
+     * @return Class model.
+     */
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Sets context.
+     *
+     * @param context Context to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public JsonbPropertyInfo setContext(JsonbRuntimeContext context) {
+        this.context = context;
         return this;
     }
+
 }

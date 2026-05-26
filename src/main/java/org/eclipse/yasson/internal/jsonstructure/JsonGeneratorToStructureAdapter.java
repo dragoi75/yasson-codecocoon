@@ -38,6 +38,61 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
 
     private final JsonProvider provider;
 
+    private JsonObjectBuilder getJsonObjectBuilder(String keyName) {
+        JsonStructureBuilder current = builders.peek();
+        if (!(current instanceof JsonObjectBuilder)) {
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass() + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
+        }
+        return (JsonObjectBuilder) current;
+    }
+
+    @Override
+    public JsonGenerator write(boolean value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(JsonValue value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(long value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(int value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(String name, double value) {
+        getJsonObjectBuilder(name).write(name, value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator writeNull() {
+        builders.peek().writeNull();
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(String name, boolean value) {
+        getJsonObjectBuilder(name).write(name, value);
+        return this;
+    }
+
+    @Override
+    public void flush() {
+        //noop
+    }
+
     /**
      * Default constructor, jsonp builders are created internally.
      *
@@ -49,8 +104,37 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator writeStartObject() {
-        builders.push(new JsonObjectBuilder(provider));
+    public JsonGenerator writeKey(String name) {
+        getJsonObjectBuilder(name).writeKey(name);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(String value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(BigInteger value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(String name, BigInteger value) {
+        getJsonObjectBuilder(name).write(name, value);
+        return this;
+    }
+
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public JsonGenerator write(String name, int value) {
+        getJsonObjectBuilder(name).write(name, value);
         return this;
     }
 
@@ -61,9 +145,42 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
         return this;
     }
 
+    /**
+     * Root structure wrapping all data.
+     *
+     * @return root JsonStructure.
+     */
+    public JsonStructure getRootStructure() {
+        return root;
+    }
+
     @Override
-    public JsonGenerator writeKey(String name) {
-        getJsonObjectBuilder(name).writeKey(name);
+    public JsonGenerator write(String name, long value) {
+        getJsonObjectBuilder(name).write(name, value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(String name, JsonValue value) {
+        getJsonObjectBuilder(name).write(name, value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(BigDecimal value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator write(double value) {
+        builders.peek().write(value);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator writeStartObject() {
+        builders.push(new JsonObjectBuilder(provider));
         return this;
     }
 
@@ -78,62 +195,6 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
         getJsonObjectBuilder(name).writeKey(name);
         builders.push(new JsonArrayBuilder(provider));
         return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, JsonValue value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, String value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, BigInteger value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, BigDecimal value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, int value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, long value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, double value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(String name, boolean value) {
-        getJsonObjectBuilder(name).write(name, value);
-        return this;
-    }
-
-    private JsonObjectBuilder getJsonObjectBuilder(String keyName) {
-        JsonStructureBuilder current = builders.peek();
-        if (!(current instanceof JsonObjectBuilder)) {
-            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass() + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
-        }
-        return (JsonObjectBuilder) current;
     }
 
     @Override
@@ -155,75 +216,15 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(JsonValue value) {
-        builders.peek().write(value);
+    public JsonGenerator write(String name, BigDecimal value) {
+        getJsonObjectBuilder(name).write(name, value);
         return this;
     }
 
     @Override
-    public JsonGenerator write(String value) {
-        builders.peek().write(value);
+    public JsonGenerator write(String name, String value) {
+        getJsonObjectBuilder(name).write(name, value);
         return this;
     }
 
-    @Override
-    public JsonGenerator write(BigDecimal value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(BigInteger value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(int value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(long value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(double value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator write(boolean value) {
-        builders.peek().write(value);
-        return this;
-    }
-
-    @Override
-    public JsonGenerator writeNull() {
-        builders.peek().writeNull();
-        return this;
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
-
-    @Override
-    public void flush() {
-        //noop
-    }
-
-    /**
-     * Root structure wrapping all data.
-     *
-     * @return root JsonStructure.
-     */
-    public JsonStructure getRootStructure() {
-        return root;
-    }
 }

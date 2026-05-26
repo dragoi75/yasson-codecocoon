@@ -59,14 +59,24 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
     private final String valueEntryName;
 
     /**
-     * Creates new map to entries array serializer.
+     * Serialize content of provided {@link Map}.
+     * Content of provided {@link Map} is written into {@code JsonArray} of {@code JsonObject}s representing individual
+     * map entries.
      *
-     * @param serializer map serializer
+     * @param obj       {@link Map} to be serialized
+     * @param generator JSON format generator
+     * @param ctx       JSON serialization context
      */
-    protected MapToEntriesArraySerializer(MapSerializer<K, V> serializer) {
-        this.serializer = serializer;
-        this.keyEntryName = DEFAULT_KEY_ENTRY_NAME;
-        this.valueEntryName = DEFAULT_VALUE_ENTRY_NAME;
+    @Override
+    public void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx) {
+        obj.forEach((key, value) -> {
+            generator.writeStartObject();
+            generator.writeKey(keyEntryName);
+            serializer.serializeItem(key, generator, ctx);
+            generator.writeKey(valueEntryName);
+            serializer.serializeItem(value, generator, ctx);
+            generator.writeEnd();
+        });
     }
 
     /**
@@ -93,24 +103,14 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
     }
 
     /**
-     * Serialize content of provided {@link Map}.
-     * Content of provided {@link Map} is written into {@code JsonArray} of {@code JsonObject}s representing individual
-     * map entries.
+     * Creates new map to entries array serializer.
      *
-     * @param obj       {@link Map} to be serialized
-     * @param generator JSON format generator
-     * @param ctx       JSON serialization context
+     * @param serializer map serializer
      */
-    @Override
-    public void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx) {
-        obj.forEach((key, value) -> {
-            generator.writeStartObject();
-            generator.writeKey(keyEntryName);
-            serializer.serializeItem(key, generator, ctx);
-            generator.writeKey(valueEntryName);
-            serializer.serializeItem(value, generator, ctx);
-            generator.writeEnd();
-        });
+    protected MapToEntriesArraySerializer(MapSerializer<K, V> serializer) {
+        this.serializer = serializer;
+        this.keyEntryName = DEFAULT_KEY_ENTRY_NAME;
+        this.valueEntryName = DEFAULT_VALUE_ENTRY_NAME;
     }
 
 }

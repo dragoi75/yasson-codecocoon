@@ -39,6 +39,36 @@ public class MappingContext {
     private final ClassModelParser classParser;
 
     /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz              Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassDescriptor getClassModel(Class<?> clazz) {
+        return classes.get(clazz);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param jsonbContext Context. Required.
@@ -47,6 +77,18 @@ public class MappingContext {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.classParser = new ClassModelParser(jsonbContext);
+    }
+
+    private static Function<Class<?>, ClassDescriptor> createParseClassModelFunction(ClassDescriptor parentClassModel, ClassModelParser classParser, JsonbRuntimeContext jsonbContext) {
+        return aClass -> {
+            JsonbAnnotationHolder<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().gatherAnnotations(aClass);
+            ClassSerializationConfig customization = jsonbContext.getAnnotationIntrospector().inspectCustomization(clsElement);
+            ClassDescriptor newClassModel = new ClassDescriptor(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            if (!DefaultSerializers.isKnownType(aClass)) {
+                classParser.extractProperties(newClassModel, clsElement);
+            }
+            return newClassModel;
+        };
     }
 
     /**
@@ -81,45 +123,4 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
-    private static Function<Class<?>, ClassDescriptor> createParseClassModelFunction(ClassDescriptor parentClassModel, ClassModelParser classParser, JsonbRuntimeContext jsonbContext) {
-        return aClass -> {
-            JsonbAnnotationHolder<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().gatherAnnotations(aClass);
-            ClassSerializationConfig customization = jsonbContext.getAnnotationIntrospector().inspectCustomization(clsElement);
-            ClassDescriptor newClassModel = new ClassDescriptor(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-            if (!DefaultSerializers.isKnownType(aClass)) {
-                classParser.extractProperties(newClassModel, clsElement);
-            }
-            return newClassModel;
-        };
-    }
-
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassDescriptor getClassModel(Class<?> clazz) {
-        return classes.get(clazz);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz              Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

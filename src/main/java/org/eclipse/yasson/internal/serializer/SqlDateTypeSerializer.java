@@ -23,23 +23,12 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class SqlDateTypeSerializer<T extends Date> extends DateTypeSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlDateTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
-    protected Instant toInstant(Date value) {
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
         if (!(value instanceof java.sql.Date)) {
-            return super.toInstant(value);
+            return super.formatWithFormatter(value, formatter);
         } else {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(value.getTime());
+            return ((java.sql.Date) value).toLocalDate().format(formatter);
         }
     }
 
@@ -54,11 +43,23 @@ public class SqlDateTypeSerializer<T extends Date> extends DateTypeSerializer<T>
     }
 
     @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+    protected Instant toInstant(Date value) {
         if (!(value instanceof java.sql.Date)) {
-            return super.formatWithFormatter(value, formatter);
+            return super.toInstant(value);
         } else {
-            return ((java.sql.Date) value).toLocalDate().format(formatter);
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(value.getTime());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlDateTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

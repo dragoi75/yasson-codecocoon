@@ -28,6 +28,17 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<byte[]> {
 
+    private Base64.Decoder getDecoder(String strategy) {
+        switch (strategy) {
+        case BinaryDataStrategy.BASE_64:
+            return Base64.getDecoder();
+        case BinaryDataStrategy.BASE_64_URL:
+            return Base64.getUrlDecoder();
+        default:
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -42,14 +53,4 @@ public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<b
         return getDecoder(unmarshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonValue);
     }
 
-    private Base64.Decoder getDecoder(String strategy) {
-        switch (strategy) {
-        case BinaryDataStrategy.BASE_64:
-            return Base64.getDecoder();
-        case BinaryDataStrategy.BASE_64_URL:
-            return Base64.getUrlDecoder();
-        default:
-            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
-        }
-    }
 }

@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class ByteArraySerializer extends AbstractArraySerializer<byte[]> {
 
+    @Override
+    protected void serializeInternal(byte[] obj, JsonGenerator generator, SerializationContext ctx) {
+        for (byte b : obj) {
+            generator.write(b);
+        }
+    }
+
     /**
      * Creates new instance of byte array serializer.
      *
@@ -27,13 +34,6 @@ public class ByteArraySerializer extends AbstractArraySerializer<byte[]> {
      */
     protected ByteArraySerializer(SerializerBuilder builder) {
         super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(byte[] obj, JsonGenerator generator, SerializationContext ctx) {
-        for (byte b : obj) {
-            generator.write(b);
-        }
     }
 
 }

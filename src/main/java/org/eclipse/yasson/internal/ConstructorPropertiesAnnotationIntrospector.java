@@ -30,8 +30,21 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
-        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
+    private JsonbInstantiator createJsonbCreator(Executable executable, String[] properties) {
+        final Parameter[] parameters = executable.getParameters();
+        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
+        int i = 0;
+        while (parameters.length > i) {
+            final Parameter parameter = parameters[i];
+            creatorModels[i] = new CreatorProfile(properties[i], parameter, jsonbContext);
+            i += 1;
+        }
+        return new JsonbInstantiator(executable, creatorModels);
+    }
+
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
     }
 
     /**
@@ -45,6 +58,10 @@ class ConstructorPropertiesAnnotationIntrospector {
     protected ConstructorPropertiesAnnotationIntrospector(JsonbRuntimeContext context, AnnotationFinder annotationFinder) {
         this.jsonbContext = context;
         this.constructorProperties = annotationFinder;
+    }
+
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
+        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
     public JsonbInstantiator getCreator(Constructor<?>[] constructors) {
@@ -73,20 +90,4 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbInstantiator createJsonbCreator(Executable executable, String[] properties) {
-        final Parameter[] parameters = executable.getParameters();
-        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
-        int i = 0;
-        while (parameters.length > i) {
-            final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorProfile(properties[i], parameter, jsonbContext);
-            i += 1;
-        }
-        return new JsonbInstantiator(executable, creatorModels);
-    }
-
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
-    }
 }

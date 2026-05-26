@@ -29,6 +29,40 @@ public class JsonbInstantiator {
     private final CreatorProfile[] creatorProfiles;
 
     /**
+     * Find creator parameter by name.
+     *
+     * @param nameKey parameter name as it appear in json document.
+     * @return Creator parameter.
+     */
+    public CreatorProfile findByParamName(String nameKey) {
+        for (CreatorProfile profile : creatorProfiles) {
+            if (profile.getName().equals(nameKey)) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorProfile[] getParams() {
+        return creatorProfiles;
+    }
+
+    /**
+     * True if param name is one of creator params.
+     *
+     * @param nameKey Param name to check.
+     * @return True if found.
+     */
+    public boolean contains(String nameKey) {
+        return null != findByParamName(nameKey);
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param invokableMember    Executable.
@@ -60,37 +94,4 @@ public class JsonbInstantiator {
         }
     }
 
-    /**
-     * True if param name is one of creator params.
-     *
-     * @param nameKey Param name to check.
-     * @return True if found.
-     */
-    public boolean contains(String nameKey) {
-        return null != findByParamName(nameKey);
-    }
-
-    /**
-     * Find creator parameter by name.
-     *
-     * @param nameKey parameter name as it appear in json document.
-     * @return Creator parameter.
-     */
-    public CreatorProfile findByParamName(String nameKey) {
-        for (CreatorProfile profile : creatorProfiles) {
-            if (profile.getName().equals(nameKey)) {
-                return profile;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorProfile[] getParams() {
-        return creatorProfiles;
-    }
 }

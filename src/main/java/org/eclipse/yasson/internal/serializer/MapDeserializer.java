@@ -44,6 +44,28 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
 
     private final T instance;
 
+    @SuppressWarnings("unchecked")
+    private <V> void appendCaptor(String key, V value) {
+        ((Map<String, V>) getInstance(null)).put(key, value);
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
+        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
+    }
+
+    @Override
+    public void appendResult(Object result) {
+        appendCaptor(getParserContext().getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
+    }
+
+    @Override
+    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -59,6 +81,11 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     private T createInstance(DeserializerBuilder builder) {
         Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
         return rawType.isInterface() ? (T) getMapImpl(rawType, builder) : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
+    }
+
+    @Override
+    public T getInstance(Unmarshaller unmarshaller) {
+        return instance;
     }
 
     private Map getMapImpl(Class ifcType, DeserializerBuilder builder) {
@@ -77,30 +104,4 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
         return new HashMap<>();
     }
 
-    @Override
-    public T getInstance(Unmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void appendResult(Object result) {
-        appendCaptor(getParserContext().getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <V> void appendCaptor(String key, V value) {
-        ((Map<String, V>) getInstance(null)).put(key, value);
-    }
-
-    @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
-    }
-
-    @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
 }

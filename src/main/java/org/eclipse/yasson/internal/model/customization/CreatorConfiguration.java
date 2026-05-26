@@ -26,41 +26,6 @@ public class CreatorConfiguration extends CustomizationBase {
 
     private PropertyMetadata fieldMetadata;
 
-    /**
-     * Creates new creator customization instance.
-     *
-     * @param customBuilder   builder of the customization
-     * @param numericFormatter number formatter
-     * @param temporalFormatter   date formatter
-     */
-    public CreatorConfiguration(CustomizationBuilder customBuilder, JsonbNumberFormatter numericFormatter, JsonbDateFormatter temporalFormatter) {
-        super(customBuilder);
-        this.numericFormatter = numericFormatter;
-        this.temporalFormatter = temporalFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (null == numericFormatter) {
-            if (null != fieldMetadata) {
-                return fieldMetadata.getCustomization().getDeserializeNumberFormatter();
-            }
-        } else {
-            return numericFormatter;
-        }
-        return null;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
         if (null == temporalFormatter) {
@@ -78,6 +43,11 @@ public class CreatorConfiguration extends CustomizationBase {
         throw new UnsupportedOperationException("Not supported for creator parameters.");
     }
 
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
     /**
      * Set property referenced model.
      *
@@ -86,4 +56,35 @@ public class CreatorConfiguration extends CustomizationBase {
     public void setPropertyModel(PropertyMetadata fieldMetadata) {
         this.fieldMetadata = fieldMetadata;
     }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        if (null == numericFormatter) {
+            if (null != fieldMetadata) {
+                return fieldMetadata.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
+            return numericFormatter;
+        }
+        return null;
+    }
+
+    /**
+     * Creates new creator customization instance.
+     *
+     * @param customBuilder   builder of the customization
+     * @param numericFormatter number formatter
+     * @param temporalFormatter   date formatter
+     */
+    public CreatorConfiguration(CustomizationBuilder customBuilder, JsonbNumberFormatter numericFormatter, JsonbDateFormatter temporalFormatter) {
+        super(customBuilder);
+        this.numericFormatter = numericFormatter;
+        this.temporalFormatter = temporalFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
 }

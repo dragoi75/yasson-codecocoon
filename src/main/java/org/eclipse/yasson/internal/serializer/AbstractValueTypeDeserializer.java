@@ -31,6 +31,36 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     private final Customization customization;
 
     /**
+     * Convert string value to object.
+     *
+     * @param jsonValue    Json value.
+     * @param unmarshaller Unmarshaller instance.
+     * @param rtType       Runtime type.
+     * @return Deserialized object.
+     */
+    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        throw new UnsupportedOperationException("Operation not supported in " + getClass());
+    }
+
+    /**
+     * Returns customization of object.
+     *
+     * @return object customization
+     */
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
+     * Type of a property or creator parameter which is deserialized.
+     *
+     * @return property type.
+     */
+    protected Class<T> getPropertyType() {
+        return clazz;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param clazz         Class to work with.
@@ -60,33 +90,4 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
         return deserialize(value, unmarshaller, rtType);
     }
 
-    /**
-     * Convert string value to object.
-     *
-     * @param jsonValue    Json value.
-     * @param unmarshaller Unmarshaller instance.
-     * @param rtType       Runtime type.
-     * @return Deserialized object.
-     */
-    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        throw new UnsupportedOperationException("Operation not supported in " + getClass());
-    }
-
-    /**
-     * Returns customization of object.
-     *
-     * @return object customization
-     */
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    /**
-     * Type of a property or creator parameter which is deserialized.
-     *
-     * @return property type.
-     */
-    protected Class<T> getPropertyType() {
-        return clazz;
-    }
 }

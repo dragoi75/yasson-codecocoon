@@ -28,13 +28,13 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalDoubleTypeDeserializer(Customization customization) {
-        super(OptionalDouble.class, customization);
+    @Override
+    protected OptionalDouble deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalDouble.of(Double.parseDouble(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
+        }
     }
 
     @Override
@@ -47,12 +47,13 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
         return deserialize(value, (Unmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalDouble deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalDouble.of(Double.parseDouble(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalDoubleTypeDeserializer(Customization customization) {
+        super(OptionalDouble.class, customization);
     }
+
 }

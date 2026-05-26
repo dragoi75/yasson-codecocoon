@@ -51,66 +51,12 @@ public class JsonbRuntimeContext {
     private final InstanceCreator instanceFactory;
 
     /**
-     * Creates and initialize context.
-     *
-     * @param runtimeConfig  jsonb jsonbConfig not null
-     * @param jsonSource provider of JSONP
-     */
-    public JsonbRuntimeContext(JsonbConfig runtimeConfig, JsonProvider jsonSource) {
-        Objects.requireNonNull(runtimeConfig);
-        this.runtimeConfig = runtimeConfig;
-        this.mapContext = new MappingContext(this);
-        this.instanceFactory = InstanceCreator.getSingleton();
-        this.componentFactory = initializeComponentInstanceCreator(instanceFactory);
-        this.componentResolver = new ComponentMatcher(this);
-        this.annotationInspector = new JsonbAnnotationIntrospector(this);
-        this.jsonSource = jsonSource;
-        this.configurationProperties = new JsonbConfigurationProperties(runtimeConfig);
-    }
-
-    /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return runtimeConfig;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mapContext;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonSource;
-    }
-
-    /**
      * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
      *
      * @return Instance creator.
      */
     public JsonbComponentInstanceCreator getComponentInstanceCreator() {
         return componentFactory;
-    }
-
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentMatcher getComponentMatcher() {
-        return componentResolver;
     }
 
     /**
@@ -135,6 +81,33 @@ public class JsonbRuntimeContext {
         return instanceFactory;
     }
 
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return runtimeConfig;
+    }
+
+    /**
+     * Creates and initialize context.
+     *
+     * @param runtimeConfig  jsonb jsonbConfig not null
+     * @param jsonSource provider of JSONP
+     */
+    public JsonbRuntimeContext(JsonbConfig runtimeConfig, JsonProvider jsonSource) {
+        Objects.requireNonNull(runtimeConfig);
+        this.runtimeConfig = runtimeConfig;
+        this.mapContext = new MappingContext(this);
+        this.instanceFactory = InstanceCreator.getSingleton();
+        this.componentFactory = initializeComponentInstanceCreator(instanceFactory);
+        this.componentResolver = new ComponentMatcher(this);
+        this.annotationInspector = new JsonbAnnotationIntrospector(this);
+        this.jsonSource = jsonSource;
+        this.configurationProperties = new JsonbConfigurationProperties(runtimeConfig);
+    }
+
     private JsonbComponentInstanceCreator initializeComponentInstanceCreator(InstanceCreator instanceFactory) {
         ServiceLoader<JsonbComponentInstanceCreator> serviceProvider = AccessController
                 .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
@@ -151,6 +124,33 @@ public class JsonbRuntimeContext {
         JsonbComponentInstanceCreator componentFactoryParam = creatorList.get(0);
         JSONB_RUNTIME_LOG.finest("Component instance creator:" + componentFactoryParam.getClass());
         return componentFactoryParam;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mapContext;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonSource;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentResolver;
     }
 
 }

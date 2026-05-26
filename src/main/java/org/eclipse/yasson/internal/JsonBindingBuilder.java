@@ -27,24 +27,14 @@ public class JsonBindingBuilder implements JsonbBuilder {
     private JsonProvider provider = null;
 
     @Override
-    public JsonbBuilder withConfig(JsonbConfig config) {
-        this.config = config;
-        return this;
+    public Jsonb build() {
+        return new JsonBinding(this);
     }
 
     @Override
     public JsonbBuilder withProvider(JsonProvider jsonpProvider) {
         this.provider = jsonpProvider;
         return this;
-    }
-
-    /**
-     * Gets configuration.
-     *
-     * @return configuration.
-     */
-    public JsonbConfig getConfig() {
-        return config;
     }
 
     /**
@@ -57,7 +47,18 @@ public class JsonBindingBuilder implements JsonbBuilder {
     }
 
     @Override
-    public Jsonb build() {
-        return new JsonBinding(this);
+    public JsonbBuilder withConfig(JsonbConfig config) {
+        this.config = config;
+        return this;
     }
+
+    /**
+     * Gets configuration.
+     *
+     * @return configuration.
+     */
+    public JsonbConfig getConfig() {
+        return config;
+    }
+
 }

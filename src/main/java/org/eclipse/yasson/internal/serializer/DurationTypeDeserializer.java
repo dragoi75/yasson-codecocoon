@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class DurationTypeDeserializer extends AbstractValueTypeDeserializer<Duration> {
 
+    @Override
+    protected Duration deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return Duration.parse(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class DurationTypeDeserializer extends AbstractValueTypeDeserializer<Dura
         super(Duration.class, customization);
     }
 
-    @Override
-    protected Duration deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return Duration.parse(jsonValue);
-    }
 }

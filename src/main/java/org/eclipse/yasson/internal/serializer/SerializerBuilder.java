@@ -34,26 +34,6 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
     private Class<?> objectClass;
 
     /**
-     * Creates a new builder.
-     *
-     * @param jsonbContext JSON-B context.
-     */
-    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    /**
-     * Adds object class.
-     *
-     * @param objectClass object class
-     * @return Builder.
-     */
-    public SerializerBuilder withObjectClass(Class<?> objectClass) {
-        this.objectClass = objectClass;
-        return this;
-    }
-
-    /**
      * Builds a {@link JsonbSerializer}.
      *
      * @return JsonbSerializer.
@@ -116,8 +96,33 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
         }
     }
 
+    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
+        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers.findValueSerializerProvider(rawType);
+        if (supportedTypeSerializerOptional.isPresent()) {
+            return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(getCustomization()));
+        }
+        return Optional.empty();
+    }
+
     private boolean isByteArray(Class<?> rawType) {
         return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
+    }
+
+    private Type resolveRuntimeType() {
+        Type genericType = getGenericType();
+        if (null != genericType && Object.class != genericType) {
+            return genericType;
+        }
+        return objectClass;
+    }
+
+    /**
+     * Creates a new builder.
+     *
+     * @param jsonbContext JSON-B context.
+     */
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
     }
 
     /**
@@ -160,19 +165,15 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
         }
     }
 
-    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers.findValueSerializerProvider(rawType);
-        if (supportedTypeSerializerOptional.isPresent()) {
-            return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(getCustomization()));
-        }
-        return Optional.empty();
+    /**
+     * Adds object class.
+     *
+     * @param objectClass object class
+     * @return Builder.
+     */
+    public SerializerBuilder withObjectClass(Class<?> objectClass) {
+        this.objectClass = objectClass;
+        return this;
     }
 
-    private Type resolveRuntimeType() {
-        Type genericType = getGenericType();
-        if (null != genericType && Object.class != genericType) {
-            return genericType;
-        }
-        return objectClass;
-    }
 }

@@ -34,17 +34,22 @@ public class ClassSerializationConfig extends CustomizationBase {
     private final PropertyVisibilityStrategy visibilityStrategy;
 
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Names of properties to sort with.
      *
-     * @param classCustomizer not null
+     * @return sorted names of properties
      */
-    ClassSerializationConfig(ClassCustomizationBuilder classCustomizer) {
-        super(classCustomizer);
-        this.instantiator = classCustomizer.getCreator();
-        this.propertySequence = classCustomizer.getPropertyOrder();
-        this.numericFormatter = classCustomizer.getNumberFormatter();
-        this.dateFormatter = classCustomizer.getDateFormatter();
-        this.visibilityStrategy = classCustomizer.getPropertyVisibilityStrategy();
+    public String[] getPropertyOrder() {
+        return propertySequence;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numericFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateFormatter;
     }
 
     /**
@@ -61,22 +66,9 @@ public class ClassSerializationConfig extends CustomizationBase {
         this.visibilityStrategy = sourceConfig.getPropertyVisibilityStrategy();
     }
 
-    /**
-     * Returns instance of {@link JsonbInstantiator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbInstantiator getCreator() {
-        return instantiator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertySequence;
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numericFormatter;
     }
 
     /**
@@ -88,6 +80,34 @@ public class ClassSerializationConfig extends CustomizationBase {
         this.propertySequence = propertySequence;
     }
 
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateFormatter;
+    }
+
+    /**
+     * Returns instance of {@link JsonbInstantiator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbInstantiator getCreator() {
+        return instantiator;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param classCustomizer not null
+     */
+    ClassSerializationConfig(ClassCustomizationBuilder classCustomizer) {
+        super(classCustomizer);
+        this.instantiator = classCustomizer.getCreator();
+        this.propertySequence = classCustomizer.getPropertyOrder();
+        this.numericFormatter = classCustomizer.getNumberFormatter();
+        this.dateFormatter = classCustomizer.getDateFormatter();
+        this.visibilityStrategy = classCustomizer.getPropertyVisibilityStrategy();
+    }
+
     /**
      * Property visibility strategy for this class model.
      *
@@ -95,26 +115,6 @@ public class ClassSerializationConfig extends CustomizationBase {
      */
     public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
         return visibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numericFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numericFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateFormatter;
     }
 
 }

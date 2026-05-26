@@ -21,6 +21,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class DoubleTypeSerializer extends AbstractNumberSerializer<Double> {
 
+    @Override
+    protected void serializeNonFormatted(Double obj, JsonGenerator generator) {
+        generator.write(obj);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class DoubleTypeSerializer extends AbstractNumberSerializer<Double> {
         generator.write(key, obj);
     }
 
-    @Override
-    protected void serializeNonFormatted(Double obj, JsonGenerator generator) {
-        generator.write(obj);
-    }
 }

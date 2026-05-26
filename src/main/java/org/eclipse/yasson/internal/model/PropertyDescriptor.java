@@ -33,42 +33,44 @@ public class PropertyDescriptor {
     private JsonbAnnotationHolder<Method> mutatorHolder;
 
     /**
-     * Create instance of property.
-     *
-     * @param identifier                not null
-     * @param sourceClassHolder Class model for a class declaring property.
+     * @param readMethod not null
      */
-    public PropertyDescriptor(String identifier, JsonbAnnotationHolder<Class<?>> sourceClassHolder) {
-        this.identifier = identifier;
-        this.ownerClassHolder = sourceClassHolder;
+    public void setGetter(Method readMethod) {
+        this.accessorHolder = new JsonbAnnotationHolder<>(readMethod);
     }
 
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return identifier;
-    }
-
-    /**
-     * {@link Field} representing property if any.
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (null == attributeHolder) {
-            return null;
+    Type getGetterType() {
+        if (null != getGetter()) {
+            return getGetter().getGenericReturnType();
         }
-        return attributeHolder.getElement();
+        return null;
     }
 
     /**
-     * @param memberRef field not null
+     * Element with getter and its annotations.
+     *
+     * @return getter with annotations
      */
-    public void setField(Field memberRef) {
-        this.attributeHolder = new JsonbAnnotationHolder<>(memberRef);
+    public JsonbAnnotationHolder<Method> getGetterElement() {
+        return accessorHolder;
+    }
+
+    Type getSetterType() {
+        Type[] typeArgs = getSetter().getGenericParameterTypes();
+        if (1 != typeArgs.length) {
+            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
+        }
+        return typeArgs[0];
+    }
+
+    /**
+     * Class element with annotation under construction for declaring class of this property.
+     * This ClassModel is not fully initialized yet.
+     *
+     * @return ClassModel
+     */
+    public JsonbAnnotationHolder<Class<?>> getDeclaringClassElement() {
+        return ownerClassHolder;
     }
 
     /**
@@ -81,42 +83,6 @@ public class PropertyDescriptor {
             return null;
         }
         return accessorHolder.getElement();
-    }
-
-    /**
-     * @param readMethod not null
-     */
-    public void setGetter(Method readMethod) {
-        this.accessorHolder = new JsonbAnnotationHolder<>(readMethod);
-    }
-
-    /**
-     * {@link Method} representing setter of a property if any.
-     *
-     * @return setter if present
-     */
-    public Method getSetter() {
-        if (null == mutatorHolder) {
-            return null;
-        }
-        return mutatorHolder.getElement();
-    }
-
-    /**
-     * @param writeMethod setter not null
-     */
-    public void setSetter(Method writeMethod) {
-        this.mutatorHolder = new JsonbAnnotationHolder<>(writeMethod);
-    }
-
-    /**
-     * Class element with annotation under construction for declaring class of this property.
-     * This ClassModel is not fully initialized yet.
-     *
-     * @return ClassModel
-     */
-    public JsonbAnnotationHolder<Class<?>> getDeclaringClassElement() {
-        return ownerClassHolder;
     }
 
     /**
@@ -140,19 +106,22 @@ public class PropertyDescriptor {
         throw new JsonbException("Empty property: " + identifier);
     }
 
-    Type getGetterType() {
-        if (null != getGetter()) {
-            return getGetter().getGenericReturnType();
-        }
-        return null;
+    /**
+     * Create instance of property.
+     *
+     * @param identifier                not null
+     * @param sourceClassHolder Class model for a class declaring property.
+     */
+    public PropertyDescriptor(String identifier, JsonbAnnotationHolder<Class<?>> sourceClassHolder) {
+        this.identifier = identifier;
+        this.ownerClassHolder = sourceClassHolder;
     }
 
-    Type getSetterType() {
-        Type[] typeArgs = getSetter().getGenericParameterTypes();
-        if (1 != typeArgs.length) {
-            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
-        }
-        return typeArgs[0];
+    /**
+     * @param memberRef field not null
+     */
+    public void setField(Field memberRef) {
+        this.attributeHolder = new JsonbAnnotationHolder<>(memberRef);
     }
 
     /**
@@ -165,12 +134,15 @@ public class PropertyDescriptor {
     }
 
     /**
-     * Element with getter and its annotations.
+     * {@link Field} representing property if any.
      *
-     * @return getter with annotations
+     * @return field if present
      */
-    public JsonbAnnotationHolder<Method> getGetterElement() {
-        return accessorHolder;
+    public Field getField() {
+        if (null == attributeHolder) {
+            return null;
+        }
+        return attributeHolder.getElement();
     }
 
     /**
@@ -181,4 +153,33 @@ public class PropertyDescriptor {
     public JsonbAnnotationHolder<Method> getSetterElement() {
         return mutatorHolder;
     }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return identifier;
+    }
+
+    /**
+     * {@link Method} representing setter of a property if any.
+     *
+     * @return setter if present
+     */
+    public Method getSetter() {
+        if (null == mutatorHolder) {
+            return null;
+        }
+        return mutatorHolder.getElement();
+    }
+
+    /**
+     * @param writeMethod setter not null
+     */
+    public void setSetter(Method writeMethod) {
+        this.mutatorHolder = new JsonbAnnotationHolder<>(writeMethod);
+    }
+
 }

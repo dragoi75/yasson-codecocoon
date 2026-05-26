@@ -47,8 +47,92 @@ class ClassModelParser {
 
     private final JsonbRuntimeContext bindingContext;
 
-    ClassModelParser(JsonbRuntimeContext bindingContext) {
-        this.bindingContext = bindingContext;
+    private static void collectFields(JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
+        Field[] fieldArray = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> annotatedClassHolder.getElement().getDeclaredFields());
+        for (Field currentMember : fieldArray) {
+            final String identifier = currentMember.getName();
+            if (currentMember.isSynthetic()) {
+                continue;
+            }
+            final PropertyDescriptor prop = new PropertyDescriptor(identifier, annotatedClassHolder);
+            prop.setField(currentMember);
+            propertyMap.put(identifier, prop);
+        }
+    }
+
+    private static String decapitalize(String identifier) {
+        Objects.requireNonNull(identifier);
+        if (0 == identifier.length()) {
+            //methods named get() or set()
+            return identifier;
+        }
+        if (1 < identifier.length() && Character.isUpperCase(identifier.charAt(1)) && Character.isUpperCase(identifier.charAt(0))) {
+            return identifier;
+        }
+        char[] charArray = identifier.toCharArray();
+        charArray[0] = Character.toLowerCase(charArray[0]);
+        return new String(charArray);
+    }
+
+    private static PropertyDescriptor mergePropertyDescriptors(PropertyDescriptor activeDescriptor, PropertyMetadata ancestorModel, JsonbAnnotationHolder<Class<?>> annotatedClassHolder) {
+        Field currentMember = null != activeDescriptor.getField() ? activeDescriptor.getField() : ancestorModel.getField();
+        Method readMethod = selectMostSpecificMethod(activeDescriptor.getGetter(), ancestorModel.getGetter());
+        Method writeMethod = selectMostSpecificMethod(activeDescriptor.getSetter(), ancestorModel.getSetter());
+        PropertyDescriptor combinedDescriptor = new PropertyDescriptor(ancestorModel.getPropertyName(), annotatedClassHolder);
+        if (null != currentMember) {
+            combinedDescriptor.setField(currentMember);
+        }
+        if (null != readMethod) {
+            combinedDescriptor.setGetter(readMethod);
+        }
+        if (null != writeMethod) {
+            combinedDescriptor.setSetter(writeMethod);
+        }
+        return combinedDescriptor;
+    }
+
+    /**
+     * Filter out certain methods that get forcibly added to some classes.
+     * For example the public groovy.lang.MetaClass X.getMetaClass() method from Groovy classes
+     */
+    private static boolean isSpecialCaseMethod(Class<?> clazz, Method candidateMember) {
+        if (!Modifier.isPublic(candidateMember.getModifiers()) || Modifier.isStatic(candidateMember.getModifiers()) || candidateMember.isSynthetic()) {
+            return false;
+        }
+        // Groovy objects will have public groovy.lang.MetaClass X.getMetaClass()
+        // which causes an infinite loop in serialization
+        if (candidateMember.getName().equals("getMetaClass") && candidateMember.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
+            return true;
+        }
+        // WELD proxy objects will have 'public org.jboss.weld
+        if (candidateMember.getName().equals("getMetadata") && candidateMember.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
+            return true;
+        }
+        return false;
+    }
+
+    private PropertyDescriptor registerPropertyMethod(String propName, Method refMethod, JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
+        PropertyDescriptor prop = propertyMap.computeIfAbsent(propName, nameParam -> new PropertyDescriptor(nameParam, annotatedClassHolder));
+        if (!isSetter(refMethod)) {
+            prop.setGetter(refMethod);
+        } else {
+            prop.setSetter(refMethod);
+        }
+        return prop;
+    }
+
+    private static void checkPropertyNameCollision(List<PropertyMetadata> propList, Class<?> targetType) {
+        final List<PropertyMetadata> validatedList = new ArrayList<>();
+        for (PropertyMetadata incomingModel : propList) {
+            for (PropertyMetadata existingModel : validatedList) {
+                if ((//
+                existingModel.getReadName().equals(incomingModel.getReadName()) && existingModel.isReadable() && incomingModel.isReadable()) || (//
+                existingModel.getWriteName().equals(incomingModel.getWriteName()) && existingModel.isWritable() && incomingModel.isWritable())) {
+                    throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.PROPERTY_NAME_CLASH, existingModel.getPropertyName(), incomingModel.getPropertyName(), targetType.getName()));
+                }
+            }
+            validatedList.add(incomingModel);
+        }
     }
 
     /**
@@ -83,32 +167,6 @@ class ClassModelParser {
             });
         }
         classDescriptor.setProperties(sortedModels);
-    }
-
-    private static void mergeProperties(List<PropertyMetadata> unsortedList) {
-        PropertyMetadata[] copies = unsortedList.toArray(new PropertyMetadata[unsortedList.size()]);
-        int index = 0;
-        while (copies.length > index) {
-            int innerIndex = index + 1;
-            while (copies.length > innerIndex) {
-                if (copies[index].equals(copies[innerIndex])) {
-                    // Need to merge two properties
-                    unsortedList.remove(copies[index]);
-                    unsortedList.remove(copies[innerIndex]);
-                    unsortedList.add(new PropertyMetadata(copies[index], copies[innerIndex]));
-                }
-                innerIndex += 1;
-            }
-            index += 1;
-        }
-    }
-
-    private void parseMethodsFromClassAndInterfaces(JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
-        Class<?> actualClass = annotatedClassHolder.getElement();
-        collectMethods(actualClass, annotatedClassHolder, propertyMap);
-        for (Class<?> interfaceType : bindingContext.getAnnotationIntrospector().gatherInterfaces(actualClass)) {
-            parseInterfaceMethodAnnotations(interfaceType, annotatedClassHolder, propertyMap);
-        }
     }
 
     private void parseInterfaceMethodAnnotations(Class<?> interfaceType, JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
@@ -152,106 +210,6 @@ class ClassModelParser {
         }
     }
 
-    private PropertyDescriptor registerPropertyMethod(String propName, Method refMethod, JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
-        PropertyDescriptor prop = propertyMap.computeIfAbsent(propName, nameParam -> new PropertyDescriptor(nameParam, annotatedClassHolder));
-        if (!isSetter(refMethod)) {
-            prop.setGetter(refMethod);
-        } else {
-            prop.setSetter(refMethod);
-        }
-        return prop;
-    }
-
-    private void collectMethods(Class<?> targetType, JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
-        Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) targetType::getDeclaredMethods);
-        for (Method refMethod : methodsArray) {
-            String identifier = refMethod.getName();
-            //isBridge method filters out methods inherited from interfaces
-            if (!isPropertyMethod(refMethod) || refMethod.isBridge() || isSpecialCaseMethod(targetType, refMethod)) {
-                continue;
-            }
-            final String propName = toPropertyNameFromMethod(identifier);
-            registerPropertyMethod(propName, refMethod, annotatedClassHolder, propertyMap);
-        }
-    }
-
-    /**
-     * Filter out certain methods that get forcibly added to some classes.
-     * For example the public groovy.lang.MetaClass X.getMetaClass() method from Groovy classes
-     */
-    private static boolean isSpecialCaseMethod(Class<?> clazz, Method candidateMember) {
-        if (!Modifier.isPublic(candidateMember.getModifiers()) || Modifier.isStatic(candidateMember.getModifiers()) || candidateMember.isSynthetic()) {
-            return false;
-        }
-        // Groovy objects will have public groovy.lang.MetaClass X.getMetaClass()
-        // which causes an infinite loop in serialization
-        if (candidateMember.getName().equals("getMetaClass") && candidateMember.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass")) {
-            return true;
-        }
-        // WELD proxy objects will have 'public org.jboss.weld
-        if (candidateMember.getName().equals("getMetadata") && candidateMember.getReturnType().getCanonicalName().equals("org.jboss.weld.proxy.WeldClientProxy$Metadata")) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean isGetter(Method candidateMember) {
-        return (candidateMember.getName().startsWith(GETTER_PREFIX) || candidateMember.getName().startsWith(BOOLEAN_GETTER_PREFIX)) && 0 == candidateMember.getParameterCount();
-    }
-
-    private static boolean isSetter(Method candidateMember) {
-        return candidateMember.getName().startsWith(SETTER_PREFIX) && 1 == candidateMember.getParameterCount();
-    }
-
-    private static String toPropertyNameFromMethod(String identifier) {
-        return decapitalize(identifier.substring(identifier.startsWith(BOOLEAN_GETTER_PREFIX) ? 2 : 3, identifier.length()));
-    }
-
-    private static String decapitalize(String identifier) {
-        Objects.requireNonNull(identifier);
-        if (0 == identifier.length()) {
-            //methods named get() or set()
-            return identifier;
-        }
-        if (1 < identifier.length() && Character.isUpperCase(identifier.charAt(1)) && Character.isUpperCase(identifier.charAt(0))) {
-            return identifier;
-        }
-        char[] charArray = identifier.toCharArray();
-        charArray[0] = Character.toLowerCase(charArray[0]);
-        return new String(charArray);
-    }
-
-    private static boolean isPropertyMethod(Method candidateMember) {
-        return isGetter(candidateMember) || isSetter(candidateMember);
-    }
-
-    private static void collectFields(JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
-        Field[] fieldArray = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> annotatedClassHolder.getElement().getDeclaredFields());
-        for (Field currentMember : fieldArray) {
-            final String identifier = currentMember.getName();
-            if (currentMember.isSynthetic()) {
-                continue;
-            }
-            final PropertyDescriptor prop = new PropertyDescriptor(identifier, annotatedClassHolder);
-            prop.setField(currentMember);
-            propertyMap.put(identifier, prop);
-        }
-    }
-
-    private static void checkPropertyNameCollision(List<PropertyMetadata> propList, Class<?> targetType) {
-        final List<PropertyMetadata> validatedList = new ArrayList<>();
-        for (PropertyMetadata incomingModel : propList) {
-            for (PropertyMetadata existingModel : validatedList) {
-                if ((//
-                existingModel.getReadName().equals(incomingModel.getReadName()) && existingModel.isReadable() && incomingModel.isReadable()) || (//
-                existingModel.getWriteName().equals(incomingModel.getWriteName()) && existingModel.isWritable() && incomingModel.isWritable())) {
-                    throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.PROPERTY_NAME_CLASH, existingModel.getPropertyName(), incomingModel.getPropertyName(), targetType.getName()));
-                }
-            }
-            validatedList.add(incomingModel);
-        }
-    }
-
     /**
      * Merges current class properties with parent class properties.
      * If javabean property is declared in more than one inheritance levels,
@@ -287,6 +245,36 @@ class ClassModelParser {
         return orderedList;
     }
 
+    private void parseMethodsFromClassAndInterfaces(JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
+        Class<?> actualClass = annotatedClassHolder.getElement();
+        collectMethods(actualClass, annotatedClassHolder, propertyMap);
+        for (Class<?> interfaceType : bindingContext.getAnnotationIntrospector().gatherInterfaces(actualClass)) {
+            parseInterfaceMethodAnnotations(interfaceType, annotatedClassHolder, propertyMap);
+        }
+    }
+
+    private static void mergeProperties(List<PropertyMetadata> unsortedList) {
+        PropertyMetadata[] copies = unsortedList.toArray(new PropertyMetadata[unsortedList.size()]);
+        int index = 0;
+        while (copies.length > index) {
+            int innerIndex = index + 1;
+            while (copies.length > innerIndex) {
+                if (copies[index].equals(copies[innerIndex])) {
+                    // Need to merge two properties
+                    unsortedList.remove(copies[index]);
+                    unsortedList.remove(copies[innerIndex]);
+                    unsortedList.add(new PropertyMetadata(copies[index], copies[innerIndex]));
+                }
+                innerIndex += 1;
+            }
+            index += 1;
+        }
+    }
+
+    private static boolean isGetter(Method candidateMember) {
+        return (candidateMember.getName().startsWith(GETTER_PREFIX) || candidateMember.getName().startsWith(BOOLEAN_GETTER_PREFIX)) && 0 == candidateMember.getParameterCount();
+    }
+
     /**
      * Select the correct method to use. The correct method is the most specific
      * method which is not a default one:
@@ -311,20 +299,33 @@ class ClassModelParser {
         return (null != activeDescriptor ? (null != superCandidate && activeDescriptor.isDefault() && !superCandidate.isDefault() ? superCandidate : activeDescriptor) : superCandidate);
     }
 
-    private static PropertyDescriptor mergePropertyDescriptors(PropertyDescriptor activeDescriptor, PropertyMetadata ancestorModel, JsonbAnnotationHolder<Class<?>> annotatedClassHolder) {
-        Field currentMember = null != activeDescriptor.getField() ? activeDescriptor.getField() : ancestorModel.getField();
-        Method readMethod = selectMostSpecificMethod(activeDescriptor.getGetter(), ancestorModel.getGetter());
-        Method writeMethod = selectMostSpecificMethod(activeDescriptor.getSetter(), ancestorModel.getSetter());
-        PropertyDescriptor combinedDescriptor = new PropertyDescriptor(ancestorModel.getPropertyName(), annotatedClassHolder);
-        if (null != currentMember) {
-            combinedDescriptor.setField(currentMember);
-        }
-        if (null != readMethod) {
-            combinedDescriptor.setGetter(readMethod);
-        }
-        if (null != writeMethod) {
-            combinedDescriptor.setSetter(writeMethod);
-        }
-        return combinedDescriptor;
+    ClassModelParser(JsonbRuntimeContext bindingContext) {
+        this.bindingContext = bindingContext;
     }
+
+    private void collectMethods(Class<?> targetType, JsonbAnnotationHolder<Class<?>> annotatedClassHolder, Map<String, PropertyDescriptor> propertyMap) {
+        Method[] methodsArray = AccessController.doPrivileged((PrivilegedAction<Method[]>) targetType::getDeclaredMethods);
+        for (Method refMethod : methodsArray) {
+            String identifier = refMethod.getName();
+            //isBridge method filters out methods inherited from interfaces
+            if (!isPropertyMethod(refMethod) || refMethod.isBridge() || isSpecialCaseMethod(targetType, refMethod)) {
+                continue;
+            }
+            final String propName = toPropertyNameFromMethod(identifier);
+            registerPropertyMethod(propName, refMethod, annotatedClassHolder, propertyMap);
+        }
+    }
+
+    private static boolean isPropertyMethod(Method candidateMember) {
+        return isGetter(candidateMember) || isSetter(candidateMember);
+    }
+
+    private static boolean isSetter(Method candidateMember) {
+        return candidateMember.getName().startsWith(SETTER_PREFIX) && 1 == candidateMember.getParameterCount();
+    }
+
+    private static String toPropertyNameFromMethod(String identifier) {
+        return decapitalize(identifier.substring(identifier.startsWith(BOOLEAN_GETTER_PREFIX) ? 2 : 3, identifier.length()));
+    }
+
 }

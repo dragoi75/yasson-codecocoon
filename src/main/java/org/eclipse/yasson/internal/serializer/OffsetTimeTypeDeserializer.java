@@ -28,6 +28,16 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<OffsetTime> {
 
+    @Override
+    protected OffsetTime parseDefault(String jsonValue, Locale locale) {
+        return OffsetTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
+    }
+
+    @Override
+    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return OffsetTime.parse(jsonValue, formatter);
+    }
+
     /**
      * Creates an instance.
      *
@@ -42,13 +52,4 @@ public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<Off
         throw new JsonbException(MessageBundle.getMessage(ErrorMessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
     }
 
-    @Override
-    protected OffsetTime parseDefault(String jsonValue, Locale locale) {
-        return OffsetTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
-    }
-
-    @Override
-    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return OffsetTime.parse(jsonValue, formatter);
-    }
 }

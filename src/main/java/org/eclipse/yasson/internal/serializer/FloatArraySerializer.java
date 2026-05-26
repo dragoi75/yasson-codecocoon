@@ -22,6 +22,14 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
 
+    @Override
+    protected void serializeInternal(float[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (float obj : arr) {
+            //floats lose precision, after upcasting to doubles in jsonp
+            generator.write(new BigDecimal(String.valueOf(obj)));
+        }
+    }
+
     /**
      * Creates new instance of float array serializer.
      *
@@ -31,11 +39,4 @@ public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
         super(builder);
     }
 
-    @Override
-    protected void serializeInternal(float[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (float obj : arr) {
-            //floats lose precision, after upcasting to doubles in jsonp
-            generator.write(new BigDecimal(String.valueOf(obj)));
-        }
-    }
 }

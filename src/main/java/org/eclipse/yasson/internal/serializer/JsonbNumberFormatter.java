@@ -22,14 +22,12 @@ public class JsonbNumberFormatter {
     private final String locale;
 
     /**
-     * Construct with format string and locale.
+     * Locale to use with formatter.
      *
-     * @param format formatter format
-     * @param locale locale
+     * @return locale
      */
-    public JsonbNumberFormatter(String format, String locale) {
-        this.format = format;
-        this.locale = locale;
+    public String getLocale() {
+        return locale;
     }
 
     /**
@@ -42,12 +40,14 @@ public class JsonbNumberFormatter {
     }
 
     /**
-     * Locale to use with formatter.
+     * Construct with format string and locale.
      *
-     * @return locale
+     * @param format formatter format
+     * @param locale locale
      */
-    public String getLocale() {
-        return locale;
+    public JsonbNumberFormatter(String format, String locale) {
+        this.format = format;
+        this.locale = locale;
     }
 
 }
