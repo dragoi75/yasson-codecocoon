@@ -27,14 +27,14 @@ import java.util.TreeSet;
  */
 public class InstanceFactory {
 
-    private interface InstanceFactory {
+    private interface Creator {
         Object newInstance();
     }
 
     /**
      * Caches default constructor to create instance.
      */
-    private static final class InstanceCreator implements InstanceFactory {
+    private static final class InstanceCreator implements Creator {
         private final Constructor<?> instantiator;
 
         public InstanceCreator(Constructor<?> instantiator) {
@@ -47,7 +47,7 @@ public class InstanceFactory {
         }
     }
 
-    private final Map<Class, InstanceFactory> factoryMap;
+    private final Map<Class, Creator> factoryMap;
 
     public InstanceFactory() {
         factoryMap = new HashMap<>();
@@ -67,7 +67,7 @@ public class InstanceFactory {
      */
     @SuppressWarnings("unchecked")
     public <T> T getOrCreateInstance(Class<T> clazz) {
-        InstanceFactory factory = factoryMap.get(clazz);
+        Creator factory = factoryMap.get(clazz);
         //No worries for race conditions here, instance may be replaced during first attempt.
         if (factory == null) {
             factory = new InstanceCreator(ReflectionTypeUtils.getDefaultConstructor(clazz, true));
