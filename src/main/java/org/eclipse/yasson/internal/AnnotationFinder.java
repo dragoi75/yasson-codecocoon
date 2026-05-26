@@ -36,72 +36,6 @@ class AnnotationFinder {
     // may be null
     private final Class<? extends Annotation> annotationClass;
 
-    /**
-     * Gets the {@link AnnotationFinder} for the given Annotation-Type.
-     *
-     * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationFinder}
-     */
-    public static AnnotationFinder findAnnotation(Class<?> annotation) {
-        return findAnnotationByName(annotation.getName());
-    }
-
-    /**
-     * Gets the {@link AnnotationFinder} for the given Annotation-Type Name.
-     *
-     * @param annotationClassName {@link String}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationFinder}
-     */
-    public static AnnotationFinder findAnnotationByName(String annotationClassName) {
-        return new AnnotationFinder(annotationClassName, getOptionalAnnotationClass(annotationClassName));
-    }
-
-    /**
-     * Gets the {@link AnnotationFinder} for @ConstructorProperties-Annotation.
-     *
-     * @return {@link AnnotationFinder}
-     */
-    public static AnnotationFinder findConstructorProperties() {
-        return findAnnotationByName(CONSTRUCTOR_PROPERTIES_ANNOTATION);
-    }
-
-    private AnnotationFinder(String annotationClassName, Class<? extends Annotation> annotationClass) {
-        this.annotationClassName = annotationClassName;
-        this.annotationClass = annotationClass;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> T in(Annotation[] annotations) {
-        if (null == annotationClass) {
-            return null;
-        }
-        return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
-    }
-
-    /**
-     * Looks for the annotation {@link #in(Annotation[])} <br>
-     * and executes the "value" Method of it dynamically.
-     *
-     * @param annotations - Array of {@link Annotation}n.
-     * @return {@link Object}
-     */
-    public Object valueIn(Annotation[] annotations) {
-        return invocateValueMethod(in(annotations));
-    }
-
-    private Object invocateValueMethod(Annotation annotation) {
-        if (null == annotation) {
-            return null;
-        }
-        try {
-            return annotation.annotationType().getMethod("value").invoke(annotation);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = Messages.getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
-            LOGGER.finest(message);
-            return null;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classname) {
         try {
@@ -111,6 +45,15 @@ class AnnotationFinder {
             LOGGER.finest(message);
             return null;
         }
+    }
+
+    /**
+     * Gets the {@link AnnotationFinder} for @ConstructorProperties-Annotation.
+     *
+     * @return {@link AnnotationFinder}
+     */
+    public static AnnotationFinder findConstructorProperties() {
+        return findAnnotationByName(CONSTRUCTOR_PROPERTIES_ANNOTATION);
     }
 
     /**
@@ -141,4 +84,62 @@ class AnnotationFinder {
     public String toString() {
         return "AnnotationFinder [annotationClassName=" + annotationClassName + ", annotationClass=" + annotationClass + "]";
     }
+
+    /**
+     * Looks for the annotation {@link #in(Annotation[])} <br>
+     * and executes the "value" Method of it dynamically.
+     *
+     * @param annotations - Array of {@link Annotation}n.
+     * @return {@link Object}
+     */
+    public Object valueIn(Annotation[] annotations) {
+        return invocateValueMethod(in(annotations));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Annotation> T in(Annotation[] annotations) {
+        if (null == annotationClass) {
+            return null;
+        }
+        return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
+    }
+
+    private AnnotationFinder(String annotationClassName, Class<? extends Annotation> annotationClass) {
+        this.annotationClassName = annotationClassName;
+        this.annotationClass = annotationClass;
+    }
+
+    /**
+     * Gets the {@link AnnotationFinder} for the given Annotation-Type.
+     *
+     * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationFinder}
+     */
+    public static AnnotationFinder findAnnotation(Class<?> annotation) {
+        return findAnnotationByName(annotation.getName());
+    }
+
+    private Object invocateValueMethod(Annotation annotation) {
+        if (null == annotation) {
+            return null;
+        }
+        try {
+            return annotation.annotationType().getMethod("value").invoke(annotation);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            String message = Messages.getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
+            LOGGER.finest(message);
+            return null;
+        }
+    }
+
+    /**
+     * Gets the {@link AnnotationFinder} for the given Annotation-Type Name.
+     *
+     * @param annotationClassName {@link String}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationFinder}
+     */
+    public static AnnotationFinder findAnnotationByName(String annotationClassName) {
+        return new AnnotationFinder(annotationClassName, getOptionalAnnotationClass(annotationClassName));
+    }
+
 }

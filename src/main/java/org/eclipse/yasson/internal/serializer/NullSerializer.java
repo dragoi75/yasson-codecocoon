@@ -28,44 +28,6 @@ public class NullSerializer implements ModelSerializer {
 
     private final ModelSerializer rootNullSerializer;
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate      non-null value delegate
-     * @param customization component customization
-     * @param jsonbContext  jsonb context
-     */
-    public NullSerializer(ModelSerializer delegate, Customization customization, JsonbContext jsonbContext) {
-        this.delegate = delegate;
-        if (!customization.isNillable()) {
-            nullSerializer = new NullWritingDisabled();
-        } else {
-            nullSerializer = new NullWritingEnabled();
-        }
-        JsonbSerializer<?> userDefinedNullSerializer = jsonbContext.getConfigProperties().getNullSerializer();
-        if (null == userDefinedNullSerializer) {
-            rootNullSerializer = nullSerializer;
-        } else {
-            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
-        }
-    }
-
-    @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        if (null != value) {
-            context.setRoot(false);
-            delegate.serialize(value, generator, context);
-        } else {
-            if (!context.isRoot()) {
-                nullSerializer.serialize(null, generator, context);
-            } else {
-                context.setRoot(false);
-                rootNullSerializer.serialize(null, generator, context);
-            }
-            context.setKey(null);
-        }
-    }
-
     private static final class NullWritingEnabled implements ModelSerializer {
 
         @Override
@@ -93,4 +55,43 @@ public class NullSerializer implements ModelSerializer {
             //Do nothing
         }
     }
+
+    @Override
+    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        if (null != value) {
+            context.setRoot(false);
+            delegate.serialize(value, generator, context);
+        } else {
+            if (!context.isRoot()) {
+                nullSerializer.serialize(null, generator, context);
+            } else {
+                context.setRoot(false);
+                rootNullSerializer.serialize(null, generator, context);
+            }
+            context.setKey(null);
+        }
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param delegate      non-null value delegate
+     * @param customization component customization
+     * @param jsonbContext  jsonb context
+     */
+    public NullSerializer(ModelSerializer delegate, Customization customization, JsonbContext jsonbContext) {
+        this.delegate = delegate;
+        if (!customization.isNillable()) {
+            nullSerializer = new NullWritingDisabled();
+        } else {
+            nullSerializer = new NullWritingEnabled();
+        }
+        JsonbSerializer<?> userDefinedNullSerializer = jsonbContext.getConfigProperties().getNullSerializer();
+        if (null == userDefinedNullSerializer) {
+            rootNullSerializer = nullSerializer;
+        } else {
+            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
+        }
+    }
+
 }

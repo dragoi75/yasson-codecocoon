@@ -23,10 +23,6 @@ class OptionalDoubleSerializer implements ModelSerializer {
 
     private final ModelSerializer typeSerializer;
 
-    OptionalDoubleSerializer(ModelSerializer typeSerializer) {
-        this.typeSerializer = typeSerializer;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalDouble optionalDouble = (OptionalDouble) value;
@@ -36,4 +32,9 @@ class OptionalDoubleSerializer implements ModelSerializer {
             typeSerializer.serialize(optionalDouble.getAsDouble(), generator, context);
         }
     }
+
+    OptionalDoubleSerializer(ModelSerializer typeSerializer) {
+        this.typeSerializer = typeSerializer;
+    }
+
 }

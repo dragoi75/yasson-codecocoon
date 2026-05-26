@@ -38,31 +38,39 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
     private final Type rType;
 
     /**
-     * Create new instance.
-     *
-     * @param delegate delegate which is call after the check
-     * @param rType    runtime type
-     * @param checker  bound group of events
+     * Grouped events according to whether it is container or value.
      */
-    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Checker checker) {
-        this(checker.events, delegate, rType);
+    public enum Checker {
+
+        /**
+         * Value bound events.
+         */
+        VALUES(Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_NULL),
+        /**
+         * Container bound events.
+         */
+        CONTAINER(Event.START_OBJECT, Event.START_ARRAY);
+
+        private final Set<Event> events;
+
+        /**
+         * Return events bound to the event group.
+         *
+         * @return set of bound events
+         */
+        public Set<Event> getEvents() {
+            return events;
+        }
+
+        Checker(Event... events) {
+            this.events = Set.of(events);
+        }
+
     }
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate delegate which is call after the check
-     * @param rType    runtime type
-     * @param events   customized checked events
-     */
-    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Event... events) {
-        this(Set.copyOf(Arrays.asList(events)), delegate, rType);
-    }
-
-    private PositionChecker(Set<Event> expectedEvents, ModelDeserializer<JsonParser> delegate, Type rType) {
-        this.expectedEvents = expectedEvents;
-        this.delegate = delegate;
-        this.rType = rType;
+    @Override
+    public String toString() {
+        return "PositionChecker{" + "expectedEvents=" + expectedEvents + ", runtimeType=" + rType + '}';
     }
 
     @Override
@@ -83,38 +91,32 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
         return o;
     }
 
-    @Override
-    public String toString() {
-        return "PositionChecker{" + "expectedEvents=" + expectedEvents + ", runtimeType=" + rType + '}';
+    /**
+     * Create new instance.
+     *
+     * @param delegate delegate which is call after the check
+     * @param rType    runtime type
+     * @param events   customized checked events
+     */
+    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Event... events) {
+        this(Set.copyOf(Arrays.asList(events)), delegate, rType);
     }
 
     /**
-     * Grouped events according to whether it is container or value.
+     * Create new instance.
+     *
+     * @param delegate delegate which is call after the check
+     * @param rType    runtime type
+     * @param checker  bound group of events
      */
-    public enum Checker {
-
-        /**
-         * Value bound events.
-         */
-        VALUES(Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_NULL),
-        /**
-         * Container bound events.
-         */
-        CONTAINER(Event.START_OBJECT, Event.START_ARRAY);
-
-        private final Set<Event> events;
-
-        Checker(Event... events) {
-            this.events = Set.of(events);
-        }
-
-        /**
-         * Return events bound to the event group.
-         *
-         * @return set of bound events
-         */
-        public Set<Event> getEvents() {
-            return events;
-        }
+    public PositionChecker(ModelDeserializer<JsonParser> delegate, Type rType, Checker checker) {
+        this(checker.events, delegate, rType);
     }
+
+    private PositionChecker(Set<Event> expectedEvents, ModelDeserializer<JsonParser> delegate, Type rType) {
+        this.expectedEvents = expectedEvents;
+        this.delegate = delegate;
+        this.rType = rType;
+    }
+
 }

@@ -25,10 +25,6 @@ class CyclicReferenceSerializer implements ModelSerializer {
 
     private ModelSerializer delegate;
 
-    CyclicReferenceSerializer(Type type) {
-        this.type = type;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         if (null == delegate) {
@@ -36,4 +32,9 @@ class CyclicReferenceSerializer implements ModelSerializer {
         }
         delegate.serialize(value, generator, context);
     }
+
+    CyclicReferenceSerializer(Type type) {
+        this.type = type;
+    }
+
 }

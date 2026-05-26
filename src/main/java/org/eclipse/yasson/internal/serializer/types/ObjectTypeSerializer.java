@@ -35,6 +35,24 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
 
     private final boolean isKey;
 
+    /**
+     * Add serializer to the cache.
+     *
+     * @param clazz           class of the serializer
+     * @param modelSerializer model serializer bound to the class
+     */
+    public void addSpecificSerializer(Class<?> clazz, ModelSerializer modelSerializer) {
+        cache.put(clazz, modelSerializer);
+    }
+
+    private void findSerializer(Object key, JsonGenerator generator, SerializationContextImpl context) {
+        Class<?> clazz = key.getClass();
+        cache.computeIfAbsent(clazz, aClass -> {
+            SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
+            return serializationModelCreator.serializerChainRuntime(new LinkedList<>(chain), clazz, customization, false, isKey);
+        }).serialize(key, generator, context);
+    }
+
     ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
         super(serializerBuilder);
         this.customization = serializerBuilder.getCustomization();
@@ -59,21 +77,4 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         findSerializer(key, generator, context);
     }
 
-    private void findSerializer(Object key, JsonGenerator generator, SerializationContextImpl context) {
-        Class<?> clazz = key.getClass();
-        cache.computeIfAbsent(clazz, aClass -> {
-            SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
-            return serializationModelCreator.serializerChainRuntime(new LinkedList<>(chain), clazz, customization, false, isKey);
-        }).serialize(key, generator, context);
-    }
-
-    /**
-     * Add serializer to the cache.
-     *
-     * @param clazz           class of the serializer
-     * @param modelSerializer model serializer bound to the class
-     */
-    public void addSpecificSerializer(Class<?> clazz, ModelSerializer modelSerializer) {
-        cache.put(clazz, modelSerializer);
-    }
 }

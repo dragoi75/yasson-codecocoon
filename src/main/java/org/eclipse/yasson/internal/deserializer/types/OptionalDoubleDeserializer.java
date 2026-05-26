@@ -25,11 +25,6 @@ class OptionalDoubleDeserializer implements ModelDeserializer<JsonParser> {
 
     private final ModelDeserializer<Object> nullValueDelegate;
 
-    OptionalDoubleDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> nullValueDelegate) {
-        this.extractor = extractor;
-        this.nullValueDelegate = nullValueDelegate;
-    }
-
     @Override
     public Object deserialize(JsonParser value, DeserializationContextImpl context) {
         if (JsonParser.Event.VALUE_NULL == context.getLastValueEvent()) {
@@ -38,4 +33,10 @@ class OptionalDoubleDeserializer implements ModelDeserializer<JsonParser> {
         OptionalDouble optional = OptionalDouble.of((Double) extractor.deserialize(value, context));
         return nullValueDelegate.deserialize(optional, context);
     }
+
+    OptionalDoubleDeserializer(ModelDeserializer<JsonParser> extractor, ModelDeserializer<Object> nullValueDelegate) {
+        this.extractor = extractor;
+        this.nullValueDelegate = nullValueDelegate;
+    }
+
 }

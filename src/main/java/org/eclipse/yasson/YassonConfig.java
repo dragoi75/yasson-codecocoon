@@ -58,60 +58,17 @@ public class YassonConfig extends JsonbConfig {
     public static final String DATE_TIME_IN_MILLIS_AS_A_STRING = "yasson.time-in-millis-as-a-string";
 
     /**
-     * Property used to specify behaviour on deserialization when JSON document contains properties
-     * which doesn't exist in the target class. Default value is 'false'.
-     * @param failOnUnknownProperties Whether or not to fail if unknown properties are encountered
+     * It is required to handle time millisecond format as a number. See
+     * {@link jakarta.json.bind.annotation.JsonbDateFormat#TIME_IN_MILLIS}. It is possible to override this and force
+     * Yasson to handle it as a String, by using this method.
+     *
+     * @param value whether to treat dates formatted by {@link jakarta.json.bind.annotation.JsonbDateFormat#TIME_IN_MILLIS}
+     *              as a String. Default value is {@code false}.
      * @return This YassonConfig instance
+     * @since 3.0.0
      */
-    public YassonConfig withFailOnUnknownProperties(boolean failOnUnknownProperties) {
-        setProperty(FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
-        return this;
-    }
-    
-    /**
-     * User type mapping for map interface to implementation classes.
-     * @param mapping A map of interface to implementation class mappings
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withUserTypeMapping(Map<Class<?>, Class<?>> mapping) {
-        setProperty(USER_TYPE_MAPPING, mapping);
-        return this;
-    }
-    
-    /**
-     * <p>Makes parsing dates defaulting to zero hour, minute and second.
-     * This will made available to parse patterns like yyyy.MM.dd to
-     * {@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant} {@link java.time.LocalDate}
-     * or even {@link java.time.ZonedDateTime}.
-     * <p>If time zone is not set in the pattern then UTC time zone is used.
-     * So for example json value 2018.01.01 becomes 2018.01.01 00:00:00 UTC when parsed
-     * to instant {@link java.time.Instant} or {@link java.time.ZonedDateTime}.
-     * @param defaultZeroHour Whether or not to default parsing dates to the zero hour
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withZeroTimeParseDefaulting(boolean defaultZeroHour) {
-        setProperty(ZERO_TIME_PARSE_DEFAULTING, defaultZeroHour);
-        return this;
-    }
-    
-    /**
-     * Serializer to use when object provided to {@link jakarta.json.bind.Jsonb#toJson(Object)} is {@code null} or an empty
-     * Optional. Must be instance of {@link jakarta.json.bind.serializer.JsonbSerializer}{@code <Object>}. Its obj value
-     * will be respective parameter.
-     * @param nullSerializer JsonbSerializer instance to use for serializing null root values
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withNullRootSerializer(JsonbSerializer<?> nullSerializer) {
-        setProperty(NULL_ROOT_SERIALIZER, nullSerializer);
-        return this;
-    }
-    
-    /**
-     * @param classes A list of classes to eagerly parse upon creation of the Jsonb instance used with this configuration. 
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withEagerParsing(Class<?>... classes) {
-        setProperty(EAGER_PARSE_CLASSES, classes);
+    public YassonConfig withTimeInMillisAsAString(boolean value) {
+        setProperty(DATE_TIME_IN_MILLIS_AS_A_STRING, value);
         return this;
     }
 
@@ -128,17 +85,60 @@ public class YassonConfig extends JsonbConfig {
     }
 
     /**
-     * It is required to handle time millisecond format as a number. See
-     * {@link jakarta.json.bind.annotation.JsonbDateFormat#TIME_IN_MILLIS}. It is possible to override this and force
-     * Yasson to handle it as a String, by using this method.
-     *
-     * @param value whether to treat dates formatted by {@link jakarta.json.bind.annotation.JsonbDateFormat#TIME_IN_MILLIS}
-     *              as a String. Default value is {@code false}.
+     * @param classes A list of classes to eagerly parse upon creation of the Jsonb instance used with this configuration.
      * @return This YassonConfig instance
-     * @since 3.0.0
      */
-    public YassonConfig withTimeInMillisAsAString(boolean value) {
-        setProperty(DATE_TIME_IN_MILLIS_AS_A_STRING, value);
+    public YassonConfig withEagerParsing(Class<?>... classes) {
+        setProperty(EAGER_PARSE_CLASSES, classes);
+        return this;
+    }
+
+    /**
+     * User type mapping for map interface to implementation classes.
+     * @param mapping A map of interface to implementation class mappings
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withUserTypeMapping(Map<Class<?>, Class<?>> mapping) {
+        setProperty(USER_TYPE_MAPPING, mapping);
+        return this;
+    }
+
+    /**
+     * Serializer to use when object provided to {@link jakarta.json.bind.Jsonb#toJson(Object)} is {@code null} or an empty
+     * Optional. Must be instance of {@link JsonbSerializer}{@code <Object>}. Its obj value
+     * will be respective parameter.
+     * @param nullSerializer JsonbSerializer instance to use for serializing null root values
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withNullRootSerializer(JsonbSerializer<?> nullSerializer) {
+        setProperty(NULL_ROOT_SERIALIZER, nullSerializer);
+        return this;
+    }
+
+    /**
+     * <p>Makes parsing dates defaulting to zero hour, minute and second.
+     * This will made available to parse patterns like yyyy.MM.dd to
+     * {@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant} {@link java.time.LocalDate}
+     * or even {@link java.time.ZonedDateTime}.
+     * <p>If time zone is not set in the pattern then UTC time zone is used.
+     * So for example json value 2018.01.01 becomes 2018.01.01 00:00:00 UTC when parsed
+     * to instant {@link java.time.Instant} or {@link java.time.ZonedDateTime}.
+     * @param defaultZeroHour Whether or not to default parsing dates to the zero hour
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withZeroTimeParseDefaulting(boolean defaultZeroHour) {
+        setProperty(ZERO_TIME_PARSE_DEFAULTING, defaultZeroHour);
+        return this;
+    }
+
+    /**
+     * Property used to specify behaviour on deserialization when JSON document contains properties
+     * which doesn't exist in the target class. Default value is 'false'.
+     * @param failOnUnknownProperties Whether or not to fail if unknown properties are encountered
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withFailOnUnknownProperties(boolean failOnUnknownProperties) {
+        setProperty(FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
         return this;
     }
 

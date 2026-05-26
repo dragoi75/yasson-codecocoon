@@ -102,25 +102,6 @@ public class BuiltInTypes {
         BUILD_IN_SUPPORT = Set.copyOf(buildInTypes);
     }
 
-    private BuiltInTypes() {
-        throw new IllegalStateException("Util class cannot be instantiated");
-    }
-
-    /**
-     * Check whether the class is available.
-     *
-     * @param className name of the checked class
-     * @return true if available, otherwise false
-     */
-    public static boolean isClassAvailable(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
-    }
-
     /**
      * Whether the type is a supported type by default.
      *
@@ -142,4 +123,24 @@ public class BuiltInTypes {
         } while (null != current);
         return false;
     }
+
+    private BuiltInTypes() {
+        throw new IllegalStateException("Util class cannot be instantiated");
+    }
+
+    /**
+     * Check whether the class is available.
+     *
+     * @param className name of the checked class
+     * @return true if available, otherwise false
+     */
+    public static boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
+    }
+
 }

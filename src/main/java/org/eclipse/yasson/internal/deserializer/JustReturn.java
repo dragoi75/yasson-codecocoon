@@ -21,7 +21,17 @@ public final class JustReturn implements ModelDeserializer<Object> {
 
     private static final JustReturn INSTANCE = new JustReturn();
 
+    @Override
+    public Object deserialize(Object value, DeserializationContextImpl context) {
+        return value;
+    }
+
     private JustReturn() {
+    }
+
+    @Override
+    public String toString() {
+        return "No other operations will be performed";
     }
 
     /**
@@ -33,13 +43,4 @@ public final class JustReturn implements ModelDeserializer<Object> {
         return INSTANCE;
     }
 
-    @Override
-    public Object deserialize(Object value, DeserializationContextImpl context) {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return "No other operations will be performed";
-    }
 }

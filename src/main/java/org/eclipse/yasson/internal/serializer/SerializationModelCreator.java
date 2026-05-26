@@ -52,201 +52,10 @@ public class SerializationModelCreator {
 
     private final JsonbContext jsonbContext;
 
-    /**
-     * Create new instance.
-     *
-     * @param jsonbContext jsonb context
-     */
-    public SerializationModelCreator(JsonbContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
-    }
-
-    /**
-     * Wrap {@link ModelSerializer} in the common set of serializers.
-     *
-     * @param modelSerializer serializer to be wrapped
-     * @param customization   component customization
-     * @param jsonbContext    jsonb context
-     * @return wrapped serializer
-     */
-    public static ModelSerializer wrapInCommonSet(ModelSerializer modelSerializer, Customization customization, JsonbContext jsonbContext) {
-        return Stream.of(modelSerializer).map(KeyWriter::new).map(serializer -> new NullSerializer(serializer, customization, jsonbContext)).findFirst().get();
-    }
-
-    /**
-     * Create new {@link ModelSerializer} of the given type.
-     *
-     * @param type               type to be serialized
-     * @param rootValue          whether it is a root value
-     * @param resolveRootAdapter whether to resolve root adapter
-     * @return type model serializer
-     */
-    public ModelSerializer serializerChain(Type type, boolean rootValue, boolean resolveRootAdapter) {
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
-        LinkedList<Type> chain = new LinkedList<>();
-        return serializerChain(chain, type, classModel.getClassCustomization(), rootValue, false, resolveRootAdapter);
-    }
-
-    /**
-     * Create new {@link ModelSerializer} of the given type.
-     *
-     * @param chain                 chain of types used before the one currently processed
-     * @param type                  type to be serialized
-     * @param propertyCustomization component customization
-     * @param rootValue             whether it is a root value
-     * @param isKey                 whether it is a key
-     * @return type model serializer
-     */
-    public ModelSerializer serializerChainRuntime(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey) {
-        if (chain.contains(type)) {
-            return new CyclicReferenceSerializer(type);
-        }
-        //If the class instance and class of the field are the same and there has been generics specified for this field,
-        //we need to use those instead of raw type.
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        Class<?> rawLast = ReflectionUtils.getRawType(chain.getLast());
-        if (rawLast.equals(rawType)) {
-            return serializerChainInternal(chain, chain.getLast(), propertyCustomization, rootValue, isKey, true);
-        }
-        return serializerChainInternal(chain, type, propertyCustomization, rootValue, isKey, true);
-    }
-
-    private ModelSerializer serializerChain(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey, boolean resolveRootAdapter) {
-        if (chain.contains(type)) {
-            return new CyclicReferenceSerializer(type);
-        }
-        try {
-            chain.add(type);
-            return serializerChainInternal(chain, type, propertyCustomization, rootValue, isKey, resolveRootAdapter);
-        } finally {
-            chain.removeLast();
-        }
-    }
-
-    private ModelSerializer serializerChainInternal(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey, boolean resolveRootAdapter) {
-        if (explicitChain.containsKey(type)) {
-            return explicitChain.get(type);
-        }
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        Optional<ModelSerializer> serializerBinding = userSerializer(type, (ComponentBoundCustomization) propertyCustomization);
-        if (serializerBinding.isPresent()) {
-            return serializerBinding.get();
-        }
-        if (resolveRootAdapter) {
-            Optional<AdapterBinding> maybeAdapter = adapterBinding(type, (ComponentBoundCustomization) propertyCustomization);
-            if (maybeAdapter.isPresent()) {
-                AdapterBinding adapterBinding = maybeAdapter.get();
-                Type toType = adapterBinding.getToType();
-                Class<?> rawToType = ReflectionUtils.getRawType(toType);
-                ModelSerializer typeSerializer = TypeSerializers.getTypeSerializer(rawToType, propertyCustomization, jsonbContext);
-                if (null == typeSerializer) {
-                    typeSerializer = serializerChain(toType, rootValue, !type.equals(toType));
-                }
-                AdapterSerializer adapterSerializer = new AdapterSerializer(adapterBinding, typeSerializer);
-                RecursionChecker recursionChecker = new RecursionChecker(adapterSerializer);
-                NullSerializer nullSerializer = new NullSerializer(recursionChecker, propertyCustomization, jsonbContext);
-                explicitChain.put(type, nullSerializer);
-                return nullSerializer;
-            }
-        }
-        ModelSerializer typeSerializer = null;
-        if (!Object.class.equals(rawType)) {
-            typeSerializer = TypeSerializers.getTypeSerializer(chain, rawType, propertyCustomization, jsonbContext, isKey);
-        }
-        if (null != typeSerializer) {
-            if (jsonbContext.getConfigProperties().isStrictIJson() && rootValue) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
-            }
-            return typeSerializer;
-        }
-        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
-        if (!Collection.class.isAssignableFrom(rawType)) {
-            if (!Map.class.isAssignableFrom(rawType)) {
-                if (!rawType.isArray()) {
-                    if (!(type instanceof GenericArrayType)) {
-                        if (Optional.class.equals(rawType)) {
-                            return createOptionalSerializer(chain, type, propertyCustomization, isKey);
-                        }
-                    } else {
-                        return createGenericArraySerializer(chain, type, propertyCustomization);
-                    }
-                } else {
-                    return createArraySerializer(chain, rawType, propertyCustomization);
-                }
-            } else {
-                return createMapSerializer(chain, type, propertyCustomization);
-            }
-        } else {
-            return createCollectionSerializer(chain, type, propertyCustomization);
-        }
-        return createObjectSerializer(chain, type, classModel);
-    }
-
-    private ModelSerializer createObjectSerializer(LinkedList<Type> chain, Type type, ClassModel classModel) {
-        LinkedHashMap<String, ModelSerializer> propertySerializers = new LinkedHashMap<>();
-        TypeInheritanceConfiguration typeInheritanceConfiguration = classModel.getClassCustomization().getPolymorphismConfig();
-        if (null != typeInheritanceConfiguration) {
-            addPolymorphismProperty(typeInheritanceConfiguration, propertySerializers, classModel);
-        }
-        for (PropertyModel model : classModel.getSortedProperties()) {
-            if (model.isReadable()) {
-                String name = model.getWriteName();
-                ModelSerializer memberModel = memberSerializer(chain, model.getPropertySerializationType(), model.getCustomization(), false);
-                propertySerializers.put(name, new ValueGetterSerializer(model.getGetValueHandle(), memberModel));
-            }
-        }
-        ModelSerializer objectSerializer = new ObjectSerializer(propertySerializers);
-        RecursionChecker recursionChecker = new RecursionChecker(objectSerializer);
-        KeyWriter keyWriter = new KeyWriter(recursionChecker);
-        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(false, keyWriter);
-        NullSerializer nullSerializer = new NullSerializer(nullVisibilitySwitcher, classModel.getClassCustomization(), jsonbContext);
-        explicitChain.put(type, nullSerializer);
-        return nullSerializer;
-    }
-
-    private void addPolymorphismProperty(TypeInheritanceConfiguration typeInheritanceConfiguration, LinkedHashMap<String, ModelSerializer> propertySerializers, ClassModel classModel) {
-        Class<?> rawType = classModel.getType();
-        String alias = typeInheritanceConfiguration.getAliases().get(rawType);
-        ModelSerializer serializer = createPolymorphismPropertySerializer(typeInheritanceConfiguration, alias);
-        if ((!typeInheritanceConfiguration.isInherited() || null != alias) && null != typeInheritanceConfiguration.getParentConfig()) {
-            addParentPolymorphismProperty(typeInheritanceConfiguration.getParentConfig(), propertySerializers, classModel);
-        }
-        if (null != serializer) {
-            propertySerializers.put(typeInheritanceConfiguration.getFieldName(), serializer);
-        }
-        for (PropertyModel propertyModel : classModel.getSortedProperties()) {
-            if (propertySerializers.containsKey(propertyModel.getWriteName())) {
-                throw new JsonbException("CHANGE naming conflict!");
-            }
-        }
-    }
-
-    private void addParentPolymorphismProperty(TypeInheritanceConfiguration typeInheritanceConfiguration, LinkedHashMap<String, ModelSerializer> propertySerializers, ClassModel classModel) {
-        Class<?> rawType = classModel.getType();
-        TypeInheritanceConfiguration current = typeInheritanceConfiguration;
-        LinkedHashMap<String, ModelSerializer> toBeAdded = new LinkedHashMap<>();
-        while (null != current) {
-            TypeInheritanceConfiguration local = current;
-            String alias = local.getAliases().entrySet().stream().filter(entry -> entry.getKey().isAssignableFrom(rawType)).map(Map.Entry::getValue).findFirst().orElse(null);
-            if (null != alias) {
-                ModelSerializer serializer = createPolymorphismPropertySerializer(local, alias);
-                toBeAdded.put(current.getFieldName(), serializer);
-                current = current.getParentConfig();
-            }
-        }
-        ListIterator<Map.Entry<String, ModelSerializer>> iterator = new ArrayList<>(toBeAdded.entrySet()).listIterator(toBeAdded.size());
-        while (iterator.hasPrevious()) {
-            Map.Entry<String, ModelSerializer> entry = iterator.previous();
-            propertySerializers.put(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private ModelSerializer createPolymorphismPropertySerializer(TypeInheritanceConfiguration configuration, String alias) {
-        if (null != alias) {
-            return (value, generator, context) -> generator.write(configuration.getFieldName(), alias);
-        }
-        return null;
+    private ModelSerializer createOptionalSerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean isKey) {
+        Type optType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
+        ModelSerializer modelSerializer = memberSerializer(chain, optType, propertyCustomization, isKey);
+        return new OptionalSerializer(modelSerializer);
     }
 
     private ModelSerializer createCollectionSerializer(LinkedList<Type> chain, Type type, Customization customization) {
@@ -256,44 +65,6 @@ public class SerializationModelCreator {
         KeyWriter keyWriter = new KeyWriter(collectionSerializer);
         NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
         return new NullSerializer(nullVisibilitySwitcher, customization, jsonbContext);
-    }
-
-    private ModelSerializer createMapSerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization) {
-        Type keyType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
-        Type valueType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[1] : Object.class;
-        Type resolvedKey = ReflectionUtils.resolveType(chain, keyType);
-        Class<?> rawClass = ReflectionUtils.getRawType(resolvedKey);
-        ModelSerializer keySerializer = memberSerializer(chain, keyType, ClassCustomization.empty(), true);
-        ModelSerializer valueSerializer = memberSerializer(chain, valueType, propertyCustomization, false);
-        MapSerializer mapSerializer = MapSerializer.create(rawClass, keySerializer, valueSerializer);
-        KeyWriter keyWriter = new KeyWriter(mapSerializer);
-        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
-        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
-    }
-
-    private ModelSerializer createArraySerializer(LinkedList<Type> chain, Class<?> raw, Customization propertyCustomization) {
-        Class<?> arrayComponent = raw.getComponentType();
-        ModelSerializer modelSerializer = memberSerializer(chain, arrayComponent, propertyCustomization, false);
-        ModelSerializer arraySerializer = ArraySerializer.create(raw, jsonbContext, modelSerializer);
-        KeyWriter keyWriter = new KeyWriter(arraySerializer);
-        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
-        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
-    }
-
-    private ModelSerializer createGenericArraySerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization) {
-        Class<?> raw = ReflectionUtils.getRawType(type);
-        Class<?> component = ReflectionUtils.getRawType(((GenericArrayType) type).getGenericComponentType());
-        ModelSerializer modelSerializer = memberSerializer(chain, component, propertyCustomization, false);
-        ModelSerializer arraySerializer = ArraySerializer.create(raw, jsonbContext, modelSerializer);
-        KeyWriter keyWriter = new KeyWriter(arraySerializer);
-        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
-        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
-    }
-
-    private ModelSerializer createOptionalSerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean isKey) {
-        Type optType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
-        ModelSerializer modelSerializer = memberSerializer(chain, optType, propertyCustomization, isKey);
-        return new OptionalSerializer(modelSerializer);
     }
 
     private ModelSerializer memberSerializer(LinkedList<Type> chain, Type type, Customization customization, boolean key) {
@@ -358,12 +129,242 @@ public class SerializationModelCreator {
         return typeSerializer;
     }
 
-    private Optional<ModelSerializer> userSerializer(Type type, ComponentBoundCustomization classCustomization) {
-        final ComponentMatcher componentMatcher = jsonbContext.getComponentMatcher();
-        return componentMatcher.getSerializerBinding(type, classCustomization).map(SerializerBinding::getJsonbSerializer).map(UserDefinedSerializer::new).map(RecursionChecker::new).map(serializer -> SerializationModelCreator.wrapInCommonSet(serializer, (Customization) classCustomization, jsonbContext));
+    private ModelSerializer createMapSerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization) {
+        Type keyType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
+        Type valueType = type instanceof ParameterizedType ? ((ParameterizedType) type).getActualTypeArguments()[1] : Object.class;
+        Type resolvedKey = ReflectionUtils.resolveType(chain, keyType);
+        Class<?> rawClass = ReflectionUtils.getRawType(resolvedKey);
+        ModelSerializer keySerializer = memberSerializer(chain, keyType, ClassCustomization.empty(), true);
+        ModelSerializer valueSerializer = memberSerializer(chain, valueType, propertyCustomization, false);
+        MapSerializer mapSerializer = MapSerializer.create(rawClass, keySerializer, valueSerializer);
+        KeyWriter keyWriter = new KeyWriter(mapSerializer);
+        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
+        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
+    }
+
+    private ModelSerializer createPolymorphismPropertySerializer(TypeInheritanceConfiguration configuration, String alias) {
+        if (null != alias) {
+            return (value, generator, context) -> generator.write(configuration.getFieldName(), alias);
+        }
+        return null;
+    }
+
+    private void addParentPolymorphismProperty(TypeInheritanceConfiguration typeInheritanceConfiguration, LinkedHashMap<String, ModelSerializer> propertySerializers, ClassModel classModel) {
+        Class<?> rawType = classModel.getType();
+        TypeInheritanceConfiguration current = typeInheritanceConfiguration;
+        LinkedHashMap<String, ModelSerializer> toBeAdded = new LinkedHashMap<>();
+        while (null != current) {
+            TypeInheritanceConfiguration local = current;
+            String alias = local.getAliases().entrySet().stream().filter(entry -> entry.getKey().isAssignableFrom(rawType)).map(Map.Entry::getValue).findFirst().orElse(null);
+            if (null != alias) {
+                ModelSerializer serializer = createPolymorphismPropertySerializer(local, alias);
+                toBeAdded.put(current.getFieldName(), serializer);
+                current = current.getParentConfig();
+            }
+        }
+        ListIterator<Map.Entry<String, ModelSerializer>> iterator = new ArrayList<>(toBeAdded.entrySet()).listIterator(toBeAdded.size());
+        while (iterator.hasPrevious()) {
+            Map.Entry<String, ModelSerializer> entry = iterator.previous();
+            propertySerializers.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private ModelSerializer serializerChainInternal(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey, boolean resolveRootAdapter) {
+        if (explicitChain.containsKey(type)) {
+            return explicitChain.get(type);
+        }
+        Class<?> rawType = ReflectionUtils.getRawType(type);
+        Optional<ModelSerializer> serializerBinding = userSerializer(type, (ComponentBoundCustomization) propertyCustomization);
+        if (serializerBinding.isPresent()) {
+            return serializerBinding.get();
+        }
+        if (resolveRootAdapter) {
+            Optional<AdapterBinding> maybeAdapter = adapterBinding(type, (ComponentBoundCustomization) propertyCustomization);
+            if (maybeAdapter.isPresent()) {
+                AdapterBinding adapterBinding = maybeAdapter.get();
+                Type toType = adapterBinding.getToType();
+                Class<?> rawToType = ReflectionUtils.getRawType(toType);
+                ModelSerializer typeSerializer = TypeSerializers.getTypeSerializer(rawToType, propertyCustomization, jsonbContext);
+                if (null == typeSerializer) {
+                    typeSerializer = serializerChain(toType, rootValue, !type.equals(toType));
+                }
+                AdapterSerializer adapterSerializer = new AdapterSerializer(adapterBinding, typeSerializer);
+                RecursionChecker recursionChecker = new RecursionChecker(adapterSerializer);
+                NullSerializer nullSerializer = new NullSerializer(recursionChecker, propertyCustomization, jsonbContext);
+                explicitChain.put(type, nullSerializer);
+                return nullSerializer;
+            }
+        }
+        ModelSerializer typeSerializer = null;
+        if (!Object.class.equals(rawType)) {
+            typeSerializer = TypeSerializers.getTypeSerializer(chain, rawType, propertyCustomization, jsonbContext, isKey);
+        }
+        if (null != typeSerializer) {
+            if (jsonbContext.getConfigProperties().isStrictIJson() && rootValue) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+            }
+            return typeSerializer;
+        }
+        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+        if (!Collection.class.isAssignableFrom(rawType)) {
+            if (!Map.class.isAssignableFrom(rawType)) {
+                if (!rawType.isArray()) {
+                    if (!(type instanceof GenericArrayType)) {
+                        if (Optional.class.equals(rawType)) {
+                            return createOptionalSerializer(chain, type, propertyCustomization, isKey);
+                        }
+                    } else {
+                        return createGenericArraySerializer(chain, type, propertyCustomization);
+                    }
+                } else {
+                    return createArraySerializer(chain, rawType, propertyCustomization);
+                }
+            } else {
+                return createMapSerializer(chain, type, propertyCustomization);
+            }
+        } else {
+            return createCollectionSerializer(chain, type, propertyCustomization);
+        }
+        return createObjectSerializer(chain, type, classModel);
+    }
+
+    /**
+     * Create new {@link ModelSerializer} of the given type.
+     *
+     * @param type               type to be serialized
+     * @param rootValue          whether it is a root value
+     * @param resolveRootAdapter whether to resolve root adapter
+     * @return type model serializer
+     */
+    public ModelSerializer serializerChain(Type type, boolean rootValue, boolean resolveRootAdapter) {
+        Class<?> rawType = ReflectionUtils.getRawType(type);
+        ClassModel classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+        LinkedList<Type> chain = new LinkedList<>();
+        return serializerChain(chain, type, classModel.getClassCustomization(), rootValue, false, resolveRootAdapter);
     }
 
     private Optional<AdapterBinding> adapterBinding(Type type, ComponentBoundCustomization classCustomization) {
         return jsonbContext.getComponentMatcher().getSerializeAdapterBinding(type, classCustomization);
     }
+
+    /**
+     * Create new instance.
+     *
+     * @param jsonbContext jsonb context
+     */
+    public SerializationModelCreator(JsonbContext jsonbContext) {
+        this.jsonbContext = jsonbContext;
+    }
+
+    private ModelSerializer createGenericArraySerializer(LinkedList<Type> chain, Type type, Customization propertyCustomization) {
+        Class<?> raw = ReflectionUtils.getRawType(type);
+        Class<?> component = ReflectionUtils.getRawType(((GenericArrayType) type).getGenericComponentType());
+        ModelSerializer modelSerializer = memberSerializer(chain, component, propertyCustomization, false);
+        ModelSerializer arraySerializer = ArraySerializer.create(raw, jsonbContext, modelSerializer);
+        KeyWriter keyWriter = new KeyWriter(arraySerializer);
+        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
+        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
+    }
+
+    /**
+     * Create new {@link ModelSerializer} of the given type.
+     *
+     * @param chain                 chain of types used before the one currently processed
+     * @param type                  type to be serialized
+     * @param propertyCustomization component customization
+     * @param rootValue             whether it is a root value
+     * @param isKey                 whether it is a key
+     * @return type model serializer
+     */
+    public ModelSerializer serializerChainRuntime(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey) {
+        if (chain.contains(type)) {
+            return new CyclicReferenceSerializer(type);
+        }
+        //If the class instance and class of the field are the same and there has been generics specified for this field,
+        //we need to use those instead of raw type.
+        Class<?> rawType = ReflectionUtils.getRawType(type);
+        Class<?> rawLast = ReflectionUtils.getRawType(chain.getLast());
+        if (rawLast.equals(rawType)) {
+            return serializerChainInternal(chain, chain.getLast(), propertyCustomization, rootValue, isKey, true);
+        }
+        return serializerChainInternal(chain, type, propertyCustomization, rootValue, isKey, true);
+    }
+
+    private ModelSerializer serializerChain(LinkedList<Type> chain, Type type, Customization propertyCustomization, boolean rootValue, boolean isKey, boolean resolveRootAdapter) {
+        if (chain.contains(type)) {
+            return new CyclicReferenceSerializer(type);
+        }
+        try {
+            chain.add(type);
+            return serializerChainInternal(chain, type, propertyCustomization, rootValue, isKey, resolveRootAdapter);
+        } finally {
+            chain.removeLast();
+        }
+    }
+
+    private Optional<ModelSerializer> userSerializer(Type type, ComponentBoundCustomization classCustomization) {
+        final ComponentMatcher componentMatcher = jsonbContext.getComponentMatcher();
+        return componentMatcher.getSerializerBinding(type, classCustomization).map(SerializerBinding::getJsonbSerializer).map(UserDefinedSerializer::new).map(RecursionChecker::new).map(serializer -> SerializationModelCreator.wrapInCommonSet(serializer, (Customization) classCustomization, jsonbContext));
+    }
+
+    private void addPolymorphismProperty(TypeInheritanceConfiguration typeInheritanceConfiguration, LinkedHashMap<String, ModelSerializer> propertySerializers, ClassModel classModel) {
+        Class<?> rawType = classModel.getType();
+        String alias = typeInheritanceConfiguration.getAliases().get(rawType);
+        ModelSerializer serializer = createPolymorphismPropertySerializer(typeInheritanceConfiguration, alias);
+        if ((!typeInheritanceConfiguration.isInherited() || null != alias) && null != typeInheritanceConfiguration.getParentConfig()) {
+            addParentPolymorphismProperty(typeInheritanceConfiguration.getParentConfig(), propertySerializers, classModel);
+        }
+        if (null != serializer) {
+            propertySerializers.put(typeInheritanceConfiguration.getFieldName(), serializer);
+        }
+        for (PropertyModel propertyModel : classModel.getSortedProperties()) {
+            if (propertySerializers.containsKey(propertyModel.getWriteName())) {
+                throw new JsonbException("CHANGE naming conflict!");
+            }
+        }
+    }
+
+    private ModelSerializer createObjectSerializer(LinkedList<Type> chain, Type type, ClassModel classModel) {
+        LinkedHashMap<String, ModelSerializer> propertySerializers = new LinkedHashMap<>();
+        TypeInheritanceConfiguration typeInheritanceConfiguration = classModel.getClassCustomization().getPolymorphismConfig();
+        if (null != typeInheritanceConfiguration) {
+            addPolymorphismProperty(typeInheritanceConfiguration, propertySerializers, classModel);
+        }
+        for (PropertyModel model : classModel.getSortedProperties()) {
+            if (model.isReadable()) {
+                String name = model.getWriteName();
+                ModelSerializer memberModel = memberSerializer(chain, model.getPropertySerializationType(), model.getCustomization(), false);
+                propertySerializers.put(name, new ValueGetterSerializer(model.getGetValueHandle(), memberModel));
+            }
+        }
+        ModelSerializer objectSerializer = new ObjectSerializer(propertySerializers);
+        RecursionChecker recursionChecker = new RecursionChecker(objectSerializer);
+        KeyWriter keyWriter = new KeyWriter(recursionChecker);
+        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(false, keyWriter);
+        NullSerializer nullSerializer = new NullSerializer(nullVisibilitySwitcher, classModel.getClassCustomization(), jsonbContext);
+        explicitChain.put(type, nullSerializer);
+        return nullSerializer;
+    }
+
+    private ModelSerializer createArraySerializer(LinkedList<Type> chain, Class<?> raw, Customization propertyCustomization) {
+        Class<?> arrayComponent = raw.getComponentType();
+        ModelSerializer modelSerializer = memberSerializer(chain, arrayComponent, propertyCustomization, false);
+        ModelSerializer arraySerializer = ArraySerializer.create(raw, jsonbContext, modelSerializer);
+        KeyWriter keyWriter = new KeyWriter(arraySerializer);
+        NullVisibilitySwitcher nullVisibilitySwitcher = new NullVisibilitySwitcher(true, keyWriter);
+        return new NullSerializer(nullVisibilitySwitcher, propertyCustomization, jsonbContext);
+    }
+
+    /**
+     * Wrap {@link ModelSerializer} in the common set of serializers.
+     *
+     * @param modelSerializer serializer to be wrapped
+     * @param customization   component customization
+     * @param jsonbContext    jsonb context
+     * @return wrapped serializer
+     */
+    public static ModelSerializer wrapInCommonSet(ModelSerializer modelSerializer, Customization customization, JsonbContext jsonbContext) {
+        return Stream.of(modelSerializer).map(KeyWriter::new).map(serializer -> new NullSerializer(serializer, customization, jsonbContext)).findFirst().get();
+    }
+
 }

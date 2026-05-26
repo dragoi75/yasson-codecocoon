@@ -25,6 +25,31 @@ class MapDeserializer implements ModelDeserializer<JsonParser> {
 
     private final ModelDeserializer<JsonParser> valueDelegate;
 
+    private enum Mode {
+
+        NONE, NORMAL, OBJECT
+    }
+
+    private enum State {
+
+        NEXT, VALUE, KEY, DONE
+    }
+
+    private void validateKeyName(String keyName, State state) {
+        if (State.KEY != state || keyName.equals("key")) {
+            if (State.VALUE == state && !keyName.equals("value")) {
+                throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
+            }
+        } else {
+            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
+        }
+    }
+
+    private Object deserializeValue(JsonParser parser, DeserializationContextImpl context, ModelDeserializer<JsonParser> deserializer) {
+        DeserializationContextImpl keyContext = new DeserializationContextImpl(context);
+        return deserializer.deserialize(parser, keyContext);
+    }
+
     MapDeserializer(ModelDeserializer<JsonParser> keyDelegate, ModelDeserializer<JsonParser> valueDelegate) {
         this.keyDelegate = keyDelegate;
         this.valueDelegate = valueDelegate;
@@ -96,28 +121,4 @@ class MapDeserializer implements ModelDeserializer<JsonParser> {
         return map;
     }
 
-    private void validateKeyName(String keyName, State state) {
-        if (State.KEY != state || keyName.equals("key")) {
-            if (State.VALUE == state && !keyName.equals("value")) {
-                throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
-            }
-        } else {
-            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
-        }
-    }
-
-    private Object deserializeValue(JsonParser parser, DeserializationContextImpl context, ModelDeserializer<JsonParser> deserializer) {
-        DeserializationContextImpl keyContext = new DeserializationContextImpl(context);
-        return deserializer.deserialize(parser, keyContext);
-    }
-
-    private enum Mode {
-
-        NONE, NORMAL, OBJECT
-    }
-
-    private enum State {
-
-        NEXT, VALUE, KEY, DONE
-    }
 }

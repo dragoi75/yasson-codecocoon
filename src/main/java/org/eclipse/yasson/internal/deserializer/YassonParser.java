@@ -35,87 +35,6 @@ class YassonParser implements JsonParser {
 
     private int level;
 
-    YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextImpl context) {
-        this.delegate = delegate;
-        this.context = context;
-        this.level = determineLevelValue(firstEvent);
-    }
-
-    private int determineLevelValue(Event firstEvent) {
-        switch(firstEvent) {
-            case START_ARRAY:
-            case START_OBJECT:
-                //container start, there will be more events to come
-                return 1;
-            default:
-                //just this single value, do not allow reading more
-                return 0;
-        }
-    }
-
-    void skipRemaining() {
-        while (hasNext()) {
-            next();
-        }
-    }
-
-    @Override
-    public boolean hasNext() {
-        if (1 > level) {
-            return false;
-        }
-        return delegate.hasNext();
-    }
-
-    @Override
-    public Event next() {
-        validate();
-        Event next = delegate.next();
-        context.setLastValueEvent(next);
-        switch(next) {
-            case START_OBJECT:
-            case START_ARRAY:
-                level += 1;
-                break;
-            case END_OBJECT:
-            case END_ARRAY:
-                level -= 1;
-                break;
-            default:
-        }
-        return next;
-    }
-
-    @Override
-    public String getString() {
-        return delegate.getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return delegate.isIntegralNumber();
-    }
-
-    @Override
-    public int getInt() {
-        return delegate.getInt();
-    }
-
-    @Override
-    public long getLong() {
-        return delegate.getLong();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return delegate.getBigDecimal();
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        return delegate.getLocation();
-    }
-
     @Override
     public JsonObject getObject() {
         validate();
@@ -139,33 +58,8 @@ class YassonParser implements JsonParser {
     }
 
     @Override
-    public JsonArray getArray() {
-        validate();
-        level -= 1;
-        JsonArray array = delegate.getArray();
-        context.setLastValueEvent(Event.END_ARRAY);
-        return array;
-    }
-
-    @Override
-    public Stream<JsonValue> getArrayStream() {
-        validate();
-        level -= 1;
-        return delegate.getArrayStream();
-    }
-
-    @Override
-    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
-        validate();
-        level -= 1;
-        return delegate.getObjectStream();
-    }
-
-    @Override
-    public Stream<JsonValue> getValueStream() {
-        validate();
-        level -= 1;
-        return delegate.getValueStream();
+    public JsonLocation getLocation() {
+        return delegate.getLocation();
     }
 
     @Override
@@ -176,15 +70,30 @@ class YassonParser implements JsonParser {
     }
 
     @Override
-    public void skipObject() {
+    public Stream<JsonValue> getArrayStream() {
         validate();
         level -= 1;
-        delegate.skipObject();
+        return delegate.getArrayStream();
     }
 
     @Override
-    public void close() {
-        throw new UnsupportedOperationException();
+    public JsonArray getArray() {
+        validate();
+        level -= 1;
+        JsonArray array = delegate.getArray();
+        context.setLastValueEvent(Event.END_ARRAY);
+        return array;
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return delegate.isIntegralNumber();
+    }
+
+    YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextImpl context) {
+        this.delegate = delegate;
+        this.context = context;
+        this.level = determineLevelValue(firstEvent);
     }
 
     private void validate() {
@@ -192,4 +101,96 @@ class YassonParser implements JsonParser {
             throw new NoSuchElementException("There are no more elements available!");
         }
     }
+
+    @Override
+    public int getInt() {
+        return delegate.getInt();
+    }
+
+    @Override
+    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
+        validate();
+        level -= 1;
+        return delegate.getObjectStream();
+    }
+
+    @Override
+    public Event next() {
+        validate();
+        Event next = delegate.next();
+        context.setLastValueEvent(next);
+        switch(next) {
+            case START_OBJECT:
+            case START_ARRAY:
+                level += 1;
+                break;
+            case END_OBJECT:
+            case END_ARRAY:
+                level -= 1;
+                break;
+            default:
+        }
+        return next;
+    }
+
+    void skipRemaining() {
+        while (hasNext()) {
+            next();
+        }
+    }
+
+    @Override
+    public Stream<JsonValue> getValueStream() {
+        validate();
+        level -= 1;
+        return delegate.getValueStream();
+    }
+
+    @Override
+    public String getString() {
+        return delegate.getString();
+    }
+
+    @Override
+    public long getLong() {
+        return delegate.getLong();
+    }
+
+    @Override
+    public boolean hasNext() {
+        if (1 > level) {
+            return false;
+        }
+        return delegate.hasNext();
+    }
+
+    @Override
+    public void close() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return delegate.getBigDecimal();
+    }
+
+    @Override
+    public void skipObject() {
+        validate();
+        level -= 1;
+        delegate.skipObject();
+    }
+
+    private int determineLevelValue(Event firstEvent) {
+        switch(firstEvent) {
+            case START_ARRAY:
+            case START_OBJECT:
+                //container start, there will be more events to come
+                return 1;
+            default:
+                //just this single value, do not allow reading more
+                return 0;
+        }
+    }
+
 }

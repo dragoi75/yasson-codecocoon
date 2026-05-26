@@ -22,9 +22,11 @@ import org.eclipse.yasson.internal.components.SerializerBinding;
 public interface ComponentBoundCustomization {
 
     /**
-     * @return Adapter wrapper class with resolved generic information.
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
      */
-    AdapterBinding getSerializeAdapterBinding();
+    DeserializerBinding<?> getDeserializerBinding();
 
     /**
      * @return Adapter wrapper class with resolved generic information.
@@ -39,9 +41,8 @@ public interface ComponentBoundCustomization {
     SerializerBinding<?> getSerializerBinding();
 
     /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
+     * @return Adapter wrapper class with resolved generic information.
      */
-    DeserializerBinding<?> getDeserializerBinding();
+    AdapterBinding getSerializeAdapterBinding();
+
 }

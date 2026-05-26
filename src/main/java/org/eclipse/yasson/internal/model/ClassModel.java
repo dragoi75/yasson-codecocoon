@@ -52,81 +52,9 @@ public class ClassModel {
 
     private final PropertyNamingStrategy propertyNamingStrategy;
 
-    /**
-     * Gets a property model by default (non customized) name.
-     *
-     * @param name A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
-     */
-    public PropertyModel getPropertyModel(String name) {
-        return properties.get(name);
-    }
-
-    /**
-     * Create instance of class model.
-     *
-     * @param clazz                  Class to model.
-     * @param customization          Customization of the class parsed from annotations.
-     * @param parentClassModel       Class model of parent class.
-     * @param propertyNamingStrategy Property naming strategy.
-     */
-    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
-        this.clazz = clazz;
-        this.classCustomization = customization;
-        this.parentClassModel = parentClassModel;
-        this.propertyNamingStrategy = propertyNamingStrategy;
-        setProperties(new ArrayList<>());
-    }
-
-    /**
-     * Search for field in this class model and superclasses of its class.
-     *
-     * @param jsonReadName name as it appears in JSON during reading.
-     * @return PropertyModel if found.
-     */
-    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
-        Objects.requireNonNull(jsonReadName);
-        return searchProperty(this, jsonReadName);
-    }
-
-    private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
-        //Standard javabean properties without overridden name (most of the cases)
-        final PropertyModel result = classModel.getPropertyModel(jsonReadName);
-        if (null != result && result.getPropertyName().equals(result.getReadName())) {
-            return result;
-        }
-        //Search for overridden name on setter with @JsonbProperty annotation
-        for (PropertyModel propertyModel : properties.values()) {
-            if (equalsReadName(jsonReadName, propertyModel)) {
-                return propertyModel;
-            }
-        }
-        //property not found
-        return null;
-    }
-
-    /**
-     * Check if name is equal according to property strategy.
-     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
-     *
-     * @return True if names are equal.
-     */
-    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
-        final String propertyReadName = propertyModel.getReadName();
-        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == propertyNamingStrategy) {
-            return jsonName.equalsIgnoreCase(propertyReadName);
-        }
-        return jsonName.equals(propertyReadName);
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return clazz;
+    @Override
+    public String toString() {
+        return "ClassModel{" + "clazz=" + clazz + '}';
     }
 
     /**
@@ -139,12 +67,12 @@ public class ClassModel {
     }
 
     /**
-     * Class model of parent class if present.
+     * Gets type.
      *
-     * @return class model of a parent
+     * @return Type.
      */
-    public ClassModel getParentClassModel() {
-        return parentClassModel;
+    public Class<?> getType() {
+        return clazz;
     }
 
     /**
@@ -157,22 +85,13 @@ public class ClassModel {
     }
 
     /**
-     * Sets parsed properties of the class.
+     * Gets a property model by default (non customized) name.
      *
-     * @param parsedProperties class properties
+     * @param name A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
      */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
+    public PropertyModel getPropertyModel(String name) {
+        return properties.get(name);
     }
 
     /**
@@ -196,8 +115,90 @@ public class ClassModel {
         return defaultConstructor;
     }
 
-    @Override
-    public String toString() {
-        return "ClassModel{" + "clazz=" + clazz + '}';
+    private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
+        //Standard javabean properties without overridden name (most of the cases)
+        final PropertyModel result = classModel.getPropertyModel(jsonReadName);
+        if (null != result && result.getPropertyName().equals(result.getReadName())) {
+            return result;
+        }
+        //Search for overridden name on setter with @JsonbProperty annotation
+        for (PropertyModel propertyModel : properties.values()) {
+            if (equalsReadName(jsonReadName, propertyModel)) {
+                return propertyModel;
+            }
+        }
+        //property not found
+        return null;
     }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    /**
+     * Search for field in this class model and superclasses of its class.
+     *
+     * @param jsonReadName name as it appears in JSON during reading.
+     * @return PropertyModel if found.
+     */
+    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
+        Objects.requireNonNull(jsonReadName);
+        return searchProperty(this, jsonReadName);
+    }
+
+    /**
+     * Check if name is equal according to property strategy.
+     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
+        final String propertyReadName = propertyModel.getReadName();
+        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == propertyNamingStrategy) {
+            return jsonName.equalsIgnoreCase(propertyReadName);
+        }
+        return jsonName.equals(propertyReadName);
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedProperties class properties
+     */
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
+    }
+
+    /**
+     * Class model of parent class if present.
+     *
+     * @return class model of a parent
+     */
+    public ClassModel getParentClassModel() {
+        return parentClassModel;
+    }
+
+    /**
+     * Create instance of class model.
+     *
+     * @param clazz                  Class to model.
+     * @param customization          Customization of the class parsed from annotations.
+     * @param parentClassModel       Class model of parent class.
+     * @param propertyNamingStrategy Property naming strategy.
+     */
+    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
+        this.clazz = clazz;
+        this.classCustomization = customization;
+        this.parentClassModel = parentClassModel;
+        this.propertyNamingStrategy = propertyNamingStrategy;
+        setProperties(new ArrayList<>());
+    }
+
 }

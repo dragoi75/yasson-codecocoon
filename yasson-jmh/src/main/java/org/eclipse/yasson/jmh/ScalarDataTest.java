@@ -24,6 +24,11 @@ public class ScalarDataTest {
 
     private String json;
 
+    @Benchmark
+    public ScalarData testDeserialize() {
+        return jsonb.fromJson(json, ScalarData.class);
+    }
+
     @Setup(Level.Trial)
     public void setUp() {
         this.jsonb = JsonbBuilder.create();
@@ -34,11 +39,6 @@ public class ScalarDataTest {
     @Benchmark
     public String testSerialize() {
         return jsonb.toJson(data);
-    }
-
-    @Benchmark
-    public ScalarData testDeserialize() {
-        return jsonb.fromJson(json, ScalarData.class);
     }
 
 }

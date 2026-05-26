@@ -28,51 +28,6 @@ class YassonJsonGenerator implements JsonGenerator {
 
     private int indentDepth;
 
-    YassonJsonGenerator(JsonGenerator innerGenerator) {
-        this.innerGenerator = innerGenerator;
-    }
-
-    @Override
-    public JsonGenerator writeStartObject() {
-        validateWrite("writeStartObject()");
-        indentDepth += 1;
-        return innerGenerator.writeStartObject();
-    }
-
-    @Override
-    public JsonGenerator writeStartObject(String fieldKey) {
-        validateWrite("writeStartObject(String name)");
-        indentDepth += 1;
-        return innerGenerator.writeStartObject(fieldKey);
-    }
-
-    @Override
-    public JsonGenerator writeKey(String fieldKey) {
-        validateWrite("writeKey(String name)");
-        indentDepth += 1;
-        return innerGenerator.writeKey(fieldKey);
-    }
-
-    @Override
-    public JsonGenerator writeStartArray() {
-        validateWrite("writeStartArray()");
-        indentDepth += 1;
-        return innerGenerator.writeStartArray();
-    }
-
-    @Override
-    public JsonGenerator writeStartArray(String fieldKey) {
-        validateWrite("writeStartArray(String name)");
-        indentDepth += 1;
-        return innerGenerator.writeStartArray(fieldKey);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, JsonValue jsonNode) {
-        validateWrite("write(String name, JsonValue value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
     @Override
     public JsonGenerator write(String fieldKey, String jsonNode) {
         validateWrite("write(String name, String value)");
@@ -80,45 +35,10 @@ class YassonJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(String fieldKey, BigInteger jsonNode) {
-        validateWrite("write(String name, BigInteger value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, BigDecimal jsonNode) {
-        validateWrite("write(String name, BigDecimal value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, int jsonNode) {
-        validateWrite("write(String name, int value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, long jsonNode) {
-        validateWrite("write(String name, long value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, double jsonNode) {
-        validateWrite("write(String name, double value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String fieldKey, boolean jsonNode) {
-        validateWrite("write(String name, boolean value)");
-        return innerGenerator.write(fieldKey, jsonNode);
-    }
-
-    @Override
-    public JsonGenerator writeNull(String fieldKey) {
-        validateWrite("writeNull(String name)");
-        return innerGenerator.writeNull(fieldKey);
+    public JsonGenerator write(BigInteger jsonNode) {
+        validateWrite("write(BigInteger value)");
+        indentDepth -= 1;
+        return innerGenerator.write(jsonNode);
     }
 
     @Override
@@ -135,29 +55,8 @@ class YassonJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(JsonValue jsonNode) {
-        validateWrite("write(JsonValue value)");
-        indentDepth -= 1;
-        return innerGenerator.write(jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(String jsonNode) {
-        validateWrite("write(String value)");
-        indentDepth -= 1;
-        return innerGenerator.write(jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(BigDecimal jsonNode) {
-        validateWrite("write(BigDecimal value)");
-        indentDepth -= 1;
-        return innerGenerator.write(jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(BigInteger jsonNode) {
-        validateWrite("write(BigInteger value)");
+    public JsonGenerator write(double jsonNode) {
+        validateWrite("write(double value)");
         indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
@@ -170,22 +69,25 @@ class YassonJsonGenerator implements JsonGenerator {
     }
 
     @Override
+    public JsonGenerator writeStartArray() {
+        validateWrite("writeStartArray()");
+        indentDepth += 1;
+        return innerGenerator.writeStartArray();
+    }
+
+    YassonJsonGenerator(JsonGenerator innerGenerator) {
+        this.innerGenerator = innerGenerator;
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, long jsonNode) {
+        validateWrite("write(String name, long value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
     public JsonGenerator write(long jsonNode) {
         validateWrite("write(long value)");
-        indentDepth -= 1;
-        return innerGenerator.write(jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(double jsonNode) {
-        validateWrite("write(double value)");
-        indentDepth -= 1;
-        return innerGenerator.write(jsonNode);
-    }
-
-    @Override
-    public JsonGenerator write(boolean jsonNode) {
-        validateWrite("write(boolean value)");
         indentDepth -= 1;
         return innerGenerator.write(jsonNode);
     }
@@ -198,8 +100,36 @@ class YassonJsonGenerator implements JsonGenerator {
     }
 
     @Override
-    public void close() {
-        throw new JsonbException("Unsupported operation in user defined deserializer.");
+    public JsonGenerator write(boolean jsonNode) {
+        validateWrite("write(boolean value)");
+        indentDepth -= 1;
+        return innerGenerator.write(jsonNode);
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, JsonValue jsonNode) {
+        validateWrite("write(String name, JsonValue value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
+    public JsonGenerator write(BigDecimal jsonNode) {
+        validateWrite("write(BigDecimal value)");
+        indentDepth -= 1;
+        return innerGenerator.write(jsonNode);
+    }
+
+    @Override
+    public JsonGenerator writeStartObject(String fieldKey) {
+        validateWrite("writeStartObject(String name)");
+        indentDepth += 1;
+        return innerGenerator.writeStartObject(fieldKey);
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, BigDecimal jsonNode) {
+        validateWrite("write(String name, BigDecimal value)");
+        return innerGenerator.write(fieldKey, jsonNode);
     }
 
     @Override
@@ -207,9 +137,80 @@ class YassonJsonGenerator implements JsonGenerator {
         throw new JsonbException("Unsupported operation in user defined deserializer.");
     }
 
+    @Override
+    public JsonGenerator writeKey(String fieldKey) {
+        validateWrite("writeKey(String name)");
+        indentDepth += 1;
+        return innerGenerator.writeKey(fieldKey);
+    }
+
+    @Override
+    public JsonGenerator write(String jsonNode) {
+        validateWrite("write(String value)");
+        indentDepth -= 1;
+        return innerGenerator.write(jsonNode);
+    }
+
     private void validateWrite(String operation) {
         if (0 > indentDepth) {
             throw new JsonbException(operation + " cannot be called outside of the scope of user generator.");
         }
     }
+
+    @Override
+    public JsonGenerator write(String fieldKey, int jsonNode) {
+        validateWrite("write(String name, int value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
+    public JsonGenerator writeStartObject() {
+        validateWrite("writeStartObject()");
+        indentDepth += 1;
+        return innerGenerator.writeStartObject();
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, double jsonNode) {
+        validateWrite("write(String name, double value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
+    public JsonGenerator writeStartArray(String fieldKey) {
+        validateWrite("writeStartArray(String name)");
+        indentDepth += 1;
+        return innerGenerator.writeStartArray(fieldKey);
+    }
+
+    @Override
+    public JsonGenerator write(JsonValue jsonNode) {
+        validateWrite("write(JsonValue value)");
+        indentDepth -= 1;
+        return innerGenerator.write(jsonNode);
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, BigInteger jsonNode) {
+        validateWrite("write(String name, BigInteger value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
+    public JsonGenerator writeNull(String fieldKey) {
+        validateWrite("writeNull(String name)");
+        return innerGenerator.writeNull(fieldKey);
+    }
+
+    @Override
+    public JsonGenerator write(String fieldKey, boolean jsonNode) {
+        validateWrite("write(String name, boolean value)");
+        return innerGenerator.write(fieldKey, jsonNode);
+    }
+
+    @Override
+    public void close() {
+        throw new JsonbException("Unsupported operation in user defined deserializer.");
+    }
+
 }

@@ -22,13 +22,13 @@ class RequiredCreatorParameter implements ModelDeserializer<Object> {
 
     private final String parameterName;
 
-    RequiredCreatorParameter(String parameterName) {
-        this.parameterName = parameterName;
-    }
-
     @Override
     public Object deserialize(Object value, DeserializationContextImpl context) {
         throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
+    }
+
+    RequiredCreatorParameter(String parameterName) {
+        this.parameterName = parameterName;
     }
 
 }

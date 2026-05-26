@@ -120,10 +120,6 @@ public class TypeDeserializers {
         OPTIONAL_TYPES.put(OptionalDouble.class, Double.class);
     }
 
-    private TypeDeserializers() {
-        throw new IllegalStateException("Utility classes cannot be instantiated");
-    }
-
     /**
      * Return deserializer for the given type.
      *
@@ -180,4 +176,9 @@ public class TypeDeserializers {
         }
         return null;
     }
+
+    private TypeDeserializers() {
+        throw new IllegalStateException("Utility classes cannot be instantiated");
+    }
+
 }

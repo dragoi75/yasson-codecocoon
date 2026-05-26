@@ -24,15 +24,15 @@ class UserDefinedSerializer<T> implements ModelSerializer {
 
     private final JsonbSerializer<T> userDefinedSerializer;
 
-    UserDefinedSerializer(JsonbSerializer<T> userDefinedSerializer) {
-        this.userDefinedSerializer = userDefinedSerializer;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         YassonJsonGenerator yassonGenerator = new YassonJsonGenerator(generator);
         userDefinedSerializer.serialize((T) value, yassonGenerator, context);
+    }
+
+    UserDefinedSerializer(JsonbSerializer<T> userDefinedSerializer) {
+        this.userDefinedSerializer = userDefinedSerializer;
     }
 
 }
