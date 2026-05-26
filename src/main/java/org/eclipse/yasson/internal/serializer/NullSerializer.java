@@ -28,46 +28,6 @@ public class NullSerializer implements ModelMarshaller {
     private final ModelMarshaller nullSerializer;
     private final ModelMarshaller rootNullSerializer;
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate      non-null value delegate
-     * @param customization component customization
-     * @param jsonbContext  jsonb context
-     */
-    public NullSerializer(ModelMarshaller delegate,
-                          Customization customization,
-                          JsonbContext jsonbContext) {
-        this.delegate = delegate;
-        if (customization.isNillable()) {
-            nullSerializer = new NullWritingEnabled();
-        } else {
-            nullSerializer = new NullWritingDisabled();
-        }
-        JsonbSerializer<?> userDefinedNullSerializer = jsonbContext.getConfigProperties().getNullSerializer();
-        if (userDefinedNullSerializer != null) {
-            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
-        } else {
-            rootNullSerializer = nullSerializer;
-        }
-    }
-
-    @Override
-    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
-        if (value == null) {
-            if (context.isRoot()) {
-                context.setRoot(false);
-                rootNullSerializer.marshal(null, generator, context);
-            } else {
-                nullSerializer.marshal(null, generator, context);
-            }
-            context.setKey(null);
-        } else {
-            context.setRoot(false);
-            delegate.marshal(value, generator, context);
-        }
-    }
-
     private static final class NullWritingEnabled implements ModelMarshaller {
 
         @Override
@@ -97,4 +57,45 @@ public class NullSerializer implements ModelMarshaller {
         }
 
     }
+
+    @Override
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
+        if (value == null) {
+            if (context.isRoot()) {
+                context.setRoot(false);
+                rootNullSerializer.marshal(null, generator, context);
+            } else {
+                nullSerializer.marshal(null, generator, context);
+            }
+            context.setKey(null);
+        } else {
+            context.setRoot(false);
+            delegate.marshal(value, generator, context);
+        }
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param delegate      non-null value delegate
+     * @param customization component customization
+     * @param jsonbContext  jsonb context
+     */
+    public NullSerializer(ModelMarshaller delegate,
+                          Customization customization,
+                          JsonbContext jsonbContext) {
+        this.delegate = delegate;
+        if (customization.isNillable()) {
+            nullSerializer = new NullWritingEnabled();
+        } else {
+            nullSerializer = new NullWritingDisabled();
+        }
+        JsonbSerializer<?> userDefinedNullSerializer = jsonbContext.getConfigProperties().getNullSerializer();
+        if (userDefinedNullSerializer != null) {
+            rootNullSerializer = (value, generator, context) -> userDefinedNullSerializer.serialize(null, generator, context);
+        } else {
+            rootNullSerializer = nullSerializer;
+        }
+    }
+
 }

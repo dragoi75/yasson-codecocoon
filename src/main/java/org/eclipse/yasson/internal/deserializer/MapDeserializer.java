@@ -27,10 +27,36 @@ class MapDeserializer implements ModelDeserializer<JsonParser> {
     private final ModelDeserializer<JsonParser> keyDelegate;
     private final ModelDeserializer<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelDeserializer<JsonParser> keyDelegate,
-                    ModelDeserializer<JsonParser> valueDelegate) {
-        this.keyDelegate = keyDelegate;
-        this.valueDelegate = valueDelegate;
+    private enum Mode {
+
+        NONE,
+        NORMAL,
+        OBJECT
+
+    }
+
+    private enum State {
+
+        NEXT,
+        VALUE,
+        KEY,
+        DONE
+
+    }
+
+    private Object deserializeValue(JsonParser parser,
+                                    DeserializationContextImpl context,
+                                    ModelDeserializer<JsonParser> deserializer) {
+        DeserializationContextImpl keyContext = new DeserializationContextImpl(context);
+        return deserializer.deserialize(parser, keyContext);
+    }
+
+    private void validateKeyName(String keyName, State state) {
+        if (state == State.KEY && !keyName.equals("key")) {
+            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
+        } else if (state == State.VALUE && !keyName.equals("value")) {
+            throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -95,36 +121,10 @@ class MapDeserializer implements ModelDeserializer<JsonParser> {
         return map;
     }
 
-    private void validateKeyName(String keyName, State state) {
-        if (state == State.KEY && !keyName.equals("key")) {
-            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
-        } else if (state == State.VALUE && !keyName.equals("value")) {
-            throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
-        }
-    }
-
-    private Object deserializeValue(JsonParser parser,
-                                    DeserializationContextImpl context,
-                                    ModelDeserializer<JsonParser> deserializer) {
-        DeserializationContextImpl keyContext = new DeserializationContextImpl(context);
-        return deserializer.deserialize(parser, keyContext);
-    }
-
-    private enum Mode {
-
-        NONE,
-        NORMAL,
-        OBJECT
-
-    }
-
-    private enum State {
-
-        NEXT,
-        VALUE,
-        KEY,
-        DONE
-
+    MapDeserializer(ModelDeserializer<JsonParser> keyDelegate,
+                    ModelDeserializer<JsonParser> valueDelegate) {
+        this.keyDelegate = keyDelegate;
+        this.valueDelegate = valueDelegate;
     }
 
 }

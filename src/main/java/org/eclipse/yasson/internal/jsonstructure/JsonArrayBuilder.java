@@ -27,6 +27,26 @@ class JsonArrayBuilder extends JsonStructureBuilder {
 
     private final jakarta.json.JsonArrayBuilder arrayBuilder;
 
+    @Override
+    void write(BigInteger value) {
+        arrayBuilder.add(value);
+    }
+
+    @Override
+    void write(double value) {
+        arrayBuilder.add(value);
+    }
+
+    @Override
+    void writeNull() {
+        arrayBuilder.addNull();
+    }
+
+    @Override
+    void write(boolean value) {
+        arrayBuilder.add(value);
+    }
+
     /**
      * Create instance with cached provider.
      *
@@ -37,27 +57,22 @@ class JsonArrayBuilder extends JsonStructureBuilder {
     }
 
     @Override
+    void write(long value) {
+        arrayBuilder.add(value);
+    }
+
+    @Override
+    void put(JsonStructure structure) {
+        arrayBuilder.add(structure);
+    }
+
+    @Override
     JsonArray build() {
         return arrayBuilder.build();
     }
 
     @Override
-    void write(JsonValue value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
     void write(String value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
-    void write(BigDecimal value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
-    void write(BigInteger value) {
         arrayBuilder.add(value);
     }
 
@@ -67,27 +82,13 @@ class JsonArrayBuilder extends JsonStructureBuilder {
     }
 
     @Override
-    void write(long value) {
+    void write(BigDecimal value) {
         arrayBuilder.add(value);
     }
 
     @Override
-    void write(double value) {
+    void write(JsonValue value) {
         arrayBuilder.add(value);
     }
 
-    @Override
-    void write(boolean value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
-    void writeNull() {
-        arrayBuilder.addNull();
-    }
-
-    @Override
-    void put(JsonStructure structure) {
-        arrayBuilder.add(structure);
-    }
 }

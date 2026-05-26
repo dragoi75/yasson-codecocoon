@@ -26,10 +26,6 @@ class OptionalLongValueSerializer implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
 
-    OptionalLongValueSerializer(ModelMarshaller modelMarshaller) {
-        this.modelMarshaller = modelMarshaller;
-    }
-
     @Override
     public void marshal(Object input, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         OptionalLong optLong = (OptionalLong) input;
@@ -39,4 +35,9 @@ class OptionalLongValueSerializer implements ModelMarshaller {
             modelMarshaller.marshal(null, jsonWriter, serializationState);
         }
     }
+
+    OptionalLongValueSerializer(ModelMarshaller modelMarshaller) {
+        this.modelMarshaller = modelMarshaller;
+    }
+
 }

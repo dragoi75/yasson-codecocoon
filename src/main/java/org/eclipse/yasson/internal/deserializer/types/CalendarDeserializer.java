@@ -34,20 +34,6 @@ class CalendarDeserializer extends AbstractDateDeserializer<Calendar> {
 
     private final Calendar calendarTemplate;
 
-    CalendarDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-        this.calendarTemplate = new GregorianCalendar();
-        this.calendarTemplate.clear();
-        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
-
-    @Override
-    Calendar fromInstant(Instant instant) {
-        final Calendar calendar = (Calendar) calendarTemplate.clone();
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return calendar;
-    }
-
     @Override
     Calendar parseDefault(String jsonValue, Locale locale) {
         DateTimeFormatter formatter = jsonValue.contains("T")
@@ -70,4 +56,19 @@ class CalendarDeserializer extends AbstractDateDeserializer<Calendar> {
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
         return GregorianCalendar.from(result);
     }
+
+    @Override
+    Calendar fromInstant(Instant instant) {
+        final Calendar calendar = (Calendar) calendarTemplate.clone();
+        calendar.setTimeInMillis(instant.toEpochMilli());
+        return calendar;
+    }
+
+    CalendarDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+        this.calendarTemplate = new GregorianCalendar();
+        this.calendarTemplate.clear();
+        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
+
 }

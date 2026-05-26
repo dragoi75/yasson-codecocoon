@@ -41,13 +41,34 @@ import static jakarta.json.bind.config.PropertyOrderStrategy.REVERSE;
  * {@link jakarta.json.bind.config.PropertyOrderStrategy}.
  */
 public final class StrategiesProvider {
-    private StrategiesProvider() {
-    }
 
     /**
      * Case insensitive naming strategy.
      */
     public static final PropertyNamingStrategy CASE_INSENSITIVE_STRATEGY = Objects::requireNonNull;
+
+    private static boolean isLowerCaseCharacter(char character) {
+        return Character.isAlphabetic(character) && Character.isLowerCase(character);
+    }
+
+    private static PropertyNamingStrategy createLowerCaseStrategyWithSeparator(char separator) {
+        return propertyName -> {
+            Objects.requireNonNull(propertyName);
+            CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
+            char last = Character.MIN_VALUE;
+
+            for (int i = 0; i < propertyName.length(); ++i) {
+                char current = propertyName.charAt(i);
+
+                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+                    charBuffer.append(separator);
+                }
+                last = current;
+                charBuffer.append(Character.toLowerCase(current));
+            }
+            return new String(charBuffer.array(), 0, charBuffer.position());
+        };
+    }
 
     /**
      * Returns an ordering strategy which corresponds to the ordering strategy name.
@@ -67,6 +88,25 @@ public final class StrategiesProvider {
         default:
             throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_ORDER, strategy));
         }
+    }
+
+    private static PropertyNamingStrategy createUpperCamelCaseWithSpaceStrategy() {
+        return propertyName -> {
+            String upperCased = createUpperCamelCaseStrategy().translateName(propertyName);
+            CharBuffer buffer = CharBuffer.allocate(upperCased.length() * 2);
+            char last = Character.MIN_VALUE;
+
+            for (int i = 0; i < upperCased.length(); ++i) {
+                char current = upperCased.charAt(i);
+
+                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+                    buffer.append(' ');
+                }
+                last = current;
+                buffer.append(current);
+            }
+            return new String(buffer.array(), 0, buffer.position());
+        };
     }
 
     /**
@@ -103,45 +143,7 @@ public final class StrategiesProvider {
         };
     }
 
-    private static PropertyNamingStrategy createUpperCamelCaseWithSpaceStrategy() {
-        return propertyName -> {
-            String upperCased = createUpperCamelCaseStrategy().translateName(propertyName);
-            CharBuffer buffer = CharBuffer.allocate(upperCased.length() * 2);
-            char last = Character.MIN_VALUE;
-
-            for (int i = 0; i < upperCased.length(); ++i) {
-                char current = upperCased.charAt(i);
-
-                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
-                    buffer.append(' ');
-                }
-                last = current;
-                buffer.append(current);
-            }
-            return new String(buffer.array(), 0, buffer.position());
-        };
+    private StrategiesProvider() {
     }
 
-    private static PropertyNamingStrategy createLowerCaseStrategyWithSeparator(char separator) {
-        return propertyName -> {
-            Objects.requireNonNull(propertyName);
-            CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
-            char last = Character.MIN_VALUE;
-
-            for (int i = 0; i < propertyName.length(); ++i) {
-                char current = propertyName.charAt(i);
-
-                if (i > 0 && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
-                    charBuffer.append(separator);
-                }
-                last = current;
-                charBuffer.append(Character.toLowerCase(current));
-            }
-            return new String(charBuffer.array(), 0, charBuffer.position());
-        };
-    }
-
-    private static boolean isLowerCaseCharacter(char character) {
-        return Character.isAlphabetic(character) && Character.isLowerCase(character);
-    }
 }

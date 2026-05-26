@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class DurationSerializer extends TypeSerializer<Duration> {
 
-    DurationSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Duration value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
+    }
+
+    DurationSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

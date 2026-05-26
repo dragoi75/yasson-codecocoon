@@ -26,17 +26,6 @@ public class SerializerBinding<T> extends AbstractComponentBinding {
     private final JsonbSerializer<T> jsonbSerializer;
 
     /**
-     * Creates a new instance.
-     *
-     * @param bindingType     Generic type argument of serializer. Not null.
-     * @param jsonbSerializer Serializer. Can be null.
-     */
-    public SerializerBinding(Type bindingType, JsonbSerializer<T> jsonbSerializer) {
-        super(bindingType);
-        this.jsonbSerializer = jsonbSerializer;
-    }
-
-    /**
      * Returns a serializer if any.
      *
      * @return Serializer.
@@ -54,4 +43,16 @@ public class SerializerBinding<T> extends AbstractComponentBinding {
     public Class<?> getComponentClass() {
         return jsonbSerializer.getClass();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param bindingType     Generic type argument of serializer. Not null.
+     * @param jsonbSerializer Serializer. Can be null.
+     */
+    public SerializerBinding(Type bindingType, JsonbSerializer<T> jsonbSerializer) {
+        super(bindingType);
+        this.jsonbSerializer = jsonbSerializer;
+    }
+
 }

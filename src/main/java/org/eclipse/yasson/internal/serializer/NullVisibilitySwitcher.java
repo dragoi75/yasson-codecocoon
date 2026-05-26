@@ -28,11 +28,6 @@ class NullVisibilitySwitcher implements ModelMarshaller {
     private final boolean nullsEnabled;
     private final ModelMarshaller delegate;
 
-    NullVisibilitySwitcher(boolean nullsEnabled, ModelMarshaller delegate) {
-        this.nullsEnabled = nullsEnabled;
-        this.delegate = delegate;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         boolean previous = context.isContainerWithNulls();
@@ -40,4 +35,10 @@ class NullVisibilitySwitcher implements ModelMarshaller {
         delegate.marshal(value, generator, context);
         context.setContainerWithNulls(previous);
     }
+
+    NullVisibilitySwitcher(boolean nullsEnabled, ModelMarshaller delegate) {
+        this.nullsEnabled = nullsEnabled;
+        this.delegate = delegate;
+    }
+
 }

@@ -32,49 +32,16 @@ class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param original         Original type.
-     * @param resolvedTypeArgs Resolved type arguments.
-     */
-    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
-        this.original = original;
-        this.resolvedTypeArgs = resolvedTypeArgs;
-    }
-
-    /**
-     * Type arguments with resolved TypeVariables.
-     *
-     * @return type args
-     */
-    @Override
-    public Type[] getActualTypeArguments() {
-        return resolvedTypeArgs;
-    }
-
-    @Override
-    public Type getRawType() {
-        return original.getRawType();
-    }
-
     @Override
     public Type getOwnerType() {
         return original.getOwnerType();
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(original.toString());
-        if (resolvedTypeArgs != null && resolvedTypeArgs.length > 0) {
-            sb.append(" resolved arguments: [");
-            for (Type typeArg : resolvedTypeArgs) {
-                sb.append(typeArg);
-            }
-            sb.append("]");
-        }
-        return sb.toString();
+    public int hashCode() {
+        return Arrays.hashCode(resolvedTypeArgs)
+                ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
+                ^ (getRawType() == null ? 0 : getRawType().hashCode());
     }
 
     @Override
@@ -92,9 +59,43 @@ class ResolvedParameterizedType implements ParameterizedType {
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(resolvedTypeArgs)
-                ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
-                ^ (getRawType() == null ? 0 : getRawType().hashCode());
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(original.toString());
+        if (resolvedTypeArgs != null && resolvedTypeArgs.length > 0) {
+            sb.append(" resolved arguments: [");
+            for (Type typeArg : resolvedTypeArgs) {
+                sb.append(typeArg);
+            }
+            sb.append("]");
+        }
+        return sb.toString();
     }
+
+    /**
+     * Type arguments with resolved TypeVariables.
+     *
+     * @return type args
+     */
+    @Override
+    public Type[] getActualTypeArguments() {
+        return resolvedTypeArgs;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param original         Original type.
+     * @param resolvedTypeArgs Resolved type arguments.
+     */
+    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
+        this.original = original;
+        this.resolvedTypeArgs = resolvedTypeArgs;
+    }
+
+    @Override
+    public Type getRawType() {
+        return original.getRawType();
+    }
+
 }

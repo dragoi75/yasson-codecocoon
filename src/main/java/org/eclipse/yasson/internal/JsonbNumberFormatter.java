@@ -23,6 +23,19 @@ public class JsonbNumberFormatter {
 
     private final String locale;
 
+    @Override
+    public String toString() {
+        return "JsonbNumberFormatter{"
+                + "format='" + format + '\''
+                + ", locale='" + locale + '\''
+                + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(format, locale);
+    }
+
     /**
      * Construct with format string and locale.
      *
@@ -65,16 +78,4 @@ public class JsonbNumberFormatter {
                 && Objects.equals(locale, that.locale);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(format, locale);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonbNumberFormatter{"
-                + "format='" + format + '\''
-                + ", locale='" + locale + '\''
-                + '}';
-    }
 }

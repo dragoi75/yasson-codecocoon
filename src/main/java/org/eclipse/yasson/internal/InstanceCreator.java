@@ -39,10 +39,6 @@ public class InstanceCreator {
         CREATORS.put(TreeMap.class, TreeMap::new);
     }
 
-    private InstanceCreator() {
-        throw new IllegalStateException("This class should never be instantiated");
-    }
-
     /**
      * Create an instance of the given class with its default constructor.
      *
@@ -61,6 +57,10 @@ public class InstanceCreator {
         }
 
         return creator.get();
+    }
+
+    private InstanceCreator() {
+        throw new IllegalStateException("This class should never be instantiated");
     }
 
 }

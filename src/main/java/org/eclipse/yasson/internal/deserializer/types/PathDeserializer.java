@@ -22,12 +22,13 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  */
 class PathDeserializer extends TypeDeserializer {
 
-    PathDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         return Paths.get(value);
     }
+
+    PathDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

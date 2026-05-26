@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class PeriodSerializer extends TypeSerializer<Period> {
 
-    PeriodSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Period value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
+    }
+
+    PeriodSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

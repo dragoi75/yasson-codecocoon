@@ -25,10 +25,6 @@ class CollectionSerializer implements ModelMarshaller {
 
     private final ModelMarshaller delegate;
 
-    CollectionSerializer(ModelMarshaller delegate) {
-        this.delegate = delegate;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
@@ -36,6 +32,10 @@ class CollectionSerializer implements ModelMarshaller {
         generator.writeStartArray();
         collection.forEach(object -> delegate.marshal(object, generator, context));
         generator.writeEnd();
+    }
+
+    CollectionSerializer(ModelMarshaller delegate) {
+        this.delegate = delegate;
     }
 
 }

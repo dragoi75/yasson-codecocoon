@@ -52,6 +52,38 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
         }
     }
 
+    @Override
+    void serializeKey(T key, JsonGenerator generator, DefaultSerializationContext context) {
+        generator.writeKey(toStringSerializer.apply(key));
+    }
+
+    @Override
+    void serializeValue(T value, JsonGenerator generator, DefaultSerializationContext context) {
+        valueWriter.accept(value, generator);
+    }
+
+    /**
+     * Format with default formatter for a given java.time date object.
+     * Different default formatter for each date object type is used.
+     *
+     * @param value  date object
+     * @param locale locale from annotation / default not null
+     * @return formatted date obj as string
+     */
+    protected abstract String formatDefault(T value, Locale locale);
+
+    /**
+     * Append UTC zone in case zone is not set on formatter.
+     *
+     * @param formatter formatter
+     * @return zoned formatter
+     */
+    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
+        return formatter.getZone() != null
+                ? formatter
+                : formatter.withZone(UTC);
+    }
+
     private Function<T, String> valueSerializer(TypeSerializerBuilder serializerBuilder) {
         Customization customization = serializerBuilder.getCustomization();
         JsonbConfigProperties properties = serializerBuilder.getJsonbContext().getConfigProperties();
@@ -80,6 +112,24 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
     }
 
     /**
+     * Format date object as strict IJson date format.
+     *
+     * @param value value to format
+     * @return formatted result
+     */
+    protected String formatStrictIJson(T value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
+    }
+
+    /**
+     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
+     *
+     * @param value date object to convert
+     * @return instant
+     */
+    protected abstract Instant toInstant(T value);
+
+    /**
      * Convert date object to {@link TemporalAccessor}
      *
      * Only for legacy dates.
@@ -92,24 +142,6 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
     }
 
     /**
-     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
-     *
-     * @param value date object to convert
-     * @return instant
-     */
-    protected abstract Instant toInstant(T value);
-
-    /**
-     * Format with default formatter for a given java.time date object.
-     * Different default formatter for each date object type is used.
-     *
-     * @param value  date object
-     * @param locale locale from annotation / default not null
-     * @return formatted date obj as string
-     */
-    protected abstract String formatDefault(T value, Locale locale);
-
-    /**
      * Format date object with given formatter.
      *
      * @param value     date object to format
@@ -120,35 +152,4 @@ abstract class AbstractDateSerializer<T> extends TypeSerializer<T> {
         return formatter.format(toTemporalAccessor(value));
     }
 
-    /**
-     * Format date object as strict IJson date format.
-     *
-     * @param value value to format
-     * @return formatted result
-     */
-    protected String formatStrictIJson(T value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
-    }
-
-    /**
-     * Append UTC zone in case zone is not set on formatter.
-     *
-     * @param formatter formatter
-     * @return zoned formatter
-     */
-    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return formatter.getZone() != null
-                ? formatter
-                : formatter.withZone(UTC);
-    }
-
-    @Override
-    void serializeValue(T value, JsonGenerator generator, DefaultSerializationContext context) {
-        valueWriter.accept(value, generator);
-    }
-
-    @Override
-    void serializeKey(T key, JsonGenerator generator, DefaultSerializationContext context) {
-        generator.writeKey(toStringSerializer.apply(key));
-    }
 }

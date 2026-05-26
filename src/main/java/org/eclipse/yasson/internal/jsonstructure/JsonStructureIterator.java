@@ -28,13 +28,6 @@ import org.eclipse.yasson.internal.properties.Messages;
 abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
 
     /**
-     * Get current {@link JsonValue}, that the parser is pointing on.
-     *
-     * @return JsonValue result.
-     */
-    abstract JsonValue getValue();
-
-    /**
      * Creates an exception for throwing in case of current value type is not compatible with
      * called getter return type.
      *
@@ -82,4 +75,12 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
         }
 
     }
+
+    /**
+     * Get current {@link JsonValue}, that the parser is pointing on.
+     *
+     * @return JsonValue result.
+     */
+    abstract JsonValue getValue();
+
 }

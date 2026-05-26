@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class UuidSerializer extends TypeSerializer<UUID> {
 
-    UuidSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(UUID value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
+    }
+
+    UuidSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

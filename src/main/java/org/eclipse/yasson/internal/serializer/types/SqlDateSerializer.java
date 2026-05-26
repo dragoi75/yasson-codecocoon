@@ -22,21 +22,6 @@ import java.util.Locale;
  */
 class SqlDateSerializer extends DateSerializer<Date> {
 
-    SqlDateSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
-    @Override
-    protected Instant toInstant(Date value) {
-        if (value instanceof java.sql.Date) {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(value.getTime());
-        } else {
-            return super.toInstant(value);
-        }
-    }
-
     @Override
     protected String formatDefault(Date value, Locale locale) {
         if (value instanceof java.sql.Date) {
@@ -54,4 +39,20 @@ class SqlDateSerializer extends DateSerializer<Date> {
             return super.formatWithFormatter(value, formatter);
         }
     }
+
+    @Override
+    protected Instant toInstant(Date value) {
+        if (value instanceof java.sql.Date) {
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(value.getTime());
+        } else {
+            return super.toInstant(value);
+        }
+    }
+
+    SqlDateSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
 }

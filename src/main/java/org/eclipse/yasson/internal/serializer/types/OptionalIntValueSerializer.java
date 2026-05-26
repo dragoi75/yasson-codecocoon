@@ -26,10 +26,6 @@ class OptionalIntValueSerializer implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
 
-    OptionalIntValueSerializer(ModelMarshaller modelMarshaller) {
-        this.modelMarshaller = modelMarshaller;
-    }
-
     @Override
     public void marshal(Object inputObj, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         OptionalInt maybeInt = (OptionalInt) inputObj;
@@ -39,4 +35,9 @@ class OptionalIntValueSerializer implements ModelMarshaller {
             modelMarshaller.marshal(null, jsonWriter, serializationState);
         }
     }
+
+    OptionalIntValueSerializer(ModelMarshaller modelMarshaller) {
+        this.modelMarshaller = modelMarshaller;
+    }
+
 }

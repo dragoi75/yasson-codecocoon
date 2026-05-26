@@ -36,18 +36,14 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
     private final List<Type> chain;
     private final boolean isKey;
 
-    ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-        this.customization = serializerBuilder.getCustomization();
-        this.cache = new ConcurrentHashMap<>();
-        this.chain = new LinkedList<>(serializerBuilder.getChain());
-        this.isKey = serializerBuilder.isKey();
-    }
-
-    @Override
-    void serializeValue(Object value, JsonGenerator generator, DefaultSerializationContext context) {
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        findSerializer(value, generator, context);
+    /**
+     * Add serializer to the cache.
+     *
+     * @param clazz           class of the serializer
+     * @param modelSerializer model serializer bound to the class
+     */
+    public void addSpecificSerializer(Class<?> clazz, ModelMarshaller modelSerializer) {
+        cache.put(clazz, modelSerializer);
     }
 
     @Override
@@ -68,13 +64,18 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         }).marshal(key, generator, context);
     }
 
-    /**
-     * Add serializer to the cache.
-     *
-     * @param clazz           class of the serializer
-     * @param modelSerializer model serializer bound to the class
-     */
-    public void addSpecificSerializer(Class<?> clazz, ModelMarshaller modelSerializer) {
-        cache.put(clazz, modelSerializer);
+    @Override
+    void serializeValue(Object value, JsonGenerator generator, DefaultSerializationContext context) {
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        findSerializer(value, generator, context);
     }
+
+    ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+        this.customization = serializerBuilder.getCustomization();
+        this.cache = new ConcurrentHashMap<>();
+        this.chain = new LinkedList<>(serializerBuilder.getChain());
+        this.isKey = serializerBuilder.isKey();
+    }
+
 }

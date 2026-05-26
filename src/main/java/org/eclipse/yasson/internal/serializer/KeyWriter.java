@@ -23,15 +23,6 @@ public class KeyWriter implements ModelMarshaller {
 
     private final ModelMarshaller delegate;
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate delegate to be called after the key is written
-     */
-    public KeyWriter(ModelMarshaller delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (context.getKey() != null) {
@@ -39,6 +30,15 @@ public class KeyWriter implements ModelMarshaller {
             context.setKey(null);
         }
         delegate.marshal(value, generator, context);
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param delegate delegate to be called after the key is written
+     */
+    public KeyWriter(ModelMarshaller delegate) {
+        this.delegate = delegate;
     }
 
 }

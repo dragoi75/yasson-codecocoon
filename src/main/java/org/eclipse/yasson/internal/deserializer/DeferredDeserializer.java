@@ -22,14 +22,14 @@ class DeferredDeserializer implements ModelDeserializer<Object> {
 
     private final ModelDeserializer<Object> delegate;
 
-    DeferredDeserializer(ModelDeserializer<Object> delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public Object deserialize(Object value, DeserializationContextImpl context) {
         context.getDeferredDeserializers().add(() -> delegate.deserialize(value, context));
         return value;
+    }
+
+    DeferredDeserializer(ModelDeserializer<Object> delegate) {
+        this.delegate = delegate;
     }
 
 }

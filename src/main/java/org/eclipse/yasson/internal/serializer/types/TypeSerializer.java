@@ -24,25 +24,6 @@ abstract class TypeSerializer<T> implements ModelMarshaller {
 
     private final ModelMarshaller serializer;
 
-    TypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        if (serializerBuilder.isKey()) {
-            serializer = new KeySerializer();
-        } else {
-            serializer = new ValueSerializer();
-        }
-    }
-
-    @Override
-    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
-        serializer.marshal(value, generator, context);
-    }
-
-    abstract void serializeValue(T value, JsonGenerator generator, DefaultSerializationContext context);
-
-    void serializeKey(T key, JsonGenerator generator, DefaultSerializationContext context) {
-        generator.writeKey(String.valueOf(key));
-    }
-
     private final class ValueSerializer implements ModelMarshaller {
 
         @SuppressWarnings("unchecked")
@@ -62,4 +43,24 @@ abstract class TypeSerializer<T> implements ModelMarshaller {
         }
 
     }
+
+    abstract void serializeValue(T value, JsonGenerator generator, DefaultSerializationContext context);
+
+    void serializeKey(T key, JsonGenerator generator, DefaultSerializationContext context) {
+        generator.writeKey(String.valueOf(key));
+    }
+
+    @Override
+    public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
+        serializer.marshal(value, generator, context);
+    }
+
+    TypeSerializer(TypeSerializerBuilder serializerBuilder) {
+        if (serializerBuilder.isKey()) {
+            serializer = new KeySerializer();
+        } else {
+            serializer = new ValueSerializer();
+        }
+    }
+
 }

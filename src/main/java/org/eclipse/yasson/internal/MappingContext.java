@@ -35,79 +35,7 @@ public class MappingContext {
 
     private final ClassParser classParser;
 
-    /**
-     * Create mapping context which is scoped to jsonb runtime.
-     *
-     * @param jsonbContext Context. Required.
-     */
-    public MappingContext(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-        this.classParser = new ClassParser(jsonbContext);
-    }
-
-    /**
-     * Searches for class model for given class. Returns the existing instance. Creates a new instance if
-     * it doesn't exist.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return {@link ClassModel} for given class.
-     */
-    public ClassModel getOrCreateClassModel(Class<?> clazz) {
-        ClassModel classModel = classes.get(clazz);
-        if (classModel != null) {
-            return classModel;
-        }
-
-        Deque<Class<?>> newClassModels = new ArrayDeque<>();
-        for (Class<?> classToParse = clazz; classToParse != Object.class; classToParse = classToParse.getSuperclass()) {
-            if (classToParse == null) {
-                break;
-            }
-            newClassModels.push(classToParse);
-        }
-        if (clazz == Object.class) {
-            return classes.computeIfAbsent(clazz, (c) -> new ClassModel(c, ClassCustomization.empty(), null, null));
-        }
-
-        ClassModel parentClassModel = null;
-        while (!newClassModels.isEmpty()) {
-            Class<?> toParse = newClassModels.pop();
-            parentClassModel = classes
-                    .computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
-        }
-        return classes.get(clazz);
-    }
-
-    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
-                                                                                ClassParser classParser,
-                                                                                JsonbContext jsonbContext) {
-        return aClass -> {
-            JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
-            ClassCustomization customization = jsonbContext.getAnnotationIntrospector()
-                    .introspectCustomization(clsElement,
-                                             parentClassModel == null
-                                                     ? ClassCustomization.empty()
-                                                     : parentClassModel.getClassCustomization());
-            //            PolymorphismSupport configPolymorphism = jsonbContext.getConfigProperties().getPolymorphismSupport();
-//            if (configPolymorphism != null) {
-//                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
-//                                                                     configPolymorphism.getClassPolymorphism(aClass),
-//                                                                     customization,
-//                                                                     aClass);
-//            }
-            ClassModel newClassModel = new ClassModel(aClass,
-                                                      customization,
-                                                      parentClassModel,
-                                                      jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-            if (!BuiltInTypes.isKnownType(aClass)) {
-                classParser.parseProperties(newClassModel, clsElement);
-            }
-            return newClassModel;
-        };
-    }
-
-//    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
+    //    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
 //                                                                           Optional<Polymorphism> maybeClassPolymorphism,
 //                                                                           ClassCustomization customization,
 //                                                                           Class<?> aClass) {
@@ -149,6 +77,78 @@ public class MappingContext {
      */
     public ClassModel getClassModel(Class<?> clazz) {
         return classes.get(clazz);
+    }
+
+    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
+                                                                                ClassParser classParser,
+                                                                                JsonbContext jsonbContext) {
+        return aClass -> {
+            JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
+            ClassCustomization customization = jsonbContext.getAnnotationIntrospector()
+                    .introspectCustomization(clsElement,
+                                             parentClassModel == null
+                                                     ? ClassCustomization.empty()
+                                                     : parentClassModel.getClassCustomization());
+            //            PolymorphismSupport configPolymorphism = jsonbContext.getConfigProperties().getPolymorphismSupport();
+//            if (configPolymorphism != null) {
+//                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
+//                                                                     configPolymorphism.getClassPolymorphism(aClass),
+//                                                                     customization,
+//                                                                     aClass);
+//            }
+            ClassModel newClassModel = new ClassModel(aClass,
+                                                      customization,
+                                                      parentClassModel,
+                                                      jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            if (!BuiltInTypes.isKnownType(aClass)) {
+                classParser.parseProperties(newClassModel, clsElement);
+            }
+            return newClassModel;
+        };
+    }
+
+    /**
+     * Searches for class model for given class. Returns the existing instance. Creates a new instance if
+     * it doesn't exist.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return {@link ClassModel} for given class.
+     */
+    public ClassModel getOrCreateClassModel(Class<?> clazz) {
+        ClassModel classModel = classes.get(clazz);
+        if (classModel != null) {
+            return classModel;
+        }
+
+        Deque<Class<?>> newClassModels = new ArrayDeque<>();
+        for (Class<?> classToParse = clazz; classToParse != Object.class; classToParse = classToParse.getSuperclass()) {
+            if (classToParse == null) {
+                break;
+            }
+            newClassModels.push(classToParse);
+        }
+        if (clazz == Object.class) {
+            return classes.computeIfAbsent(clazz, (c) -> new ClassModel(c, ClassCustomization.empty(), null, null));
+        }
+
+        ClassModel parentClassModel = null;
+        while (!newClassModels.isEmpty()) {
+            Class<?> toParse = newClassModels.pop();
+            parentClassModel = classes
+                    .computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
+        }
+        return classes.get(clazz);
+    }
+
+    /**
+     * Create mapping context which is scoped to jsonb runtime.
+     *
+     * @param jsonbContext Context. Required.
+     */
+    public MappingContext(JsonbContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+        this.classParser = new ClassParser(jsonbContext);
     }
 
 }

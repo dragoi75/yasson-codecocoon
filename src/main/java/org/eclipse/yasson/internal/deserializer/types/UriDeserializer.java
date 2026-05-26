@@ -22,12 +22,13 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  */
 class UriDeserializer extends TypeDeserializer {
 
-    UriDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         return URI.create(value);
     }
+
+    UriDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

@@ -32,43 +32,6 @@ class SerializerBuilderParams {
     private final boolean resolveRootAdapter;
     private final ModelMarshaller objectBaseSerializer;
 
-    private SerializerBuilderParams(Builder builder) {
-        this.type = builder.type;
-        this.customization = builder.customization;
-        this.root = builder.root;
-        this.key = builder.key;
-        this.resolveRootAdapter = builder.resolveRootAdapter;
-        this.objectBaseSerializer = builder.objectBaseSerializer;
-    }
-
-    public static Builder builder(Type type) {
-        return new Builder(type);
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    public boolean isRoot() {
-        return root;
-    }
-
-    public boolean isKey() {
-        return key;
-    }
-
-    public boolean isResolveRootAdapter() {
-        return resolveRootAdapter;
-    }
-
-    public ModelMarshaller getObjectBaseSerializer() {
-        return objectBaseSerializer;
-    }
-
     static final class Builder {
 
         private Type type;
@@ -78,15 +41,17 @@ class SerializerBuilderParams {
         private boolean resolveRootAdapter;
         private ModelMarshaller objectBaseSerializer;
 
-        private Builder(Type type) {
-            this.type = Objects.requireNonNull(type);
-            this.customization = ClassCustomization.empty();
-            this.root = true;
-            this.key = false;
+        public Builder key(boolean key) {
+            this.key = key;
+            return this;
         }
 
-        public Builder type(Type type) {
-            this.type = Objects.requireNonNull(type);
+        public SerializerBuilderParams build() {
+            return new SerializerBuilderParams(this);
+        }
+
+        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
+            this.objectBaseSerializer = objectBaseSerializer;
             return this;
         }
 
@@ -95,30 +60,65 @@ class SerializerBuilderParams {
             return this;
         }
 
-        public Builder root(boolean root) {
-            this.root = root;
-            return this;
-        }
-
-        public Builder key(boolean key) {
-            this.key = key;
-            return this;
-        }
-
         public Builder resolveRootAdapter(boolean resolveRootAdapter) {
             this.resolveRootAdapter = resolveRootAdapter;
             return this;
         }
 
-        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
-            this.objectBaseSerializer = objectBaseSerializer;
+        private Builder(Type type) {
+            this.type = Objects.requireNonNull(type);
+            this.customization = ClassCustomization.empty();
+            this.root = true;
+            this.key = false;
+        }
+
+        public Builder root(boolean root) {
+            this.root = root;
             return this;
         }
 
-        public SerializerBuilderParams build() {
-            return new SerializerBuilderParams(this);
+        public Builder type(Type type) {
+            this.type = Objects.requireNonNull(type);
+            return this;
         }
 
+    }
+
+    public boolean isRoot() {
+        return root;
+    }
+
+    public ModelMarshaller getObjectBaseSerializer() {
+        return objectBaseSerializer;
+    }
+
+    public boolean isResolveRootAdapter() {
+        return resolveRootAdapter;
+    }
+
+    public boolean isKey() {
+        return key;
+    }
+
+    public static Builder builder(Type type) {
+        return new Builder(type);
+    }
+
+    private SerializerBuilderParams(Builder builder) {
+        this.type = builder.type;
+        this.customization = builder.customization;
+        this.root = builder.root;
+        this.key = builder.key;
+        this.resolveRootAdapter = builder.resolveRootAdapter;
+        this.objectBaseSerializer = builder.objectBaseSerializer;
+    }
+
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    public Type getType() {
+        return type;
     }
 
 }

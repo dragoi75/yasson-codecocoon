@@ -35,6 +35,28 @@ public class CreatorModel {
 
     private final CreatorCustomization creatorCustomization;
 
+    public CreatorCustomization getCustomization() {
+        return creatorCustomization;
+    }
+
+    /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Gets parameter name.
+     *
+     * @return Parameter name.
+     */
+    public String getName() {
+        return name;
+    }
+
     /**
      * Creates a new instance.
      *  @param name      Parameter name
@@ -70,28 +92,6 @@ public class CreatorModel {
                 .dateFormatter(constructorDateFormatter)
                 .required(required)
                 .build();
-    }
-
-    /**
-     * Gets parameter name.
-     *
-     * @return Parameter name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    public CreatorCustomization getCustomization() {
-        return creatorCustomization;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return type;
     }
 
 }

@@ -55,6 +55,65 @@ public class ClassModel {
 
     private final PropertyNamingStrategy propertyNamingStrategy;
 
+    @Override
+    public String toString() {
+        return "ClassModel{"
+                + "clazz=" + clazz
+                + '}';
+    }
+
+    /**
+     * Check if name is equal according to property strategy.
+     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
+        final String propertyReadName = propertyModel.getReadName();
+        if (propertyNamingStrategy == StrategiesProvider.CASE_INSENSITIVE_STRATEGY) {
+            return jsonName.equalsIgnoreCase(propertyReadName);
+        }
+        return jsonName.equals(propertyReadName);
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedProperties class properties
+     */
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassCustomization getClassCustomization() {
+        return classCustomization;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
     /**
      * Gets a property model by default (non customized) name.
      *
@@ -85,6 +144,15 @@ public class ClassModel {
     }
 
     /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return clazz;
+    }
+
+    /**
      * Search for field in this class model and superclasses of its class.
      *
      * @param jsonReadName name as it appears in JSON during reading.
@@ -93,6 +161,15 @@ public class ClassModel {
     public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
         Objects.requireNonNull(jsonReadName);
         return searchProperty(this, jsonReadName);
+    }
+
+    /**
+     * Class model of parent class if present.
+     *
+     * @return class model of a parent
+     */
+    public ClassModel getParentClassModel() {
+        return parentClassModel;
     }
 
     private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
@@ -109,76 +186,6 @@ public class ClassModel {
         }
         //property not found
         return null;
-    }
-
-    /**
-     * Check if name is equal according to property strategy.
-     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
-     *
-     * @return True if names are equal.
-     */
-    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
-        final String propertyReadName = propertyModel.getReadName();
-        if (propertyNamingStrategy == StrategiesProvider.CASE_INSENSITIVE_STRATEGY) {
-            return jsonName.equalsIgnoreCase(propertyReadName);
-        }
-        return jsonName.equals(propertyReadName);
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return clazz;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassCustomization getClassCustomization() {
-        return classCustomization;
-    }
-
-    /**
-     * Class model of parent class if present.
-     *
-     * @return class model of a parent
-     */
-    public ClassModel getParentClassModel() {
-        return parentClassModel;
-    }
-
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProperties class properties
-     */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
     }
 
     /**
@@ -202,10 +209,4 @@ public class ClassModel {
         return defaultConstructor;
     }
 
-    @Override
-    public String toString() {
-        return "ClassModel{"
-                + "clazz=" + clazz
-                + '}';
-    }
 }

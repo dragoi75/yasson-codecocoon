@@ -28,10 +28,6 @@ class ObjectSerializer implements ModelMarshaller {
 
     private final LinkedHashMap<String, ModelMarshaller> propertySerializers;
 
-    ObjectSerializer(LinkedHashMap<String, ModelMarshaller> propertySerializers) {
-        this.propertySerializers = propertySerializers;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.writeStartObject();
@@ -46,4 +42,9 @@ class ObjectSerializer implements ModelMarshaller {
         });
         generator.writeEnd();
     }
+
+    ObjectSerializer(LinkedHashMap<String, ModelMarshaller> propertySerializers) {
+        this.propertySerializers = propertySerializers;
+    }
+
 }

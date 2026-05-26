@@ -25,15 +25,15 @@ class OptionalValueSerializer implements ModelMarshaller {
 
     private final ModelMarshaller backingMarshaller;
 
-    OptionalValueSerializer(ModelMarshaller backingMarshaller) {
-        this.backingMarshaller = backingMarshaller;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void marshal(Object inputObject, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         Optional<Object> maybeObject = (Optional<Object>) inputObject;
         backingMarshaller.marshal(maybeObject.orElse(null), jsonWriter, serializationState);
+    }
+
+    OptionalValueSerializer(ModelMarshaller backingMarshaller) {
+        this.backingMarshaller = backingMarshaller;
     }
 
 }

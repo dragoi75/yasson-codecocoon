@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class ZoneIdSerializer extends TypeSerializer<ZoneId> {
 
-    ZoneIdSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(ZoneId value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.getId());
+    }
+
+    ZoneIdSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }
