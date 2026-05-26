@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import org.eclipse.yasson.internal.model.ClassDescriptor;
-
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,13 +54,11 @@ public class InstanceCreator {
     public static <T> T createInstance(Class<T> tClass) {
         Supplier<T> creator = (Supplier<T>) CREATORS.get(tClass);
         //No worries for race conditions here, instance may be replaced during first attempt.
-        if (creator == null) {
+        if (null == creator) {
             Constructor<T> constructor = ReflectionHelper.getDefaultConstructor(tClass, true);
             creator = () -> ReflectionHelper.instantiateNoArgConstructor(constructor);
             CREATORS.put(tClass, creator);
         }
-
         return creator.get();
     }
-
 }

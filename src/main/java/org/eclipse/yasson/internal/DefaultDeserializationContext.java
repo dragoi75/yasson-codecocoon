@@ -9,18 +9,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.deserializer.ModelParser;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
 import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
@@ -35,8 +32,11 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
     private static final Logger LOG = Logger.getLogger(DefaultDeserializationContext.class.getName());
 
     private final List<Runnable> deferredSetters = new ArrayList<>();
+
     private JsonParser.Event finalValueEvent;
+
     private SerializationCustomizer serializationCustomizer = ClassSerializationConfig.emptyConfig();
+
     private Object targetObject;
 
     /**
@@ -134,7 +134,7 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
     @SuppressWarnings("unchecked")
     private <T> T deserializeValue(Type target, JsonParser jsonReader) {
         try {
-            if (finalValueEvent == null) {
+            if (null == finalValueEvent) {
                 finalValueEvent = jsonReader.next();
                 validateState();
             }
@@ -150,9 +150,8 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
     }
 
     private void validateState() {
-        if (finalValueEvent == JsonParser.Event.KEY_NAME) {
+        if (JsonParser.Event.KEY_NAME == finalValueEvent) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
     }
-
 }

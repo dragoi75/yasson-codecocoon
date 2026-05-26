@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
@@ -18,12 +17,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.MessageProvider;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
@@ -43,8 +40,11 @@ public class SerializationContextImpl extends ProcessingScope implements Seriali
     private final Set<Object> currentlyProcessedObjects = new HashSet<>();
 
     private final Type runtimeType;
+
     private String key = null;
+
     private boolean containerWithNulls = true;
+
     private boolean root = true;
 
     /**
@@ -140,10 +140,10 @@ public class SerializationContextImpl extends ProcessingScope implements Seriali
             throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
-                if (close) {
-                    jsonGenerator.close();
-                } else {
+                if (!close) {
                     jsonGenerator.flush();
+                } else {
+                    jsonGenerator.close();
                 }
             } catch (JsonGenerationException jge) {
                 LOGGER.severe(jge.getMessage());
@@ -195,7 +195,7 @@ public class SerializationContextImpl extends ProcessingScope implements Seriali
      * @param generator JSON generator.
      */
     public <T> void serializeObject(T root, JsonGenerator generator) {
-        Type type = runtimeType == null ? (root == null ? Object.class : root.getClass()) : runtimeType;
+        Type type = null == runtimeType ? (null == root ? Object.class : root.getClass()) : runtimeType;
         final ModelMarshaller rootSerializer = getRootSerializer(type);
         rootSerializer.marshal(root, generator, this);
     }
@@ -223,6 +223,4 @@ public class SerializationContextImpl extends ProcessingScope implements Seriali
     public boolean removeProcessedObject(Object object) {
         return currentlyProcessedObjects.remove(object);
     }
-
-
 }

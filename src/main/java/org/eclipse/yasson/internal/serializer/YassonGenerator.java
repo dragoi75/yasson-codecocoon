@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonGenerator;
@@ -27,6 +25,7 @@ import jakarta.json.stream.JsonGenerator;
 class YassonGenerator implements JsonGenerator {
 
     private final JsonGenerator delegate;
+
     private int level;
 
     YassonGenerator(JsonGenerator delegate) {
@@ -36,35 +35,35 @@ class YassonGenerator implements JsonGenerator {
     @Override
     public JsonGenerator writeStartObject() {
         writeValidate("writeStartObject()");
-        level++;
+        level += 1;
         return delegate.writeStartObject();
     }
 
     @Override
     public JsonGenerator writeStartObject(String name) {
         writeValidate("writeStartObject(String name)");
-        level++;
+        level += 1;
         return delegate.writeStartObject(name);
     }
 
     @Override
     public JsonGenerator writeKey(String name) {
         writeValidate("writeKey(String name)");
-        level++;
+        level += 1;
         return delegate.writeKey(name);
     }
 
     @Override
     public JsonGenerator writeStartArray() {
         writeValidate("writeStartArray()");
-        level++;
+        level += 1;
         return delegate.writeStartArray();
     }
 
     @Override
     public JsonGenerator writeStartArray(String name) {
         writeValidate("writeStartArray(String name)");
-        level++;
+        level += 1;
         return delegate.writeStartArray(name);
     }
 
@@ -124,12 +123,13 @@ class YassonGenerator implements JsonGenerator {
 
     @Override
     public JsonGenerator writeEnd() {
-        level--;
-        if (level < 0) {
+        level -= 1;
+        if (0 > level) {
             throw new JsonbException("writeEnd() cannot be called outside of the scope of user generator.");
         }
-        if (level == 0) {
-            level--; //if user has closed array or object and is on the same level he started. There is no more allowed writing.
+        if (0 == level) {
+            //if user has closed array or object and is on the same level he started. There is no more allowed writing.
+            level -= 1;
         }
         return delegate.writeEnd();
     }
@@ -137,63 +137,63 @@ class YassonGenerator implements JsonGenerator {
     @Override
     public JsonGenerator write(JsonValue value) {
         writeValidate("write(JsonValue value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(String value) {
         writeValidate("write(String value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(BigDecimal value) {
         writeValidate("write(BigDecimal value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(BigInteger value) {
         writeValidate("write(BigInteger value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(int value) {
         writeValidate("write(int value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(long value) {
         writeValidate("write(long value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(double value) {
         writeValidate("write(double value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(boolean value) {
         writeValidate("write(boolean value)");
-        level--;
+        level -= 1;
         return delegate.write(value);
     }
 
     @Override
     public JsonGenerator writeNull() {
         writeValidate("writeNull()");
-        level--;
+        level -= 1;
         return delegate.writeNull();
     }
 
@@ -208,7 +208,7 @@ class YassonGenerator implements JsonGenerator {
     }
 
     private void writeValidate(String method) {
-        if (level < 0) {
+        if (0 > level) {
             throw new JsonbException(method + " cannot be called outside of the scope of user generator.");
         }
     }

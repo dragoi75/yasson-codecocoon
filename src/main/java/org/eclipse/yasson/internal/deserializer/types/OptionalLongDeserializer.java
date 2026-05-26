@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.util.OptionalLong;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.deserializer.ModelParser;
 
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.deserializer.ModelParser;
 class OptionalLongDeserializer implements ModelParser<JsonParser> {
 
     private final ModelParser<JsonParser> extractor;
+
     private final ModelParser<Object> nullValueDelegate;
 
     OptionalLongDeserializer(ModelParser<JsonParser> extractor, ModelParser<Object> nullValueDelegate) {
@@ -34,7 +32,7 @@ class OptionalLongDeserializer implements ModelParser<JsonParser> {
 
     @Override
     public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL == context.getLastValueEvent()) {
             return nullValueDelegate.deserializeModel(OptionalLong.empty(), context);
         }
         OptionalLong optional = OptionalLong.of((Long) extractor.deserializeModel(value, context));

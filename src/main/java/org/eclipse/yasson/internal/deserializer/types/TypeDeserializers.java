@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.math.BigDecimal;
@@ -44,13 +43,10 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
-
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.deserializer.JustReturn;
 import org.eclipse.yasson.internal.deserializer.ModelParser;
@@ -58,7 +54,6 @@ import org.eclipse.yasson.internal.deserializer.NullCheckDeserializer;
 import org.eclipse.yasson.internal.deserializer.PositionChecker;
 import org.eclipse.yasson.internal.deserializer.ValueExtractor;
 import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
-
 import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
 
 /**
@@ -66,8 +61,8 @@ import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
  */
 public class TypeDeserializers {
 
-    private static final Map<Class<?>, Function<TypeDeserializerBuilder, TypeDeserializer>> DESERIALIZERS =
-            new HashMap<>();
+    private static final Map<Class<?>, Function<TypeDeserializerBuilder, TypeDeserializer>> DESERIALIZERS = new HashMap<>();
+
     private static final Map<Class<?>, Class<?>> OPTIONAL_TYPES = new HashMap<>();
 
     static {
@@ -120,7 +115,6 @@ public class TypeDeserializers {
             DESERIALIZERS.put(java.sql.Date.class, SqlDateDeserializer::new);
             DESERIALIZERS.put(Timestamp.class, SqlTimestampDeserializer::new);
         }
-
         OPTIONAL_TYPES.put(OptionalLong.class, Long.class);
         OPTIONAL_TYPES.put(OptionalInt.class, Integer.class);
         OPTIONAL_TYPES.put(OptionalDouble.class, Double.class);
@@ -140,57 +134,50 @@ public class TypeDeserializers {
      * @param events        expected parser events at the beginning when deserializing the type
      * @return type deserializer
      */
-    public static ModelParser<JsonParser> getTypeDeserializer(Class<?> clazz,
-                                                              SerializationCustomizer customization,
-                                                              JsonbConfigurationProperties properties,
-                                                              ModelParser<Object> delegate,
-                                                              Set<JsonParser.Event> events) {
+    public static ModelParser<JsonParser> getTypeDeserializer(Class<?> clazz, SerializationCustomizer customization, JsonbConfigurationProperties properties, ModelParser<Object> delegate, Set<JsonParser.Event> events) {
         JsonParser.Event[] eventArray = events.toArray(new JsonParser.Event[0]);
         if (OPTIONAL_TYPES.containsKey(clazz)) {
             Class<?> optionalType = OPTIONAL_TYPES.get(clazz);
-            TypeDeserializerBuilder builder = new TypeDeserializerBuilder(optionalType,
-                                                                          customization,
-                                                                          properties,
-                                                                          JustReturn.instance());
+            TypeDeserializerBuilder builder = new TypeDeserializerBuilder(optionalType, customization, properties, JustReturn.instance());
             ValueExtractor valueExtractor = new ValueExtractor(DESERIALIZERS.get(optionalType).apply(builder));
             PositionChecker positionChecker = new PositionChecker(valueExtractor, clazz, eventArray);
-            if (OptionalLong.class.equals(clazz)) {
-                return new OptionalLongDeserializer(positionChecker, delegate);
-            } else if (OptionalInt.class.equals(clazz)) {
-                return new OptionalIntDeserializer(positionChecker, delegate);
-            } else if (OptionalDouble.class.equals(clazz)) {
-                return new OptionalDoubleDeserializer(positionChecker, delegate);
+            if (!OptionalLong.class.equals(clazz)) {
+                if (!OptionalInt.class.equals(clazz)) {
+                    if (!OptionalDouble.class.equals(clazz)) {
+                        throw new JsonbException("Unsupported Optional type for deserialization: " + clazz);
+                    } else {
+                        return new OptionalDoubleDeserializer(positionChecker, delegate);
+                    }
+                } else {
+                    return new OptionalIntDeserializer(positionChecker, delegate);
+                }
             } else {
-                throw new JsonbException("Unsupported Optional type for deserialization: " + clazz);
+                return new OptionalLongDeserializer(positionChecker, delegate);
             }
         }
-
         TypeDeserializerBuilder builder = new TypeDeserializerBuilder(clazz, customization, properties, delegate);
         if (DESERIALIZERS.containsKey(clazz)) {
             ValueExtractor valueExtractor = new ValueExtractor(DESERIALIZERS.get(clazz).apply(builder));
             return new NullCheckDeserializer(new PositionChecker(valueExtractor, clazz, eventArray), delegate);
         }
-
         if (JsonValue.class.isAssignableFrom(builder.getClazz())) {
             return new JsonValueDeserializer(builder);
         }
         ModelParser<JsonParser> deserializer = assignableCases(builder, eventArray);
-        if (deserializer != null) {
+        if (null != deserializer) {
             return new NullCheckDeserializer(deserializer, delegate);
         }
         return null;
     }
 
-    private static ModelParser<JsonParser> assignableCases(TypeDeserializerBuilder builder,
-                                                           JsonParser.Event[] checker) {
-        if (Enum.class.isAssignableFrom(builder.getClazz())) {
-            return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)),
-                                       builder.getClazz(),
-                                       checker);
-        } else if (Object.class.equals(builder.getClazz())) {
-            return new ObjectTypeDeserializer(builder);
+    private static ModelParser<JsonParser> assignableCases(TypeDeserializerBuilder builder, JsonParser.Event[] checker) {
+        if (!Enum.class.isAssignableFrom(builder.getClazz())) {
+            if (Object.class.equals(builder.getClazz())) {
+                return new ObjectTypeDeserializer(builder);
+            }
+        } else {
+            return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)), builder.getClazz(), checker);
         }
         return null;
     }
-
 }

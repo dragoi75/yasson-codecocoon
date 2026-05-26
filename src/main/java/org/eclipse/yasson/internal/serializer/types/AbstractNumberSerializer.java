@@ -9,14 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.JsonBindingContext;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.SerializationContextImpl;
@@ -38,11 +35,10 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
     @SuppressWarnings("unchecked")
     private ModelMarshaller actualSerializer(SerializationCustomizer customization, JsonBindingContext jsonbContext) {
         JsonbNumberFormatter formatter = customization.getSerializeNumberFormatter();
-        if (formatter == null) {
+        if (null == formatter) {
             return (value, generator, context) -> writeValue((T) value, generator);
         }
-        final NumberFormat format = NumberFormat
-                .getInstance(jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
+        final NumberFormat format = NumberFormat.getInstance(jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
         ((DecimalFormat) format).applyPattern(formatter.getFormat());
         return (value, generator, context) -> generator.write(format.format(value));
     }
@@ -53,5 +49,4 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
     }
 
     abstract void writeValue(T value, JsonGenerator generator);
-
 }

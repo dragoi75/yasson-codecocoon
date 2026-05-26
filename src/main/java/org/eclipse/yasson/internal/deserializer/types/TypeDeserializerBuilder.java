@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.util.Objects;
-
 import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 import org.eclipse.yasson.internal.deserializer.ModelParser;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
@@ -22,16 +20,16 @@ import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 class TypeDeserializerBuilder {
 
     private final Class<?> clazz;
+
     private final SerializationCustomizer customization;
+
     private final JsonbConfigurationProperties configProperties;
+
     private final ModelParser<Object> delegate;
 
-    TypeDeserializerBuilder(Class<?> clazz,
-                            SerializationCustomizer customization,
-                            JsonbConfigurationProperties configProperties,
-                            ModelParser<Object> delegate) {
+    TypeDeserializerBuilder(Class<?> clazz, SerializationCustomizer customization, JsonbConfigurationProperties configProperties, ModelParser<Object> delegate) {
         this.clazz = Objects.requireNonNull(clazz);
-        this.customization = customization == null ? ClassSerializationConfig.emptyConfig() : customization;
+        this.customization = null == customization ? ClassSerializationConfig.emptyConfig() : customization;
         this.configProperties = configProperties;
         this.delegate = Objects.requireNonNull(delegate);
     }
@@ -51,5 +49,4 @@ class TypeDeserializerBuilder {
     public SerializationCustomizer getCustomization() {
         return customization;
     }
-
 }

@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.Map;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.serializer.types.TypeSerializerRegistry;
 
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.serializer.types.TypeSerializerRegistry;
 abstract class AbstractMapSerializer implements ModelMarshaller {
 
     private final ModelMarshaller keyMarshaller;
+
     private final ModelMarshaller valueMarshaller;
 
     AbstractMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
@@ -41,10 +39,12 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
     }
 
     static AbstractMapSerializer createMapSerializer(Class<?> keyType, ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
-        if (TypeSerializerRegistry.isSupportedMapKey(keyType)) {
+        if (!TypeSerializerRegistry.isSupportedMapKey(keyType)) {
+            if (Object.class.equals(keyType)) {
+                return new RuntimeMapSerializer(keyMarshaller, valueMarshaller);
+            }
+        } else {
             return new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
-        } else if (Object.class.equals(keyType)) {
-            return new RuntimeMapSerializer(keyMarshaller, valueMarshaller);
         }
         return new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
     }
@@ -52,11 +52,12 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
     private static final class RuntimeMapSerializer extends AbstractMapSerializer {
 
         private final StringKeyedMapSerializer stringKeyedMap;
+
         private final ObjectKeyedMapSerializer objectKeyedMap;
+
         private AbstractMapSerializer mapHandler;
 
-        RuntimeMapSerializer(ModelMarshaller keyMarshaller,
-                             ModelMarshaller valueMarshaller) {
+        RuntimeMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
             super(keyMarshaller, valueMarshaller);
             stringKeyedMap = new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
             objectKeyedMap = new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
@@ -65,12 +66,12 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
         @SuppressWarnings("unchecked")
         @Override
         public void marshal(Object obj, JsonGenerator jsonGen, SerializationContextImpl serializationCtx) {
-            if (mapHandler == null) {
+            if (null == mapHandler) {
                 //We have to be sure that Map with Object as a key contains only supported values for key:value format map.
                 Map<Object, Object> entries = (Map<Object, Object>) obj;
                 boolean isApplicable = true;
                 for (Object identifier : entries.keySet()) {
-                    if (identifier == null) {
+                    if (null == identifier) {
                         if (serializationCtx.getJsonbContext().getConfigProperties().isForceMapArraySerializerForNullKeys()) {
                             isApplicable = false;
                             break;
@@ -89,13 +90,11 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             }
             mapHandler.marshal(obj, jsonGen, serializationCtx);
         }
-
     }
 
     private static final class StringKeyedMapSerializer extends AbstractMapSerializer {
 
-        StringKeyedMapSerializer(ModelMarshaller keyMarshaller,
-                                 ModelMarshaller valueMarshaller) {
+        StringKeyedMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
             super(keyMarshaller, valueMarshaller);
         }
 
@@ -110,13 +109,11 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             });
             jsonGen.writeEnd();
         }
-
     }
 
     private static final class ObjectKeyedMapSerializer extends AbstractMapSerializer {
 
-        ObjectKeyedMapSerializer(ModelMarshaller keyMarshaller,
-                                 ModelMarshaller valueMarshaller) {
+        ObjectKeyedMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
             super(keyMarshaller, valueMarshaller);
         }
 
@@ -128,10 +125,10 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             entries.forEach((identifier, mappedObj) -> {
                 jsonGen.writeStartObject();
                 jsonGen.writeKey("key");
-                if (identifier == null) {
-                    jsonGen.writeNull();
-                } else {
+                if (null != identifier) {
                     getKeySerializer().marshal(identifier, jsonGen, serializationCtx);
+                } else {
+                    jsonGen.writeNull();
                 }
                 jsonGen.writeKey("value");
                 getValueSerializer().marshal(mappedObj, jsonGen, serializationCtx);
@@ -139,7 +136,5 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             });
             jsonGen.writeEnd();
         }
-
     }
-
 }

@@ -9,20 +9,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import jakarta.json.JsonObject;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.jsonstructure.JsonStructureParserAdapter;
 import org.eclipse.yasson.internal.model.customization.TypeInheritanceSettings;
-
 import static jakarta.json.stream.JsonParser.Event;
 
 /**
@@ -31,15 +27,16 @@ import static jakarta.json.stream.JsonParser.Event;
 class PolymorphicInstanceFactory implements ModelParser<JsonParser> {
 
     private final Class<?> targetClass;
+
     private final Map<String, Class<?>> classRegistry = new ConcurrentHashMap<>();
+
     private final DeserializationModelFactory modelFactory;
+
     private final TypeInheritanceSettings inheritanceSettings;
+
     private final ModelParser<JsonParser> fallbackParser;
 
-    PolymorphicInstanceFactory(Class<?> targetClass,
-                               DeserializationModelFactory modelFactory,
-                               TypeInheritanceSettings inheritanceSettings,
-                               ModelParser<JsonParser> fallbackParser) {
+    PolymorphicInstanceFactory(Class<?> targetClass, DeserializationModelFactory modelFactory, TypeInheritanceSettings inheritanceSettings, ModelParser<JsonParser> fallbackParser) {
         this.targetClass = targetClass;
         this.modelFactory = modelFactory;
         this.inheritanceSettings = inheritanceSettings;
@@ -53,15 +50,13 @@ class PolymorphicInstanceFactory implements ModelParser<JsonParser> {
         String inheritanceKey = inheritanceSettings.getFieldName();
         JsonObject jsonNode = jsonInput.getObject();
         typeKey = jsonNode.getString(inheritanceKey, null);
-        JsonObject transformedNode = deserializationState.getJsonbContext().getJsonProvider().createObjectBuilder(jsonNode)
-                .remove(inheritanceKey)
-                .build();
+        JsonObject transformedNode = deserializationState.getJsonbContext().getJsonProvider().createObjectBuilder(jsonNode).remove(inheritanceKey).build();
         internalParser = new JsonStructureParserAdapter(transformedNode);
         //To get to the first event
         Event evt = internalParser.next();
         deserializationState.setLastValueEvent(evt);
         Class<?> subtypeClass;
-        if (typeKey == null) {
+        if (null == typeKey) {
             return fallbackParser.deserializeModel(internalParser, deserializationState);
         }
         subtypeClass = getPolymorphicTypeClass(typeKey);
@@ -87,8 +82,6 @@ class PolymorphicInstanceFactory implements ModelParser<JsonParser> {
                 return mappingPair.getKey();
             }
         }
-        throw new JsonbException("Unknown alias \"" + typeKey + "\" known aliases: "
-                                         + inheritanceSettings.getAliases().values());
+        throw new JsonbException("Unknown alias \"" + typeKey + "\" known aliases: " + inheritanceSettings.getAliases().values());
     }
-
 }

@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Constructor;
@@ -20,9 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.ReflectionHelper;
 import org.eclipse.yasson.internal.model.customization.ClassSerializationConfig;
 import org.eclipse.yasson.internal.model.customization.PropertyNamingStrategyProvider;
@@ -72,10 +69,7 @@ public class ClassDescriptor {
      * @param parentDescriptor       Class model of parent class.
      * @param namingStrategy Property naming strategy.
      */
-    public ClassDescriptor(Class<?> targetClass,
-                           ClassSerializationConfig serializationConfig,
-                           ClassDescriptor parentDescriptor,
-                           PropertyNamingStrategy namingStrategy) {
+    public ClassDescriptor(Class<?> targetClass, ClassSerializationConfig serializationConfig, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
         this.targetClass = targetClass;
         this.serializationConfig = serializationConfig;
         this.parentDescriptor = parentDescriptor;
@@ -97,7 +91,7 @@ public class ClassDescriptor {
     private BeanPropertyDescriptor findProperty(ClassDescriptor targetDescriptor, String jsonFieldName) {
         //Standard javabean properties without overridden name (most of the cases)
         final BeanPropertyDescriptor foundProperty = targetDescriptor.getPropertyModel(jsonFieldName);
-        if (foundProperty != null && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
             return foundProperty;
         }
         //Search for overridden name on setter with @JsonbProperty annotation
@@ -119,7 +113,7 @@ public class ClassDescriptor {
      */
     private boolean matchesReadName(String candidateJsonName, BeanPropertyDescriptor propertyDescriptor) {
         final String resolvedReadName = propertyDescriptor.getReadName();
-        if (namingStrategy == PropertyNamingStrategyProvider.CASE_INSENSITIVE_STRATEGY) {
+        if (PropertyNamingStrategyProvider.CASE_INSENSITIVE_STRATEGY == namingStrategy) {
             return candidateJsonName.equalsIgnoreCase(resolvedReadName);
         }
         return candidateJsonName.equals(resolvedReadName);

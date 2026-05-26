@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 
 /**
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
 class CircularReferenceSerializer implements ModelMarshaller {
 
     private final Type modelClass;
+
     private ModelMarshaller modelMarshaller;
 
     CircularReferenceSerializer(Type modelClass) {
@@ -33,7 +31,7 @@ class CircularReferenceSerializer implements ModelMarshaller {
 
     @Override
     public void marshal(Object payload, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
-        if (modelMarshaller == null) {
+        if (null == modelMarshaller) {
             modelMarshaller = serializationState.getJsonbContext().getSerializationModelCreator().buildSerializerChain(modelClass, true, true);
         }
         modelMarshaller.marshal(payload, jsonWriter, serializationState);

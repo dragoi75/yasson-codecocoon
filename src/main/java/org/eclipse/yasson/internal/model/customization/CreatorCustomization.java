@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import org.eclipse.yasson.internal.JsonbDateFormatter;
@@ -22,8 +21,11 @@ import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 public class CreatorCustomization extends CustomizationBase {
 
     private final JsonbNumberFormatter numberFormatter;
+
     private final JsonbDateFormatter dateFormatter;
+
     private final boolean required;
+
     private BeanPropertyDescriptor propertyModel;
 
     /**
@@ -49,10 +51,12 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (numberFormatter != null) {
+        if (null == numberFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
             return numberFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeNumberFormatter();
         }
         return null;
     }
@@ -64,10 +68,12 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (dateFormatter != null) {
+        if (null == dateFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeDateFormatter();
+            }
+        } else {
             return dateFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeDateFormatter();
         }
         return null;
     }
@@ -93,7 +99,9 @@ public class CreatorCustomization extends CustomizationBase {
     public static final class Builder extends CustomizationBase.Builder<Builder, CreatorCustomization> {
 
         private JsonbNumberFormatter numberFormatter;
+
         private JsonbDateFormatter dateFormatter;
+
         private boolean required = false;
 
         private Builder() {
@@ -126,7 +134,5 @@ public class CreatorCustomization extends CustomizationBase {
         public CreatorCustomization build() {
             return new CreatorCustomization(this);
         }
-
     }
-
 }

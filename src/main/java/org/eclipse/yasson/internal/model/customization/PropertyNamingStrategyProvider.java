@@ -9,23 +9,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model.customization;
 
 import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.MessageProvider;
-
 import static java.util.Comparator.comparing;
-
 import static jakarta.json.bind.config.PropertyNamingStrategy.CASE_INSENSITIVE;
 import static jakarta.json.bind.config.PropertyNamingStrategy.IDENTITY;
 import static jakarta.json.bind.config.PropertyNamingStrategy.LOWER_CASE_WITH_DASHES;
@@ -41,6 +36,7 @@ import static jakarta.json.bind.config.PropertyOrderStrategy.REVERSE;
  * {@link jakarta.json.bind.config.PropertyOrderStrategy}.
  */
 public final class PropertyNamingStrategyProvider {
+
     private PropertyNamingStrategyProvider() {
     }
 
@@ -56,16 +52,16 @@ public final class PropertyNamingStrategyProvider {
      * @return ordering strategy
      */
     public static Consumer<List<BeanPropertyDescriptor>> getOrderingFunction(String orderingScheme) {
-        switch (orderingScheme) {
-        case LEXICOGRAPHICAL:
-            return propertyMap -> propertyMap.sort(comparing(BeanPropertyDescriptor::getWriteName));
-        case ANY:
-            return props -> {
-            };
-        case REVERSE:
-            return propertyMap -> propertyMap.sort(comparing(BeanPropertyDescriptor::getWriteName).reversed());
-        default:
-            throw new JsonbException(MessageProvider.getMessage(MessageConstants.PROPERTY_ORDER, orderingScheme));
+        switch(orderingScheme) {
+            case LEXICOGRAPHICAL:
+                return propertyMap -> propertyMap.sort(comparing(BeanPropertyDescriptor::getWriteName));
+            case ANY:
+                return props -> {
+                };
+            case REVERSE:
+                return propertyMap -> propertyMap.sort(comparing(BeanPropertyDescriptor::getWriteName).reversed());
+            default:
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.PROPERTY_ORDER, orderingScheme));
         }
     }
 
@@ -76,21 +72,21 @@ public final class PropertyNamingStrategyProvider {
      * @return naming strategy
      */
     public static PropertyNamingStrategy getPropertyNamingStrategy(String orderingScheme) {
-        switch (orderingScheme) {
-        case LOWER_CASE_WITH_UNDERSCORES:
-            return createLowerCaseWithSeparatorStrategy('_');
-        case LOWER_CASE_WITH_DASHES:
-            return createLowerCaseWithSeparatorStrategy('-');
-        case UPPER_CAMEL_CASE:
-            return createPascalCaseStrategy();
-        case UPPER_CAMEL_CASE_WITH_SPACES:
-            return createUpperCamelCaseWithSpacesStrategy();
-        case IDENTITY:
-            return Objects::requireNonNull;
-        case CASE_INSENSITIVE:
-            return CASE_INSENSITIVE_STRATEGY;
-        default:
-            throw new JsonbException("No property naming strategy was found for: " + orderingScheme);
+        switch(orderingScheme) {
+            case LOWER_CASE_WITH_UNDERSCORES:
+                return createLowerCaseWithSeparatorStrategy('_');
+            case LOWER_CASE_WITH_DASHES:
+                return createLowerCaseWithSeparatorStrategy('-');
+            case UPPER_CAMEL_CASE:
+                return createPascalCaseStrategy();
+            case UPPER_CAMEL_CASE_WITH_SPACES:
+                return createUpperCamelCaseWithSpacesStrategy();
+            case IDENTITY:
+                return Objects::requireNonNull;
+            case CASE_INSENSITIVE:
+                return CASE_INSENSITIVE_STRATEGY;
+            default:
+                throw new JsonbException("No property naming strategy was found for: " + orderingScheme);
         }
     }
 
@@ -98,7 +94,6 @@ public final class PropertyNamingStrategyProvider {
         return name -> {
             Objects.requireNonNull(name);
             char initialChar = Character.toUpperCase(name.charAt(0));
-
             return initialChar + name.substring(1);
         };
     }
@@ -108,15 +103,15 @@ public final class PropertyNamingStrategyProvider {
             String upperCaseVersion = createPascalCaseStrategy().translateName(name);
             CharBuffer charSeq = CharBuffer.allocate(upperCaseVersion.length() * 2);
             char prevChar = Character.MIN_VALUE;
-
-            for (int index = 0; index < upperCaseVersion.length(); ++index) {
+            int index = 0;
+            while (upperCaseVersion.length() > index) {
                 char activeChar = upperCaseVersion.charAt(index);
-
-                if (index > 0 && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
+                if (0 < index && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
                     charSeq.append(' ');
                 }
                 prevChar = activeChar;
                 charSeq.append(activeChar);
+                ++index;
             }
             return new String(charSeq.array(), 0, charSeq.position());
         };
@@ -127,15 +122,15 @@ public final class PropertyNamingStrategyProvider {
             Objects.requireNonNull(name);
             CharBuffer charsSequence = CharBuffer.allocate(name.length() * 2);
             char prevChar = Character.MIN_VALUE;
-
-            for (int index = 0; index < name.length(); ++index) {
+            int index = 0;
+            while (name.length() > index) {
                 char activeChar = name.charAt(index);
-
-                if (index > 0 && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
+                if (0 < index && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
                     charsSequence.append(delimiter);
                 }
                 prevChar = activeChar;
                 charsSequence.append(Character.toLowerCase(activeChar));
+                ++index;
             }
             return new String(charsSequence.array(), 0, charsSequence.position());
         };

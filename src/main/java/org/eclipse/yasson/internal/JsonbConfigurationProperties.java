@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.time.format.DateTimeFormatterBuilder;
@@ -27,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
@@ -36,7 +34,6 @@ import jakarta.json.bind.config.PropertyNamingStrategy;
 import jakarta.json.bind.config.PropertyOrderStrategy;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
-
 import org.eclipse.yasson.YassonConfig;
 import org.eclipse.yasson.internal.model.BeanPropertyDescriptor;
 import org.eclipse.yasson.internal.model.ReverseTreeMap;
@@ -52,27 +49,40 @@ import org.eclipse.yasson.internal.properties.MessageProvider;
 @SuppressWarnings("rawtypes")
 public class JsonbConfigurationProperties {
 
-    private static final Map<String, Class<? extends Map>> PROPERTY_ORDER_MAP_TYPES =
-            Map.of(PropertyOrderStrategy.LEXICOGRAPHICAL, TreeMap.class,
-                   PropertyOrderStrategy.REVERSE, ReverseTreeMap.class,
-                   PropertyOrderStrategy.ANY, HashMap.class);
+    private static final Map<String, Class<? extends Map>> PROPERTY_ORDER_MAP_TYPES = Map.of(PropertyOrderStrategy.LEXICOGRAPHICAL, TreeMap.class, PropertyOrderStrategy.REVERSE, ReverseTreeMap.class, PropertyOrderStrategy.ANY, HashMap.class);
 
     private final JsonbConfig jsonbSettings;
+
     private final PropertyVisibilityStrategy visibilityStrategy;
+
     private final PropertyNamingStrategy namingStrategy;
+
     private final PropertyOrdering orderingPolicy;
+
     private final JsonbDateFormatter dateFormatHandler;
+
     private final Locale region;
+
     private final String binaryEncoding;
+
     private final boolean allowsNull;
+
     private final boolean failOnUnknownFields;
+
     private final boolean strictJson;
+
     private final boolean zeroTimeFallback;
+
     private final boolean requireCreatorParams;
+
     private final Map<Class<?>, Class<?>> customTypeMapping;
+
     private final Class<?> mapImplementationType;
+
     private final JsonbSerializer<Object> missingValueSerializer;
+
     private final Set<Class<?>> preloadClasses;
+
     private final boolean forceArraySerializerForNullKeys;
 
     /**
@@ -148,10 +158,12 @@ public class JsonbConfigurationProperties {
             return PropertyNamingStrategyProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
         }
         Object namingStrategy = optValue.get();
-        if (namingStrategy instanceof String) {
+        if (!(namingStrategy instanceof String)) {
+            if (!(namingStrategy instanceof PropertyNamingStrategy)) {
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.PROPERTY_NAMING_STRATEGY_INVALID));
+            }
+        } else {
             return PropertyNamingStrategyProvider.getPropertyNamingStrategy((String) namingStrategy);
-        } else if (!(namingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(MessageProvider.getMessage(MessageConstants.PROPERTY_NAMING_STRATEGY_INVALID));
         }
         return (PropertyNamingStrategy) optValue.get();
     }
@@ -162,10 +174,12 @@ public class JsonbConfigurationProperties {
             return null;
         }
         final Object visibilityStrategy = optValue.get();
-        if (visibilityStrategy instanceof String) {
+        if (!(visibilityStrategy instanceof String)) {
+            if (!(visibilityStrategy instanceof PropertyVisibilityStrategy)) {
+                throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
+            }
+        } else {
             return VisibilityStrategiesProvider.getStrategy((String) visibilityStrategy);
-        } else if (!(visibilityStrategy instanceof PropertyVisibilityStrategy)) {
-            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
         }
         return (PropertyVisibilityStrategy) visibilityStrategy;
     }
@@ -186,7 +200,7 @@ public class JsonbConfigurationProperties {
     }
 
     private boolean resolveRequiredCreatorParameters() {
-        if (System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED) != null) {
+        if (null != System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED)) {
             return Boolean.parseBoolean(System.getProperty(YassonConfig.CREATOR_PARAMETERS_REQUIRED));
         }
         return getConfigProperty(YassonConfig.CREATOR_PARAMETERS_REQUIRED, Boolean.class, false);
@@ -194,14 +208,12 @@ public class JsonbConfigurationProperties {
 
     @SuppressWarnings("unchecked")
     private JsonbSerializer<Object> initNullRootSerializer() {
-        return jsonbSettings.getProperty(YassonConfig.NULL_ROOT_SERIALIZER)
-                .map(obj -> {
-                    if (!(obj instanceof JsonbSerializer)) {
-                        throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class
-                                                         + "<Object>");
-                    }
-                    return (JsonbSerializer<Object>) obj;
-                }).orElse(null);
+        return jsonbSettings.getProperty(YassonConfig.NULL_ROOT_SERIALIZER).map(obj -> {
+            if (!(obj instanceof JsonbSerializer)) {
+                throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class + "<Object>");
+            }
+            return (JsonbSerializer<Object>) obj;
+        }).orElse(null);
     }
 
     private Set<Class<?>> initEagerParseClasses() {
@@ -244,13 +256,7 @@ public class JsonbConfigurationProperties {
 
     private <T> T getConfigProperty(String configKey, Class<T> typeClass, T fallbackValue) {
         Objects.requireNonNull(fallbackValue, "Default value cannot be null");
-        return jsonbSettings.getProperty(configKey)
-                .or(() -> Optional.of(fallbackValue))
-                .filter(typeClass::isInstance)
-                .map(typeClass::cast)
-                .orElseThrow(() -> new JsonbException(MessageProvider.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
-                        configKey,
-                                                                          typeClass.getSimpleName())));
+        return jsonbSettings.getProperty(configKey).or(() -> Optional.of(fallbackValue)).filter(typeClass::isInstance).map(typeClass::cast).orElseThrow(() -> new JsonbException(MessageProvider.getMessage(MessageConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, configKey, typeClass.getSimpleName())));
     }
 
     /**

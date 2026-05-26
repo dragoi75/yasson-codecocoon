@@ -9,12 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.bind.serializer.JsonbSerializer;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.JsonBindingContext;
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
@@ -25,7 +23,9 @@ import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 public class NullValueSerializer implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
+
     private final ModelMarshaller nullValueMarshaller;
+
     private final ModelMarshaller rootNullMarshaller;
 
     /**
@@ -35,36 +35,34 @@ public class NullValueSerializer implements ModelMarshaller {
      * @param serializationCustomizer component customization
      * @param bindingContext  jsonb context
      */
-    public NullValueSerializer(ModelMarshaller modelMarshaller,
-                               SerializationCustomizer serializationCustomizer,
-                               JsonBindingContext bindingContext) {
+    public NullValueSerializer(ModelMarshaller modelMarshaller, SerializationCustomizer serializationCustomizer, JsonBindingContext bindingContext) {
         this.modelMarshaller = modelMarshaller;
-        if (serializationCustomizer.isNillable()) {
-            nullValueMarshaller = new NullSerializationEnabled();
-        } else {
+        if (!serializationCustomizer.isNillable()) {
             nullValueMarshaller = new DisableNullWriting();
+        } else {
+            nullValueMarshaller = new NullSerializationEnabled();
         }
         JsonbSerializer<?> customNullSerializer = bindingContext.getConfigProperties().getNullSerializer();
-        if (customNullSerializer != null) {
-            rootNullMarshaller = (value, jsonWriter, serializationState) -> customNullSerializer.serialize(null, jsonWriter, serializationState);
-        } else {
+        if (null == customNullSerializer) {
             rootNullMarshaller = nullValueMarshaller;
+        } else {
+            rootNullMarshaller = (value, jsonWriter, serializationState) -> customNullSerializer.serialize(null, jsonWriter, serializationState);
         }
     }
 
     @Override
     public void marshal(Object input, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
-        if (input == null) {
-            if (serializationState.isRoot()) {
-                serializationState.setRoot(false);
-                rootNullMarshaller.marshal(null, jsonWriter, serializationState);
-            } else {
-                nullValueMarshaller.marshal(null, jsonWriter, serializationState);
-            }
-            serializationState.setKey(null);
-        } else {
+        if (null != input) {
             serializationState.setRoot(false);
             modelMarshaller.marshal(input, jsonWriter, serializationState);
+        } else {
+            if (!serializationState.isRoot()) {
+                nullValueMarshaller.marshal(null, jsonWriter, serializationState);
+            } else {
+                serializationState.setRoot(false);
+                rootNullMarshaller.marshal(null, jsonWriter, serializationState);
+            }
+            serializationState.setKey(null);
         }
     }
 
@@ -72,13 +70,12 @@ public class NullValueSerializer implements ModelMarshaller {
 
         @Override
         public void marshal(Object value, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
-            if (serializationState.getKey() == null) {
-                jsonWriter.writeNull();
-            } else {
+            if (null != serializationState.getKey()) {
                 jsonWriter.writeNull(serializationState.getKey());
+            } else {
+                jsonWriter.writeNull();
             }
         }
-
     }
 
     private static class DisableNullWriting implements ModelMarshaller {
@@ -86,15 +83,14 @@ public class NullValueSerializer implements ModelMarshaller {
         @Override
         public void marshal(Object value, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
             if (serializationState.isContainerWithNulls()) {
-                if (serializationState.getKey() == null) {
-                    jsonWriter.writeNull();
-                } else {
+                if (null != serializationState.getKey()) {
                     jsonWriter.writeNull(serializationState.getKey());
+                } else {
+                    jsonWriter.writeNull();
                 }
             }
             serializationState.setKey(null);
             //Do nothing
         }
-
     }
 }

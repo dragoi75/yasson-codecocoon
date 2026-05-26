@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
@@ -55,22 +53,28 @@ public class JsonStructureParserAdapter implements JsonParser {
     @Override
     public Event next() {
         if (cursorStack.isEmpty()) {
-            if (rootNode instanceof JsonObject) {
+            if (!(rootNode instanceof JsonObject)) {
+                if (rootNode instanceof JsonArray) {
+                    cursorStack.push(new JsonArrayIterator((JsonArray) rootNode));
+                    return Event.START_ARRAY;
+                }
+            } else {
                 cursorStack.push(new JsonObjectIterator((JsonObject) rootNode));
                 return Event.START_OBJECT;
-            } else if (rootNode instanceof JsonArray) {
-                cursorStack.push(new JsonArrayIterator((JsonArray) rootNode));
-                return Event.START_ARRAY;
             }
         }
         JsonStructureIterator activeCursor = cursorStack.peek();
         Event upcomingEvent = activeCursor.next();
-        if (upcomingEvent == Event.START_OBJECT) {
+        if (Event.START_OBJECT != upcomingEvent) {
+            if (Event.START_ARRAY != upcomingEvent) {
+                if (Event.END_OBJECT == upcomingEvent || Event.END_ARRAY == upcomingEvent) {
+                    cursorStack.pop();
+                }
+            } else {
+                cursorStack.push(new JsonArrayIterator((JsonArray) cursorStack.peek().getValue()));
+            }
+        } else {
             cursorStack.push(new JsonObjectIterator((JsonObject) cursorStack.peek().getValue()));
-        } else if (upcomingEvent == Event.START_ARRAY) {
-            cursorStack.push(new JsonArrayIterator((JsonArray) cursorStack.peek().getValue()));
-        } else if (upcomingEvent == Event.END_OBJECT || upcomingEvent == Event.END_ARRAY) {
-            cursorStack.pop();
         }
         return upcomingEvent;
     }
@@ -102,14 +106,14 @@ public class JsonStructureParserAdapter implements JsonParser {
 
     @Override
     public JsonObject getObject() {
-//        ((JsonObjectIterator) iterators.peek()).jsonObject
+        //        ((JsonObjectIterator) iterators.peek()).jsonObject
         return cursorStack.peek().getValue().asJsonObject();
     }
 
     private JsonNumber getJsonNumberValue() {
         JsonStructureIterator structureCursor = cursorStack.peek();
         JsonValue jsonElement = structureCursor.getValue();
-        if (jsonElement.getValueType() != JsonValue.ValueType.NUMBER) {
+        if (JsonValue.ValueType.NUMBER != jsonElement.getValueType()) {
             throw structureCursor.createIncompatibleValueError();
         }
         return (JsonNumber) jsonElement;

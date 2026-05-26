@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.HashMap;
@@ -20,9 +19,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DefaultDeserializationContext;
 import org.eclipse.yasson.internal.InstanceCreator;
 import org.eclipse.yasson.internal.JsonbConfigurationProperties;
@@ -33,12 +30,12 @@ import org.eclipse.yasson.internal.JsonbConfigurationProperties;
 class MapInstanceCreator implements ModelParser<JsonParser> {
 
     private final MapDeserializer delegate;
+
     private final JsonbConfigurationProperties configProperties;
+
     private final Class<?> clazz;
 
-    MapInstanceCreator(MapDeserializer delegate,
-                       JsonbConfigurationProperties configProperties,
-                       Class<?> clazz) {
+    MapInstanceCreator(MapDeserializer delegate, JsonbConfigurationProperties configProperties, Class<?> clazz) {
         this.delegate = delegate;
         this.configProperties = configProperties;
         this.clazz = clazz;
@@ -52,27 +49,22 @@ class MapInstanceCreator implements ModelParser<JsonParser> {
     }
 
     private Map<?, ?> createInstance(Class<?> clazz) {
-        return clazz.isInterface()
-                ? getMapImpl(clazz)
-                : (Map<?, ?>) InstanceCreator.createInstance(clazz);
+        return clazz.isInterface() ? getMapImpl(clazz) : (Map<?, ?>) InstanceCreator.createInstance(clazz);
     }
 
     private Map<?, ?> getMapImpl(Class<?> ifcType) {
         if (ConcurrentMap.class.isAssignableFrom(ifcType)) {
-            if (SortedMap.class.isAssignableFrom(ifcType) || NavigableMap.class.isAssignableFrom(ifcType)) {
-                return new ConcurrentSkipListMap<>();
-            } else {
+            if (!SortedMap.class.isAssignableFrom(ifcType) && !NavigableMap.class.isAssignableFrom(ifcType)) {
                 return new ConcurrentHashMap<>();
+            } else {
+                return new ConcurrentSkipListMap<>();
             }
         }
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
             Class<?> defaultMapImplType = configProperties.getDefaultMapImplType();
-            return SortedMap.class.isAssignableFrom(defaultMapImplType)
-                    ? (Map<?, ?>) InstanceCreator.createInstance(defaultMapImplType)
-                    : new TreeMap<>();
+            return SortedMap.class.isAssignableFrom(defaultMapImplType) ? (Map<?, ?>) InstanceCreator.createInstance(defaultMapImplType) : new TreeMap<>();
         }
         return new HashMap<>();
     }
-
 }

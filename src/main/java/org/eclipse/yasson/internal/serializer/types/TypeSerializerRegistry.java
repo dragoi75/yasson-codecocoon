@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.lang.reflect.Type;
@@ -46,19 +45,15 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
-
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.JsonBindingContext;
 import org.eclipse.yasson.internal.model.customization.SerializationCustomizer;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 import org.eclipse.yasson.internal.serializer.SerializationModelBuilder;
-
 import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
 
 /**
@@ -67,6 +62,7 @@ import static org.eclipse.yasson.internal.BuiltInTypes.isClassAvailable;
 public class TypeSerializerRegistry {
 
     private static final Map<Class<?>, Function<TypeSerializerBuilder, ModelMarshaller>> TYPE_MARSHALLER_FACTORIES;
+
     private static final Set<Class<?>> ALLOWED_KEY_TYPES;
 
     private static final Map<Class<?>, Class<?>> WRAPPER_TYPE_MAP;
@@ -123,20 +119,17 @@ public class TypeSerializerRegistry {
             cache.put(java.sql.Timestamp.class, SqlTimestampSerializer::new);
         }
         TYPE_MARSHALLER_FACTORIES = Map.copyOf(cache);
-
         Map<Class<?>, Class<?>> optionals = new HashMap<>();
         optionals.put(OptionalDouble.class, Double.class);
         optionals.put(OptionalInt.class, Integer.class);
         optionals.put(OptionalLong.class, Long.class);
         WRAPPER_TYPE_MAP = Map.copyOf(optionals);
-
         Set<Class<?>> mapKeys = new HashSet<>(TYPE_MARSHALLER_FACTORIES.keySet());
         mapKeys.addAll(optionals.keySet());
         mapKeys.add(JsonNumber.class);
         mapKeys.add(JsonString.class);
         mapKeys.remove(Object.class);
         ALLOWED_KEY_TYPES = Set.copyOf(mapKeys);
-
     }
 
     private TypeSerializerRegistry() {
@@ -175,11 +168,7 @@ public class TypeSerializerRegistry {
      * @param isMapEntry           whether serializer is a key
      * @return new type serializer
      */
-    public static ModelMarshaller getTypeSerializer(List<Type> typeSequence,
-                                                    Class<?> keyType,
-                                                    SerializationCustomizer customizer,
-                                                    JsonBindingContext bindingContext,
-                                                    boolean isMapEntry) {
+    public static ModelMarshaller getTypeSerializer(List<Type> typeSequence, Class<?> keyType, SerializationCustomizer customizer, JsonBindingContext bindingContext, boolean isMapEntry) {
         Class<?> activeClass = keyType;
         List<Type> typeQueue = new LinkedList<>(typeSequence);
         TypeSerializerBuilder serializerMaker = new TypeSerializerBuilder(typeQueue, keyType, customizer, bindingContext, isMapEntry);
@@ -190,39 +179,40 @@ public class TypeSerializerRegistry {
         if (WRAPPER_TYPE_MAP.containsKey(activeClass)) {
             Class<?> containedType = WRAPPER_TYPE_MAP.get(activeClass);
             ModelMarshaller marshallerImpl = getTypeSerializer(typeQueue, containedType, customizer, bindingContext, isMapEntry);
-            if (OptionalInt.class.equals(activeClass)) {
-                return new OptionalIntSerializer(marshallerImpl);
-            } else if (OptionalLong.class.equals(activeClass)) {
-                return new OptionalLongSerializer(marshallerImpl);
-            } else if (OptionalDouble.class.equals(activeClass)) {
-                return new OptionalDoubleSerializer(marshallerImpl);
+            if (!OptionalInt.class.equals(activeClass)) {
+                if (!OptionalLong.class.equals(activeClass)) {
+                    if (!OptionalDouble.class.equals(activeClass)) {
+                        throw new JsonbException("Unsupported Optional type for serialization: " + keyType);
+                    } else {
+                        return new OptionalDoubleSerializer(marshallerImpl);
+                    }
+                } else {
+                    return new OptionalLongSerializer(marshallerImpl);
+                }
             } else {
-                throw new JsonbException("Unsupported Optional type for serialization: " + keyType);
+                return new OptionalIntSerializer(marshallerImpl);
             }
         }
-
-        if (Enum.class.isAssignableFrom(keyType)) {
+        if (!Enum.class.isAssignableFrom(keyType)) {
+            if (JsonValue.class.isAssignableFrom(keyType)) {
+                marshaller = new JsonValueSerializer(serializerMaker);
+            }
+        } else {
             marshaller = new EnumSerializer(serializerMaker);
-        } else if (JsonValue.class.isAssignableFrom(keyType)) {
-            marshaller = new JsonValueSerializer(serializerMaker);
         }
-        if (marshaller == null) {
+        if (null == marshaller) {
             do {
                 if (TYPE_MARSHALLER_FACTORIES.containsKey(activeClass)) {
                     marshaller = TYPE_MARSHALLER_FACTORIES.get(activeClass).apply(serializerMaker);
                     break;
                 }
                 activeClass = activeClass.getSuperclass();
-            } while (!Object.class.equals(activeClass) && activeClass != null);
+            } while (!Object.class.equals(activeClass) && null != activeClass);
         }
-
         if (isMapEntry) {
             //We do not want any other special serializers around our type serializer if it will be used as a key
             return marshaller;
         }
-        return marshaller == null
-                ? null
-                : SerializationModelBuilder.wrapWithCommonSet(marshaller, customizer, bindingContext);
+        return null == marshaller ? null : SerializationModelBuilder.wrapWithCommonSet(marshaller, customizer, bindingContext);
     }
-
 }

@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.Type;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DefaultDeserializationContext;
 
 /**
@@ -24,6 +21,7 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
 class CyclicReferenceDeserializer implements ModelParser<JsonParser> {
 
     private final Type type;
+
     private ModelParser<JsonParser> delegate;
 
     CyclicReferenceDeserializer(Type type) {
@@ -32,7 +30,7 @@ class CyclicReferenceDeserializer implements ModelParser<JsonParser> {
 
     @Override
     public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        if (delegate == null) {
+        if (null == delegate) {
             delegate = context.getJsonbContext().getChainModelCreator().createDeserializerChain(type);
         }
         return delegate.deserializeModel(value, context);

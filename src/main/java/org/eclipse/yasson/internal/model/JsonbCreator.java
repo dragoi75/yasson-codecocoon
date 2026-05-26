@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.properties.MessageConstants;
 import org.eclipse.yasson.internal.properties.MessageProvider;
 
@@ -53,10 +50,10 @@ public class JsonbCreator {
     @SuppressWarnings("unchecked")
     public <T> T call(Object[] params, Class<T> on) {
         try {
-            if (executable instanceof Constructor) {
-                return ((Constructor<T>) executable).newInstance(params);
-            } else {
+            if (!(executable instanceof Constructor)) {
                 return (T) ((Method) executable).invoke(on, params);
+            } else {
+                return ((Constructor<T>) executable).newInstance(params);
             }
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new JsonbException(MessageProvider.getMessage(MessageConstants.ERROR_CALLING_JSONB_CREATOR, on), e);
@@ -70,7 +67,7 @@ public class JsonbCreator {
      * @return True if found.
      */
     public boolean contains(String paramName) {
-        return findByName(paramName) != null;
+        return null != findByName(paramName);
     }
 
     /**

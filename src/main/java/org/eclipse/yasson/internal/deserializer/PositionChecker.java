@@ -9,19 +9,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DefaultDeserializationContext;
-
 import static jakarta.json.stream.JsonParser.Event;
 
 /**
@@ -33,11 +29,12 @@ import static jakarta.json.stream.JsonParser.Event;
  */
 public class PositionChecker implements ModelParser<JsonParser> {
 
-    private static final Map<Event, Event> CLOSING_EVENTS = Map.of(Event.START_ARRAY, Event.END_ARRAY,
-                                                                   Event.START_OBJECT, Event.END_OBJECT);
+    private static final Map<Event, Event> CLOSING_EVENTS = Map.of(Event.START_ARRAY, Event.END_ARRAY, Event.START_OBJECT, Event.END_OBJECT);
 
     private final Set<Event> expectedEvents;
+
     private final ModelParser<JsonParser> delegate;
+
     private final Type rType;
 
     /**
@@ -62,8 +59,7 @@ public class PositionChecker implements ModelParser<JsonParser> {
         this(Set.copyOf(Arrays.asList(events)), delegate, rType);
     }
 
-    private PositionChecker(Set<Event> expectedEvents,
-                            ModelParser<JsonParser> delegate, Type rType) {
+    private PositionChecker(Set<Event> expectedEvents, ModelParser<JsonParser> delegate, Type rType) {
         this.expectedEvents = expectedEvents;
         this.delegate = delegate;
         this.rType = rType;
@@ -77,27 +73,19 @@ public class PositionChecker implements ModelParser<JsonParser> {
             startEvent = value.next();
             context.setLastValueEvent(startEvent);
             if (!expectedEvents.contains(startEvent)) {
-                throw new JsonbException("Incorrect position for processing type: " + rType + ". "
-                                                 + "Received event: " + original + " "
-                                                 + "Allowed: " + expectedEvents);
+                throw new JsonbException("Incorrect position for processing type: " + rType + ". " + "Received event: " + original + " " + "Allowed: " + expectedEvents);
             }
         }
         Object o = delegate.deserializeModel(value, context);
-        if (CLOSING_EVENTS.containsKey(startEvent)
-                && CLOSING_EVENTS.get(startEvent) != context.getLastValueEvent()) {
-            throw new JsonbException("Incorrect parser position after processing of the type: " + rType + ". "
-                                             + "Start event: " + startEvent + " "
-                                             + "After processing event: " + context.getLastValueEvent());
+        if (CLOSING_EVENTS.containsKey(startEvent) && context.getLastValueEvent() != CLOSING_EVENTS.get(startEvent)) {
+            throw new JsonbException("Incorrect parser position after processing of the type: " + rType + ". " + "Start event: " + startEvent + " " + "After processing event: " + context.getLastValueEvent());
         }
         return o;
     }
 
     @Override
     public String toString() {
-        return "PositionChecker{"
-                + "expectedEvents=" + expectedEvents
-                + ", runtimeType=" + rType
-                + '}';
+        return "PositionChecker{" + "expectedEvents=" + expectedEvents + ", runtimeType=" + rType + '}';
     }
 
     /**
@@ -108,17 +96,11 @@ public class PositionChecker implements ModelParser<JsonParser> {
         /**
          * Value bound events.
          */
-        VALUES(Event.VALUE_FALSE,
-               Event.VALUE_TRUE,
-               Event.VALUE_STRING,
-               Event.VALUE_NUMBER,
-               Event.VALUE_NULL),
-
+        VALUES(Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_NULL),
         /**
          * Container bound events.
          */
-        CONTAINER(Event.START_OBJECT,
-                  Event.START_ARRAY);
+        CONTAINER(Event.START_OBJECT, Event.START_ARRAY);
 
         private final Set<Event> events;
 
@@ -135,5 +117,4 @@ public class PositionChecker implements ModelParser<JsonParser> {
             return events;
         }
     }
-
 }

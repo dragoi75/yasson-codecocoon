@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.properties;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ import java.util.ResourceBundle;
 public class MessageProvider {
 
     private static final String MESSAGES_BASE_NAME = "yasson-messages";
+
     private static final String DEFAULT_CHARSET = "UTF-8";
 
     private MessageProvider() {
@@ -70,26 +70,26 @@ public class MessageProvider {
     }
 
     static class UTF8ResourceBundleControl extends ResourceBundle.Control {
-        public ResourceBundle newBundle(String bundleBase, Locale userRegion, String format, ClassLoader classProvider, boolean shouldRefresh)
-                throws IllegalAccessException, InstantiationException, IOException {
+
+        public ResourceBundle newBundle(String bundleBase, Locale userRegion, String format, ClassLoader classProvider, boolean shouldRefresh) throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             String baseBundleId = toBundleName(bundleBase, userRegion);
             String resourcePath = toResourceName(baseBundleId, "properties");
             ResourceBundle resourceSet = null;
             InputStream input = null;
-            if (shouldRefresh) {
+            if (!shouldRefresh) {
+                input = classProvider.getResourceAsStream(resourcePath);
+            } else {
                 URL resourceLocation = classProvider.getResource(resourcePath);
-                if (resourceLocation != null) {
+                if (null != resourceLocation) {
                     URLConnection urlConn = resourceLocation.openConnection();
-                    if (urlConn != null) {
+                    if (null != urlConn) {
                         urlConn.setUseCaches(false);
                         input = urlConn.getInputStream();
                     }
                 }
-            } else {
-                input = classProvider.getResourceAsStream(resourcePath);
             }
-            if (input != null) {
+            if (null != input) {
                 try {
                     // Only this line is changed to make it to read properties files as UTF-8.
                     resourceSet = new PropertyResourceBundle(new InputStreamReader(input, DEFAULT_CHARSET));
@@ -100,5 +100,4 @@ public class MessageProvider {
             return resourceSet;
         }
     }
-
 }
