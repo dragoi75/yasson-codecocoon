@@ -30,6 +30,17 @@ public class LocalDateSerializer extends AbstractDateTimeSerializer<LocalDate> {
 
     private static final DateTimeFormatter LOCAL_DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC);
 
+    @Override
+    protected String formatStrictIJson(LocalDate localDate) {
+        final ZonedDateTime zonedTimestamp = localDate.atTime(0, 0, 0).atZone(UTC);
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedTimestamp);
+    }
+
+    @Override
+    protected String formatDefault(LocalDate localDate, Locale userRegion) {
+        return LOCAL_DATE_FORMATTER.withLocale(userRegion).format(localDate);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,14 +55,4 @@ public class LocalDateSerializer extends AbstractDateTimeSerializer<LocalDate> {
         return Instant.from(localDate.atStartOfDay(UTC));
     }
 
-    @Override
-    protected String formatDefault(LocalDate localDate, Locale userRegion) {
-        return LOCAL_DATE_FORMATTER.withLocale(userRegion).format(localDate);
-    }
-
-    @Override
-    protected String formatStrictIJson(LocalDate localDate) {
-        final ZonedDateTime zonedTimestamp = localDate.atTime(0, 0, 0).atZone(UTC);
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(zonedTimestamp);
-    }
 }

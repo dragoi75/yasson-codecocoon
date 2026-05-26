@@ -24,6 +24,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class ByteValueSerializer extends AbstractNumberSerializer<Byte> {
 
+    @Override
+    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter) {
+        jsonWriter.write(byteValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,8 +43,4 @@ public class ByteValueSerializer extends AbstractNumberSerializer<Byte> {
         jsonWriter.write(fieldName, byteValue);
     }
 
-    @Override
-    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter) {
-        jsonWriter.write(byteValue);
-    }
 }

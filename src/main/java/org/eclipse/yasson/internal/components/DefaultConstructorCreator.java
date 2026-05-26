@@ -25,12 +25,13 @@ import java.io.IOException;
 public class DefaultConstructorCreator implements JsonbComponentInstanceCreator {
 
     @Override
+    public void close() throws IOException {
+
+    }
+
+    @Override
     public <T> T getOrCreateComponent(Class<T> componentClass) {
         return ReflectionUtils.createNoArgConstructorInstance(componentClass);
     }
 
-    @Override
-    public void close() throws IOException {
-
-    }
 }

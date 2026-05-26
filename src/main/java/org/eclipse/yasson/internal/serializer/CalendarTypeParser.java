@@ -35,25 +35,6 @@ public class CalendarTypeParser extends AbstractDateTimeDeserializer<Calendar> {
 
     private final LocalTime midnightTime = LocalTime.parse("00:00:00");
 
-    /**
-     * Creates an instance.
-     *
-     * @param config Model customization.
-     */
-    public CalendarTypeParser(Customization config) {
-        super(Calendar.class, config);
-        this.templateReference = new GregorianCalendar();
-        this.templateReference.clear();
-        this.templateReference.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
-
-    @Override
-    protected Calendar fromInstant(Instant timestamp) {
-        final Calendar calInstance = (Calendar) templateReference.clone();
-        calInstance.setTimeInMillis(timestamp.toEpochMilli());
-        return calInstance;
-    }
-
     @Override
     protected Calendar parseDefault(String jsonText, Locale region) {
         DateTimeFormatter dateTimeFormat = jsonText.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
@@ -74,4 +55,24 @@ public class CalendarTypeParser extends AbstractDateTimeDeserializer<Calendar> {
         ZonedDateTime zonedDateTime = LocalDate.from(temporalAccessor).atTime(localMoment).atZone(tzId);
         return GregorianCalendar.from(zonedDateTime);
     }
+
+    @Override
+    protected Calendar fromInstant(Instant timestamp) {
+        final Calendar calInstance = (Calendar) templateReference.clone();
+        calInstance.setTimeInMillis(timestamp.toEpochMilli());
+        return calInstance;
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param config Model customization.
+     */
+    public CalendarTypeParser(Customization config) {
+        super(Calendar.class, config);
+        this.templateReference = new GregorianCalendar();
+        this.templateReference.clear();
+        this.templateReference.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
+
 }

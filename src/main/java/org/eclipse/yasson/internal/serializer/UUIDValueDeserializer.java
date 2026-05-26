@@ -24,6 +24,11 @@ import java.util.UUID;
  */
 public class UUIDValueDeserializer extends AbstractValueTypeDeserializer<UUID> {
 
+    @Override
+    protected UUID deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
+        return UUID.fromString(jsonText);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class UUIDValueDeserializer extends AbstractValueTypeDeserializer<UUID> {
         super(UUID.class, configProfile);
     }
 
-    @Override
-    protected UUID deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
-        return UUID.fromString(jsonText);
-    }
 }

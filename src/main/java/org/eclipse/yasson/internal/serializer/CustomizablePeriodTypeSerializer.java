@@ -26,6 +26,11 @@ import java.time.Period;
  */
 public class CustomizablePeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
 
+    @Override
+    protected void serialize(Period period, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(period.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class CustomizablePeriodTypeSerializer extends AbstractValueTypeSerialize
         super(customConfig);
     }
 
-    @Override
-    protected void serialize(Period period, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(period.toString());
-    }
 }

@@ -57,6 +57,51 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     protected final JsonbContext jsonbContext;
 
     /**
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     *
+     * @param type type of instance not null
+     * @return builder instance for call chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T withType(Type type) {
+        this.genericType = type;
+        return (T) this;
+    }
+
+    /**
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
+     * Otherwise provided type in type field, or type of field model.
+     *
+     * @return runtime type
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
+     * Wrapper item for this item.
+     *
+     * @return Wrapper item.
+     */
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
      * Crates a builder.
      *
      * @param jsonbContext Not null.
@@ -64,30 +109,6 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     public AbstractSerializerBuilder(JsonbContext jsonbContext) {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
-    }
-
-    /**
-     * Wrapper item for this item.
-     *
-     * @param wrapper not null.
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
-        return (T) this;
-    }
-
-    /**
-     * Customization of the class
-     *
-     * @param customization Class customization
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
-        return (T) this;
     }
 
     /**
@@ -105,12 +126,15 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Wrapper item for this item.
+     * Customization of the class
      *
-     * @return Wrapper item.
+     * @param customization Class customization
+     * @return Builder instance for call chaining.
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    @SuppressWarnings("unchecked")
+    public T withCustomization(Customization customization) {
+        this.customization = customization;
+        return (T) this;
     }
 
     /**
@@ -124,38 +148,15 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
-     * Otherwise provided type in type field, or type of field model.
+     * Wrapper item for this item.
      *
-     * @return runtime type
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
-
-    /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
-     *
-     * @param type type of instance not null
-     * @return builder instance for call chaining
+     * @param wrapper not null.
+     * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T withType(Type type) {
-        this.genericType = type;
+    public T withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
         return (T) this;
     }
 
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
 }

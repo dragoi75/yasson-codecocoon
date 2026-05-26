@@ -25,6 +25,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class CharacterSerializer extends AbstractValueTypeSerializer<Character> {
 
+    @Override
+    protected void serialize(Character charValue, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(String.valueOf(charValue));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,8 +39,4 @@ public class CharacterSerializer extends AbstractValueTypeSerializer<Character> 
         super(settings);
     }
 
-    @Override
-    protected void serialize(Character charValue, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(String.valueOf(charValue));
-    }
 }

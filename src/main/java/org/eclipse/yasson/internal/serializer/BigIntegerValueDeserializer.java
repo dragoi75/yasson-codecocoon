@@ -29,15 +29,6 @@ import java.math.BigInteger;
  */
 public class BigIntegerValueDeserializer extends AbstractNumberDeserializer<BigInteger> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public BigIntegerValueDeserializer(Customization customConfig) {
-        super(BigInteger.class, customConfig);
-    }
-
     @Override
     public BigInteger deserialize(String jsonString, Unmarshaller objectParser, Type rtType) {
         return deserializeFormatted(jsonString, true, objectParser.getJsonbContext())
@@ -51,4 +42,14 @@ public class BigIntegerValueDeserializer extends AbstractNumberDeserializer<BigI
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public BigIntegerValueDeserializer(Customization customConfig) {
+        super(BigInteger.class, customConfig);
+    }
+
 }

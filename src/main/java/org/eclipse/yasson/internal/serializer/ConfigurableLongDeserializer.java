@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class ConfigurableLongDeserializer extends AbstractNumberDeserializer<Long> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public ConfigurableLongDeserializer(Customization config) {
-        super(Long.class, config);
-    }
-
     @Override
     protected Long deserialize(String jsonText, Unmarshaller dataParser, Type rtType) {
         return deserializeFormatted(jsonText, true, dataParser.getJsonbContext())
@@ -49,4 +40,14 @@ public class ConfigurableLongDeserializer extends AbstractNumberDeserializer<Lon
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public ConfigurableLongDeserializer(Customization config) {
+        super(Long.class, config);
+    }
+
 }

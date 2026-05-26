@@ -39,67 +39,6 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
     protected JsonbRiParser.LevelContext parserContext;
 
     /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link DeserializerBuilder} used to build this instance
-     */
-    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
-     *
-     * @param parser JSON parser.
-     * @param context Deseriaization context.
-     * @param rtType Runtime type.
-     * @return Instance of a type for this item.
-     */
-    @Override
-    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
-        ctx.setCurrent(this);
-        deserializeInternal((JsonbParser) parser, ctx);
-        ctx.setCurrent(getWrapper());
-        return getInstance((Unmarshaller) context);
-    }
-
-    /**
-     * Creates and initializes an instance of deserializing item.
-     *
-     * @param unmarshaller Current deserialization context.
-     * @return An instance of deserializing item.
-     */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
-
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
-        parserContext = moveToFirst(parser);
-        while (parser.hasNext()) {
-            final JsonParser.Event event = parser.next();
-            switch(event) {
-                case START_OBJECT:
-                case START_ARRAY:
-                case VALUE_STRING:
-                case VALUE_NUMBER:
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                    deserializeNext(parser, context);
-                    break;
-                case KEY_NAME:
-                    break;
-                case VALUE_NULL:
-                    appendResult(null);
-                    break;
-                case END_OBJECT:
-                case END_ARRAY:
-                    return;
-                default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
-            }
-        }
-    }
-
-    /**
      * Determine class mappings and create an instance of a new deserializer.
      * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
      *
@@ -107,18 +46,6 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param context Current unmarshalling context.
      */
     protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
-
-    /**
-     * Move to first event for current deserializer structure.
-     *
-     * @param parser Json parser.
-     * @return First event.
-     */
-    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
-
-    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
-        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
-    }
 
     protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
         //TODO needs performance optimization on not to create deserializer each time
@@ -130,6 +57,10 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
             deserializerBuilder.withCustomization(null == classModel ? null : classModel.getCustomization());
         }
         return deserializerBuilder.build();
+    }
+
+    protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
+        return new DeserializerBuilder(ctx).withWrapper(this).withJsonValueType(parserContext.getLastEvent());
     }
 
     /**
@@ -168,6 +99,14 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
     }
 
     /**
+     * Creates and initializes an instance of deserializing item.
+     *
+     * @param unmarshaller Current deserialization context.
+     * @return An instance of deserializing item.
+     */
+    protected abstract T getInstance(Unmarshaller unmarshaller);
+
+    /**
      * After object is transitively deserialized from JSON, "append" it to its wrapper.
      * In case of a field set value to field, in case of collections
      * or other embedded objects use methods provided.
@@ -175,4 +114,66 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param result An instance result of an item.
      */
     public abstract void appendResult(Object result);
+
+    /**
+     * Move to first event for current deserializer structure.
+     *
+     * @param parser Json parser.
+     * @return First event.
+     */
+    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
+
+    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+        parserContext = moveToFirst(parser);
+        while (parser.hasNext()) {
+            final JsonParser.Event event = parser.next();
+            switch(event) {
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    deserializeNext(parser, context);
+                    break;
+                case KEY_NAME:
+                    break;
+                case VALUE_NULL:
+                    appendResult(null);
+                    break;
+                case END_OBJECT:
+                case END_ARRAY:
+                    return;
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+            }
+        }
+    }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link DeserializerBuilder} used to build this instance
+     */
+    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
+    /**
+     * Drives JSONP {@link JsonParser} to deserialize json document.
+     *
+     * @param parser JSON parser.
+     * @param context Deseriaization context.
+     * @param rtType Runtime type.
+     * @return Instance of a type for this item.
+     */
+    @Override
+    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
+        Unmarshaller ctx = (Unmarshaller) context;
+        ctx.setCurrent(this);
+        deserializeInternal((JsonbParser) parser, ctx);
+        ctx.setCurrent(getWrapper());
+        return getInstance((Unmarshaller) context);
+    }
+
 }

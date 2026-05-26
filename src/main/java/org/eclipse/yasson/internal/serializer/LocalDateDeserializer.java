@@ -27,6 +27,16 @@ import java.util.Locale;
  */
 public class LocalDateDeserializer extends AbstractDateTimeDeserializer<LocalDate> {
 
+    @Override
+    protected LocalDate parseDefault(String jsonText, Locale region) {
+        return LocalDate.parse(jsonText, DateTimeFormatter.ISO_LOCAL_DATE.withLocale(region));
+    }
+
+    @Override
+    protected LocalDate parseWithFormatter(String jsonText, DateTimeFormatter dateFormat) {
+        return LocalDate.parse(jsonText, dateFormat);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -41,13 +51,4 @@ public class LocalDateDeserializer extends AbstractDateTimeDeserializer<LocalDat
         return moment.atZone(UTC).toLocalDate();
     }
 
-    @Override
-    protected LocalDate parseDefault(String jsonText, Locale region) {
-        return LocalDate.parse(jsonText, DateTimeFormatter.ISO_LOCAL_DATE.withLocale(region));
-    }
-
-    @Override
-    protected LocalDate parseWithFormatter(String jsonText, DateTimeFormatter dateFormat) {
-        return LocalDate.parse(jsonText, dateFormat);
-    }
 }

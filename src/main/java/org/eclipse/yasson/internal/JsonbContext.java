@@ -42,6 +42,34 @@ public class JsonbContext {
 
     private final JsonbConfigProperties configProperties;
 
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonProvider;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentMatcher;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mappingContext;
+    }
+
     /**
      * Creates and initialize context.
      *
@@ -59,32 +87,17 @@ public class JsonbContext {
         this.configProperties = new JsonbConfigProperties(jsonbConfig);
     }
 
-    /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return jsonbConfig;
+    public JsonbConfigProperties getConfigProperties() {
+        return configProperties;
     }
 
     /**
-     * Gets mapping context.
+     * Gets component for annotation parsing.
      *
-     * @return Mapping context.
+     * @return Annotation introspector.
      */
-    public MappingContext getMappingContext() {
-        return mappingContext;
-    }
-
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonProvider;
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationIntrospector;
     }
 
     /**
@@ -97,26 +110,12 @@ public class JsonbContext {
     }
 
     /**
-     * Component matcher for lookup of (de)serializers and adapters.
+     * Gets {@link JsonbConfig}.
      *
-     * @return Component matcher.
+     * @return Configuration.
      */
-    public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationIntrospector;
-    }
-
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
+    public JsonbConfig getConfig() {
+        return jsonbConfig;
     }
 
 }

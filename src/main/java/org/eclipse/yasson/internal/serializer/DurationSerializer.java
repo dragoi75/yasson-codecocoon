@@ -26,6 +26,11 @@ import java.time.Duration;
  */
 public class DurationSerializer extends AbstractValueTypeSerializer<Duration> {
 
+    @Override
+    protected void serialize(Duration duration, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(duration.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class DurationSerializer extends AbstractValueTypeSerializer<Duration> {
         super(customConfig);
     }
 
-    @Override
-    protected void serialize(Duration duration, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(duration.toString());
-    }
 }

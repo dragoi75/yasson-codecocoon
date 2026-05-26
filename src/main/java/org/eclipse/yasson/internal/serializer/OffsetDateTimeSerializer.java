@@ -27,15 +27,6 @@ import java.util.Locale;
  */
 public class OffsetDateTimeSerializer extends AbstractDateTimeSerializer<OffsetDateTime> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param configuration Model customization.
-     */
-    public OffsetDateTimeSerializer(Customization configuration) {
-        super(configuration);
-    }
-
     @Override
     protected Instant toInstant(OffsetDateTime offsetDateTime) {
         return offsetDateTime.toInstant();
@@ -45,4 +36,14 @@ public class OffsetDateTimeSerializer extends AbstractDateTimeSerializer<OffsetD
     protected String formatDefault(OffsetDateTime offsetDateTime, Locale region) {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(region).format(offsetDateTime);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param configuration Model customization.
+     */
+    public OffsetDateTimeSerializer(Customization configuration) {
+        super(configuration);
+    }
+
 }

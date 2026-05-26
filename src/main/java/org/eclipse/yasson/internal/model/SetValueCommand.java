@@ -11,8 +11,6 @@ import java.util.Objects;
  */
 abstract class SetValueCommand {
 
-    abstract void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException;
-
     /**
      * Sets a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method setter}.
      *
@@ -28,4 +26,7 @@ abstract class SetValueCommand {
             throw new JsonbException("Error getting value on: " + object, e);
         }
     }
+
+    abstract void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException;
+
 }

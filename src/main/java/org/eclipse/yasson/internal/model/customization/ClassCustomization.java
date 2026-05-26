@@ -32,6 +32,39 @@ public class ClassCustomization extends CustomizationBase {
 
     private final JsonbDateFormatter dateTimeFormatter;
 
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
+     * Sets sorted properties.
+     *
+     * @param propertyOrder sorted names of properties
+     */
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return creator;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -45,26 +78,9 @@ public class ClassCustomization extends CustomizationBase {
         this.dateTimeFormatter = builder.getDateFormatter();
     }
 
-    /**
-     * Copy constructor.
-     *
-     * @param other other customization instance
-     */
-    public ClassCustomization(ClassCustomization other) {
-        super(other);
-        this.creator = other.getCreator();
-        this.propertyOrder = other.getPropertyOrder();
-        this.numberFormatter = other.getSerializeNumberFormatter();
-        this.dateTimeFormatter = other.getSerializeDateFormatter();
-    }
-
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
     }
 
     /**
@@ -77,32 +93,16 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Sets sorted properties.
+     * Copy constructor.
      *
-     * @param propertyOrder sorted names of properties
+     * @param other other customization instance
      */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
+    public ClassCustomization(ClassCustomization other) {
+        super(other);
+        this.creator = other.getCreator();
+        this.propertyOrder = other.getPropertyOrder();
+        this.numberFormatter = other.getSerializeNumberFormatter();
+        this.dateTimeFormatter = other.getSerializeDateFormatter();
     }
 
 }

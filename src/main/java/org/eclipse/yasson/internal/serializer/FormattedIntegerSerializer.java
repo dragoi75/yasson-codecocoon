@@ -24,6 +24,16 @@ import javax.json.stream.JsonGenerator;
  */
 public class FormattedIntegerSerializer extends AbstractNumberSerializer<Integer> {
 
+    @Override
+    protected void serializeNonFormatted(Integer value, JsonGenerator jsonWriter) {
+        jsonWriter.write(value);
+    }
+
+    @Override
+    protected void serializeNonFormatted(Integer value, JsonGenerator jsonWriter, String fieldName) {
+        jsonWriter.write(fieldName, value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,13 +43,4 @@ public class FormattedIntegerSerializer extends AbstractNumberSerializer<Integer
         super(customConfig);
     }
 
-    @Override
-    protected void serializeNonFormatted(Integer value, JsonGenerator jsonWriter, String fieldName) {
-        jsonWriter.write(fieldName, value);
-    }
-
-    @Override
-    protected void serializeNonFormatted(Integer value, JsonGenerator jsonWriter) {
-        jsonWriter.write(value);
-    }
 }

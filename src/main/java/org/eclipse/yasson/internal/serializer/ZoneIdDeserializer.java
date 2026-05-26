@@ -26,6 +26,11 @@ import java.time.ZoneId;
  */
 public class ZoneIdDeserializer extends AbstractValueTypeDeserializer<ZoneId> {
 
+    @Override
+    protected ZoneId deserialize(String jsonString, Unmarshaller unmarshaller, Type rtType) {
+        return ZoneId.of(jsonString);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class ZoneIdDeserializer extends AbstractValueTypeDeserializer<ZoneId> {
         super(ZoneId.class, customConfig);
     }
 
-    @Override
-    protected ZoneId deserialize(String jsonString, Unmarshaller unmarshaller, Type rtType) {
-        return ZoneId.of(jsonString);
-    }
 }

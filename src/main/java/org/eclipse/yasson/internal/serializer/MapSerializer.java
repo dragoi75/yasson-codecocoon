@@ -29,8 +29,18 @@ import java.util.Optional;
  */
 public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSerializer<T> implements EmbeddedItem {
 
-    protected MapSerializer(SerializerBuilder builder) {
-        super(builder);
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    @Override
+    protected Type getValueType(Type valueType) {
+        if (valueType instanceof ParameterizedType) {
+            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
+            return runtimeTypeOptional.orElse(Object.class);
+        }
+        return Object.class;
     }
 
     @SuppressWarnings("unchecked")
@@ -53,17 +63,8 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
         generator.writeStartObject();
     }
 
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
+    protected MapSerializer(SerializerBuilder builder) {
+        super(builder);
     }
 
-    @Override
-    protected Type getValueType(Type valueType) {
-        if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectionUtils.resolveOptionalType(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
-            return runtimeTypeOptional.orElse(Object.class);
-        }
-        return Object.class;
-    }
 }

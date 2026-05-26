@@ -46,13 +46,19 @@ public class ClassModel {
     private final PropertyNamingStrategy propertyNamingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
-     *
-     * @param name A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * Class model of parent class if present.
+     * @return class model of a parent
      */
-    public PropertyModel getPropertyModel(String name) {
-        return properties.get(name);
+    public ClassModel getParentClassModel() {
+        return parentClassModel;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     /**
@@ -72,14 +78,29 @@ public class ClassModel {
     }
 
     /**
-     * Search for field in this class model and superclasses of its class.
+     * Gets customization.
      *
-     * @param jsonReadName name as it appears in JSON during reading.
-     * @return PropertyModel if found.
+     * @return Customization.
      */
-    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
-        Objects.requireNonNull(jsonReadName);
-        return searchProperty(this, jsonReadName);
+    public ClassCustomization getCustomization() {
+        return classCustomization;
+    }
+
+    /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return clazz;
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
     }
 
     private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
@@ -113,46 +134,14 @@ public class ClassModel {
     }
 
     /**
-     * Gets customization.
+     * Search for field in this class model and superclasses of its class.
      *
-     * @return Customization.
+     * @param jsonReadName name as it appears in JSON during reading.
+     * @return PropertyModel if found.
      */
-    public ClassCustomization getCustomization() {
-        return classCustomization;
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return clazz;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassCustomization getClassCustomization() {
-        return classCustomization;
-    }
-
-    /**
-     * Class model of parent class if present.
-     * @return class model of a parent
-     */
-    public ClassModel getParentClassModel() {
-        return parentClassModel;
-    }
-
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
+    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
+        Objects.requireNonNull(jsonReadName);
+        return searchProperty(this, jsonReadName);
     }
 
     /**
@@ -166,10 +155,22 @@ public class ClassModel {
     }
 
     /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return class properties.
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
      */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
+    public ClassCustomization getClassCustomization() {
+        return classCustomization;
     }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param name A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public PropertyModel getPropertyModel(String name) {
+        return properties.get(name);
+    }
+
 }

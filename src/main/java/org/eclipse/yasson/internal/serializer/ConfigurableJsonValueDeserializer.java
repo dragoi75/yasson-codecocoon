@@ -32,13 +32,9 @@ import java.lang.reflect.Type;
  */
 public class ConfigurableJsonValueDeserializer extends AbstractValueTypeDeserializer<JsonValue> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param configOptions Model customization.
-     */
-    public ConfigurableJsonValueDeserializer(Customization configOptions) {
-        super(JsonValue.class, configOptions);
+    @Override
+    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -59,8 +55,13 @@ public class ConfigurableJsonValueDeserializer extends AbstractValueTypeDeserial
         }
     }
 
-    @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        throw new UnsupportedOperationException();
+    /**
+     * Creates a new instance.
+     *
+     * @param configOptions Model customization.
+     */
+    public ConfigurableJsonValueDeserializer(Customization configOptions) {
+        super(JsonValue.class, configOptions);
     }
+
 }

@@ -17,17 +17,6 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
 
     private final boolean nillable;
 
-    /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
-     */
-    public CustomizationBase(CustomizationBuilder builder) {
-        this.nillable = builder.isNillable();
-        this.adapterBinding = builder.getAdapterInfo();
-        this.serializerBinding = builder.getSerializerBinding();
-        this.deserializerBinding = builder.getDeserializerBinding();
-    }
 
     /**
      * Copy constructor.
@@ -39,24 +28,6 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         this.adapterBinding = other.getAdapterBinding();
         this.serializerBinding = other.getSerializerBinding();
         this.deserializerBinding = other.getDeserializerBinding();
-    }
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    /**
-     * Adapter wrapper class with resolved generic information.
-     *
-     * @return components wrapper
-     */
-    public AdapterBinding getAdapterBinding() {
-        return adapterBinding;
     }
 
     /**
@@ -77,5 +48,34 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         return deserializerBinding;
     }
 
+    /**
+     * Adapter wrapper class with resolved generic information.
+     *
+     * @return components wrapper
+     */
+    public AdapterBinding getAdapterBinding() {
+        return adapterBinding;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    public CustomizationBase(CustomizationBuilder builder) {
+        this.nillable = builder.isNillable();
+        this.adapterBinding = builder.getAdapterInfo();
+        this.serializerBinding = builder.getSerializerBinding();
+        this.deserializerBinding = builder.getDeserializerBinding();
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
 
 }

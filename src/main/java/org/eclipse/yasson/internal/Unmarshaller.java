@@ -30,37 +30,7 @@ import java.lang.reflect.Type;
  */
 public class Unmarshaller extends ProcessingContext implements DeserializationContext {
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param jsonbContext context to use
-     */
-    public Unmarshaller(JsonbContext jsonbContext) {
-        super(jsonbContext);
-    }
-
     private CurrentItem<?> current;
-
-    @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
-    }
-
-    @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T deserializeItem(Type type, JsonParser parser) {
-        DeserializerBuilder deserializerBuilder = new DeserializerBuilder(jsonbContext).withWrapper(current).withType(type).withJsonValueType(getRootEvent(parser));
-        Class<?> rawType = ReflectionUtils.getRawType(type);
-        if (!DefaultSerializerRegistry.getInstance().isKnownType(rawType)) {
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
-            deserializerBuilder.withCustomization(classModel.getCustomization());
-        }
-        return (T) deserializerBuilder.build().deserialize(parser, this, type);
-    }
 
     /**
      * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
@@ -75,6 +45,15 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     }
 
     /**
+     * Set currently processed item.
+     *
+     * @param current current item
+     */
+    public void setCurrent(CurrentItem<?> current) {
+        this.current = current;
+    }
+
+    /**
      * Get currently processed json item.
      *
      * @return current item
@@ -84,11 +63,33 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     }
 
     /**
-     * Set currently processed item.
+     * Creates instance of unmarshaller.
      *
-     * @param current current item
+     * @param jsonbContext context to use
      */
-    public void setCurrent(CurrentItem<?> current) {
-        this.current = current;
+    public Unmarshaller(JsonbContext jsonbContext) {
+        super(jsonbContext);
     }
+
+    @Override
+    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
+        return deserializeItem(clazz, parser);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T deserializeItem(Type type, JsonParser parser) {
+        DeserializerBuilder deserializerBuilder = new DeserializerBuilder(jsonbContext).withWrapper(current).withType(type).withJsonValueType(getRootEvent(parser));
+        Class<?> rawType = ReflectionUtils.getRawType(type);
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(rawType)) {
+            ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
+            deserializerBuilder.withCustomization(classModel.getCustomization());
+        }
+        return (T) deserializerBuilder.build().deserialize(parser, this, type);
+    }
+
+    @Override
+    public <T> T deserialize(Type type, JsonParser parser) {
+        return deserializeItem(type, parser);
+    }
+
 }

@@ -31,6 +31,16 @@ import java.util.Locale;
  */
 public class OffsetTimeSerializer extends AbstractDateTimeSerializer<OffsetTime> {
 
+    @Override
+    protected String formatDefault(OffsetTime offsetTime, Locale userRegion) {
+        return DateTimeFormatter.ISO_OFFSET_TIME.withLocale(userRegion).format(offsetTime);
+    }
+
+    @Override
+    protected Instant toInstant(OffsetTime value) {
+        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -40,13 +50,4 @@ public class OffsetTimeSerializer extends AbstractDateTimeSerializer<OffsetTime>
         super(customConfig);
     }
 
-    @Override
-    protected Instant toInstant(OffsetTime value) {
-        throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
-    }
-
-    @Override
-    protected String formatDefault(OffsetTime offsetTime, Locale userRegion) {
-        return DateTimeFormatter.ISO_OFFSET_TIME.withLocale(userRegion).format(offsetTime);
-    }
 }

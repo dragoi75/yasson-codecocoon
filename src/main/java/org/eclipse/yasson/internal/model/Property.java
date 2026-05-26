@@ -37,89 +37,12 @@ public class Property {
 
     private JsonbAnnotatedElement<Method> setterElement;
 
-    /**
-     * Create instance of property.
-     * @param name not null
-     * @param declaringClassModel Class model for a class declaring property.
-     */
-    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
-        this.name = name;
-        this.declaringClassElement = declaringClassModel;
-    }
-
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * {@link Field} representing property if any
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (null == fieldElement) {
-            return null;
+    public Type getSetterType() {
+        Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
+        if (1 != genericParameterTypes.length) {
+            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
-        return fieldElement.getElement();
-    }
-
-    /**
-     * @param field field not null
-     */
-    public void setField(Field field) {
-        this.fieldElement = new JsonbAnnotatedElement<>(field);
-    }
-
-    /**
-     * {@link Method} representing getter of a property if any.
-     *
-     * @return getter if present
-     */
-    public Method getGetter() {
-        if (null == getterElement) {
-            return null;
-        }
-        return getterElement.getElement();
-    }
-
-    /**
-     * @param getter not null
-     */
-    public void setGetter(Method getter) {
-        this.getterElement = new JsonbAnnotatedElement<>(getter);
-    }
-
-    /**
-     * {@link Method} representing setter of a property if any.
-     *
-     * @return setter if present
-     */
-    public Method getSetter() {
-        if (null == setterElement) {
-            return null;
-        }
-        return setterElement.getElement();
-    }
-
-    /**
-     * @param setter setter not null
-     */
-    public void setSetter(Method setter) {
-        this.setterElement = new JsonbAnnotatedElement<>(setter);
-    }
-
-    /**
-     * Class element with annotation under construction for declaring class of this property.
-     * This ClassModel is not fully initialized yet.
-     * @return ClassModel
-     */
-    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
-        return declaringClassElement;
+        return genericParameterTypes[0];
     }
 
     /**
@@ -143,19 +66,12 @@ public class Property {
         throw new JsonbException("Empty property: " + name);
     }
 
-    public Type getGetterType() {
-        if (null != getGetter()) {
-            return getGetter().getGenericReturnType();
-        }
-        return null;
-    }
-
-    public Type getSetterType() {
-        Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
-        if (1 != genericParameterTypes.length) {
-            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
-        }
-        return genericParameterTypes[0];
+    /**
+     * Element with setter and its annotations.
+     * @return setter with annotations
+     */
+    public JsonbAnnotatedElement<Method> getSetterElement() {
+        return setterElement;
     }
 
     /**
@@ -164,6 +80,79 @@ public class Property {
      */
     public JsonbAnnotatedElement<Field> getFieldElement() {
         return fieldElement;
+    }
+
+    public Type getGetterType() {
+        if (null != getGetter()) {
+            return getGetter().getGenericReturnType();
+        }
+        return null;
+    }
+
+    /**
+     * Class element with annotation under construction for declaring class of this property.
+     * This ClassModel is not fully initialized yet.
+     * @return ClassModel
+     */
+    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
+        return declaringClassElement;
+    }
+
+    /**
+     * Create instance of property.
+     * @param name not null
+     * @param declaringClassModel Class model for a class declaring property.
+     */
+    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
+        this.name = name;
+        this.declaringClassElement = declaringClassModel;
+    }
+
+    /**
+     * @param setter setter not null
+     */
+    public void setSetter(Method setter) {
+        this.setterElement = new JsonbAnnotatedElement<>(setter);
+    }
+
+    /**
+     * {@link Method} representing getter of a property if any.
+     *
+     * @return getter if present
+     */
+    public Method getGetter() {
+        if (null == getterElement) {
+            return null;
+        }
+        return getterElement.getElement();
+    }
+
+    /**
+     * @param getter not null
+     */
+    public void setGetter(Method getter) {
+        this.getterElement = new JsonbAnnotatedElement<>(getter);
+    }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * {@link Method} representing setter of a property if any.
+     *
+     * @return setter if present
+     */
+    public Method getSetter() {
+        if (null == setterElement) {
+            return null;
+        }
+        return setterElement.getElement();
     }
 
     /**
@@ -175,10 +164,22 @@ public class Property {
     }
 
     /**
-     * Element with setter and its annotations.
-     * @return setter with annotations
+     * {@link Field} representing property if any
+     *
+     * @return field if present
      */
-    public JsonbAnnotatedElement<Method> getSetterElement() {
-        return setterElement;
+    public Field getField() {
+        if (null == fieldElement) {
+            return null;
+        }
+        return fieldElement.getElement();
     }
+
+    /**
+     * @param field field not null
+     */
+    public void setField(Field field) {
+        this.fieldElement = new JsonbAnnotatedElement<>(field);
+    }
+
 }

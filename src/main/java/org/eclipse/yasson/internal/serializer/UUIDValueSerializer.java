@@ -24,6 +24,11 @@ import java.util.UUID;
  */
 public class UUIDValueSerializer extends AbstractValueTypeSerializer<UUID> {
 
+    @Override
+    protected void serialize(UUID uuid, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(uuid.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class UUIDValueSerializer extends AbstractValueTypeSerializer<UUID> {
         super(config);
     }
 
-    @Override
-    protected void serialize(UUID uuid, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(uuid.toString());
-    }
 }

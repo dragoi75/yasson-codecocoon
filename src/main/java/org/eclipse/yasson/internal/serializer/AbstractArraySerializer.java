@@ -30,6 +30,16 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
 
     protected final Type arrayValType;
 
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartArray(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
+    }
+
     protected AbstractArraySerializer(SerializerBuilder builder) {
         super(builder);
         arrayValType = resolveArrayType();
@@ -51,13 +61,4 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartArray(key);
-    }
 }

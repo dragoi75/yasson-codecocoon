@@ -31,15 +31,6 @@ public class JsonNumericTypeDeserializer extends AbstractValueTypeDeserializer<J
 
     private final static String NUMERIC_VALUE = "number";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customizer Model customization.
-     */
-    public JsonNumericTypeDeserializer(Customization customizer) {
-        super(JsonNumber.class, customizer);
-    }
-
     @Override
     protected JsonNumber deserialize(String jsonText, Unmarshaller converter, Type rtType) {
         final JsonBuilderFactory jsonBuilder = converter.getJsonbContext().getJsonProvider().createBuilderFactory(null);
@@ -68,4 +59,14 @@ public class JsonNumericTypeDeserializer extends AbstractValueTypeDeserializer<J
                 .build();
         return parsedObject.getJsonNumber(NUMERIC_VALUE);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customizer Model customization.
+     */
+    public JsonNumericTypeDeserializer(Customization customizer) {
+        super(JsonNumber.class, customizer);
+    }
+
 }

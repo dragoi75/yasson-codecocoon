@@ -43,6 +43,21 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
 
     private final LocalTime midnightTime = LocalTime.parse("00:00:00");
 
+    @Override
+    protected XMLGregorianCalendar parseWithFormatter(String jsonText, DateTimeFormatter dateFormat) {
+        final TemporalAccessor temporalAccessor = dateFormat.parse(jsonText);
+        LocalTime timeOfDay = temporalAccessor.query(TemporalQueries.localTime());
+        ZoneId timeRegion = temporalAccessor.query(TemporalQueries.zone());
+        if (null == timeRegion) {
+            timeRegion = UTC;
+        }
+        if (null == timeOfDay) {
+            timeOfDay = midnightTime;
+        }
+        ZonedDateTime zonedDateTime = LocalDate.from(temporalAccessor).atTime(timeOfDay).atZone(timeRegion);
+        return typeFactory.newXMLGregorianCalendar(GregorianCalendar.from(zonedDateTime));
+    }
+
     /**
      * Creates an instance.
      *
@@ -73,18 +88,4 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
         return parseWithFormatter(jsonText, dateFormat.withLocale(region));
     }
 
-    @Override
-    protected XMLGregorianCalendar parseWithFormatter(String jsonText, DateTimeFormatter dateFormat) {
-        final TemporalAccessor temporalAccessor = dateFormat.parse(jsonText);
-        LocalTime timeOfDay = temporalAccessor.query(TemporalQueries.localTime());
-        ZoneId timeRegion = temporalAccessor.query(TemporalQueries.zone());
-        if (null == timeRegion) {
-            timeRegion = UTC;
-        }
-        if (null == timeOfDay) {
-            timeOfDay = midnightTime;
-        }
-        ZonedDateTime zonedDateTime = LocalDate.from(temporalAccessor).atTime(timeOfDay).atZone(timeRegion);
-        return typeFactory.newXMLGregorianCalendar(GregorianCalendar.from(zonedDateTime));
-    }
 }

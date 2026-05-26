@@ -26,15 +26,6 @@ import java.math.BigDecimal;
  */
 public class NumericTypeSerializer extends AbstractValueTypeSerializer<Number> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public NumericTypeSerializer(Customization config) {
-        super(config);
-    }
-
     @Override
     protected void serialize(Number value, JsonGenerator jsonWriter, Marshaller marshaller) {
         BigDecimal decimalAmount = new BigDecimal(String.valueOf(value));
@@ -44,4 +35,14 @@ public class NumericTypeSerializer extends AbstractValueTypeSerializer<Number> {
             jsonWriter.write(decimalAmount);
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public NumericTypeSerializer(Customization config) {
+        super(config);
+    }
+
 }

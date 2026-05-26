@@ -30,6 +30,16 @@ import java.util.Locale;
 public class XMLGregorianCalendarSerializer extends AbstractDateTimeSerializer<XMLGregorianCalendar> {
 
 
+    @Override
+    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar xmlCalendar) {
+        return toZonedDateTimeFromXMLGregorianCalendar(xmlCalendar);
+    }
+
+    private ZonedDateTime toZonedDateTimeFromXMLGregorianCalendar(XMLGregorianCalendar xmlCalendar) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(xmlCalendar.toGregorianCalendar().getTimeInMillis()),
+                xmlCalendar.toGregorianCalendar().getTimeZone().toZoneId());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,11 +47,6 @@ public class XMLGregorianCalendarSerializer extends AbstractDateTimeSerializer<X
      */
     public XMLGregorianCalendarSerializer(Customization customConfig) {
         super(customConfig);
-    }
-
-    @Override
-    protected Instant toInstant(XMLGregorianCalendar xmlCalendar) {
-        return Instant.ofEpochMilli(xmlCalendar.toGregorianCalendar().getTimeInMillis());
     }
 
     @Override
@@ -54,12 +59,8 @@ public class XMLGregorianCalendarSerializer extends AbstractDateTimeSerializer<X
     }
 
     @Override
-    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar xmlCalendar) {
-        return toZonedDateTimeFromXMLGregorianCalendar(xmlCalendar);
+    protected Instant toInstant(XMLGregorianCalendar xmlCalendar) {
+        return Instant.ofEpochMilli(xmlCalendar.toGregorianCalendar().getTimeInMillis());
     }
 
-    private ZonedDateTime toZonedDateTimeFromXMLGregorianCalendar(XMLGregorianCalendar xmlCalendar) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(xmlCalendar.toGregorianCalendar().getTimeInMillis()),
-                xmlCalendar.toGregorianCalendar().getTimeZone().toZoneId());
-    }
 }

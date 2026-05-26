@@ -26,15 +26,6 @@ import java.util.OptionalLong;
  */
 public class OptionalLongValueSerializer extends AbstractValueTypeSerializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public OptionalLongValueSerializer(Customization customConfig) {
-        super(customConfig);
-    }
-
     @Override
     protected void serialize(OptionalLong optionalLongValue, JsonGenerator jsonWriter, Marshaller marshaller) {
         if (!optionalLongValue.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalLongValueSerializer extends AbstractValueTypeSerializer<Opt
             jsonWriter.write(optionalLongValue.getAsLong());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public OptionalLongValueSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

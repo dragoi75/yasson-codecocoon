@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class ShortDeserializer extends AbstractNumberDeserializer<Short> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public ShortDeserializer(Customization customConfig) {
-        super(Short.class, customConfig);
-    }
-
     @Override
     protected Short deserialize(String jsonText, Unmarshaller objectConverter, Type rtType) {
         return deserializeFormatted(jsonText, true, objectConverter.getJsonbContext())
@@ -49,4 +40,14 @@ public class ShortDeserializer extends AbstractNumberDeserializer<Short> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public ShortDeserializer(Customization customConfig) {
+        super(Short.class, customConfig);
+    }
+
 }

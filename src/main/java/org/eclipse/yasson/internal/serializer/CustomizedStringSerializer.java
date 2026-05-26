@@ -31,13 +31,9 @@ import java.io.UnsupportedEncodingException;
  */
 public class CustomizedStringSerializer extends AbstractValueTypeSerializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializerSettings Model customization.
-     */
-    public CustomizedStringSerializer(Customization serializerSettings) {
-        super(serializerSettings);
+    @Override
+    protected void serialize(String sourceString, JsonGenerator jsonWriter, Marshaller binder) {
+        jsonWriter.write(serializeToJson(sourceString, binder.getJsonbContext()));
     }
 
     private String serializeToJson(String inputString, JsonbContext serializationContext) {
@@ -54,8 +50,13 @@ public class CustomizedStringSerializer extends AbstractValueTypeSerializer<Stri
         return inputString;
     }
 
-    @Override
-    protected void serialize(String sourceString, JsonGenerator jsonWriter, Marshaller binder) {
-        jsonWriter.write(serializeToJson(sourceString, binder.getJsonbContext()));
+    /**
+     * Creates a new instance.
+     *
+     * @param serializerSettings Model customization.
+     */
+    public CustomizedStringSerializer(Customization serializerSettings) {
+        super(serializerSettings);
     }
+
 }

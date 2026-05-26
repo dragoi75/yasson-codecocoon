@@ -26,6 +26,11 @@ import java.time.Duration;
  */
 public class DurationDeserializer extends AbstractValueTypeDeserializer<Duration> {
 
+    @Override
+    protected Duration deserialize(String rawInput, Unmarshaller unmarshaller, Type rtType) {
+        return Duration.parse(rawInput);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class DurationDeserializer extends AbstractValueTypeDeserializer<Duration
         super(Duration.class, configuration);
     }
 
-    @Override
-    protected Duration deserialize(String rawInput, Unmarshaller unmarshaller, Type rtType) {
-        return Duration.parse(rawInput);
-    }
 }

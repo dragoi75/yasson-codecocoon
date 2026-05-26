@@ -30,19 +30,11 @@ public class DateValueDeserializer extends AbstractDateTimeDeserializer<Date> {
 
     private static final DateTimeFormatter DEFAULT_ISO_DATE_TIME = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customOptions Model customization.
-     */
-    public DateValueDeserializer(Customization customOptions) {
-        super(Date.class, customOptions);
-    }
-
 
     @Override
-    protected Date fromInstant(Instant timePoint) {
-        return new Date(timePoint.toEpochMilli());
+    protected Date parseWithFormatter(String jsonString, DateTimeFormatter dateTimeFormat) {
+        final TemporalAccessor temporalResult = getZonedFormatter(dateTimeFormat).parse(jsonString);
+        return new Date(Instant.from(temporalResult).toEpochMilli());
     }
 
     @Override
@@ -52,8 +44,17 @@ public class DateValueDeserializer extends AbstractDateTimeDeserializer<Date> {
     }
 
     @Override
-    protected Date parseWithFormatter(String jsonString, DateTimeFormatter dateTimeFormat) {
-        final TemporalAccessor temporalResult = getZonedFormatter(dateTimeFormat).parse(jsonString);
-        return new Date(Instant.from(temporalResult).toEpochMilli());
+    protected Date fromInstant(Instant timePoint) {
+        return new Date(timePoint.toEpochMilli());
     }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customOptions Model customization.
+     */
+    public DateValueDeserializer(Customization customOptions) {
+        super(Date.class, customOptions);
+    }
+
 }

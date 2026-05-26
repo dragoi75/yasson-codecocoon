@@ -29,15 +29,6 @@ import java.math.BigDecimal;
  */
 public class BigDecimalDeserializer extends AbstractNumberDeserializer<BigDecimal> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public BigDecimalDeserializer(Customization customConfig) {
-        super(BigDecimal.class, customConfig);
-    }
-
     @Override
     public BigDecimal deserialize(String jsonString, Unmarshaller unmarshalHelper, Type rtType) {
         return deserializeFormatted(jsonString, false, unmarshalHelper.getJsonbContext())
@@ -51,4 +42,14 @@ public class BigDecimalDeserializer extends AbstractNumberDeserializer<BigDecima
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public BigDecimalDeserializer(Customization customConfig) {
+        super(BigDecimal.class, customConfig);
+    }
+
 }

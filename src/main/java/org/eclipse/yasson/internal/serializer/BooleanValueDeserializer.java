@@ -31,15 +31,6 @@ import java.util.NoSuchElementException;
  */
 public class BooleanValueDeserializer extends AbstractValueTypeDeserializer<Boolean> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param settings Model customization.
-     */
-    public BooleanValueDeserializer(Customization settings) {
-        super(Boolean.class, settings);
-    }
-
     @Override
     public Boolean deserialize(JsonParser jsonReader, DeserializationContext ctx, Type rtType) {
         JsonParser.Event occurrence = ((JsonbParser) jsonReader).moveToValue();
@@ -53,6 +44,15 @@ public class BooleanValueDeserializer extends AbstractValueTypeDeserializer<Bool
             default:
                 throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Unknown JSON value: " + occurrence));
         }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param settings Model customization.
+     */
+    public BooleanValueDeserializer(Customization settings) {
+        super(Boolean.class, settings);
     }
 
 }

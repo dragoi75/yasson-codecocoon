@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class FloatValueDeserializer extends AbstractNumberDeserializer<Float> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customSettings Model customization.
-     */
-    public FloatValueDeserializer(Customization customSettings) {
-        super(Float.class, customSettings);
-    }
-
     @Override
     protected Float deserialize(String jsonString, Unmarshaller valueConverter, Type rtType) {
         return deserializeFormatted(jsonString, false, valueConverter.getJsonbContext())
@@ -49,4 +40,14 @@ public class FloatValueDeserializer extends AbstractNumberDeserializer<Float> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customSettings Model customization.
+     */
+    public FloatValueDeserializer(Customization customSettings) {
+        super(Float.class, customSettings);
+    }
+
 }

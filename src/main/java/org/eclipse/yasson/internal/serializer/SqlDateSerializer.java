@@ -28,6 +28,11 @@ public class SqlDateSerializer extends AbstractDateTypeSerializer<Date> {
 
     public static DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
+    @Override
+    protected DateTimeFormatter getDefaultFormatter() {
+        return DEFAULT_FORMATTER;
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,8 +42,4 @@ public class SqlDateSerializer extends AbstractDateTypeSerializer<Date> {
         super(config);
     }
 
-    @Override
-    protected DateTimeFormatter getDefaultFormatter() {
-        return DEFAULT_FORMATTER;
-    }
 }

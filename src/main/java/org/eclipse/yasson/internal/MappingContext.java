@@ -43,12 +43,6 @@ public class MappingContext {
 
         private JsonbContext jsonbContext;
 
-        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
-            this.parentClassModel = parentClassModel;
-            this.classParser = classParser;
-            this.jsonbContext = jsonbContext;
-        }
-
         @Override
         public ClassModel apply(Class aClass) {
             final JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
@@ -57,6 +51,13 @@ public class MappingContext {
             classParser.parseProperties(newClassModel, clsElement);
             return newClassModel;
         }
+
+        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
+            this.parentClassModel = parentClassModel;
+            this.classParser = classParser;
+            this.jsonbContext = jsonbContext;
+        }
+
     }
 
     private final JsonbContext jsonbContext;
@@ -68,14 +69,23 @@ public class MappingContext {
     private final ClassParser classParser;
 
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Gets serializer provider for given class.
      *
-     * @param jsonbContext Context. Required.
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
      */
-    public MappingContext(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-        this.classParser = new ClassParser(jsonbContext);
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
     }
 
     /**
@@ -112,6 +122,27 @@ public class MappingContext {
     }
 
     /**
+     * Create mapping context which is scoped to jsonb runtime.
+     *
+     * @param jsonbContext Context. Required.
+     */
+    public MappingContext(JsonbContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+        this.classParser = new ClassParser(jsonbContext);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassModel getClassModel(Class<?> clazz) {
+        return classes.get(clazz);
+    }
+
+    /**
      * Provided class class model is returned first by iterator.
      * Following class models are sorted by hierarchy from provided class up to the Object.class.
      *
@@ -137,33 +168,4 @@ public class MappingContext {
         };
     }
 
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassModel getClassModel(Class<?> clazz) {
-        return classes.get(clazz);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

@@ -25,15 +25,6 @@ import java.math.BigDecimal;
  */
 public class BigDecimalSerializer extends AbstractNumberSerializer<BigDecimal> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param formatOptions Model customization.
-     */
-    public BigDecimalSerializer(Customization formatOptions) {
-        super(formatOptions);
-    }
-
     @Override
     protected void serializeNonFormatted(BigDecimal decimalValue, JsonGenerator jsonWriter, String propertyName) {
         if (!BigNumberUtil.isIEEE754(decimalValue)) {
@@ -51,4 +42,14 @@ public class BigDecimalSerializer extends AbstractNumberSerializer<BigDecimal> {
             jsonWriter.write(decimalValue);
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param formatOptions Model customization.
+     */
+    public BigDecimalSerializer(Customization formatOptions) {
+        super(formatOptions);
+    }
+
 }

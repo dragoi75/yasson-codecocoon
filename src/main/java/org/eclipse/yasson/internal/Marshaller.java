@@ -43,25 +43,31 @@ public class Marshaller extends ProcessingContext implements SerializationContex
 
     private final Type runtimeType;
 
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext Current context.
-     * @param rootRuntimeType Type of root object.
-     */
-    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
-        super(jsonbContext);
-        this.runtimeType = rootRuntimeType;
+    @Override
+    public <T> void serialize(T object, JsonGenerator generator) {
+        Objects.requireNonNull(object);
+        serializeRoot(object, generator);
     }
 
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext Current context.
-     */
-    public Marshaller(JsonbContext jsonbContext) {
-        super(jsonbContext);
-        this.runtimeType = null;
+    @Override
+    public <T> void serialize(String key, T object, JsonGenerator generator) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(object);
+        generator.writeKey(key);
+        serializeRoot(object, generator);
+    }
+
+    private JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
+        final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
+        if (null != serializerProvider) {
+            return serializerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(runtimeType));
+        }
+        SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext).withObjectClass(rootClazz).withType(runtimeType);
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClazz)) {
+            ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
+            serializerBuilder.withCustomization(classModel.getCustomization());
+        }
+        return serializerBuilder.build();
     }
 
     /**
@@ -85,20 +91,6 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         }
     }
 
-    @Override
-    public <T> void serialize(String key, T object, JsonGenerator generator) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(object);
-        generator.writeKey(key);
-        serializeRoot(object, generator);
-    }
-
-    @Override
-    public <T> void serialize(T object, JsonGenerator generator) {
-        Objects.requireNonNull(object);
-        serializeRoot(object, generator);
-    }
-
     /**
      * Serializes root element.
      *
@@ -115,16 +107,25 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         rootSerializer.serialize(root, generator, this);
     }
 
-    private JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
-        final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
-        if (null != serializerProvider) {
-            return serializerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(runtimeType));
-        }
-        SerializerBuilder serializerBuilder = new SerializerBuilder(jsonbContext).withObjectClass(rootClazz).withType(runtimeType);
-        if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClazz)) {
-            ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
-            serializerBuilder.withCustomization(classModel.getCustomization());
-        }
-        return serializerBuilder.build();
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbContext Current context.
+     * @param rootRuntimeType Type of root object.
+     */
+    public Marshaller(JsonbContext jsonbContext, Type rootRuntimeType) {
+        super(jsonbContext);
+        this.runtimeType = rootRuntimeType;
     }
+
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbContext Current context.
+     */
+    public Marshaller(JsonbContext jsonbContext) {
+        super(jsonbContext);
+        this.runtimeType = null;
+    }
+
 }

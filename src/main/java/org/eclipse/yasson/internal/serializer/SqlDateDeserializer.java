@@ -31,6 +31,28 @@ public class SqlDateDeserializer extends AbstractDateTimeDeserializer<Date> {
 
     private static final DateTimeFormatter SQL_DATE_PATTERN = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
+    @Override
+    protected Date parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
+        final TemporalAccessor temporalResult = getZonedFormatter(dateTimeFormat).parse(jsonText);
+        return new Date(getInstant(temporalResult).toEpochMilli());
+    }
+
+    @Override
+    protected Date fromInstant(Instant timePoint) {
+        return new Date(timePoint.toEpochMilli());
+    }
+
+    private Instant getInstant(TemporalAccessor temporalResult) {
+        LocalDate datePart = LocalDate.from(temporalResult);
+        return datePart.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
+    }
+
+    @Override
+    protected Date parseDefault(String jsonText, Locale region) {
+        final TemporalAccessor temporalResult = SQL_DATE_PATTERN.withLocale(region).parse(jsonText);
+        return new Date(getInstant(temporalResult).toEpochMilli());
+    }
+
     /**
      * Creates an instance.
      *
@@ -47,25 +69,4 @@ public class SqlDateDeserializer extends AbstractDateTimeDeserializer<Date> {
         super(Date.class, null);
     }
 
-    @Override
-    protected Date fromInstant(Instant timePoint) {
-        return new Date(timePoint.toEpochMilli());
-    }
-
-    @Override
-    protected Date parseDefault(String jsonText, Locale region) {
-        final TemporalAccessor temporalResult = SQL_DATE_PATTERN.withLocale(region).parse(jsonText);
-        return new Date(getInstant(temporalResult).toEpochMilli());
-    }
-
-    @Override
-    protected Date parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
-        final TemporalAccessor temporalResult = getZonedFormatter(dateTimeFormat).parse(jsonText);
-        return new Date(getInstant(temporalResult).toEpochMilli());
-    }
-
-    private Instant getInstant(TemporalAccessor temporalResult) {
-        LocalDate datePart = LocalDate.from(temporalResult);
-        return datePart.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
-    }
 }

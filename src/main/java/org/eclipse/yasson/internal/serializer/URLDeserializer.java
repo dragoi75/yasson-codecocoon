@@ -28,15 +28,6 @@ import java.net.URL;
  */
 public class URLDeserializer extends AbstractValueTypeDeserializer<URL> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public URLDeserializer(Customization customConfig) {
-        super(URL.class, customConfig);
-    }
-
     @Override
     protected URL deserialize(String jsonString, Unmarshaller unmarshaller, Type rtType) {
         URL parsedLocation = null;
@@ -47,4 +38,14 @@ public class URLDeserializer extends AbstractValueTypeDeserializer<URL> {
         }
         return parsedLocation;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public URLDeserializer(Customization customConfig) {
+        super(URL.class, customConfig);
+    }
+
 }

@@ -26,26 +26,6 @@ public class ReflectionPropagation extends PropertyValuePropagation {
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(Property property, JsonbContext ctx) {
-        super(property, ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
-        switch (mode) {
-            case GET:
-                getValueCommand = new GetFromGetter(method);
-                break;
-            case SET:
-                setValueCommand = new SetWithSetter(method);
-                break;
-            default: throw new IllegalStateException("Unknown mode");
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -67,8 +47,29 @@ public class ReflectionPropagation extends PropertyValuePropagation {
         setValueCommand.setValue(object, value);
     }
 
+    public ReflectionPropagation(Property property, JsonbContext ctx) {
+        super(property, ctx);
+    }
+
     @Override
     Object getValue(Object object) {
         return getValueCommand.getValue(object);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void acceptMethod(Method method, OperationMode mode) {
+        switch (mode) {
+            case GET:
+                getValueCommand = new GetFromGetter(method);
+                break;
+            case SET:
+                setValueCommand = new SetWithSetter(method);
+                break;
+            default: throw new IllegalStateException("Unknown mode");
+        }
+    }
+
 }

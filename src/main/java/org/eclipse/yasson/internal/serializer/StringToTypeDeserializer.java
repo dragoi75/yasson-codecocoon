@@ -30,15 +30,6 @@ import java.lang.reflect.Type;
  */
 public class StringToTypeDeserializer extends AbstractValueTypeDeserializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public StringToTypeDeserializer(Customization config) {
-        super(String.class, config);
-    }
-
     @Override
     protected String deserialize(String jsonText, Unmarshaller deserializer, Type rtType) {
         if ((boolean) deserializer.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
@@ -53,4 +44,14 @@ public class StringToTypeDeserializer extends AbstractValueTypeDeserializer<Stri
         }
         return jsonText;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public StringToTypeDeserializer(Customization config) {
+        super(String.class, config);
+    }
+
 }

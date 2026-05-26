@@ -31,6 +31,16 @@ import java.util.logging.Logger;
 public class OffsetDateTimeDeserializer extends AbstractDateTimeDeserializer<OffsetDateTime> {
     private static final Logger OFFSET_DATE_TIME_AUDITOR = Logger.getLogger(OffsetDateTimeDeserializer.class.getName());
 
+    @Override
+    protected OffsetDateTime parseWithFormatter(String rawText, DateTimeFormatter formatSpec) {
+        return OffsetDateTime.parse(rawText, formatSpec);
+    }
+
+    @Override
+    protected OffsetDateTime parseDefault(String rawText, Locale region) {
+        return OffsetDateTime.parse(rawText, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(region));
+    }
+
     /**
      * Creates an instance.
      *
@@ -50,13 +60,4 @@ public class OffsetDateTimeDeserializer extends AbstractDateTimeDeserializer<Off
         return OffsetDateTime.ofInstant(timePoint, UTC);
     }
 
-    @Override
-    protected OffsetDateTime parseDefault(String rawText, Locale region) {
-        return OffsetDateTime.parse(rawText, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(region));
-    }
-
-    @Override
-    protected OffsetDateTime parseWithFormatter(String rawText, DateTimeFormatter formatSpec) {
-        return OffsetDateTime.parse(rawText, formatSpec);
-    }
 }

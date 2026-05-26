@@ -27,6 +27,11 @@ import java.net.URI;
  */
 public class URITypeConverter extends AbstractValueTypeDeserializer<URI> {
 
+    @Override
+    protected URI deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
+        return URI.create(jsonText);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,8 +41,4 @@ public class URITypeConverter extends AbstractValueTypeDeserializer<URI> {
         super(URI.class, customConfig);
     }
 
-    @Override
-    protected URI deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
-        return URI.create(jsonText);
-    }
 }

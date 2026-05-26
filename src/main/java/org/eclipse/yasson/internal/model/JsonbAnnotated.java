@@ -32,31 +32,15 @@ public class JsonbAnnotated implements AnnotatedElement {
 
     protected final Map<Class<? extends Annotation>, Annotation> annotations;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param initialAnnotations Annotations to initialize from.
-     */
-    public JsonbAnnotated(Annotation[] initialAnnotations) {
-        this.annotations = new HashMap<>();
-        addInitialAnnotations(initialAnnotations);
-    }
-
-    private void addInitialAnnotations(Annotation[] initialAnnotations) {
-        for (Annotation ann : initialAnnotations) {
-            annotations.put(ann.annotationType(), ann);
-        }
+    @Override
+    public Annotation[] getAnnotations() {
+        final Collection<Annotation> values = annotations.values();
+        return values.toArray(new Annotation[values.size()]);
     }
 
     @Override
     public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
         return annotationClass.cast(annotations.get(annotationClass));
-    }
-
-    @Override
-    public Annotation[] getAnnotations() {
-        final Collection<Annotation> values = annotations.values();
-        return values.toArray(new Annotation[values.size()]);
     }
 
     @Override
@@ -75,4 +59,21 @@ public class JsonbAnnotated implements AnnotatedElement {
         }
         annotations.put(annotation.annotationType(), annotation);
     }
+
+    private void addInitialAnnotations(Annotation[] initialAnnotations) {
+        for (Annotation ann : initialAnnotations) {
+            annotations.put(ann.annotationType(), ann);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param initialAnnotations Annotations to initialize from.
+     */
+    public JsonbAnnotated(Annotation[] initialAnnotations) {
+        this.annotations = new HashMap<>();
+        addInitialAnnotations(initialAnnotations);
+    }
+
 }

@@ -32,15 +32,6 @@ import java.util.OptionalDouble;
  */
 public class OptionalDoubleValueDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customizer Model customization.
-     */
-    public OptionalDoubleValueDeserializer(Customization customizer) {
-        super(OptionalDouble.class, customizer);
-    }
-
     @Override
     public OptionalDouble deserialize(JsonParser jsonReader, DeserializationContext deserializationContext, Type resolvedType) {
         final JsonParser.Event upcomingEvent = ((JsonbParser) jsonReader).moveToValue();
@@ -59,4 +50,14 @@ public class OptionalDoubleValueDeserializer extends AbstractValueTypeDeserializ
             throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customizer Model customization.
+     */
+    public OptionalDoubleValueDeserializer(Customization customizer) {
+        super(OptionalDouble.class, customizer);
+    }
+
 }

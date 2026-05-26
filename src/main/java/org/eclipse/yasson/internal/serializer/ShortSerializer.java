@@ -24,6 +24,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class ShortSerializer extends AbstractNumberSerializer<Short> {
 
+    @Override
+    protected void serializeNonFormatted(Short value, JsonGenerator jsonWriter) {
+        jsonWriter.write(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,8 +43,4 @@ public class ShortSerializer extends AbstractNumberSerializer<Short> {
         jsonWriter.write(fieldName, value);
     }
 
-    @Override
-    protected void serializeNonFormatted(Short value, JsonGenerator jsonWriter) {
-        jsonWriter.write(value);
-    }
 }

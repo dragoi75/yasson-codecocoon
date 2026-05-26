@@ -25,6 +25,12 @@ import java.lang.reflect.Type;
  */
 public class EnumDeserializer extends AbstractValueTypeDeserializer<Enum> {
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected Enum deserialize(String jsonString, Unmarshaller unmarshaller, Type runtimeType) {
+        return Enum.valueOf((Class<Enum>) runtimeType, jsonString);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,9 +40,4 @@ public class EnumDeserializer extends AbstractValueTypeDeserializer<Enum> {
         super(Enum.class, customConfig);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Enum deserialize(String jsonString, Unmarshaller unmarshaller, Type runtimeType) {
-        return Enum.valueOf((Class<Enum>) runtimeType, jsonString);
-    }
 }

@@ -30,6 +30,24 @@ import java.util.Locale;
 public class CalendarTemporalSerializer extends AbstractDateTimeSerializer<Calendar> {
 
 
+    @Override
+    protected String formatDefault(Calendar calendar, Locale region) {
+        DateTimeFormatter dateTimeFormat = calendar.isSet(Calendar.HOUR) || calendar.isSet(Calendar.HOUR_OF_DAY) ?
+                DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
+        return dateTimeFormat.withZone(calendar.getTimeZone().toZoneId())
+                .withLocale(region).format(toTemporalAccessor(calendar));
+    }
+
+    private ZonedDateTime convertToZonedDateTime(Calendar calendar) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()),
+                calendar.getTimeZone().toZoneId());
+    }
+
+    @Override
+    protected TemporalAccessor toTemporalAccessor(Calendar calendar) {
+        return convertToZonedDateTime(calendar);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,21 +62,4 @@ public class CalendarTemporalSerializer extends AbstractDateTimeSerializer<Calen
         return calendar.toInstant();
     }
 
-    @Override
-    protected String formatDefault(Calendar calendar, Locale region) {
-        DateTimeFormatter dateTimeFormat = calendar.isSet(Calendar.HOUR) || calendar.isSet(Calendar.HOUR_OF_DAY) ?
-                DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
-        return dateTimeFormat.withZone(calendar.getTimeZone().toZoneId())
-                .withLocale(region).format(toTemporalAccessor(calendar));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Calendar calendar) {
-        return convertToZonedDateTime(calendar);
-    }
-
-    private ZonedDateTime convertToZonedDateTime(Calendar calendar) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()),
-                calendar.getTimeZone().toZoneId());
-    }
 }

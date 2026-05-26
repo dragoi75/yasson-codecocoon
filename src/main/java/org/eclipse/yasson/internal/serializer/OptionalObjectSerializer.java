@@ -39,22 +39,9 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     private final Type optionalValueType;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public OptionalObjectSerializer(SerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.customization = builder.getCustomization();
-        this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
-    }
-
-    private Type resolveOptionalType(Type runtimeType) {
-        if (runtimeType instanceof ParameterizedType) {
-            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
-        }
-        return Object.class;
+    @SuppressWarnings("unchecked")
+    private <T> void serialCaptor(JsonbSerializer<?> serializer, T object, JsonGenerator generator, SerializationContext context) {
+        ((JsonbSerializer<T>) serializer).serialize(object, generator, context);
     }
 
     @Override
@@ -62,18 +49,15 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
         return null;
     }
 
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return optionalValueType;
-    }
-
     public Customization getCustomization() {
         return customization;
+    }
+
+    private Type resolveOptionalType(Type runtimeType) {
+        if (runtimeType instanceof ParameterizedType) {
+            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
+        }
+        return Object.class;
     }
 
     @Override
@@ -91,8 +75,25 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> void serialCaptor(JsonbSerializer<?> serializer, T object, JsonGenerator generator, SerializationContext context) {
-        ((JsonbSerializer<T>) serializer).serialize(object, generator, context);
+    @Override
+    public Type getRuntimeType() {
+        return optionalValueType;
     }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public OptionalObjectSerializer(SerializerBuilder builder) {
+        this.wrapper = builder.getWrapper();
+        this.customization = builder.getCustomization();
+        this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
+    }
+
 }

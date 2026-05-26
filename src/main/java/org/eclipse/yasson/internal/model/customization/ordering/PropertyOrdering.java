@@ -35,6 +35,15 @@ public class PropertyOrdering {
     private PropOrderStrategy propertyOrderStrategy;
 
     /**
+     * Returns a property order strategy from {@link JsonbConfig}.
+     *
+     * @return {@link PropOrderStrategy} or null if not present.
+     */
+    public PropOrderStrategy getPropertyOrderStrategy() {
+        return propertyOrderStrategy;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param propertyOrderStrategy Property order strategy. Must be not null.
@@ -70,12 +79,4 @@ public class PropertyOrdering {
         return sortedProperties;
     }
 
-    /**
-     * Returns a property order strategy from {@link JsonbConfig}.
-     *
-     * @return {@link PropOrderStrategy} or null if not present.
-     */
-    public PropOrderStrategy getPropertyOrderStrategy() {
-        return propertyOrderStrategy;
-    }
 }

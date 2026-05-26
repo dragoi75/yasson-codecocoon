@@ -42,35 +42,6 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
     private final AbstractContainerDeserializer<?> wrapperItem;
 
     /**
-     * Creates decoration instance wrapping real adapted object item.
-     *
-     * @param adapterInfo components type info
-     * @param wrapperItem wrapper item to get instance from
-     */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
-        this.adapterInfo = adapterInfo;
-        this.wrapperItem = wrapperItem;
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapperItem;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
-            return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
-        }
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
-    }
-
-    /**
      * Sets adapted item.
      *
      * @param adaptedTypeDeserializer Adapted item to set.
@@ -93,4 +64,34 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         }
     }
+
+    @Override
+    public Type getRuntimeType() {
+        if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
+            return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
+        }
+        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
+    }
+
+    @Override
+    public ClassModel getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates decoration instance wrapping real adapted object item.
+     *
+     * @param adapterInfo components type info
+     * @param wrapperItem wrapper item to get instance from
+     */
+    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+        this.adapterInfo = adapterInfo;
+        this.wrapperItem = wrapperItem;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapperItem;
+    }
+
 }

@@ -28,20 +28,12 @@ import java.util.Locale;
  */
 public class LocalDateTimeSerializer extends AbstractDateTimeSerializer<LocalDateTime> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public LocalDateTimeSerializer(Customization customConfig) {
-        super(customConfig);
-    }
 
     @Override
-    protected Instant toInstant(LocalDateTime dateTime) {
-        return dateTime.atZone(UTC).toInstant();
+    protected String formatStrictIJson(LocalDateTime dateTime) {
+        final ZonedDateTime offsetDateTime = dateTime.atZone(UTC);
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(offsetDateTime);
     }
-
 
     @Override
     protected String formatDefault(LocalDateTime dateTime, Locale userRegion) {
@@ -54,8 +46,17 @@ public class LocalDateTimeSerializer extends AbstractDateTimeSerializer<LocalDat
     }
 
     @Override
-    protected String formatStrictIJson(LocalDateTime dateTime) {
-        final ZonedDateTime offsetDateTime = dateTime.atZone(UTC);
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(offsetDateTime);
+    protected Instant toInstant(LocalDateTime dateTime) {
+        return dateTime.atZone(UTC).toInstant();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public LocalDateTimeSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

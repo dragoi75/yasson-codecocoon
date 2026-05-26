@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class IntegerValueDeserializer extends AbstractNumberDeserializer<Integer> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public IntegerValueDeserializer(Customization customConfig) {
-        super(Integer.class, customConfig);
-    }
-
     @Override
     protected Integer deserialize(String rawJson, Unmarshaller parser, Type rtType) {
         return deserializeFormatted(rawJson, true, parser.getJsonbContext())
@@ -50,4 +41,14 @@ public class IntegerValueDeserializer extends AbstractNumberDeserializer<Integer
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public IntegerValueDeserializer(Customization customConfig) {
+        super(Integer.class, customConfig);
+    }
+
 }

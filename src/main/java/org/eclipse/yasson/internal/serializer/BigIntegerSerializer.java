@@ -25,15 +25,6 @@ import java.math.BigInteger;
  */
 public class BigIntegerSerializer extends AbstractNumberSerializer<BigInteger> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public BigIntegerSerializer(Customization config) {
-        super(config);
-    }
-
     @Override
     protected void serializeNonFormatted(BigInteger value, JsonGenerator jsonWriter, String fieldName) {
         if (!BigNumberUtil.isIEEE754(value)) {
@@ -51,4 +42,14 @@ public class BigIntegerSerializer extends AbstractNumberSerializer<BigInteger> {
             jsonWriter.write(value);
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public BigIntegerSerializer(Customization config) {
+        super(config);
+    }
+
 }

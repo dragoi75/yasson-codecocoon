@@ -24,6 +24,16 @@ import javax.json.stream.JsonGenerator;
  */
 public class DoubleSerializer extends AbstractNumberSerializer<Double> {
 
+    @Override
+    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter) {
+        jsonWriter.write(value);
+    }
+
+    @Override
+    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter, String propertyName) {
+        jsonWriter.write(propertyName, value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,13 +43,4 @@ public class DoubleSerializer extends AbstractNumberSerializer<Double> {
         super(customConfig);
     }
 
-    @Override
-    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter, String propertyName) {
-        jsonWriter.write(propertyName, value);
-    }
-
-    @Override
-    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter) {
-        jsonWriter.write(value);
-    }
 }

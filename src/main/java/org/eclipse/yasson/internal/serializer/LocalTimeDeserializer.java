@@ -30,6 +30,16 @@ import java.util.Locale;
  */
 public class LocalTimeDeserializer extends AbstractDateTimeDeserializer<LocalTime> {
 
+    @Override
+    protected LocalTime parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
+        return LocalTime.parse(jsonText, dateTimeFormat);
+    }
+
+    @Override
+    protected LocalTime parseDefault(String jsonText, Locale region) {
+        return LocalTime.parse(jsonText, DateTimeFormatter.ISO_LOCAL_TIME.withLocale(region));
+    }
+
     /**
      * Creates an instance.
      *
@@ -44,13 +54,4 @@ public class LocalTimeDeserializer extends AbstractDateTimeDeserializer<LocalTim
         throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
 
-    @Override
-    protected LocalTime parseDefault(String jsonText, Locale region) {
-        return LocalTime.parse(jsonText, DateTimeFormatter.ISO_LOCAL_TIME.withLocale(region));
-    }
-
-    @Override
-    protected LocalTime parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
-        return LocalTime.parse(jsonText, dateTimeFormat);
-    }
 }

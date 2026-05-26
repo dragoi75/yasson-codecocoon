@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class ByteDeserializer extends AbstractNumberDeserializer<Byte> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public ByteDeserializer(Customization config) {
-        super(Byte.class, config);
-    }
-
     @Override
     protected Byte deserialize(String text, Unmarshaller parser, Type rtType) {
         return deserializeFormatted(text, true, parser.getJsonbContext())
@@ -49,4 +40,14 @@ public class ByteDeserializer extends AbstractNumberDeserializer<Byte> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public ByteDeserializer(Customization config) {
+        super(Byte.class, config);
+    }
+
 }
