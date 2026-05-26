@@ -85,51 +85,6 @@ public class JsonbContext {
     }
 
     /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return jsonbConfig;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mappingContext;
-    }
-
-    /**
-     * Get chain model creator.
-     *
-     * @return chain model creator
-     */
-    public DeserializationModelCreator getChainModelCreator() {
-        return deserializationModelCreator;
-    }
-
-    /**
-     * Get serialization model creator.
-     *
-     * @return serialization model creator
-     */
-    public SerializationModelCreator getSerializationModelCreator() {
-        return serializationModelCreator;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonProvider;
-    }
-
-    /**
      * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
      *
      * @return Instance creator.
@@ -138,30 +93,8 @@ public class JsonbContext {
         return componentInstanceCreator;
     }
 
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationIntrospector;
-    }
-
     public JsonbConfigProperties getConfigProperties() {
         return configProperties;
-    }
-
-    public JsonParserFactory getJsonParserFactory() {
-        return jsonParserFactory;
     }
 
     private JsonParserFactory initJsonParserFactory() {
@@ -191,6 +124,15 @@ public class JsonbContext {
         return factoryProperties;
     }
 
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentMatcher;
+    }
+
     private JsonbComponentInstanceCreator initComponentInstanceCreator() {
         ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
                 .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
@@ -207,6 +149,64 @@ public class JsonbContext {
         JsonbComponentInstanceCreator creator = creators.get(0);
         LOGGER.finest("Component instance creator:" + creator.getClass());
         return creator;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mappingContext;
+    }
+
+    /**
+     * Get chain model creator.
+     *
+     * @return chain model creator
+     */
+    public DeserializationModelCreator getChainModelCreator() {
+        return deserializationModelCreator;
+    }
+
+    public JsonParserFactory getJsonParserFactory() {
+        return jsonParserFactory;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonProvider;
+    }
+
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return jsonbConfig;
+    }
+
+    /**
+     * Get serialization model creator.
+     *
+     * @return serialization model creator
+     */
+    public SerializationModelCreator getSerializationModelCreator() {
+        return serializationModelCreator;
+    }
+
+    /**
+     * Gets component for annotation parsing.
+     *
+     * @return Annotation introspector.
+     */
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationIntrospector;
     }
 
 }

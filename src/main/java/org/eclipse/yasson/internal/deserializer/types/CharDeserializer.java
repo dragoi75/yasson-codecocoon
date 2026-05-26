@@ -21,12 +21,13 @@ import org.eclipse.yasson.internal.DeserializationContextImplementation;
  */
 class CharDeserializer extends TypeDeserializer {
 
-    CharDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
         return value.charAt(0);
     }
+
+    CharDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

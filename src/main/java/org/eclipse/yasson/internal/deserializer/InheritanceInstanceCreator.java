@@ -36,14 +36,23 @@ class InheritanceInstanceCreator implements ModelUnmarshaller<JsonParser> {
     private final TypeInheritanceConfiguration typeInheritanceConfiguration;
     private final ModelUnmarshaller<JsonParser> defaultProcessor;
 
-    InheritanceInstanceCreator(Class<?> processedType,
-                               DeserializationModelCreator deserializationModelCreator,
-                               TypeInheritanceConfiguration typeInheritanceConfiguration,
-                               ModelUnmarshaller<JsonParser> defaultProcessor) {
-        this.processedType = processedType;
-        this.deserializationModelCreator = deserializationModelCreator;
-        this.typeInheritanceConfiguration = typeInheritanceConfiguration;
-        this.defaultProcessor = defaultProcessor;
+    private Class<?> getPolymorphicTypeClass(String alias) {
+        if (resolvedClasses.containsKey(alias)) {
+            return resolvedClasses.get(alias);
+        }
+        for (Map.Entry<Class<?>, String> entry : typeInheritanceConfiguration.getAliases().entrySet()) {
+            if (entry.getValue().equals(alias)) {
+                resolvedClasses.put(alias, entry.getKey());
+                return entry.getKey();
+            }
+        }
+        throw new JsonbException("Unknown alias \"" + alias + "\" of the type " + processedType.getName() + ". Known aliases: "
+                                         + typeInheritanceConfiguration.getAliases().values());
+    }
+
+    @Override
+    public String toString() {
+        return "Property " + typeInheritanceConfiguration.getFieldName() + " polymorphic information handler";
     }
 
     @Override
@@ -72,23 +81,14 @@ class InheritanceInstanceCreator implements ModelUnmarshaller<JsonParser> {
         return deserializer.unmarshal(jsonParser, context);
     }
 
-    @Override
-    public String toString() {
-        return "Property " + typeInheritanceConfiguration.getFieldName() + " polymorphic information handler";
-    }
-
-    private Class<?> getPolymorphicTypeClass(String alias) {
-        if (resolvedClasses.containsKey(alias)) {
-            return resolvedClasses.get(alias);
-        }
-        for (Map.Entry<Class<?>, String> entry : typeInheritanceConfiguration.getAliases().entrySet()) {
-            if (entry.getValue().equals(alias)) {
-                resolvedClasses.put(alias, entry.getKey());
-                return entry.getKey();
-            }
-        }
-        throw new JsonbException("Unknown alias \"" + alias + "\" of the type " + processedType.getName() + ". Known aliases: "
-                                         + typeInheritanceConfiguration.getAliases().values());
+    InheritanceInstanceCreator(Class<?> processedType,
+                               DeserializationModelCreator deserializationModelCreator,
+                               TypeInheritanceConfiguration typeInheritanceConfiguration,
+                               ModelUnmarshaller<JsonParser> defaultProcessor) {
+        this.processedType = processedType;
+        this.deserializationModelCreator = deserializationModelCreator;
+        this.typeInheritanceConfiguration = typeInheritanceConfiguration;
+        this.defaultProcessor = defaultProcessor;
     }
 
 }

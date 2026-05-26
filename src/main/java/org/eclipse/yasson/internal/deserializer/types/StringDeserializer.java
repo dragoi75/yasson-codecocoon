@@ -27,10 +27,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 class StringDeserializer extends TypeDeserializer {
 
-    StringDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     public Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
         JsonbConfigProperties config = context.getJsonbContext().getConfigProperties();
@@ -46,4 +42,9 @@ class StringDeserializer extends TypeDeserializer {
         }
         return value;
     }
+
+    StringDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

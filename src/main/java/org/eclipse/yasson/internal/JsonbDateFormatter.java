@@ -51,6 +51,28 @@ public class JsonbDateFormatter {
     private final String format;
     private final String locale;
 
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        JsonbDateFormatter that = (JsonbDateFormatter) o;
+        return Objects.equals(format, that.format)
+                && Objects.equals(locale, that.locale)
+                && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
+    }
+
     /**
      * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
@@ -64,17 +86,13 @@ public class JsonbDateFormatter {
         this.locale = locale;
     }
 
-    /**
-     * Creates an instance with format string and locale.
-     * Formatter will be created on every formatting / parsing operation.
-     *
-     * @param format Formatter format.
-     * @param locale Locale in string.
-     */
-    public JsonbDateFormatter(String format, String locale) {
-        this.format = format;
-        this.locale = locale;
-        this.dateTimeFormatter = null;
+    @Override
+    public String toString() {
+        return "JsonbDateFormatter{"
+                + "dateTimeFormatter=" + dateTimeFormatter
+                + ", format='" + format + '\''
+                + ", locale='" + locale + '\''
+                + '}';
     }
 
     /**
@@ -97,6 +115,24 @@ public class JsonbDateFormatter {
         return format;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateTimeFormatter, format, locale);
+    }
+
+    /**
+     * Creates an instance with format string and locale.
+     * Formatter will be created on every formatting / parsing operation.
+     *
+     * @param format Formatter format.
+     * @param locale Locale in string.
+     */
+    public JsonbDateFormatter(String format, String locale) {
+        this.format = format;
+        this.locale = locale;
+        this.dateTimeFormatter = null;
+    }
+
     /**
      * Locale to use with formatter.
      *
@@ -106,39 +142,4 @@ public class JsonbDateFormatter {
         return locale;
     }
 
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        JsonbDateFormatter that = (JsonbDateFormatter) o;
-        return Objects.equals(format, that.format)
-                && Objects.equals(locale, that.locale)
-                && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(dateTimeFormatter, format, locale);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonbDateFormatter{"
-                + "dateTimeFormatter=" + dateTimeFormatter
-                + ", format='" + format + '\''
-                + ", locale='" + locale + '\''
-                + '}';
-    }
 }

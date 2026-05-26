@@ -27,36 +27,36 @@ public abstract class TypeDeserializer implements ModelUnmarshaller<String> {
     private final ModelUnmarshaller<Object> delegate;
     private final Class<?> clazz;
 
+    abstract Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType);
+
+    Object deserializeNumberValue(JsonParser value, DeserializationContextImplementation context, Type rType) {
+        return deserializeStringValue(value.getString(), context, rType);
+    }
+
+    Object deserializeBooleanValue(boolean value, DeserializationContextImplementation context, Type rType) {
+        return deserializeStringValue(String.valueOf(value), context, rType);
+    }
+
     TypeDeserializer(TypeDeserializerBuilder builder) {
         this.delegate = builder.getDelegate();
         this.clazz = builder.getClazz();
-    }
-
-    @Override
-    public final Object unmarshal(String value, DeserializationContextImplementation context) {
-        return delegate.unmarshal(deserializeStringValue(value, context, clazz), context);
-    }
-
-    public final Object deserialize(boolean value, DeserializationContextImplementation context) {
-        return delegate.unmarshal(deserializeBooleanValue(value, context, clazz), context);
     }
 
     public final Object deserialize(JsonParser value, DeserializationContextImplementation context) {
         return delegate.unmarshal(deserializeNumberValue(value, context, clazz), context);
     }
 
-    abstract Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType);
-
-    Object deserializeBooleanValue(boolean value, DeserializationContextImplementation context, Type rType) {
-        return deserializeStringValue(String.valueOf(value), context, rType);
-    }
-
-    Object deserializeNumberValue(JsonParser value, DeserializationContextImplementation context, Type rType) {
-        return deserializeStringValue(value.getString(), context, rType);
-    }
-
     Class<?> getType() {
         return clazz;
+    }
+
+    public final Object deserialize(boolean value, DeserializationContextImplementation context) {
+        return delegate.unmarshal(deserializeBooleanValue(value, context, clazz), context);
+    }
+
+    @Override
+    public final Object unmarshal(String value, DeserializationContextImplementation context) {
+        return delegate.unmarshal(deserializeStringValue(value, context, clazz), context);
     }
 
 }

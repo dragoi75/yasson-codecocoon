@@ -29,17 +29,6 @@ class JsonValueDeserializer implements ModelUnmarshaller<JsonParser> {
     private final ModelUnmarshaller<Object> delegate;
     private final JsonValue nullValue;
 
-    JsonValueDeserializer(TypeDeserializerBuilder builder, JsonValue nullValue) {
-        this.delegate = builder.getDelegate();
-        this.nullValue = nullValue;
-    }
-
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        JsonParser.Event last = context.getLastValueEvent();
-        return delegate.unmarshal(deserializeValue(last, value), context);
-    }
-
     private JsonValue deserializeValue(JsonParser.Event last, JsonParser parser) {
         switch (last) {
         case VALUE_TRUE:
@@ -59,4 +48,16 @@ class JsonValueDeserializer implements ModelUnmarshaller<JsonParser> {
             throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: " + last));
         }
     }
+
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+        JsonParser.Event last = context.getLastValueEvent();
+        return delegate.unmarshal(deserializeValue(last, value), context);
+    }
+
+    JsonValueDeserializer(TypeDeserializerBuilder builder, JsonValue nullValue) {
+        this.delegate = builder.getDelegate();
+        this.nullValue = nullValue;
+    }
+
 }

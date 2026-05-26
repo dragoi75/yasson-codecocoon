@@ -36,12 +36,71 @@ public class DeserializationContextImplementation extends ProcessingContext impl
     private Object currentObject;
 
     /**
-     * Parent instance for marshaller and unmarshaller.
+     * Return last obtained {@link JsonParser.Event} event.
      *
-     * @param jsonbCtx context of Jsonb
+     * @return last obtained event
      */
-    public DeserializationContextImplementation(JsonbContext jsonbCtx) {
-        super(jsonbCtx);
+    public JsonParser.Event getLastValueEvent() {
+        return previousEvent;
+    }
+
+    private void validateState() {
+        if (previousEvent == JsonParser.Event.KEY_NAME) {
+            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
+        }
+    }
+
+    /**
+     * Return customization used by currently processed user defined deserializer.
+     *
+     * @return currently used customization
+     */
+    public Customization getCustomization() {
+        return customConfig;
+    }
+
+    /**
+     * Set last obtained {@link JsonParser.Event} event.
+     *
+     * @param previousEvent last obtained event
+     */
+    public void setLastValueEvent(JsonParser.Event previousEvent) {
+        this.previousEvent = previousEvent;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T deserializeValue(Type targetDescriptor, JsonParser jsonReader) {
+        try {
+            if (previousEvent == null) {
+                previousEvent = jsonReader.next();
+                validateState();
+            }
+            ModelUnmarshaller<JsonParser> modelDeserializer = getJsonbContext().getChainModelCreator().deserializerChain(targetDescriptor);
+            return (T) modelDeserializer.unmarshal(jsonReader, this);
+        } catch (JsonbException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, e.getMessage()), e);
+        }
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
+    }
+
+    @Override
+    public <T> T deserialize(Type targetDescriptor, JsonParser jsonReader) {
+        return deserializeValue(targetDescriptor, jsonReader);
+    }
+
+    /**
+     * Set customization used by currently processed user defined deserializer.
+     *
+     * @param customConfig currently used customization
+     */
+    public void setCustomization(Customization customConfig) {
+        this.customConfig = customConfig;
     }
 
     /**
@@ -64,15 +123,6 @@ public class DeserializationContextImplementation extends ProcessingContext impl
     }
 
     /**
-     * Set currently deserialized type instance.
-     *
-     * @param currentObject deserialized type instance
-     */
-    public void setInstance(Object currentObject) {
-        this.currentObject = currentObject;
-    }
-
-    /**
      * Return the list of deferred deserializers.
      *
      * @return list of deferred deserializers
@@ -82,71 +132,21 @@ public class DeserializationContextImplementation extends ProcessingContext impl
     }
 
     /**
-     * Return last obtained {@link JsonParser.Event} event.
+     * Parent instance for marshaller and unmarshaller.
      *
-     * @return last obtained event
+     * @param jsonbCtx context of Jsonb
      */
-    public JsonParser.Event getLastValueEvent() {
-        return previousEvent;
+    public DeserializationContextImplementation(JsonbContext jsonbCtx) {
+        super(jsonbCtx);
     }
 
     /**
-     * Set last obtained {@link JsonParser.Event} event.
+     * Set currently deserialized type instance.
      *
-     * @param previousEvent last obtained event
+     * @param currentObject deserialized type instance
      */
-    public void setLastValueEvent(JsonParser.Event previousEvent) {
-        this.previousEvent = previousEvent;
-    }
-
-    /**
-     * Return customization used by currently processed user defined deserializer.
-     *
-     * @return currently used customization
-     */
-    public Customization getCustomization() {
-        return customConfig;
-    }
-
-    /**
-     * Set customization used by currently processed user defined deserializer.
-     *
-     * @param customConfig currently used customization
-     */
-    public void setCustomization(Customization customConfig) {
-        this.customConfig = customConfig;
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type targetDescriptor, JsonParser jsonReader) {
-        return deserializeValue(targetDescriptor, jsonReader);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T deserializeValue(Type targetDescriptor, JsonParser jsonReader) {
-        try {
-            if (previousEvent == null) {
-                previousEvent = jsonReader.next();
-                validateState();
-            }
-            ModelUnmarshaller<JsonParser> modelDeserializer = getJsonbContext().getChainModelCreator().deserializerChain(targetDescriptor);
-            return (T) modelDeserializer.unmarshal(jsonReader, this);
-        } catch (JsonbException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, e.getMessage()), e);
-        }
-    }
-
-    private void validateState() {
-        if (previousEvent == JsonParser.Event.KEY_NAME) {
-            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
-        }
+    public void setInstance(Object currentObject) {
+        this.currentObject = currentObject;
     }
 
 }

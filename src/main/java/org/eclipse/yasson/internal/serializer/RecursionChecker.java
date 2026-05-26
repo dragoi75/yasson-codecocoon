@@ -26,10 +26,6 @@ class RecursionChecker implements ModelSerializer {
 
     private final ModelSerializer delegate;
 
-    RecursionChecker(ModelSerializer delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         if (!context.addProcessedObject(value)) {
@@ -37,6 +33,10 @@ class RecursionChecker implements ModelSerializer {
         }
         delegate.serialize(value, generator, context);
         context.removeProcessedObject(value);
+    }
+
+    RecursionChecker(ModelSerializer delegate) {
+        this.delegate = delegate;
     }
 
 }

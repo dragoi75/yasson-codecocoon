@@ -23,22 +23,11 @@ import org.eclipse.yasson.internal.JsonbNumberFormatter;
 public interface Customization {
 
     /**
-     * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for
-     * deserialization
-     * (returned by {@link #getDeserializeNumberFormatter()}
+     * Returns true if <i>nillable</i> customization is present.
      *
-     * @return number formatter
+     * @return True if <i>nillable</i> customization is present.
      */
-    JsonbNumberFormatter getSerializeNumberFormatter();
-
-    /**
-     * Number formatter for formatting numbers during deserialization process. It could be the same formatter instance used for
-     * serialization
-     * (returned by {@link #getSerializeNumberFormatter()}
-     *
-     * @return number formatter
-     */
-    JsonbNumberFormatter getDeserializeNumberFormatter();
+    boolean isNillable();
 
     /**
      * Date formatter for formatting date values during serialization process. It could be the same formatter instance used for
@@ -63,10 +52,21 @@ public interface Customization {
     JsonbDateFormatter getDeserializeDateFormatter();
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
+     * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for
+     * deserialization
+     * (returned by {@link #getDeserializeNumberFormatter()}
      *
-     * @return True if <i>nillable</i> customization is present.
+     * @return number formatter
      */
-    boolean isNillable();
+    JsonbNumberFormatter getSerializeNumberFormatter();
+
+    /**
+     * Number formatter for formatting numbers during deserialization process. It could be the same formatter instance used for
+     * serialization
+     * (returned by {@link #getSerializeNumberFormatter()}
+     *
+     * @return number formatter
+     */
+    JsonbNumberFormatter getDeserializeNumberFormatter();
 
 }

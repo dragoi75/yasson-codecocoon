@@ -19,13 +19,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 class IntegerSerializer extends AbstractNumberSerializer<Integer> {
 
-    IntegerSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     void writeValue(Integer value, JsonGenerator generator) {
         generator.write(value);
+    }
+
+    IntegerSerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
 }

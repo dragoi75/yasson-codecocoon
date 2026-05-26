@@ -31,21 +31,68 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
 
     private final T value;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param value Element.
-     */
-    public JsonbAnnotationContainer(T value) {
-        for (Annotation marker : value.getAnnotations()) {
-            if (value instanceof Class) {
-                addAnnotation(marker, false, (Class<?>) value);
-            } else {
-                addAnnotation(marker, false, null);
-            }
+    public static final class AnnotationMetadata<T extends Annotation> {
+
+        private final T marker;
+        private final boolean fromSuperclass;
+        private final Class<?> concreteType;
+
+        public Class<?> getDefinedType() {
+            return concreteType;
         }
 
-        this.value = value;
+        @Override
+        public String toString() {
+            return concreteType.getName();
+        }
+
+        public T getAnnotation() {
+            return marker;
+        }
+
+        public boolean isInherited() {
+            return fromSuperclass;
+        }
+
+        public AnnotationMetadata(T marker, boolean fromSuperclass, Class<?> concreteType) {
+            this.marker = marker;
+            this.fromSuperclass = fromSuperclass;
+            this.concreteType = concreteType;
+        }
+
+    }
+
+    public void addAnnotationWrapper(AnnotationMetadata<?> metadata) {
+        annotationMap.computeIfAbsent(metadata.getAnnotation().annotationType(), aClass -> new LinkedList<>())
+                .add(metadata);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <AT extends Annotation> JsonbAnnotationContainer.AnnotationMetadata<AT> getAnnotationWrapper(Class<AT> annotationType) {
+        return (AnnotationMetadata<AT>) annotationMap.get(annotationType).getFirst();
+    }
+
+    /**
+     * Adds annotation.
+     *
+     * @param marker Annotation to add.
+     * @param concreteType
+     */
+    public void addAnnotation(Annotation marker, boolean fromSuperclass, Class<?> concreteType) {
+//        if (annotations.containsKey(annotation.annotationType())) {
+//            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+//                                                         "Annotation already present: " + annotation));
+//        }
+//        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
+        annotationMap.computeIfAbsent(marker.annotationType(), aClass -> new LinkedList<>())
+                        .add(new AnnotationMetadata(marker, fromSuperclass, concreteType));
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotationMap.values().stream()
+                .flatMap(Collection::stream)
+                .map(AnnotationMetadata::getAnnotation)
+                .toArray(Annotation[]::new);
     }
 
     /**
@@ -75,66 +122,21 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
         return annotationMap.getOrDefault(annotationType, new LinkedList<>());
     }
 
-    @SuppressWarnings("unchecked")
-    public <AT extends Annotation> JsonbAnnotationContainer.AnnotationMetadata<AT> getAnnotationWrapper(Class<AT> annotationType) {
-        return (AnnotationMetadata<AT>) annotationMap.get(annotationType).getFirst();
-    }
-
-    public Annotation[] getAnnotations() {
-        return annotationMap.values().stream()
-                .flatMap(Collection::stream)
-                .map(AnnotationMetadata::getAnnotation)
-                .toArray(Annotation[]::new);
-    }
-
     /**
-     * Adds annotation.
+     * Creates a new instance.
      *
-     * @param marker Annotation to add.
-     * @param concreteType
+     * @param value Element.
      */
-    public void addAnnotation(Annotation marker, boolean fromSuperclass, Class<?> concreteType) {
-//        if (annotations.containsKey(annotation.annotationType())) {
-//            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-//                                                         "Annotation already present: " + annotation));
-//        }
-//        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
-        annotationMap.computeIfAbsent(marker.annotationType(), aClass -> new LinkedList<>())
-                        .add(new AnnotationMetadata(marker, fromSuperclass, concreteType));
+    public JsonbAnnotationContainer(T value) {
+        for (Annotation marker : value.getAnnotations()) {
+            if (value instanceof Class) {
+                addAnnotation(marker, false, (Class<?>) value);
+            } else {
+                addAnnotation(marker, false, null);
+            }
+        }
+
+        this.value = value;
     }
 
-    public void addAnnotationWrapper(AnnotationMetadata<?> metadata) {
-        annotationMap.computeIfAbsent(metadata.getAnnotation().annotationType(), aClass -> new LinkedList<>())
-                .add(metadata);
-    }
-
-    public static final class AnnotationMetadata<T extends Annotation> {
-
-        private final T marker;
-        private final boolean fromSuperclass;
-        private final Class<?> concreteType;
-
-        public AnnotationMetadata(T marker, boolean fromSuperclass, Class<?> concreteType) {
-            this.marker = marker;
-            this.fromSuperclass = fromSuperclass;
-            this.concreteType = concreteType;
-        }
-
-        public T getAnnotation() {
-            return marker;
-        }
-
-        public boolean isInherited() {
-            return fromSuperclass;
-        }
-
-        public Class<?> getDefinedType() {
-            return concreteType;
-        }
-
-        @Override
-        public String toString() {
-            return concreteType.getName();
-        }
-    }
 }

@@ -19,13 +19,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 class ShortSerializer extends AbstractNumberSerializer<Short> {
 
-    ShortSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     void writeValue(Short value, JsonGenerator generator) {
         generator.write(value);
+    }
+
+    ShortSerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
 }

@@ -21,14 +21,14 @@ import jakarta.json.stream.JsonGenerator;
  */
 class FloatSerializer extends AbstractNumberSerializer<Float> {
 
-    FloatSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     void writeValue(Float value, JsonGenerator generator) {
         //floats lose precision, after upcasting to doubles in jsonp
         generator.write(new BigDecimal(String.valueOf(value)));
+    }
+
+    FloatSerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
 }

@@ -21,7 +21,17 @@ public final class JustReturn implements ModelUnmarshaller<Object> {
 
     private static final JustReturn INSTANCE = new JustReturn();
 
+    @Override
+    public String toString() {
+        return "No other operations will be performed";
+    }
+
     private JustReturn() {
+    }
+
+    @Override
+    public Object unmarshal(Object value, DeserializationContextImplementation context) {
+        return value;
     }
 
     /**
@@ -33,13 +43,4 @@ public final class JustReturn implements ModelUnmarshaller<Object> {
         return INSTANCE;
     }
 
-    @Override
-    public Object unmarshal(Object value, DeserializationContextImplementation context) {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return "No other operations will be performed";
-    }
 }

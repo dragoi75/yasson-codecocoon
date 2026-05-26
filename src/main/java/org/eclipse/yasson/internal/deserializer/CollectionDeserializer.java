@@ -26,10 +26,6 @@ class CollectionDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> delegate;
 
-    CollectionDeserializer(ModelUnmarshaller<JsonParser> delegate) {
-        this.delegate = delegate;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Object unmarshal(JsonParser parser, DeserializationContextImplementation context) {
@@ -55,6 +51,10 @@ class CollectionDeserializer implements ModelUnmarshaller<JsonParser> {
             }
         }
         return collection;
+    }
+
+    CollectionDeserializer(ModelUnmarshaller<JsonParser> delegate) {
+        this.delegate = delegate;
     }
 
 }

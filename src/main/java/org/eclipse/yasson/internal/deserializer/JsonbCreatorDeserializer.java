@@ -46,23 +46,6 @@ class JsonbCreatorDeserializer implements ModelUnmarshaller<JsonParser> {
     private final Function<String, String> renamer;
     private final boolean failOnUnknownProperties;
 
-    JsonbCreatorDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyDeserializerChains,
-                             Map<String, ModelUnmarshaller<Object>> defaultCreatorValues,
-                             JsonbCreator creator,
-                             Class<?> clazz,
-                             Function<String, String> renamer,
-                             boolean failOnUnknownProperties,
-                             Set<String> ignoredProperties) {
-        this.propertyDeserializerChains = propertyDeserializerChains;
-        this.defaultCreatorValues = defaultCreatorValues;
-        this.creatorParams = Arrays.stream(creator.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
-        this.ignoredProperties = Set.copyOf(ignoredProperties);
-        this.creator = creator;
-        this.clazz = clazz;
-        this.renamer = renamer;
-        this.failOnUnknownProperties = failOnUnknownProperties;
-    }
-
     @Override
     public Object unmarshal(JsonParser parser, DeserializationContextImplementation context) {
         String key = null;
@@ -125,4 +108,22 @@ class JsonbCreatorDeserializer implements ModelUnmarshaller<JsonParser> {
                 + ", clazz=" + clazz
                 + '}';
     }
+
+    JsonbCreatorDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyDeserializerChains,
+                             Map<String, ModelUnmarshaller<Object>> defaultCreatorValues,
+                             JsonbCreator creator,
+                             Class<?> clazz,
+                             Function<String, String> renamer,
+                             boolean failOnUnknownProperties,
+                             Set<String> ignoredProperties) {
+        this.propertyDeserializerChains = propertyDeserializerChains;
+        this.defaultCreatorValues = defaultCreatorValues;
+        this.creatorParams = Arrays.stream(creator.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
+        this.ignoredProperties = Set.copyOf(ignoredProperties);
+        this.creator = creator;
+        this.clazz = clazz;
+        this.renamer = renamer;
+        this.failOnUnknownProperties = failOnUnknownProperties;
+    }
+
 }

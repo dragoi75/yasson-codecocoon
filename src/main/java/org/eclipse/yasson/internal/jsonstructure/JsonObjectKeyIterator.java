@@ -57,16 +57,33 @@ public class JsonObjectKeyIterator extends JsonStructureWalker {
 
     private ParseState parseMode = ParseState.START;
 
+    @Override
+    JsonbException createIncompatibleValueException() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
+                                                      getValue().getValueType(),
+                activeKey));
+    }
+
+    /**
+     * Current key this iterator is pointing at.
+     *
+     * @return Current key.
+     */
+    public String getKey() {
+        return activeKey;
+    }
+
+    @Override
+    String getString() {
+        if (parseMode == ParseState.KEY) {
+            return activeKey;
+        }
+        return super.getString();
+    }
+
     JsonObjectKeyIterator(JsonObject rootObject) {
         this.rootObject = rootObject;
         this.keyCursor = rootObject.keySet().iterator();
-    }
-
-    private void getNextKey() {
-        if (!keyCursor.hasNext()) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Object is empty"));
-        }
-        activeKey = keyCursor.next();
     }
 
     @Override
@@ -99,10 +116,15 @@ public class JsonObjectKeyIterator extends JsonStructureWalker {
 
     }
 
-    @Override
-    public boolean hasNext() {
-        //From the perspective of JsonParser not finished until END_OBJECT is being read.
-        return parseMode != ParseState.END;
+    private void setState(ParseState parseMode) {
+        this.parseMode = parseMode;
+    }
+
+    private void getNextKey() {
+        if (!keyCursor.hasNext()) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Object is empty"));
+        }
+        activeKey = keyCursor.next();
     }
 
     /**
@@ -118,30 +140,9 @@ public class JsonObjectKeyIterator extends JsonStructureWalker {
     }
 
     @Override
-    String getString() {
-        if (parseMode == ParseState.KEY) {
-            return activeKey;
-        }
-        return super.getString();
+    public boolean hasNext() {
+        //From the perspective of JsonParser not finished until END_OBJECT is being read.
+        return parseMode != ParseState.END;
     }
 
-    @Override
-    JsonbException createIncompatibleValueException() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
-                                                      getValue().getValueType(),
-                activeKey));
-    }
-
-    private void setState(ParseState parseMode) {
-        this.parseMode = parseMode;
-    }
-
-    /**
-     * Current key this iterator is pointing at.
-     *
-     * @return Current key.
-     */
-    public String getKey() {
-        return activeKey;
-    }
 }

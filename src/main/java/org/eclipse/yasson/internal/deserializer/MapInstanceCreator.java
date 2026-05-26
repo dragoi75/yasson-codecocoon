@@ -36,27 +36,6 @@ class MapInstanceCreator implements ModelUnmarshaller<JsonParser> {
     private final JsonbConfigProperties configProperties;
     private final Class<?> clazz;
 
-    MapInstanceCreator(MapDeserializer delegate,
-                       JsonbConfigProperties configProperties,
-                       Class<?> clazz) {
-        this.delegate = delegate;
-        this.configProperties = configProperties;
-        this.clazz = clazz;
-    }
-
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        Map<?, ?> map = createInstance(clazz);
-        context.setInstance(map);
-        return delegate.unmarshal(value, context);
-    }
-
-    private Map<?, ?> createInstance(Class<?> clazz) {
-        return clazz.isInterface()
-                ? getMapImpl(clazz)
-                : (Map<?, ?>) InstanceCreator.createInstance(clazz);
-    }
-
     private Map<?, ?> getMapImpl(Class<?> ifcType) {
         if (ConcurrentMap.class.isAssignableFrom(ifcType)) {
             if (SortedMap.class.isAssignableFrom(ifcType) || NavigableMap.class.isAssignableFrom(ifcType)) {
@@ -73,6 +52,27 @@ class MapInstanceCreator implements ModelUnmarshaller<JsonParser> {
                     : new TreeMap<>();
         }
         return new HashMap<>();
+    }
+
+    private Map<?, ?> createInstance(Class<?> clazz) {
+        return clazz.isInterface()
+                ? getMapImpl(clazz)
+                : (Map<?, ?>) InstanceCreator.createInstance(clazz);
+    }
+
+    MapInstanceCreator(MapDeserializer delegate,
+                       JsonbConfigProperties configProperties,
+                       Class<?> clazz) {
+        this.delegate = delegate;
+        this.configProperties = configProperties;
+        this.clazz = clazz;
+    }
+
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+        Map<?, ?> map = createInstance(clazz);
+        context.setInstance(map);
+        return delegate.unmarshal(value, context);
     }
 
 }

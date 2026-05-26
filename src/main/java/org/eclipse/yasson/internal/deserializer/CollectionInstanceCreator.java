@@ -41,26 +41,6 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
     private final Class<?> clazz;
     private final boolean isEnumSet;
 
-    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
-        this.delegate = delegate;
-        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
-        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
-        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        Object instance;
-        if (isEnumSet) {
-            instance = EnumSet.noneOf((Class<Enum>) type);
-        } else {
-            instance = InstanceCreator.createInstance(clazz);
-        }
-        context.setInstance(instance);
-        return delegate.unmarshal(value, context);
-    }
-
     private Class<?> implementationClass(Class<?> type) {
         if (type.isInterface()) {
             return createInterfaceInstance(type);
@@ -86,4 +66,25 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
         }
         return ifcType;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+        Object instance;
+        if (isEnumSet) {
+            instance = EnumSet.noneOf((Class<Enum>) type);
+        } else {
+            instance = InstanceCreator.createInstance(clazz);
+        }
+        context.setInstance(instance);
+        return delegate.unmarshal(value, context);
+    }
+
+    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
+        this.delegate = delegate;
+        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
+        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
+        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
+    }
+
 }

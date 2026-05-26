@@ -32,38 +32,6 @@ public class JsonbCreator {
     private final CreatorModel[] params;
 
     /**
-     * Creates a new instance.
-     *
-     * @param executable    Executable.
-     * @param creatorModels Parameters.
-     */
-    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
-        this.executable = executable;
-        this.params = creatorModels;
-    }
-
-    /**
-     * Create instance by either constructor or factory method, with provided parameter values and a Class to call on.
-     *
-     * @param params parameters to be passed into constructor / factory method
-     * @param on     class to call onto
-     * @param <T>    Type of class / instance
-     * @return instance
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T call(Object[] params, Class<T> on) {
-        try {
-            if (executable instanceof Constructor) {
-                return ((Constructor<T>) executable).newInstance(params);
-            } else {
-                return (T) ((Method) executable).invoke(on, params);
-            }
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, on), e);
-        }
-    }
-
-    /**
      * True if param name is one of creator params.
      *
      * @param paramName Param name to check.
@@ -96,4 +64,37 @@ public class JsonbCreator {
     public CreatorModel[] getParams() {
         return params;
     }
+
+    /**
+     * Create instance by either constructor or factory method, with provided parameter values and a Class to call on.
+     *
+     * @param params parameters to be passed into constructor / factory method
+     * @param on     class to call onto
+     * @param <T>    Type of class / instance
+     * @return instance
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T call(Object[] params, Class<T> on) {
+        try {
+            if (executable instanceof Constructor) {
+                return ((Constructor<T>) executable).newInstance(params);
+            } else {
+                return (T) ((Method) executable).invoke(on, params);
+            }
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, on), e);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param executable    Executable.
+     * @param creatorModels Parameters.
+     */
+    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
+        this.executable = executable;
+        this.params = creatorModels;
+    }
+
 }

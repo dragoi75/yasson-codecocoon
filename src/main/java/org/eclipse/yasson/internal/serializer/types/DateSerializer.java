@@ -27,23 +27,9 @@ class DateSerializer<T extends Date> extends AbstractDateSerializer<T> {
 
     private static final DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    DateSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
-    @Override
-    protected Instant toInstant(Date value) {
-        return value.toInstant();
-    }
-
     @Override
     protected String formatDefault(Date value, Locale locale) {
         return DEFAULT_DATE_FORMATTER.withLocale(locale).format(toInstant(value));
-    }
-
-    @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
-        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
     }
 
     @Override
@@ -52,8 +38,22 @@ class DateSerializer<T extends Date> extends AbstractDateSerializer<T> {
     }
 
     @Override
+    protected Instant toInstant(Date value) {
+        return value.toInstant();
+    }
+
+    @Override
     protected TemporalAccessor toTemporalAccessor(Date object) {
         return toInstant(object);
+    }
+
+    DateSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
+    @Override
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
     }
 
 }

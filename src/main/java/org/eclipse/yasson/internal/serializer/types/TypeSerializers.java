@@ -139,32 +139,6 @@ public class TypeSerializers {
 
     }
 
-    private TypeSerializers() {
-        throw new IllegalStateException("Util class cannot be instantiated");
-    }
-
-    /**
-     * Whether type is the supported key type.
-     *
-     * @param clazz key type
-     * @return whether type is supported key type
-     */
-    public static boolean isSupportedMapKey(Class<?> clazz) {
-        return Enum.class.isAssignableFrom(clazz) || SUPPORTED_MAP_KEYS.contains(clazz);
-    }
-
-    /**
-     * Create new type serializer.
-     *
-     * @param clazz         type of the serializer
-     * @param customization serializer customization
-     * @param jsonbContext  jsonb context
-     * @return new type serializer
-     */
-    public static ModelSerializer getTypeSerializer(Class<?> clazz, Customization customization, JsonbContext jsonbContext) {
-        return getTypeSerializer(Collections.emptyList(), clazz, customization, jsonbContext, false);
-    }
-
     /**
      * Create new type serializer.
      *
@@ -223,6 +197,32 @@ public class TypeSerializers {
         return typeSerializer == null
                 ? null
                 : SerializationModelCreator.wrapInCommonSet(typeSerializer, customization, jsonbContext);
+    }
+
+    /**
+     * Create new type serializer.
+     *
+     * @param clazz         type of the serializer
+     * @param customization serializer customization
+     * @param jsonbContext  jsonb context
+     * @return new type serializer
+     */
+    public static ModelSerializer getTypeSerializer(Class<?> clazz, Customization customization, JsonbContext jsonbContext) {
+        return getTypeSerializer(Collections.emptyList(), clazz, customization, jsonbContext, false);
+    }
+
+    private TypeSerializers() {
+        throw new IllegalStateException("Util class cannot be instantiated");
+    }
+
+    /**
+     * Whether type is the supported key type.
+     *
+     * @param clazz key type
+     * @return whether type is supported key type
+     */
+    public static boolean isSupportedMapKey(Class<?> clazz) {
+        return Enum.class.isAssignableFrom(clazz) || SUPPORTED_MAP_KEYS.contains(clazz);
     }
 
 }

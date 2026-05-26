@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  */
 class PathSerializer extends TypeSerializer<Path> {
 
-    PathSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Path value, JsonGenerator generator, SerializationContextImpl context) {
         generator.write(value.toString());
+    }
+
+    PathSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

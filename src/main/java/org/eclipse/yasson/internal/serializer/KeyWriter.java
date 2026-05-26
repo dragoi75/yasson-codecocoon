@@ -23,15 +23,6 @@ public class KeyWriter implements ModelSerializer {
 
     private final ModelSerializer delegate;
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate delegate to be called after the key is written
-     */
-    public KeyWriter(ModelSerializer delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         if (context.getKey() != null) {
@@ -39,6 +30,15 @@ public class KeyWriter implements ModelSerializer {
             context.setKey(null);
         }
         delegate.serialize(value, generator, context);
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param delegate delegate to be called after the key is written
+     */
+    public KeyWriter(ModelSerializer delegate) {
+        this.delegate = delegate;
     }
 
 }

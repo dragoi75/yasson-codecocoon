@@ -27,11 +27,6 @@ class OptionalLongDeserializer implements ModelUnmarshaller<JsonParser> {
     private final ModelUnmarshaller<JsonParser> extractor;
     private final ModelUnmarshaller<Object> nullValueDelegate;
 
-    OptionalLongDeserializer(ModelUnmarshaller<JsonParser> extractor, ModelUnmarshaller<Object> nullValueDelegate) {
-        this.extractor = extractor;
-        this.nullValueDelegate = nullValueDelegate;
-    }
-
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
@@ -40,4 +35,10 @@ class OptionalLongDeserializer implements ModelUnmarshaller<JsonParser> {
         OptionalLong optional = OptionalLong.of((Long) extractor.unmarshal(value, context));
         return nullValueDelegate.unmarshal(optional, context);
     }
+
+    OptionalLongDeserializer(ModelUnmarshaller<JsonParser> extractor, ModelUnmarshaller<Object> nullValueDelegate) {
+        this.extractor = extractor;
+        this.nullValueDelegate = nullValueDelegate;
+    }
+
 }

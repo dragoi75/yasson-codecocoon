@@ -26,6 +26,14 @@ class TypeDeserializerBuilder {
     private final JsonbConfigProperties configProperties;
     private final ModelUnmarshaller<Object> delegate;
 
+    public ModelUnmarshaller<Object> getDelegate() {
+        return delegate;
+    }
+
+    public Customization getCustomization() {
+        return customization;
+    }
+
     TypeDeserializerBuilder(Class<?> clazz,
                             Customization customization,
                             JsonbConfigProperties configProperties,
@@ -42,14 +50,6 @@ class TypeDeserializerBuilder {
 
     public JsonbConfigProperties getConfigProperties() {
         return configProperties;
-    }
-
-    public ModelUnmarshaller<Object> getDelegate() {
-        return delegate;
-    }
-
-    public Customization getCustomization() {
-        return customization;
     }
 
 }
