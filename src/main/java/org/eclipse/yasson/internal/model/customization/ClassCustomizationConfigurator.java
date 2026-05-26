@@ -44,12 +44,39 @@ public class ClassCustomizationConfigurator extends SerializationCustomizationBu
     private PropertyVisibilityStrategy visibilityStrategy;
 
     /**
-     * Creates a customization for class properties.
+     * Property visibility strategy for given class.
      *
-     * @return A new instance of {@link PropertyCustomization}
+     * @return property visibility strategy
      */
-    public ClassSerializationConfig buildClassSerializationConfig() {
-        return new ClassSerializationConfig(this);
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return visibilityStrategy;
+    }
+
+    /**
+     * Gets custom constructor or method for user instantiation.
+     *
+     * @return Custom creator.
+     */
+    public JsonbCreatorInvoker getCreator() {
+        return jsonbInvoker;
+    }
+
+    /**
+     * Sets custom property visibility strategy.
+     *
+     * @param visibilityStrategy strategy
+     */
+    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy visibilityStrategy) {
+        this.visibilityStrategy = visibilityStrategy;
+    }
+
+    /**
+     * Sets date format for formatting dates.
+     *
+     * @param dateTimeFormatter Date format.
+     */
+    public void setDateFormatter(JsonbDateTimeFormatter dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
     }
 
     /**
@@ -64,42 +91,12 @@ public class ClassCustomizationConfigurator extends SerializationCustomizationBu
     }
 
     /**
-     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated
-     * number formatter.
-     *
-     * @param numericFormatter the default number formatter instance that would be used for all number properties that don't
-     *                        have a dedicated number
-     *                        formatter.
-     */
-    public void setNumberFormatter(JsonbNumericFormatter numericFormatter) {
-        this.numericFormatter = numericFormatter;
-    }
-
-    /**
      * Gets a date format for formatting dates.
      *
      * @return Date format.
      */
     public JsonbDateTimeFormatter getDateFormatter() {
         return dateTimeFormatter;
-    }
-
-    /**
-     * Sets date format for formatting dates.
-     *
-     * @param dateTimeFormatter Date format.
-     */
-    public void setDateFormatter(JsonbDateTimeFormatter dateTimeFormatter) {
-        this.dateTimeFormatter = dateTimeFormatter;
-    }
-
-    /**
-     * Gets custom constructor or method for user instantiation.
-     *
-     * @return Custom creator.
-     */
-    public JsonbCreatorInvoker getCreator() {
-        return jsonbInvoker;
     }
 
     /**
@@ -112,20 +109,24 @@ public class ClassCustomizationConfigurator extends SerializationCustomizationBu
     }
 
     /**
-     * Property visibility strategy for given class.
+     * Creates a customization for class properties.
      *
-     * @return property visibility strategy
+     * @return A new instance of {@link PropertyCustomization}
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return visibilityStrategy;
+    public ClassSerializationConfig buildClassSerializationConfig() {
+        return new ClassSerializationConfig(this);
     }
 
     /**
-     * Sets custom property visibility strategy.
+     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated
+     * number formatter.
      *
-     * @param visibilityStrategy strategy
+     * @param numericFormatter the default number formatter instance that would be used for all number properties that don't
+     *                        have a dedicated number
+     *                        formatter.
      */
-    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy visibilityStrategy) {
-        this.visibilityStrategy = visibilityStrategy;
+    public void setNumberFormatter(JsonbNumericFormatter numericFormatter) {
+        this.numericFormatter = numericFormatter;
     }
+
 }

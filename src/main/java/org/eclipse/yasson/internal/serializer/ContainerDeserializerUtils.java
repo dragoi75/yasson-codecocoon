@@ -31,19 +31,25 @@ import org.eclipse.yasson.internal.model.ClassDescriptor;
  */
 class ContainerDeserializerUtils {
 
-    private ContainerDeserializerUtils() {
-        throw new IllegalStateException("Util classes cannot be instantiated!");
-    }
-
     /**
-     * Resolve {@code Map} key type.
+     * Builds new de-serializer for {@code Collection} or {@code Map} item (key or value).
      *
-     * @param item    item containing wrapper class of a type field, shall not be {@code null}
-     * @param mapType type to resolve, typically field type or generic bound, shall not be {@code null}
-     * @return resolved {@code Map} key type
+     * @param wrapper   item wrapper. {@code Collection} or {@code Map} instance.
+     * @param valueType type of deserialized value
+     * @param ctx       JSON-B parser context
+     * @param event     JSON parser event
+     * @return de-serializer for {@code Collection} or {@code Map} item
      */
-    public static Type mapKeyType(RuntimeTypeDescriptor item, Type mapType) {
-        return mapType instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0]) : Object.class;
+    public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper, Type valueType, JsonbRuntimeContext ctx, JsonParser.Event event) {
+        //TODO needs performance optimization on not to create deserializer each time
+        //TODO In contrast to serialization value type cannot change here
+        Type actualValueType = ReflectionTypeResolver.resolveTypeDefault(wrapper, valueType);
+        JsonDeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(wrapper, ctx, event).setType(actualValueType);
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(ReflectionTypeResolver.getRawType(actualValueType))) {
+            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionTypeResolver.getRawType(actualValueType));
+            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getClassCustomization());
+        }
+        return deserializerBuilder.buildDeserializer();
     }
 
     /**
@@ -55,6 +61,22 @@ class ContainerDeserializerUtils {
      */
     public static Type mapValueType(RuntimeTypeDescriptor item, Type mapType) {
         return mapType instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[1]) : Object.class;
+    }
+
+    private ContainerDeserializerUtils() {
+        throw new IllegalStateException("Util classes cannot be instantiated!");
+    }
+
+    /**
+     * Creates new instance of {@code DeserializerBuilder}.
+     *
+     * @param wrapper item wrapper. {@code Collection} or {@code Map} instance.
+     * @param ctx     JSON-P parser context
+     * @param event   JSON parser event
+     * @return new instance of {@code DeserializerBuilder}
+     */
+    public static JsonDeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper, JsonbRuntimeContext ctx, JsonParser.Event event) {
+        return new JsonDeserializerBuilder(ctx).setWrapper(wrapper).withJsonEvent(event);
     }
 
     /**
@@ -81,35 +103,14 @@ class ContainerDeserializerUtils {
     }
 
     /**
-     * Builds new de-serializer for {@code Collection} or {@code Map} item (key or value).
+     * Resolve {@code Map} key type.
      *
-     * @param wrapper   item wrapper. {@code Collection} or {@code Map} instance.
-     * @param valueType type of deserialized value
-     * @param ctx       JSON-B parser context
-     * @param event     JSON parser event
-     * @return de-serializer for {@code Collection} or {@code Map} item
+     * @param item    item containing wrapper class of a type field, shall not be {@code null}
+     * @param mapType type to resolve, typically field type or generic bound, shall not be {@code null}
+     * @return resolved {@code Map} key type
      */
-    public static JsonbDeserializer<?> newCollectionOrMapItem(CurrentItem<?> wrapper, Type valueType, JsonbRuntimeContext ctx, JsonParser.Event event) {
-        //TODO needs performance optimization on not to create deserializer each time
-        //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectionTypeResolver.resolveTypeDefault(wrapper, valueType);
-        JsonDeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(wrapper, ctx, event).setType(actualValueType);
-        if (!DefaultSerializerRegistry.getInstance().isKnownType(ReflectionTypeResolver.getRawType(actualValueType))) {
-            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectionTypeResolver.getRawType(actualValueType));
-            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getClassCustomization());
-        }
-        return deserializerBuilder.buildDeserializer();
+    public static Type mapKeyType(RuntimeTypeDescriptor item, Type mapType) {
+        return mapType instanceof ParameterizedType ? ReflectionTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0]) : Object.class;
     }
 
-    /**
-     * Creates new instance of {@code DeserializerBuilder}.
-     *
-     * @param wrapper item wrapper. {@code Collection} or {@code Map} instance.
-     * @param ctx     JSON-P parser context
-     * @param event   JSON parser event
-     * @return new instance of {@code DeserializerBuilder}
-     */
-    public static JsonDeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper, JsonbRuntimeContext ctx, JsonParser.Event event) {
-        return new JsonDeserializerBuilder(ctx).setWrapper(wrapper).withJsonEvent(event);
-    }
 }

@@ -30,31 +30,38 @@ public class ReflectionPropagation extends PropertyValuePropagation {
     private SetValueCommand setValueCommand;
 
     /**
-     * Creates new instance of reflection propagation.
+     * Get a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method getter}.
      *
-     * @param property target property
-     * @param strategy visibility strategy
+     * @param object object to invoke get value on, not null.
+     * @return value
+     * @throws JsonbException if reflection fails.
      */
-    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
-        super(property, strategy);
+    @Override
+    Object getValue(Object object) {
+        Objects.requireNonNull(object);
+
+        try {
+            return getValueCommand.getValue(object);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new JsonbException("Error getting value on: " + object, e);
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * Sets a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method setter}.
+     *
+     * @param object object to invoke set value on, not null.
+     * @param value  object to be set, nullable.
+     * @throws JsonbException if reflection fails.
      */
     @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
-        Objects.requireNonNull(method);
+    void setValue(Object object, Object value) {
+        Objects.requireNonNull(object);
 
-        switch (mode) {
-        case GET:
-            getValueCommand = method::invoke;
-            break;
-        case SET:
-            setValueCommand = method::invoke;
-            break;
-        default:
-            throw new IllegalStateException("Unknown mode");
+        try {
+            setValueCommand.setValue(object, value);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new JsonbException("Error getting value on: " + object, e);
         }
     }
 
@@ -78,38 +85,32 @@ public class ReflectionPropagation extends PropertyValuePropagation {
     }
 
     /**
-     * Sets a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method setter}.
-     *
-     * @param object object to invoke set value on, not null.
-     * @param value  object to be set, nullable.
-     * @throws JsonbException if reflection fails.
+     * {@inheritDoc}
      */
     @Override
-    void setValue(Object object, Object value) {
-        Objects.requireNonNull(object);
+    protected void acceptMethod(Method method, OperationMode mode) {
+        Objects.requireNonNull(method);
 
-        try {
-            setValueCommand.setValue(object, value);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new JsonbException("Error getting value on: " + object, e);
+        switch (mode) {
+        case GET:
+            getValueCommand = method::invoke;
+            break;
+        case SET:
+            setValueCommand = method::invoke;
+            break;
+        default:
+            throw new IllegalStateException("Unknown mode");
         }
     }
 
     /**
-     * Get a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method getter}.
+     * Creates new instance of reflection propagation.
      *
-     * @param object object to invoke get value on, not null.
-     * @return value
-     * @throws JsonbException if reflection fails.
+     * @param property target property
+     * @param strategy visibility strategy
      */
-    @Override
-    Object getValue(Object object) {
-        Objects.requireNonNull(object);
-
-        try {
-            return getValueCommand.getValue(object);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new JsonbException("Error getting value on: " + object, e);
-        }
+    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
+        super(property, strategy);
     }
+
 }

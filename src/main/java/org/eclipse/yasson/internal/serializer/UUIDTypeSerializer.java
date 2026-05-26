@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class UUIDTypeSerializer extends AbstractValueSerializer<UUID> {
 
+    @Override
+    protected void serializeValue(UUID obj, JsonGenerator generator, JsonbMarshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class UUIDTypeSerializer extends AbstractValueSerializer<UUID> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(UUID obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

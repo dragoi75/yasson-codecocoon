@@ -36,6 +36,39 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
     private final ClassDescriptor componentClassModel;
 
     /**
+     * Returns list of deserialized items.
+     *
+     * @return list of items
+     */
+    protected abstract List<?> getItems();
+
+    /**
+     * Returns component class.
+     *
+     * @return component class
+     */
+    Class<?> getComponentClass() {
+        return componentClass;
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getClassCustomization()).buildDeserializer();
+        appendResult(deserializer.deserialize(parser, context, componentClass));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <X> void appendCaptor(X value) {
+        ((List<X>) getItems()).add(value);
+    }
+
+    @Override
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    /**
      * Creates new class instance.
      *
      * @param builder deserializer builder
@@ -54,41 +87,9 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         }
     }
 
-    /**
-     * Returns component class.
-     *
-     * @return component class
-     */
-    Class<?> getComponentClass() {
-        return componentClass;
-    }
-
     @Override
     public void appendResult(Object result) {
         appendCaptor(convertNullToOptionalEmpty(componentClass, result));
     }
 
-    @SuppressWarnings("unchecked")
-    private <X> void appendCaptor(X value) {
-        ((List<X>) getItems()).add(value);
-    }
-
-    @Override
-    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getClassCustomization()).buildDeserializer();
-        appendResult(deserializer.deserialize(parser, context, componentClass));
-    }
-
-    /**
-     * Returns list of deserialized items.
-     *
-     * @return list of items
-     */
-    protected abstract List<?> getItems();
-
-    @Override
-    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

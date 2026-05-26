@@ -31,15 +31,6 @@ public class PropertyOrdering {
     private final Consumer<List<PropertyModel>> propertyOrderStrategy;
 
     /**
-     * Creates a new instance.
-     *
-     * @param propertyOrderStrategy Property order strategy. Must be not null.
-     */
-    public PropertyOrdering(Consumer<List<PropertyModel>> propertyOrderStrategy) {
-        this.propertyOrderStrategy = Objects.requireNonNull(propertyOrderStrategy);
-    }
-
-    /**
      * Sorts class properties either, by class {@link jakarta.json.bind.annotation.JsonbPropertyOrder} annotation,
      * or by {@link PropertyOrderStrategy} if set in {@link JsonbConfig}.
      *
@@ -66,4 +57,14 @@ public class PropertyOrdering {
         sortedProperties.addAll(readNamesToSort);
         return sortedProperties;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param propertyOrderStrategy Property order strategy. Must be not null.
+     */
+    public PropertyOrdering(Consumer<List<PropertyModel>> propertyOrderStrategy) {
+        this.propertyOrderStrategy = Objects.requireNonNull(propertyOrderStrategy);
+    }
+
 }

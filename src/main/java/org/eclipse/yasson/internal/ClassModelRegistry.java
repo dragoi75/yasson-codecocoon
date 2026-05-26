@@ -38,6 +38,16 @@ public class ClassModelRegistry {
     private final ClassModelParser modelParser;
 
     /**
+     * Gets serializer provider for given class.
+     *
+     * @param type Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerFactory getSerializerProvider(Class<?> type) {
+        return serializerFactoryMap.get(type);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param serializationContext Context. Required.
@@ -46,6 +56,26 @@ public class ClassModelRegistry {
         Objects.requireNonNull(serializationContext);
         this.serializationContext = serializationContext;
         this.modelParser = new ClassModelParser(serializationContext);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param type              Class to add serializer provider for.
+     * @param provider Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> type, ContainerSerializerFactory provider) {
+        serializerFactoryMap.putIfAbsent(type, provider);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param type Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassDescriptor getClassModel(Class<?> type) {
+        return classDescriptorMap.get(type);
     }
 
     /**
@@ -90,33 +120,4 @@ public class ClassModelRegistry {
         };
     }
 
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param type Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassDescriptor getClassModel(Class<?> type) {
-        return classDescriptorMap.get(type);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param type Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerFactory getSerializerProvider(Class<?> type) {
-        return serializerFactoryMap.get(type);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param type              Class to add serializer provider for.
-     * @param provider Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> type, ContainerSerializerFactory provider) {
-        serializerFactoryMap.putIfAbsent(type, provider);
-    }
 }

@@ -31,22 +31,33 @@ public class JsonbPropertyMetadata {
     private CurrentItem<?> currentItem;
 
     /**
-     * Gets context.
+     * Gets class model.
      *
-     * @return Context.
+     * @return Class model.
      */
-    public JsonbRuntimeContext getContext() {
-        return jsonbRuntime;
+    public ClassDescriptor getClassModel() {
+        return typeDescriptor;
     }
 
     /**
-     * Sets context.
+     * Sets class model.
      *
-     * @param jsonbRuntime Context to set.
+     * @param typeDescriptor Class model to set.
      * @return Updated object.
      */
-    public JsonbPropertyMetadata setContext(JsonbRuntimeContext jsonbRuntime) {
-        this.jsonbRuntime = jsonbRuntime;
+    public JsonbPropertyMetadata withClassModel(ClassDescriptor typeDescriptor) {
+        this.typeDescriptor = typeDescriptor;
+        return this;
+    }
+
+    /**
+     * Sets wrapper.
+     *
+     * @param currentItem Wrapper to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyMetadata setWrapper(CurrentItem<?> currentItem) {
+        this.currentItem = currentItem;
         return this;
     }
 
@@ -71,26 +82,6 @@ public class JsonbPropertyMetadata {
     }
 
     /**
-     * Gets class model.
-     *
-     * @return Class model.
-     */
-    public ClassDescriptor getClassModel() {
-        return typeDescriptor;
-    }
-
-    /**
-     * Sets class model.
-     *
-     * @param typeDescriptor Class model to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyMetadata withClassModel(ClassDescriptor typeDescriptor) {
-        this.typeDescriptor = typeDescriptor;
-        return this;
-    }
-
-    /**
      * Gets wrapper.
      *
      * @return Wrapper.
@@ -100,13 +91,23 @@ public class JsonbPropertyMetadata {
     }
 
     /**
-     * Sets wrapper.
+     * Sets context.
      *
-     * @param currentItem Wrapper to set.
+     * @param jsonbRuntime Context to set.
      * @return Updated object.
      */
-    public JsonbPropertyMetadata setWrapper(CurrentItem<?> currentItem) {
-        this.currentItem = currentItem;
+    public JsonbPropertyMetadata setContext(JsonbRuntimeContext jsonbRuntime) {
+        this.jsonbRuntime = jsonbRuntime;
         return this;
     }
+
+    /**
+     * Gets context.
+     *
+     * @return Context.
+     */
+    public JsonbRuntimeContext getContext() {
+        return jsonbRuntime;
+    }
+
 }

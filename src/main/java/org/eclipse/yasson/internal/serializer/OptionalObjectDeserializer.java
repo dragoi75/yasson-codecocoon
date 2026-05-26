@@ -31,6 +31,13 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
 
     private final Type optionalValueType;
 
+    private Type resolveOptionalType(Type runtimeType) {
+        if (runtimeType instanceof ParameterizedType) {
+            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
+        }
+        return Object.class;
+    }
+
     /**
      * Creates new optional object deserializer.
      *
@@ -52,10 +59,4 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
         return Optional.of(deserializer.deserialize(parser, ctx, optionalValueType));
     }
 
-    private Type resolveOptionalType(Type runtimeType) {
-        if (runtimeType instanceof ParameterizedType) {
-            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
-        }
-        return Object.class;
-    }
 }

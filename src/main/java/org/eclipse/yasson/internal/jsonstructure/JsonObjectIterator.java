@@ -55,6 +55,62 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     private State state = State.START;
 
+    private void setState(State state) {
+        this.state = state;
+    }
+
+    @Override
+    public JsonParser.Event next() {
+        switch(state) {
+            case START:
+                if (!keyIterator.hasNext()) {
+                    setState(State.END);
+                    return JsonParser.Event.END_OBJECT;
+                } else {
+                    nextKey();
+                    setState(State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
+            case KEY:
+                setState(State.VALUE);
+                JsonValue value = getValue();
+                return getValueEvent(value);
+            case VALUE:
+                if (keyIterator.hasNext()) {
+                    nextKey();
+                    setState(State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
+                setState(State.END);
+                return JsonParser.Event.END_OBJECT;
+            default:
+                throw new JsonbException("Illegal state");
+        }
+    }
+
+    /**
+     * {@link JsonValue} for current key.
+     *
+     * @return Current JsonValue.
+     */
+    public JsonValue getValue() {
+        return jsonObject.get(currentKey);
+    }
+
+    /**
+     * Current key this iterator is pointing at.
+     *
+     * @return Current key.
+     */
+    public String getKey() {
+        return currentKey;
+    }
+
+    @Override
+    JsonbException createIncompatibleValueError() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
+    }
+
     JsonObjectIterator(JsonObject jsonObject) {
         this.jsonObject = jsonObject;
         this.keyIterator = jsonObject.keySet().iterator();
@@ -68,32 +124,11 @@ public class JsonObjectIterator extends JsonStructureIterator {
     }
 
     @Override
-    public JsonParser.Event next() {
-        switch(state) {
-            case START:
-                if (!keyIterator.hasNext()) {
-                    setState(State.END);
-                    return JsonParser.Event.END_OBJECT;
-                } else {
-                    nextKey();
-                    setState(JsonObjectIterator.State.KEY);
-                    return JsonParser.Event.KEY_NAME;
-                }
-            case KEY:
-                setState(JsonObjectIterator.State.VALUE);
-                JsonValue value = getValue();
-                return getValueEvent(value);
-            case VALUE:
-                if (keyIterator.hasNext()) {
-                    nextKey();
-                    setState(JsonObjectIterator.State.KEY);
-                    return JsonParser.Event.KEY_NAME;
-                }
-                setState(State.END);
-                return JsonParser.Event.END_OBJECT;
-            default:
-                throw new JsonbException("Illegal state");
+    String getString() {
+        if (State.KEY == state) {
+            return currentKey;
         }
+        return super.getString();
     }
 
     @Override
@@ -102,38 +137,4 @@ public class JsonObjectIterator extends JsonStructureIterator {
         return State.END != state;
     }
 
-    /**
-     * {@link JsonValue} for current key.
-     *
-     * @return Current JsonValue.
-     */
-    public JsonValue getValue() {
-        return jsonObject.get(currentKey);
-    }
-
-    @Override
-    String getString() {
-        if (JsonObjectIterator.State.KEY == state) {
-            return currentKey;
-        }
-        return super.getString();
-    }
-
-    @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
-    }
-
-    private void setState(State state) {
-        this.state = state;
-    }
-
-    /**
-     * Current key this iterator is pointing at.
-     *
-     * @return Current key.
-     */
-    public String getKey() {
-        return currentKey;
-    }
 }

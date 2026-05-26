@@ -24,22 +24,6 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
 
-    /**
-     * Creates new instance of json object serializer.
-     *
-     * @param builder serializer builder
-     */
-    protected JsonObjectSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(JsonObject obj, JsonGenerator generator, SerializationContext ctx) {
-        for (Map.Entry<String, JsonValue> entry : obj.entrySet()) {
-            generator.write(entry.getKey(), entry.getValue());
-        }
-    }
-
     @Override
     protected void writeStart(JsonGenerator generator) {
         generator.writeStartObject();
@@ -49,4 +33,21 @@ public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
     protected void writeStart(String key, JsonGenerator generator) {
         generator.writeStartObject(key);
     }
+
+    @Override
+    protected void serializeInternal(JsonObject obj, JsonGenerator generator, SerializationContext ctx) {
+        for (Map.Entry<String, JsonValue> entry : obj.entrySet()) {
+            generator.write(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Creates new instance of json object serializer.
+     *
+     * @param builder serializer builder
+     */
+    protected JsonObjectSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
 }

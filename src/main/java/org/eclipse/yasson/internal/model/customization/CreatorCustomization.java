@@ -27,38 +27,17 @@ public class CreatorCustomization extends CustomizationBase {
     private PropertyModel propertyModel;
 
     /**
-     * Creates new creator customization instance.
+     * Set property referenced model.
      *
-     * @param customization   builder of the customization
-     * @param numberFormatter number formatter
-     * @param dateFormatter   date formatter
+     * @param propertyModel referenced property model
      */
-    public CreatorCustomization(SerializationCustomizationBuilder customization, JsonbNumericFormatter numberFormatter, JsonbDateTimeFormatter dateFormatter) {
-        super(customization);
-        this.numberFormatter = numberFormatter;
-        this.dateFormatter = dateFormatter;
+    public void setPropertyModel(PropertyModel propertyModel) {
+        this.propertyModel = propertyModel;
     }
 
     @Override
-    public JsonbNumericFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbNumericFormatter getDeserializeNumberFormatter() {
-        if (null == numberFormatter) {
-            if (null != propertyModel) {
-                return propertyModel.getCustomization().getDeserializeNumberFormatter();
-            }
-        } else {
-            return numberFormatter;
-        }
-        return null;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
     }
 
     @Override
@@ -74,16 +53,38 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    public JsonbNumericFormatter getDeserializeNumberFormatter() {
+        if (null == numberFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
+            return numberFormatter;
+        }
+        return null;
+    }
+
+    @Override
+    public JsonbNumericFormatter getSerializeNumberFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    @Override
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     /**
-     * Set property referenced model.
+     * Creates new creator customization instance.
      *
-     * @param propertyModel referenced property model
+     * @param customization   builder of the customization
+     * @param numberFormatter number formatter
+     * @param dateFormatter   date formatter
      */
-    public void setPropertyModel(PropertyModel propertyModel) {
-        this.propertyModel = propertyModel;
+    public CreatorCustomization(SerializationCustomizationBuilder customization, JsonbNumericFormatter numberFormatter, JsonbDateTimeFormatter dateFormatter) {
+        super(customization);
+        this.numberFormatter = numberFormatter;
+        this.dateFormatter = dateFormatter;
     }
+
 }

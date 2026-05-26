@@ -24,17 +24,6 @@ public class RuntimeTypeHolder implements RuntimeTypeDescriptor {
     private final Type runtimeType;
 
     /**
-     * Creates a new instance.
-     *
-     * @param wrapper     runtime info about class
-     * @param runtimeType class type
-     */
-    public RuntimeTypeHolder(RuntimeTypeDescriptor wrapper, Type runtimeType) {
-        this.wrapper = wrapper;
-        this.runtimeType = runtimeType;
-    }
-
-    /**
      * Wrapper containing property of this type.
      *
      * @return wrapper
@@ -53,4 +42,16 @@ public class RuntimeTypeHolder implements RuntimeTypeDescriptor {
     public Type getRuntimeType() {
         return runtimeType;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper     runtime info about class
+     * @param runtimeType class type
+     */
+    public RuntimeTypeHolder(RuntimeTypeDescriptor wrapper, Type runtimeType) {
+        this.wrapper = wrapper;
+        this.runtimeType = runtimeType;
+    }
+
 }

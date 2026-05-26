@@ -33,18 +33,14 @@ public class ClassSerializationConfig extends CustomizationBase {
 
     private final PropertyVisibilityStrategy visibilityStrategy;
 
-    /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param configurator not null
-     */
-    ClassSerializationConfig(ClassCustomizationConfigurator configurator) {
-        super(configurator);
-        this.instanceFactory = configurator.getCreator();
-        this.fieldSequence = configurator.getPropertyOrder();
-        this.numericFormatter = configurator.getNumberFormatter();
-        this.dateTimeFormat = configurator.getDateFormatter();
-        this.visibilityStrategy = configurator.getPropertyVisibilityStrategy();
+    @Override
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
+        return dateTimeFormat;
+    }
+
+    @Override
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
+        return dateTimeFormat;
     }
 
     /**
@@ -61,13 +57,18 @@ public class ClassSerializationConfig extends CustomizationBase {
         this.visibilityStrategy = sourceConfig.getPropertyVisibilityStrategy();
     }
 
+    @Override
+    public JsonbNumericFormatter getDeserializeNumberFormatter() {
+        return numericFormatter;
+    }
+
     /**
-     * Returns instance of {@link JsonbCreatorInvoker}.
+     * Sets sorted properties.
      *
-     * @return instance of creator
+     * @param fieldSequence sorted names of properties
      */
-    public JsonbCreatorInvoker getCreator() {
-        return instanceFactory;
+    public void setPropertyOrder(String[] fieldSequence) {
+        this.fieldSequence = fieldSequence;
     }
 
     /**
@@ -80,12 +81,26 @@ public class ClassSerializationConfig extends CustomizationBase {
     }
 
     /**
-     * Sets sorted properties.
+     * Copies properties from builder an creates immutable instance.
      *
-     * @param fieldSequence sorted names of properties
+     * @param configurator not null
      */
-    public void setPropertyOrder(String[] fieldSequence) {
-        this.fieldSequence = fieldSequence;
+    ClassSerializationConfig(ClassCustomizationConfigurator configurator) {
+        super(configurator);
+        this.instanceFactory = configurator.getCreator();
+        this.fieldSequence = configurator.getPropertyOrder();
+        this.numericFormatter = configurator.getNumberFormatter();
+        this.dateTimeFormat = configurator.getDateFormatter();
+        this.visibilityStrategy = configurator.getPropertyVisibilityStrategy();
+    }
+
+    /**
+     * Returns instance of {@link JsonbCreatorInvoker}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreatorInvoker getCreator() {
+        return instanceFactory;
     }
 
     /**
@@ -100,21 +115,6 @@ public class ClassSerializationConfig extends CustomizationBase {
     @Override
     public JsonbNumericFormatter getSerializeNumberFormatter() {
         return numericFormatter;
-    }
-
-    @Override
-    public JsonbNumericFormatter getDeserializeNumberFormatter() {
-        return numericFormatter;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getSerializeDateFormatter() {
-        return dateTimeFormat;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
-        return dateTimeFormat;
     }
 
 }

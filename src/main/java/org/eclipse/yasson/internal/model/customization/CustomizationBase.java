@@ -29,6 +29,38 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
 
     private final boolean nillable;
 
+    @Override
+    public TypeAdapterBinding getDeserializeAdapterBinding() {
+        return adapterBinding;
+    }
+
+    /**
+     * Serializer wrapper with resolved generic info.
+     *
+     * @return serializer wrapper
+     */
+    public JsonbSerializerBinding getSerializerBinding() {
+        return serializerBinding;
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public JsonbDeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -53,40 +85,8 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         this.deserializerBinding = other.getDeserializerBinding();
     }
 
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
     public TypeAdapterBinding getSerializeAdapterBinding() {
         return adapterBinding;
-    }
-
-    @Override
-    public TypeAdapterBinding getDeserializeAdapterBinding() {
-        return adapterBinding;
-    }
-
-    /**
-     * Serializer wrapper with resolved generic info.
-     *
-     * @return serializer wrapper
-     */
-    public JsonbSerializerBinding getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public JsonbDeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
     }
 
 }

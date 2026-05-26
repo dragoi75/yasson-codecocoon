@@ -57,37 +57,66 @@ public class SerializerBuilderBase<T extends SerializerBuilderBase> {
     private final JsonbRuntimeContext jsonbRuntime;
 
     /**
-     * Crates a builder.
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or
+     * {@link java.lang.reflect.WildcardType}.
+     * Otherwise provided type in type field, or type of field model.
      *
-     * @param jsonbRuntime Not null.
+     * @return runtime type
      */
-    public SerializerBuilderBase(JsonbRuntimeContext jsonbRuntime) {
-        Objects.requireNonNull(jsonbRuntime);
-        this.jsonbRuntime = jsonbRuntime;
+    public Type getRuntimeType() {
+        return resolvedType;
     }
 
     /**
-     * Wrapper item for this item.
+     * Generic type of the item.
      *
-     * @param currentItem not null.
-     * @return Builder instance for call chaining.
+     * @return generic type
+     */
+    public Type getGenericType() {
+        return parameterizedType;
+    }
+
+    /**
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     *
+     * @param valueType type of instance not null
+     * @return builder instance for call chaining
      */
     @SuppressWarnings("unchecked")
-    public T setWrapper(CurrentItem<?> currentItem) {
-        this.currentItem = currentItem;
+    public T setType(Type valueType) {
+        this.parameterizedType = valueType;
         return (T) this;
     }
 
     /**
-     * Customization of the class.
+     * Runtime type for this item.
      *
-     * @param customConfig Class customization
+     * @param resolvedType runtime type
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T setCustomization(Customization customConfig) {
-        this.customConfig = customConfig;
+    public T setRuntimeType(Type resolvedType) {
+        this.resolvedType = resolvedType;
         return (T) this;
+    }
+
+    /**
+     * Type customization.
+     *
+     * @return customization
+     */
+    public Customization getCustomization() {
+        return customConfig;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbRuntime;
     }
 
     /**
@@ -103,14 +132,33 @@ public class SerializerBuilderBase<T extends SerializerBuilderBase> {
     }
 
     /**
-     * Runtime type for this item.
+     * Wrapper item for this item.
      *
-     * @param resolvedType runtime type
+     * @return Wrapper item.
+     */
+    public CurrentItem<?> getWrapper() {
+        return currentItem;
+    }
+
+    /**
+     * Crates a builder.
+     *
+     * @param jsonbRuntime Not null.
+     */
+    public SerializerBuilderBase(JsonbRuntimeContext jsonbRuntime) {
+        Objects.requireNonNull(jsonbRuntime);
+        this.jsonbRuntime = jsonbRuntime;
+    }
+
+    /**
+     * Customization of the class.
+     *
+     * @param customConfig Class customization
      * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T setRuntimeType(Type resolvedType) {
-        this.resolvedType = resolvedType;
+    public T setCustomization(Customization customConfig) {
+        this.customConfig = customConfig;
         return (T) this;
     }
 
@@ -129,15 +177,6 @@ public class SerializerBuilderBase<T extends SerializerBuilderBase> {
     }
 
     /**
-     * Wrapper item for this item.
-     *
-     * @return Wrapper item.
-     */
-    public CurrentItem<?> getWrapper() {
-        return currentItem;
-    }
-
-    /**
      * Model of a class representing current item and instance (if any).
      * Known collection classes doesn't need such a model.
      *
@@ -148,53 +187,15 @@ public class SerializerBuilderBase<T extends SerializerBuilderBase> {
     }
 
     /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or
-     * {@link java.lang.reflect.WildcardType}.
-     * Otherwise provided type in type field, or type of field model.
+     * Wrapper item for this item.
      *
-     * @return runtime type
-     */
-    public Type getRuntimeType() {
-        return resolvedType;
-    }
-
-    /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
-     *
-     * @param valueType type of instance not null
-     * @return builder instance for call chaining
+     * @param currentItem not null.
+     * @return Builder instance for call chaining.
      */
     @SuppressWarnings("unchecked")
-    public T setType(Type valueType) {
-        this.parameterizedType = valueType;
+    public T setWrapper(CurrentItem<?> currentItem) {
+        this.currentItem = currentItem;
         return (T) this;
     }
 
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbRuntime;
-    }
-
-    /**
-     * Type customization.
-     *
-     * @return customization
-     */
-    public Customization getCustomization() {
-        return customConfig;
-    }
-
-    /**
-     * Generic type of the item.
-     *
-     * @return generic type
-     */
-    public Type getGenericType() {
-        return parameterizedType;
-    }
 }

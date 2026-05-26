@@ -26,6 +26,20 @@ public class TypeAdapterBinding extends ComponentBindingBase {
 
     private final JsonbAdapter<?, ?> jsonbConverter;
 
+    @Override
+    public Class<?> getComponentClass() {
+        return jsonbConverter.getClass();
+    }
+
+    /**
+     * Get actual components to adapt object value.
+     *
+     * @return components
+     */
+    public JsonbAdapter<?, ?> getAdapter() {
+        return jsonbConverter;
+    }
+
     /**
      * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
      *
@@ -53,17 +67,4 @@ public class TypeAdapterBinding extends ComponentBindingBase {
         return targetType;
     }
 
-    /**
-     * Get actual components to adapt object value.
-     *
-     * @return components
-     */
-    public JsonbAdapter<?, ?> getAdapter() {
-        return jsonbConverter;
-    }
-
-    @Override
-    public Class<?> getComponentClass() {
-        return jsonbConverter.getClass();
-    }
 }

@@ -22,15 +22,6 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
 
     private final List<Byte> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of byte array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected ByteArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +38,14 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
         }
         return byteArray;
     }
+
+    /**
+     * Creates new instance of byte array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected ByteArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

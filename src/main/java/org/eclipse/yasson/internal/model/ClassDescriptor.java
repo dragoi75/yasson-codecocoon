@@ -49,41 +49,49 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
      *
-     * @param propertyName A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * @return class properties.
      */
-    public PropertyModel getPropertyModel(String propertyName) {
-        return propertyMap.get(propertyName);
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(propertyMap);
     }
 
     /**
-     * Create instance of class model.
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
      *
-     * @param targetType                  Class to model.
-     * @param serializationConfig          Customization of the class parsed from annotations.
-     * @param parentDescriptor       Class model of parent class.
-     * @param namingStrategy Property naming strategy.
+     * @return sorted class properties.
      */
-    public ClassDescriptor(Class<?> targetType, ClassSerializationConfig serializationConfig, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
-        this.targetType = targetType;
-        this.serializationConfig = serializationConfig;
-        this.parentDescriptor = parentDescriptor;
-        this.namingStrategy = namingStrategy;
-        this.noArgConstructor = ReflectionTypeResolver.getDefaultConstructor(targetType, false);
-        setProperties(new ArrayList<>());
+    public PropertyModel[] getSortedProperties() {
+        return orderedProperties;
     }
 
     /**
-     * Search for field in this class model and superclasses of its class.
+     * Sets parsed properties of the class.
      *
-     * @param jsonPropertyName name as it appears in JSON during reading.
-     * @return PropertyModel if found.
+     * @param incomingProperties class properties
      */
-    public PropertyModel findPropertyByJsonReadName(String jsonPropertyName) {
-        Objects.requireNonNull(jsonPropertyName);
-        return findPropertyModel(this, jsonPropertyName);
+    public void setProperties(List<PropertyModel> incomingProperties) {
+        orderedProperties = incomingProperties.toArray(new PropertyModel[] {});
+        this.propertyMap = incomingProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (modifier) -> modifier));
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassSerializationConfig getClassCustomization() {
+        return serializationConfig;
+    }
+
+    /**
+     * Default no argument constructor of the class used for deserialization.
+     *
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        return noArgConstructor;
     }
 
     private PropertyModel findPropertyModel(ClassDescriptor targetClassDescriptor, String jsonPropertyName) {
@@ -126,12 +134,24 @@ public class ClassDescriptor {
     }
 
     /**
-     * Introspected customization for a class.
+     * Search for field in this class model and superclasses of its class.
      *
-     * @return Immutable class customization.
+     * @param jsonPropertyName name as it appears in JSON during reading.
+     * @return PropertyModel if found.
      */
-    public ClassSerializationConfig getClassCustomization() {
-        return serializationConfig;
+    public PropertyModel findPropertyByJsonReadName(String jsonPropertyName) {
+        Objects.requireNonNull(jsonPropertyName);
+        return findPropertyModel(this, jsonPropertyName);
+    }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param propertyName A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public PropertyModel getPropertyModel(String propertyName) {
+        return propertyMap.get(propertyName);
     }
 
     /**
@@ -144,39 +164,20 @@ public class ClassDescriptor {
     }
 
     /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * Create instance of class model.
      *
-     * @return sorted class properties.
+     * @param targetType                  Class to model.
+     * @param serializationConfig          Customization of the class parsed from annotations.
+     * @param parentDescriptor       Class model of parent class.
+     * @param namingStrategy Property naming strategy.
      */
-    public PropertyModel[] getSortedProperties() {
-        return orderedProperties;
+    public ClassDescriptor(Class<?> targetType, ClassSerializationConfig serializationConfig, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
+        this.targetType = targetType;
+        this.serializationConfig = serializationConfig;
+        this.parentDescriptor = parentDescriptor;
+        this.namingStrategy = namingStrategy;
+        this.noArgConstructor = ReflectionTypeResolver.getDefaultConstructor(targetType, false);
+        setProperties(new ArrayList<>());
     }
 
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param incomingProperties class properties
-     */
-    public void setProperties(List<PropertyModel> incomingProperties) {
-        orderedProperties = incomingProperties.toArray(new PropertyModel[] {});
-        this.propertyMap = incomingProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (modifier) -> modifier));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(propertyMap);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     *
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        return noArgConstructor;
-    }
 }

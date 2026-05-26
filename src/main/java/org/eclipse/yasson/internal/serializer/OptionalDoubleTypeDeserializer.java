@@ -28,6 +28,15 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserializer<OptionalDouble> {
 
+    @Override
+    protected OptionalDouble deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalDouble.of(Double.parseDouble(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -47,12 +56,4 @@ public class OptionalDoubleTypeDeserializer extends AbstractValueTypeDeserialize
         return deserialize(value, (JsonbUnmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalDouble deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalDouble.of(Double.parseDouble(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
-        }
-    }
 }

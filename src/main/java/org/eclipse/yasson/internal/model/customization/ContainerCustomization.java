@@ -20,15 +20,6 @@ public class ContainerCustomization extends ClassSerializationConfig {
     /**
      * Creates a new instance.
      *
-     * @param builder Builder to initialize from.
-     */
-    public ContainerCustomization(ClassCustomizationConfigurator builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
      * @param other Class customization to initialize from.
      */
     public ContainerCustomization(ClassSerializationConfig other) {
@@ -44,4 +35,14 @@ public class ContainerCustomization extends ClassSerializationConfig {
     public final boolean isNillable() {
         return true;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize from.
+     */
+    public ContainerCustomization(ClassCustomizationConfigurator builder) {
+        super(builder);
+    }
+
 }

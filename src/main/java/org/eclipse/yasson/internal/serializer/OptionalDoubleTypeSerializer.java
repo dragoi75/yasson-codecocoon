@@ -27,6 +27,13 @@ import static org.eclipse.yasson.internal.serializer.OptionalObjectSerializer.ha
  */
 public class OptionalDoubleTypeSerializer extends AbstractValueSerializer<OptionalDouble> {
 
+    @Override
+    protected void serializeValue(OptionalDouble obj, JsonGenerator generator, JsonbMarshaller marshaller) {
+        if (!handleEmpty(obj, OptionalDouble::isPresent, getCustomization(), generator, marshaller)) {
+            generator.write(obj.getAsDouble());
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,10 +43,4 @@ public class OptionalDoubleTypeSerializer extends AbstractValueSerializer<Option
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(OptionalDouble obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        if (!handleEmpty(obj, OptionalDouble::isPresent, getCustomization(), generator, marshaller)) {
-            generator.write(obj.getAsDouble());
-        }
-    }
 }

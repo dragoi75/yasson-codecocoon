@@ -30,15 +30,6 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
     private static final String NEGATIVE_INFINITY = "NEGATIVE_INFINITY";
     private static final String NAN = "NaN";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    DoubleTypeDeserializer(Customization customization) {
-        super(Double.class, customization);
-    }
-
     @Override
     protected Double deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         switch (jsonValue) {
@@ -61,4 +52,14 @@ public class DoubleTypeDeserializer extends AbstractNumberDeserializer<Double> {
                     });
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    DoubleTypeDeserializer(Customization customization) {
+        super(Double.class, customization);
+    }
+
 }

@@ -30,25 +30,6 @@ public class JsonbUnmarshaller extends ObjectProcessingContext implements Deseri
 
     private static final Logger JSONB_UNMARSHALLER_LOG = Logger.getLogger(JsonbUnmarshaller.class.getName());
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param runtimeContext context to use
-     */
-    public JsonbUnmarshaller(JsonbRuntimeContext runtimeContext) {
-        super(runtimeContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type targetKind, JsonParser jsonReader) {
-        return deserializeValue(targetKind, jsonReader);
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T deserializeValue(Type targetKind, JsonParser jsonReader) {
         try {
@@ -81,4 +62,24 @@ public class JsonbUnmarshaller extends ObjectProcessingContext implements Deseri
         final JsonParser.Event finalEvent = levelContext.getLastEvent();
         return JsonParser.Event.KEY_NAME == finalEvent ? jsonReader.next() : finalEvent;
     }
+
+    @Override
+    public <T> T deserialize(Type targetKind, JsonParser jsonReader) {
+        return deserializeValue(targetKind, jsonReader);
+    }
+
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param runtimeContext context to use
+     */
+    public JsonbUnmarshaller(JsonbRuntimeContext runtimeContext) {
+        super(runtimeContext);
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
+    }
+
 }

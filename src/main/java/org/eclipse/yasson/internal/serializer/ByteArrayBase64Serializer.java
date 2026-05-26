@@ -28,21 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class ByteArrayBase64Serializer extends AbstractValueSerializer<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Customization model.
-     */
-    public ByteArrayBase64Serializer(Customization customization) {
-        super(customization);
-    }
-
-    @Override
-    protected void serializeValue(byte[] obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy())
-                                .encodeToString(obj));
-    }
-
     private Base64.Encoder getEncoder(String strategy) {
         switch (strategy) {
         case BinaryDataStrategy.BASE_64:
@@ -54,4 +39,20 @@ public class ByteArrayBase64Serializer extends AbstractValueSerializer<byte[]> {
                                                          "Invalid strategy: " + strategy));
         }
     }
+
+    @Override
+    protected void serializeValue(byte[] obj, JsonGenerator generator, JsonbMarshaller marshaller) {
+        generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy())
+                                .encodeToString(obj));
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Customization model.
+     */
+    public ByteArrayBase64Serializer(Customization customization) {
+        super(customization);
+    }
+
 }

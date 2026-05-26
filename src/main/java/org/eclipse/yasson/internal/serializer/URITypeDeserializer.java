@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
 
+    @Override
+    protected URI deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        return URI.create(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class URITypeDeserializer extends AbstractValueTypeDeserializer<URI> {
         super(URI.class, customization);
     }
 
-    @Override
-    protected URI deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
-        return URI.create(jsonValue);
-    }
 }

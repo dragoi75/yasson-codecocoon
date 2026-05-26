@@ -30,27 +30,6 @@ public class DateTypeDeserializer extends AbstractDateTimeDeserializer<Date> {
 
     private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public DateTypeDeserializer(Customization customization) {
-        super(Date.class, customization);
-    }
-
-    @Override
-    protected Date fromInstant(Instant instant) {
-        return new Date(instant.toEpochMilli());
-    }
-
-    @Override
-    protected Date parseDefault(String jsonValue, Locale locale) {
-        TemporalAccessor parsed = parseWithOrWithoutZone(jsonValue, DEFAULT_DATE_TIME_FORMATTER.withLocale(locale), UTC);
-
-        return new Date(Instant.from(parsed).toEpochMilli());
-    }
-
     @Override
     protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
         TemporalAccessor parsed = parseWithOrWithoutZone(jsonValue, formatter, UTC);
@@ -79,4 +58,26 @@ public class DateTypeDeserializer extends AbstractDateTimeDeserializer<Date> {
             return ZonedDateTime.parse(jsonValue, formatter.withZone(defaultZone));
         }
     }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public DateTypeDeserializer(Customization customization) {
+        super(Date.class, customization);
+    }
+
+    @Override
+    protected Date parseDefault(String jsonValue, Locale locale) {
+        TemporalAccessor parsed = parseWithOrWithoutZone(jsonValue, DEFAULT_DATE_TIME_FORMATTER.withLocale(locale), UTC);
+
+        return new Date(Instant.from(parsed).toEpochMilli());
+    }
+
+    @Override
+    protected Date fromInstant(Instant instant) {
+        return new Date(instant.toEpochMilli());
+    }
+
 }

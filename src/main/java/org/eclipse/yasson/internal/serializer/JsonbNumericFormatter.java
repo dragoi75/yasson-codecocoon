@@ -22,6 +22,15 @@ public class JsonbNumericFormatter {
     private final String regionCode;
 
     /**
+     * Locale to use with formatter.
+     *
+     * @return locale
+     */
+    public String getLocale() {
+        return regionCode;
+    }
+
+    /**
      * Construct with format string and locale.
      *
      * @param pattern formatter format
@@ -39,15 +48,6 @@ public class JsonbNumericFormatter {
      */
     public String getFormat() {
         return pattern;
-    }
-
-    /**
-     * Locale to use with formatter.
-     *
-     * @return locale
-     */
-    public String getLocale() {
-        return regionCode;
     }
 
 }

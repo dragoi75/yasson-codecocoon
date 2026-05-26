@@ -34,6 +34,28 @@ public class CreatorProfile {
     private final CreatorCustomization profileCustomization;
 
     /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return valueKind;
+    }
+
+    public CreatorCustomization getCustomization() {
+        return profileCustomization;
+    }
+
+    /**
+     * Gets parameter name.
+     *
+     * @return Parameter name.
+     */
+    public String getName() {
+        return displayLabel;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param displayLabel      Parameter name
@@ -56,28 +78,6 @@ public class CreatorProfile {
         configurator.setDeserializerBinding(annotationInspector.getDeserializerBinding(classAnnotationHolder));
         configurator.setSerializerBinding(annotationInspector.getSerializerBinding(classAnnotationHolder));
         this.profileCustomization = new CreatorCustomization(configurator, numericFormatter, dateTimeFormatter);
-    }
-
-    /**
-     * Gets parameter name.
-     *
-     * @return Parameter name.
-     */
-    public String getName() {
-        return displayLabel;
-    }
-
-    public CreatorCustomization getCustomization() {
-        return profileCustomization;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return valueKind;
     }
 
 }

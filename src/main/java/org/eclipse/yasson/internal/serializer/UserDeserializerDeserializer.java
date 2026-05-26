@@ -29,29 +29,9 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     private T deserializerResult;
 
-    /**
-     * Create instance of current item with its builder.
-     * Contains user provided component for custom deserialization.
-     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
-     * in wrong position after returning from deserializerBinding.
-     *
-     * @param builder             {@link JsonDeserializerBuilder} used to build this instance
-     * @param deserializerBinding Deserializer.
-     */
-    protected UserDeserializerDeserializer(JsonDeserializerBuilder builder, JsonbDeserializerBinding<?> deserializerBinding) {
-        super(builder);
-        this.deserializerBinding = deserializerBinding;
-    }
-
     @Override
-    public void appendResult(Object result) {
-        //ignore internal deserialize() call in custom deserializer
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(JsonbUnmarshaller unmarshaller) {
-        return deserializerResult;
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 
     @SuppressWarnings("unchecked")
@@ -69,8 +49,9 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
+    @SuppressWarnings("unchecked")
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
+        return deserializerResult;
     }
 
     /**
@@ -80,4 +61,24 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
         return parser.getCurrentLevel();
     }
+
+    @Override
+    public void appendResult(Object result) {
+        //ignore internal deserialize() call in custom deserializer
+    }
+
+    /**
+     * Create instance of current item with its builder.
+     * Contains user provided component for custom deserialization.
+     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
+     * in wrong position after returning from deserializerBinding.
+     *
+     * @param builder             {@link JsonDeserializerBuilder} used to build this instance
+     * @param deserializerBinding Deserializer.
+     */
+    protected UserDeserializerDeserializer(JsonDeserializerBuilder builder, JsonbDeserializerBinding<?> deserializerBinding) {
+        super(builder);
+        this.deserializerBinding = deserializerBinding;
+    }
+
 }

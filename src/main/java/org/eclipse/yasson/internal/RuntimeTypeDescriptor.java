@@ -20,17 +20,18 @@ import java.lang.reflect.Type;
 public interface RuntimeTypeDescriptor {
 
     /**
-     * Runtime type holder of a wrapper class of this runtime type.
-     *
-     * @return Runtime type info
-     */
-    RuntimeTypeDescriptor getWrapper();
-
-    /**
      * Returns a runtime type. It can be a class, {@link java.lang.reflect.ParameterizedType} or
      * {@link java.lang.reflect.TypeVariable}.
      *
      * @return Runtime type or null if not defined.
      */
     Type getRuntimeType();
+
+    /**
+     * Runtime type holder of a wrapper class of this runtime type.
+     *
+     * @return Runtime type info
+     */
+    RuntimeTypeDescriptor getWrapper();
+
 }

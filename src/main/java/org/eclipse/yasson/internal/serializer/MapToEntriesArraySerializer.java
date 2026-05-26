@@ -59,28 +59,6 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
     private final String valueEntryName;
 
     /**
-     * Creates new map to entries array serializer.
-     *
-     * @param serializer map serializer
-     */
-    protected MapToEntriesArraySerializer(MapSerializer<K, V> serializer) {
-        this.serializer = serializer;
-        this.keyEntryName = DEFAULT_KEY_ENTRY_NAME;
-        this.valueEntryName = DEFAULT_VALUE_ENTRY_NAME;
-    }
-
-    /**
-     * Write start of {@link Map} serialization.
-     * Opens {@code JsonArray} block.
-     *
-     * @param generator JSON format generator
-     */
-    @Override
-    public void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    /**
      * Write start of {@link Map} serialization.
      * Opens {@code JsonArray} block.
      *
@@ -111,6 +89,28 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
             serializer.serializeItem(value, generator, ctx);
             generator.writeEnd();
         });
+    }
+
+    /**
+     * Creates new map to entries array serializer.
+     *
+     * @param serializer map serializer
+     */
+    protected MapToEntriesArraySerializer(MapSerializer<K, V> serializer) {
+        this.serializer = serializer;
+        this.keyEntryName = DEFAULT_KEY_ENTRY_NAME;
+        this.valueEntryName = DEFAULT_VALUE_ENTRY_NAME;
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Opens {@code JsonArray} block.
+     *
+     * @param generator JSON format generator
+     */
+    @Override
+    public void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
     }
 
 }

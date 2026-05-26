@@ -36,40 +36,6 @@ class AnnotationLocator {
     // may be null
     private final Class<? extends Annotation> annotationType;
 
-    /**
-     * Gets the {@link AnnotationLocator} for the given Annotation-Type.
-     *
-     * @param annClass {@link Class}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationLocator}
-     */
-    public static AnnotationLocator locateAnnotation(Class<?> annClass) {
-        return locateAnnotationByName(annClass.getName());
-    }
-
-    /**
-     * Gets the {@link AnnotationLocator} for the given Annotation-Type Name.
-     *
-     * @param annotationTypeName {@link String}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationLocator}
-     */
-    public static AnnotationLocator locateAnnotationByName(String annotationTypeName) {
-        return new AnnotationLocator(annotationTypeName, getOptionalAnnotationClass(annotationTypeName));
-    }
-
-    /**
-     * Gets the {@link AnnotationLocator} for @ConstructorProperties-Annotation.
-     *
-     * @return {@link AnnotationLocator}
-     */
-    public static AnnotationLocator findConstructorPropertiesAnnotation() {
-        return locateAnnotationByName(CONSTRUCTOR_PROPERTIES_KEY);
-    }
-
-    private AnnotationLocator(String annotationTypeName, Class<? extends Annotation> annotationType) {
-        this.annotationTypeName = annotationTypeName;
-        this.annotationType = annotationType;
-    }
-
     @SuppressWarnings("unchecked")
     public <T extends Annotation> T findAnnotationIn(Annotation[] annArray) {
         if (null == annotationType) {
@@ -78,39 +44,9 @@ class AnnotationLocator {
         return (T) locateAnnotation(annArray, annotationType, new HashSet<>());
     }
 
-    /**
-     * Looks for the annotation {@link #findAnnotationIn(Annotation[])} <br>
-     * and executes the "value" Method of it dynamically.
-     *
-     * @param annArray - Array of {@link Annotation}n.
-     * @return {@link Object}
-     */
-    public Object getValueIn(Annotation[] annArray) {
-        return invokeValueMethod(findAnnotationIn(annArray));
-    }
-
-    private Object invokeValueMethod(Annotation annClass) {
-        if (null == annClass) {
-            return null;
-        }
-        try {
-            return annClass.annotationType().getMethod("value").invoke(annClass);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String msg = MessageBundle.getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annClass.annotationType().getName());
-            LOG.finest(msg);
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classFqn) {
-        try {
-            return (Class<T>) Class.forName(classFqn);
-        } catch (ClassNotFoundException e) {
-            String msg = MessageBundle.getMessage(MessageKeyConstants.ANNOTATION_NOT_AVAILABLE, classFqn);
-            LOG.finest(msg);
-            return null;
-        }
+    @Override
+    public String toString() {
+        return "AnnotationFinder [annotationClassName=" + annotationTypeName + ", annotationClass=" + annotationType + "]";
     }
 
     /**
@@ -137,8 +73,73 @@ class AnnotationLocator {
         return null;
     }
 
-    @Override
-    public String toString() {
-        return "AnnotationFinder [annotationClassName=" + annotationTypeName + ", annotationClass=" + annotationType + "]";
+    @SuppressWarnings("unchecked")
+    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classFqn) {
+        try {
+            return (Class<T>) Class.forName(classFqn);
+        } catch (ClassNotFoundException e) {
+            String msg = MessageBundle.getMessage(MessageKeyConstants.ANNOTATION_NOT_AVAILABLE, classFqn);
+            LOG.finest(msg);
+            return null;
+        }
     }
+
+    /**
+     * Looks for the annotation {@link #findAnnotationIn(Annotation[])} <br>
+     * and executes the "value" Method of it dynamically.
+     *
+     * @param annArray - Array of {@link Annotation}n.
+     * @return {@link Object}
+     */
+    public Object getValueIn(Annotation[] annArray) {
+        return invokeValueMethod(findAnnotationIn(annArray));
+    }
+
+    /**
+     * Gets the {@link AnnotationLocator} for @ConstructorProperties-Annotation.
+     *
+     * @return {@link AnnotationLocator}
+     */
+    public static AnnotationLocator findConstructorPropertiesAnnotation() {
+        return locateAnnotationByName(CONSTRUCTOR_PROPERTIES_KEY);
+    }
+
+    private Object invokeValueMethod(Annotation annClass) {
+        if (null == annClass) {
+            return null;
+        }
+        try {
+            return annClass.annotationType().getMethod("value").invoke(annClass);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            String msg = MessageBundle.getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annClass.annotationType().getName());
+            LOG.finest(msg);
+            return null;
+        }
+    }
+
+    /**
+     * Gets the {@link AnnotationLocator} for the given Annotation-Type.
+     *
+     * @param annClass {@link Class}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationLocator}
+     */
+    public static AnnotationLocator locateAnnotation(Class<?> annClass) {
+        return locateAnnotationByName(annClass.getName());
+    }
+
+    /**
+     * Gets the {@link AnnotationLocator} for the given Annotation-Type Name.
+     *
+     * @param annotationTypeName {@link String}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationLocator}
+     */
+    public static AnnotationLocator locateAnnotationByName(String annotationTypeName) {
+        return new AnnotationLocator(annotationTypeName, getOptionalAnnotationClass(annotationTypeName));
+    }
+
+    private AnnotationLocator(String annotationTypeName, Class<? extends Annotation> annotationType) {
+        this.annotationTypeName = annotationTypeName;
+        this.annotationType = annotationType;
+    }
+
 }

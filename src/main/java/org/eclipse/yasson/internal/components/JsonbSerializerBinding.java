@@ -26,14 +26,13 @@ public class JsonbSerializerBinding<T> extends ComponentBindingBase {
     private final JsonbSerializer<T> bindingSerializer;
 
     /**
-     * Creates a new instance.
+     * Class of user component.
      *
-     * @param targetType     Generic type argument of serializer. Not null.
-     * @param bindingSerializer Serializer. Can be null.
+     * @return Component class.
      */
-    public JsonbSerializerBinding(Type targetType, JsonbSerializer<T> bindingSerializer) {
-        super(targetType);
-        this.bindingSerializer = bindingSerializer;
+    @Override
+    public Class<?> getComponentClass() {
+        return bindingSerializer.getClass();
     }
 
     /**
@@ -46,12 +45,14 @@ public class JsonbSerializerBinding<T> extends ComponentBindingBase {
     }
 
     /**
-     * Class of user component.
+     * Creates a new instance.
      *
-     * @return Component class.
+     * @param targetType     Generic type argument of serializer. Not null.
+     * @param bindingSerializer Serializer. Can be null.
      */
-    @Override
-    public Class<?> getComponentClass() {
-        return bindingSerializer.getClass();
+    public JsonbSerializerBinding(Type targetType, JsonbSerializer<T> bindingSerializer) {
+        super(targetType);
+        this.bindingSerializer = bindingSerializer;
     }
+
 }

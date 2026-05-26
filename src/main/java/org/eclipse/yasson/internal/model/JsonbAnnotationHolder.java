@@ -33,38 +33,6 @@ public class JsonbAnnotationHolder<T extends AnnotatedElement> {
 
     private final T targetItem;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param targetItem Element.
-     */
-    public JsonbAnnotationHolder(T targetItem) {
-        for (Annotation annotationInstance : targetItem.getAnnotations()) {
-            annotationMap.put(annotationInstance.annotationType(), annotationInstance);
-        }
-
-        this.targetItem = targetItem;
-    }
-
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return targetItem;
-    }
-
-    /**
-     * Get an annotation by type.
-     * @param <AT> Type of annotation
-     * @param annotationType Type of annotation
-     * @return Annotation by passed type
-     */
-    public <AT extends Annotation> AT getAnnotation(Class<AT> annotationType) {
-        return annotationType.cast(annotationMap.get(annotationType));
-    }
-
     public Annotation[] getAnnotations() {
         return annotationMap.values().toArray(new Annotation[0]);
     }
@@ -81,4 +49,37 @@ public class JsonbAnnotationHolder<T extends AnnotatedElement> {
         }
         annotationMap.put(annInstance.annotationType(), annInstance);
     }
+
+    /**
+     * Get an annotation by type.
+     * @param <AT> Type of annotation
+     * @param annotationType Type of annotation
+     * @return Annotation by passed type
+     */
+    public <AT extends Annotation> AT getAnnotation(Class<AT> annotationType) {
+        return annotationType.cast(annotationMap.get(annotationType));
+    }
+
+    /**
+     * Gets element.
+     *
+     * @return Element.
+     */
+    public T getElement() {
+        return targetItem;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param targetItem Element.
+     */
+    public JsonbAnnotationHolder(T targetItem) {
+        for (Annotation annotationInstance : targetItem.getAnnotations()) {
+            annotationMap.put(annotationInstance.annotationType(), annotationInstance);
+        }
+
+        this.targetItem = targetItem;
+    }
+
 }

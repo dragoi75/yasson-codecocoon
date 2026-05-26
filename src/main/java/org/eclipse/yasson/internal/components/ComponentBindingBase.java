@@ -24,14 +24,11 @@ public abstract class ComponentBindingBase {
     private final Type boundType;
 
     /**
-     * Creates info.
+     * Class of user component.
      *
-     * @param boundType type to which component is bound.
+     * @return component class
      */
-    public ComponentBindingBase(Type boundType) {
-        Objects.requireNonNull(boundType);
-        this.boundType = boundType;
-    }
+    public abstract Class<?> getComponentClass();
 
     /**
      * Resolved binding type of a component.
@@ -43,9 +40,13 @@ public abstract class ComponentBindingBase {
     }
 
     /**
-     * Class of user component.
+     * Creates info.
      *
-     * @return component class
+     * @param boundType type to which component is bound.
      */
-    public abstract Class<?> getComponentClass();
+    public ComponentBindingBase(Type boundType) {
+        Objects.requireNonNull(boundType);
+        this.boundType = boundType;
+    }
+
 }

@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class TimeZoneTypeSerializer extends AbstractValueSerializer<TimeZone> {
 
+    @Override
+    protected void serializeValue(TimeZone obj, JsonGenerator generator, JsonbMarshaller marshaller) {
+        generator.write(obj.getID());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class TimeZoneTypeSerializer extends AbstractValueSerializer<TimeZone> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(TimeZone obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        generator.write(obj.getID());
-    }
 }

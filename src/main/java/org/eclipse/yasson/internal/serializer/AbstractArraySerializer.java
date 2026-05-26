@@ -21,6 +21,16 @@ import jakarta.json.stream.JsonGenerator;
  */
 public abstract class AbstractArraySerializer<T> extends AbstractContainerSerializer<T> implements EmbeddedElement {
 
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartArray(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
+    }
+
     /**
      * Creates new instance of array serializer.
      *
@@ -30,13 +40,4 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
         super(builder);
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartArray(key);
-    }
 }

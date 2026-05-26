@@ -34,57 +34,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param wrapper     wrapped item
-     * @param runtimeType class type
-     * @param classModel  model of the class
-     */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
-        super(wrapper, runtimeType, classModel);
-    }
-
-    @Override
-    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        JsonbMarshaller context = (JsonbMarshaller) ctx;
-        try {
-            if (!context.addToProcessedObjects(object)) {
-                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, object.getClass()));
-            } else {
-                final PropertyModel[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
-                for (PropertyModel model : allProperties) {
-                    try {
-                        marshallProperty(object, generator, context, model);
-                    } catch (Exception e) {
-                        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.SERIALIZE_PROPERTY_ERROR, model.getWriteName(), object.getClass().getCanonicalName()), e);
-                    }
-                }
-            }
-        } finally {
-            context.removeFromProcessedObjects(object);
-        }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
         JsonbMarshaller marshaller = (JsonbMarshaller) ctx;
         if (propertyModel.isReadable()) {
@@ -108,6 +57,11 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
     }
 
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
     private boolean isEmptyOptional(Object object) {
         if (!(object instanceof Optional)) {
             if (!(object instanceof OptionalInt)) {
@@ -126,4 +80,51 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
         return false;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper     wrapped item
+     * @param runtimeType class type
+     * @param classModel  model of the class
+     */
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    @Override
+    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
+        JsonbMarshaller context = (JsonbMarshaller) ctx;
+        try {
+            if (!context.addToProcessedObjects(object)) {
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.RECURSIVE_REFERENCE, object.getClass()));
+            } else {
+                final PropertyModel[] allProperties = context.getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+                for (PropertyModel model : allProperties) {
+                    try {
+                        marshallProperty(object, generator, context, model);
+                    } catch (Exception e) {
+                        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.SERIALIZE_PROPERTY_ERROR, model.getWriteName(), object.getClass().getCanonicalName()), e);
+                    }
+                }
+            }
+        } finally {
+            context.removeFromProcessedObjects(object);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
 }

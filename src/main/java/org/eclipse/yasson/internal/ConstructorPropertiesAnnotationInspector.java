@@ -30,21 +30,9 @@ class ConstructorPropertiesAnnotationInspector {
 
     private final AnnotationLocator constructorAnnotations;
 
-    public static final ConstructorPropertiesAnnotationInspector forJsonbContext(JsonbRuntimeContext runtimeContext) {
-        return new ConstructorPropertiesAnnotationInspector(runtimeContext, AnnotationLocator.findConstructorPropertiesAnnotation());
-    }
-
-    /**
-     * Only for testing and internal purposes.
-     * <p>
-     * Please use static factory methods e.g. {@link #forJsonbContext(JsonbRuntimeContext)}.
-     *
-     * @param runtime          {@link JsonbRuntimeContext}
-     * @param annotationLocator {@link AnnotationLocator}
-     */
-    protected ConstructorPropertiesAnnotationInspector(JsonbRuntimeContext runtime, AnnotationLocator annotationLocator) {
-        this.runtimeContext = runtime;
-        this.constructorAnnotations = annotationLocator;
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + runtimeContext + ", constructorProperties=" + constructorAnnotations + "]";
     }
 
     public JsonbCreatorInvoker getCreator(Constructor<?>[] ctorArray) {
@@ -85,8 +73,21 @@ class ConstructorPropertiesAnnotationInspector {
         return new JsonbCreatorInvoker(execMember, creatorProfiles);
     }
 
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + runtimeContext + ", constructorProperties=" + constructorAnnotations + "]";
+    public static final ConstructorPropertiesAnnotationInspector forJsonbContext(JsonbRuntimeContext runtimeContext) {
+        return new ConstructorPropertiesAnnotationInspector(runtimeContext, AnnotationLocator.findConstructorPropertiesAnnotation());
     }
+
+    /**
+     * Only for testing and internal purposes.
+     * <p>
+     * Please use static factory methods e.g. {@link #forJsonbContext(JsonbRuntimeContext)}.
+     *
+     * @param runtime          {@link JsonbRuntimeContext}
+     * @param annotationLocator {@link AnnotationLocator}
+     */
+    protected ConstructorPropertiesAnnotationInspector(JsonbRuntimeContext runtime, AnnotationLocator annotationLocator) {
+        this.runtimeContext = runtime;
+        this.constructorAnnotations = annotationLocator;
+    }
+
 }

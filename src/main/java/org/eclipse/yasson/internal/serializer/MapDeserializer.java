@@ -43,19 +43,26 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
 
     private final T instance;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link JsonDeserializerBuilder} used to build this instance
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected MapDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
-                ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
-                : Object.class;
+    @SuppressWarnings("unchecked")
+    private <V> void appendCaptor(String key, V value) {
+        ((Map<String, V>) getInstance(null)).put(key, value);
+    }
 
-        this.instance = createInstance(builder);
+    @Override
+    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
+    @Override
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
+        return instance;
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
+        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
     }
 
     @SuppressWarnings("unchecked")
@@ -78,29 +85,23 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
     }
 
     @Override
-    public T getInstance(JsonbUnmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
     public void appendResult(Object result) {
         appendCaptor(getParserContext().getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
     }
 
-    @SuppressWarnings("unchecked")
-    private <V> void appendCaptor(String key, V value) {
-        ((Map<String, V>) getInstance(null)).put(key, value);
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected MapDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType
+                ? ReflectionTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
+                : Object.class;
+
+        this.instance = createInstance(builder);
     }
 
-    @Override
-    protected void deserializeNext(JsonParser parser, JsonbUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
-    }
-
-    @Override
-    protected JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
 }

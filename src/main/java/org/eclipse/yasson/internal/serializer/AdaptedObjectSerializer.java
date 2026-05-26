@@ -38,15 +38,19 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
 
     private final TypeAdapterBinding adapterInfo;
 
-    /**
-     * Creates AdapterObjectSerializer.
-     *
-     * @param classModel Class model.
-     * @param adapter    Adapter.
-     */
-    public AdaptedObjectSerializer(ClassDescriptor classModel, TypeAdapterBinding adapter) {
-        this.classModel = classModel;
-        this.adapterInfo = adapter;
+    @Override
+    public Type getRuntimeType() {
+        return null;
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return null;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return null;
     }
 
     @Override
@@ -73,6 +77,17 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         }
     }
 
+    /**
+     * Creates AdapterObjectSerializer.
+     *
+     * @param classModel Class model.
+     * @param adapter    Adapter.
+     */
+    public AdaptedObjectSerializer(ClassDescriptor classModel, TypeAdapterBinding adapter) {
+        this.classModel = classModel;
+        this.adapterInfo = adapter;
+    }
+
     @SuppressWarnings("unchecked")
     private JsonbSerializer<A> resolveSerializer(JsonbMarshaller ctx, A adapted) {
         final ContainerSerializerFactory cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
@@ -82,18 +97,4 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         return (JsonbSerializer<A>) new TypeSerializerBuilder(ctx.getJsonbContext()).setObjectClass(adapted.getClass()).setCustomization(null == classModel ? null : classModel.getClassCustomization()).setWrapper(this).buildSerializer();
     }
 
-    @Override
-    public ClassDescriptor getClassModel() {
-        return null;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return null;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return null;
-    }
 }

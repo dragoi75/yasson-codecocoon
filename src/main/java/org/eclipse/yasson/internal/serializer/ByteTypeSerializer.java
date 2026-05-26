@@ -21,15 +21,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ByteTypeSerializer extends AbstractNumberSerializer<Byte> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public ByteTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeNonFormatted(Byte obj, JsonGenerator generator, String key) {
         generator.write(key, obj);
@@ -39,4 +30,14 @@ public class ByteTypeSerializer extends AbstractNumberSerializer<Byte> {
     protected void serializeNonFormatted(Byte obj, JsonGenerator generator) {
         generator.write(obj);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public ByteTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

@@ -24,13 +24,14 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class CollectionSerializer<V> extends AbstractContainerSerializer<Collection<V>> implements EmbeddedElement {
 
-    /**
-     * Creates new collection serializer.
-     *
-     * @param builder serializer builder
-     */
-    protected CollectionSerializer(TypeSerializerBuilder builder) {
-        super(builder);
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartArray(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
     }
 
     @Override
@@ -40,13 +41,13 @@ public class CollectionSerializer<V> extends AbstractContainerSerializer<Collect
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
+    /**
+     * Creates new collection serializer.
+     *
+     * @param builder serializer builder
+     */
+    protected CollectionSerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartArray(key);
-    }
 }

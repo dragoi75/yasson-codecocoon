@@ -51,79 +51,12 @@ public class JsonbRuntimeContext {
     private final InstanceCreator objectFactory;
 
     /**
-     * Creates and initialize context.
-     *
-     * @param runtimeSettings  jsonb jsonbConfig not null
-     * @param jsonService provider of JSONP
-     */
-    public JsonbRuntimeContext(JsonbConfig runtimeSettings, JsonProvider jsonService) {
-        Objects.requireNonNull(runtimeSettings);
-        this.runtimeSettings = runtimeSettings;
-        this.modelRegistry = new ClassModelRegistry(this);
-        this.objectFactory = InstanceCreator.getSingleton();
-        this.componentFactory = initializeComponentInstanceCreator(objectFactory);
-        this.bindingRegistry = new ComponentBindingRegistry(this);
-        this.annotationInspector = new JsonbAnnotationIntrospector(this);
-        this.jsonService = jsonService;
-        this.configurationProperties = new JsonbConfigurationProperties(runtimeSettings);
-    }
-
-    /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return runtimeSettings;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public ClassModelRegistry getMappingContext() {
-        return modelRegistry;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonService;
-    }
-
-    /**
-     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
-     *
-     * @return Instance creator.
-     */
-    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        return componentFactory;
-    }
-
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentBindingRegistry getComponentMatcher() {
-        return bindingRegistry;
-    }
-
-    /**
      * Gets component for annotation parsing.
      *
      * @return Annotation introspector.
      */
     public JsonbAnnotationIntrospector getAnnotationIntrospector() {
         return annotationInspector;
-    }
-
-    public JsonbConfigurationProperties getConfigProperties() {
-        return configurationProperties;
     }
 
     /**
@@ -151,6 +84,73 @@ public class JsonbRuntimeContext {
         JsonbComponentInstanceCreator candidate = componentFactories.get(0);
         JSONB_RUNTIME_LOG.finest("Component instance creator:" + candidate.getClass());
         return candidate;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentBindingRegistry getComponentMatcher() {
+        return bindingRegistry;
+    }
+
+    /**
+     * Creates and initialize context.
+     *
+     * @param runtimeSettings  jsonb jsonbConfig not null
+     * @param jsonService provider of JSONP
+     */
+    public JsonbRuntimeContext(JsonbConfig runtimeSettings, JsonProvider jsonService) {
+        Objects.requireNonNull(runtimeSettings);
+        this.runtimeSettings = runtimeSettings;
+        this.modelRegistry = new ClassModelRegistry(this);
+        this.objectFactory = InstanceCreator.getSingleton();
+        this.componentFactory = initializeComponentInstanceCreator(objectFactory);
+        this.bindingRegistry = new ComponentBindingRegistry(this);
+        this.annotationInspector = new JsonbAnnotationIntrospector(this);
+        this.jsonService = jsonService;
+        this.configurationProperties = new JsonbConfigurationProperties(runtimeSettings);
+    }
+
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return runtimeSettings;
+    }
+
+    /**
+     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
+     *
+     * @return Instance creator.
+     */
+    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
+        return componentFactory;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonService;
+    }
+
+    public JsonbConfigurationProperties getConfigProperties() {
+        return configurationProperties;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public ClassModelRegistry getMappingContext() {
+        return modelRegistry;
     }
 
 }

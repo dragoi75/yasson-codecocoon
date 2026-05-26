@@ -29,6 +29,11 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class StringTypeSerializer extends AbstractValueSerializer<String> {
 
+    @Override
+    protected void serializeValue(String obj, JsonGenerator generator, JsonbMarshaller marshaller) {
+        generator.write(toJson(obj, marshaller.getJsonbContext()));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -52,8 +57,4 @@ public class StringTypeSerializer extends AbstractValueSerializer<String> {
         return object;
     }
 
-    @Override
-    protected void serializeValue(String obj, JsonGenerator generator, JsonbMarshaller marshaller) {
-        generator.write(toJson(obj, marshaller.getJsonbContext()));
-    }
 }

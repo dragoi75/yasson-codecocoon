@@ -39,36 +39,78 @@ public abstract class AbstractContainerDeserializer<T> extends BaseItem<T> imple
     private JsonbStreamingParser.LevelParseContext parserContext;
 
     /**
-     * Create instance of current item with its builder.
+     * Returns parser context.
      *
-     * @param builder {@link JsonDeserializerBuilder} used to build this instance
+     * @return parser context
      */
-    AbstractContainerDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
+    JsonbStreamingParser.LevelParseContext getParserContext() {
+        return parserContext;
     }
 
     /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
+     * Returns new deserialization builder for specific collection or map.
      *
-     * @param parser  JSON parser.
-     * @param context Deseriaization context.
-     * @param rtType  Runtime type.
-     * @return Instance of a type for this item.
+     * @param valueType value type
+     * @param ctx       jsonb context
+     * @return deserialization builder
      */
-    @Override
-    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        JsonbUnmarshaller ctx = (JsonbUnmarshaller) context;
-        deserializeInternal((JsonbNavigator) parser, ctx);
-        return getInstance((JsonbUnmarshaller) context);
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbRuntimeContext ctx) {
+        return ContainerDeserializerUtils.newCollectionOrMapItem(this, valueType, ctx, parserContext.getLastEvent());
     }
 
     /**
-     * Creates and initializes an instance of deserializing item.
+     * Returns new deserialization builder for specific item.
      *
-     * @param unmarshaller Current deserialization context.
-     * @return An instance of deserializing item.
+     * @param ctx jsonb context
+     * @return deserialization builder
      */
-    protected abstract T getInstance(JsonbUnmarshaller unmarshaller);
+    protected JsonDeserializerBuilder newUnmarshallerItemBuilder(JsonbRuntimeContext ctx) {
+        return ContainerDeserializerUtils.newUnmarshallerItemBuilder(this, ctx, parserContext.getLastEvent());
+    }
+
+    /**
+     * If value is null and property model type is one of {@link Optional}, {@link OptionalDouble},
+     * {@link OptionalInt}, or {@link OptionalLong}, value of corresponding {@code Optional#empty()}
+     * is returned.
+     *
+     * @param propertyType property type
+     * @param value        value to set
+     * @return empty optional if applies
+     */
+    protected Object convertNullToOptionalEmpty(Type propertyType, Object value) {
+        if (null != value) {
+            return value;
+        }
+        if (!(propertyType instanceof Class)) {
+            propertyType = ReflectionTypeResolver.getRawType(ReflectionTypeResolver.resolveTypeDefault(this, propertyType));
+        }
+        if (Optional.class != propertyType) {
+            if (OptionalInt.class != propertyType) {
+                if (OptionalLong.class != propertyType) {
+                    if (OptionalDouble.class != propertyType) {
+                        return null;
+                    } else {
+                        return OptionalDouble.empty();
+                    }
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
+                return OptionalInt.empty();
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Sets new parser context.
+     *
+     * @param parserContext parser context
+     */
+    void setParserContext(JsonbStreamingParser.LevelParseContext parserContext) {
+        this.parserContext = parserContext;
+    }
 
     /**
      * Deserialize specific item type.
@@ -112,15 +154,6 @@ public abstract class AbstractContainerDeserializer<T> extends BaseItem<T> imple
     }
 
     /**
-     * Determine class mappings and create an instance of a new deserializer.
-     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
-     *
-     * @param parser  Json parser.
-     * @param context Current unmarshalling context.
-     */
-    protected abstract void deserializeNext(JsonParser parser, JsonbUnmarshaller context);
-
-    /**
      * Move to first event for current deserializer structure.
      *
      * @param parser Json parser.
@@ -129,59 +162,35 @@ public abstract class AbstractContainerDeserializer<T> extends BaseItem<T> imple
     protected abstract JsonbStreamingParser.LevelParseContext moveToFirst(JsonbNavigator parser);
 
     /**
-     * Returns new deserialization builder for specific item.
+     * Creates and initializes an instance of deserializing item.
      *
-     * @param ctx jsonb context
-     * @return deserialization builder
+     * @param unmarshaller Current deserialization context.
+     * @return An instance of deserializing item.
      */
-    protected JsonDeserializerBuilder newUnmarshallerItemBuilder(JsonbRuntimeContext ctx) {
-        return ContainerDeserializerUtils.newUnmarshallerItemBuilder(this, ctx, parserContext.getLastEvent());
+    protected abstract T getInstance(JsonbUnmarshaller unmarshaller);
+
+    /**
+     * Drives JSONP {@link JsonParser} to deserialize json document.
+     *
+     * @param parser  JSON parser.
+     * @param context Deseriaization context.
+     * @param rtType  Runtime type.
+     * @return Instance of a type for this item.
+     */
+    @Override
+    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
+        JsonbUnmarshaller ctx = (JsonbUnmarshaller) context;
+        deserializeInternal((JsonbNavigator) parser, ctx);
+        return getInstance((JsonbUnmarshaller) context);
     }
 
     /**
-     * Returns new deserialization builder for specific collection or map.
+     * Create instance of current item with its builder.
      *
-     * @param valueType value type
-     * @param ctx       jsonb context
-     * @return deserialization builder
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
      */
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbRuntimeContext ctx) {
-        return ContainerDeserializerUtils.newCollectionOrMapItem(this, valueType, ctx, parserContext.getLastEvent());
-    }
-
-    /**
-     * If value is null and property model type is one of {@link Optional}, {@link OptionalDouble},
-     * {@link OptionalInt}, or {@link OptionalLong}, value of corresponding {@code Optional#empty()}
-     * is returned.
-     *
-     * @param propertyType property type
-     * @param value        value to set
-     * @return empty optional if applies
-     */
-    protected Object convertNullToOptionalEmpty(Type propertyType, Object value) {
-        if (null != value) {
-            return value;
-        }
-        if (!(propertyType instanceof Class)) {
-            propertyType = ReflectionTypeResolver.getRawType(ReflectionTypeResolver.resolveTypeDefault(this, propertyType));
-        }
-        if (Optional.class != propertyType) {
-            if (OptionalInt.class != propertyType) {
-                if (OptionalLong.class != propertyType) {
-                    if (OptionalDouble.class != propertyType) {
-                        return null;
-                    } else {
-                        return OptionalDouble.empty();
-                    }
-                } else {
-                    return OptionalLong.empty();
-                }
-            } else {
-                return OptionalInt.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
+    AbstractContainerDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
     }
 
     /**
@@ -194,20 +203,12 @@ public abstract class AbstractContainerDeserializer<T> extends BaseItem<T> imple
     public abstract void appendResult(Object result);
 
     /**
-     * Returns parser context.
+     * Determine class mappings and create an instance of a new deserializer.
+     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
      *
-     * @return parser context
+     * @param parser  Json parser.
+     * @param context Current unmarshalling context.
      */
-    JsonbStreamingParser.LevelParseContext getParserContext() {
-        return parserContext;
-    }
+    protected abstract void deserializeNext(JsonParser parser, JsonbUnmarshaller context);
 
-    /**
-     * Sets new parser context.
-     *
-     * @param parserContext parser context
-     */
-    void setParserContext(JsonbStreamingParser.LevelParseContext parserContext) {
-        this.parserContext = parserContext;
-    }
 }

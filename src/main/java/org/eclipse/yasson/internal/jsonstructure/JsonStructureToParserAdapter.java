@@ -36,6 +36,40 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    private JsonNumber getJsonNumberValue() {
+        JsonStructureIterator iterator = iterators.peek();
+        JsonValue value = iterator.getValue();
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
+            throw iterator.createIncompatibleValueError();
+        }
+        return (JsonNumber) value;
+    }
+
+    @Override
+    public String getString() {
+        return iterators.peek().getString();
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
     /**
      * Creates new {@link JsonStructure} parser.
      *
@@ -46,8 +80,8 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public boolean hasNext() {
-        return iterators.peek().hasNext();
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
     }
 
     @Override
@@ -80,18 +114,8 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
+    public boolean hasNext() {
+        return iterators.peek().hasNext();
     }
 
     @Override
@@ -99,27 +123,4 @@ public class JsonStructureToParserAdapter implements JsonParser {
         return getJsonNumberValue().longValueExact();
     }
 
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
-    }
-
-    private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
-            throw iterator.createIncompatibleValueError();
-        }
-        return (JsonNumber) value;
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

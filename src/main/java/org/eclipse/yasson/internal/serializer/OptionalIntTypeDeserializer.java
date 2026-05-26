@@ -27,13 +27,13 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<OptionalInt> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalIntTypeDeserializer(Customization customization) {
-        super(OptionalInt.class, customization);
+    @Override
+    protected OptionalInt deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalInt.of(Integer.parseInt(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
+        }
     }
 
     @Override
@@ -46,12 +46,13 @@ public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<O
         return deserialize(value, (JsonbUnmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalInt deserialize(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalInt.of(Integer.parseInt(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalIntTypeDeserializer(Customization customization) {
+        super(OptionalInt.class, customization);
     }
+
 }

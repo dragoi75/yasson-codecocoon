@@ -38,6 +38,16 @@ public abstract class BaseItem<T> implements CurrentItem<T> {
      */
     private final ClassDescriptor classDescriptor;
 
+    @Override
+    public ClassDescriptor getClassModel() {
+        return classDescriptor;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return currentItem;
+    }
+
     /**
      * Creates and populates an instance from given builder.
      *
@@ -47,6 +57,11 @@ public abstract class BaseItem<T> implements CurrentItem<T> {
         this.currentItem = serializerFactory.getWrapper();
         this.classDescriptor = serializerFactory.getClassModel();
         this.actualType = serializerFactory.getRuntimeType();
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return actualType;
     }
 
     /**
@@ -60,21 +75,6 @@ public abstract class BaseItem<T> implements CurrentItem<T> {
         this.currentItem = currentItem;
         this.actualType = actualType;
         this.classDescriptor = classDescriptor;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        return classDescriptor;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return currentItem;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return actualType;
     }
 
 }

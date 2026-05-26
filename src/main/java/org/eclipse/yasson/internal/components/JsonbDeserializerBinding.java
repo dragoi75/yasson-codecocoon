@@ -26,17 +26,6 @@ public class JsonbDeserializerBinding<T> extends ComponentBindingBase {
     private final JsonbDeserializer<T> deserializer;
 
     /**
-     * Creates a new instance.
-     *
-     * @param targetType       Binding type.
-     * @param deserializer Deserializer.
-     */
-    public JsonbDeserializerBinding(Type targetType, JsonbDeserializer<T> deserializer) {
-        super(targetType);
-        this.deserializer = deserializer;
-    }
-
-    /**
      * Gets deserializer if any.
      *
      * @return Deserializer.
@@ -49,4 +38,16 @@ public class JsonbDeserializerBinding<T> extends ComponentBindingBase {
     public Class<?> getComponentClass() {
         return deserializer.getClass();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param targetType       Binding type.
+     * @param deserializer Deserializer.
+     */
+    public JsonbDeserializerBinding(Type targetType, JsonbDeserializer<T> deserializer) {
+        super(targetType);
+        this.deserializer = deserializer;
+    }
+
 }

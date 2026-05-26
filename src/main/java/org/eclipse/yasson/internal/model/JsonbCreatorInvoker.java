@@ -29,6 +29,30 @@ public class JsonbCreatorInvoker {
     private final CreatorProfile[] creatorProfiles;
 
     /**
+     * Find creator parameter by name.
+     *
+     * @param name parameter name as it appear in json document.
+     * @return Creator parameter.
+     */
+    public CreatorProfile findByParamName(String name) {
+        for (CreatorProfile creatorProfile : creatorProfiles) {
+            if (creatorProfile.getName().equals(name)) {
+                return creatorProfile;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorProfile[] getParams() {
+        return creatorProfiles;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param callTarget    Executable.
@@ -70,27 +94,4 @@ public class JsonbCreatorInvoker {
         return null != findByParamName(name);
     }
 
-    /**
-     * Find creator parameter by name.
-     *
-     * @param name parameter name as it appear in json document.
-     * @return Creator parameter.
-     */
-    public CreatorProfile findByParamName(String name) {
-        for (CreatorProfile creatorProfile : creatorProfiles) {
-            if (creatorProfile.getName().equals(name)) {
-                return creatorProfile;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorProfile[] getParams() {
-        return creatorProfiles;
-    }
 }

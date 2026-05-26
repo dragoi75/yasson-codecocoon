@@ -28,15 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class LocalTimeTypeSerializer extends AbstractDateTimeSerializer<LocalTime> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public LocalTimeTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected Instant toInstant(LocalTime value) {
         throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
@@ -46,4 +37,14 @@ public class LocalTimeTypeSerializer extends AbstractDateTimeSerializer<LocalTim
     protected String formatDefault(LocalTime value, Locale locale) {
         return DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format(value);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public LocalTimeTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

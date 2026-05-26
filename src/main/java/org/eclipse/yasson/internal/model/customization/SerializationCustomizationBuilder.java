@@ -32,6 +32,51 @@ public abstract class SerializationCustomizationBuilder {
     private String[] propertySequence;
 
     /**
+     * Sets serializer info.
+     *
+     * @param jsonbSerializer Serializer info to set.
+     */
+    public void setSerializerBinding(JsonbSerializerBinding jsonbSerializer) {
+        this.jsonbSerializer = jsonbSerializer;
+    }
+
+    /**
+     * Gets ordered list of property names.
+     *
+     * @return Sorted names of properties.
+     */
+    public String[] getPropertyOrder() {
+        return propertySequence;
+    }
+
+    /**
+     * Sets an components.
+     *
+     * @param adapterBinding Adapter.
+     */
+    public void setAdapterInfo(TypeAdapterBinding adapterBinding) {
+        this.adapterBinding = adapterBinding;
+    }
+
+    /**
+     * Gets a deserializer.
+     *
+     * @return Deserializer.
+     */
+    public JsonbDeserializerBinding getDeserializerBinding() {
+        return jsonbDeserializer;
+    }
+
+    /**
+     * Sets a sorted list of property names.
+     *
+     * @param propertySequence Array containing property names
+     */
+    public void setPropertyOrder(String[] propertySequence) {
+        this.propertySequence = propertySequence;
+    }
+
+    /**
      * Returns true if <i>nillable</i> customization is present.
      *
      * @return True if <i>nillable</i> customization is present.
@@ -50,24 +95,6 @@ public abstract class SerializationCustomizationBuilder {
     }
 
     /**
-     * Gets an components.
-     *
-     * @return Adapter.
-     */
-    public TypeAdapterBinding getAdapterInfo() {
-        return adapterBinding;
-    }
-
-    /**
-     * Sets an components.
-     *
-     * @param adapterBinding Adapter.
-     */
-    public void setAdapterInfo(TypeAdapterBinding adapterBinding) {
-        this.adapterBinding = adapterBinding;
-    }
-
-    /**
      * Gets meta info for user serializers.
      *
      * @return Serializer info
@@ -77,21 +104,12 @@ public abstract class SerializationCustomizationBuilder {
     }
 
     /**
-     * Sets serializer info.
+     * Gets an components.
      *
-     * @param jsonbSerializer Serializer info to set.
+     * @return Adapter.
      */
-    public void setSerializerBinding(JsonbSerializerBinding jsonbSerializer) {
-        this.jsonbSerializer = jsonbSerializer;
-    }
-
-    /**
-     * Gets a deserializer.
-     *
-     * @return Deserializer.
-     */
-    public JsonbDeserializerBinding getDeserializerBinding() {
-        return jsonbDeserializer;
+    public TypeAdapterBinding getAdapterInfo() {
+        return adapterBinding;
     }
 
     /**
@@ -103,21 +121,4 @@ public abstract class SerializationCustomizationBuilder {
         this.jsonbDeserializer = jsonbDeserializer;
     }
 
-    /**
-     * Gets ordered list of property names.
-     *
-     * @return Sorted names of properties.
-     */
-    public String[] getPropertyOrder() {
-        return propertySequence;
-    }
-
-    /**
-     * Sets a sorted list of property names.
-     *
-     * @param propertySequence Array containing property names
-     */
-    public void setPropertyOrder(String[] propertySequence) {
-        this.propertySequence = propertySequence;
-    }
 }
