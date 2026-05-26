@@ -57,51 +57,22 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
     protected final JsonbRuntimeContext jsonbContext;
 
     /**
-     * Crates a builder.
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
+     * Otherwise provided type in type field, or type of field model.
      *
-     * @param runtimeContext Not null.
+     * @return runtime type
      */
-    public BaseSerializerBuilder(JsonbRuntimeContext runtimeContext) {
-        Objects.requireNonNull(runtimeContext);
-        this.jsonbContext = runtimeContext;
+    public Type getRuntimeType() {
+        return runtimeType;
     }
 
     /**
-     * Wrapper item for this item.
+     * Jsonb runtime context.
      *
-     * @param currentItem not null.
-     * @return Builder instance for call chaining.
+     * @return jsonb context
      */
-    @SuppressWarnings("unchecked")
-    public T setWrapper(CurrentItem<?> currentItem) {
-        this.wrapper = currentItem;
-        return (T) this;
-    }
-
-    /**
-     * Customization of the class
-     *
-     * @param configuration Class customization
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T setCustomization(Customization configuration) {
-        this.customization = configuration;
-        return (T) this;
-    }
-
-    /***
-     * Gets or load class model for a class an its superclasses.
-     *
-     * @param targetType Class to get model for.
-     * @return Class model.
-     */
-    protected ClassModel getClassModel(Class<?> targetType) {
-        ClassModel resolvedModel = jsonbContext.getMappingContext().getClassModel(targetType);
-        if (resolvedModel == null) {
-            resolvedModel = jsonbContext.getMappingContext().getOrCreateClassModel(targetType);
-        }
-        return resolvedModel;
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
     }
 
     /**
@@ -124,13 +95,15 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
     }
 
     /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
-     * Otherwise provided type in type field, or type of field model.
+     * Customization of the class
      *
-     * @return runtime type
+     * @param configuration Class customization
+     * @return Builder instance for call chaining.
      */
-    public Type getRuntimeType() {
-        return runtimeType;
+    @SuppressWarnings("unchecked")
+    public T setCustomization(Customization configuration) {
+        this.customization = configuration;
+        return (T) this;
     }
 
     /**
@@ -146,16 +119,44 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
         return (T) this;
     }
 
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
-    }
-
     public Customization getCustomization() {
         return customization;
     }
+
+    /**
+     * Wrapper item for this item.
+     *
+     * @param currentItem not null.
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T setWrapper(CurrentItem<?> currentItem) {
+        this.wrapper = currentItem;
+        return (T) this;
+    }
+
+    /***
+     * Gets or load class model for a class an its superclasses.
+     *
+     * @param targetType Class to get model for.
+     * @return Class model.
+     */
+    protected ClassModel getClassModel(Class<?> targetType) {
+        ClassModel resolvedModel = jsonbContext.getMappingContext().getClassModel(targetType);
+        if (resolvedModel == null) {
+            resolvedModel = jsonbContext.getMappingContext().getOrCreateClassModel(targetType);
+        }
+        return resolvedModel;
+    }
+
+    /**
+     * Crates a builder.
+     *
+     * @param runtimeContext Not null.
+     */
+    public BaseSerializerBuilder(JsonbRuntimeContext runtimeContext) {
+        Objects.requireNonNull(runtimeContext);
+        this.jsonbContext = runtimeContext;
+    }
+
 }

@@ -34,6 +34,19 @@ public class CreatorModel {
 
     private final CreatorCustomization creatorCustomization;
 
+    public CreatorCustomization getCustomization() {
+        return creatorCustomization;
+    }
+
+    /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return type;
+    }
+
     /**
      * Creates a new instance.
      *
@@ -65,19 +78,6 @@ public class CreatorModel {
      */
     public String getName() {
         return name;
-    }
-
-    public CreatorCustomization getCustomization() {
-        return creatorCustomization;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return type;
     }
 
 }

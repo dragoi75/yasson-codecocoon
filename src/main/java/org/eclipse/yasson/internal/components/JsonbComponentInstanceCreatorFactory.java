@@ -42,6 +42,62 @@ public class JsonbComponentInstanceCreatorFactory {
     public static final String INITIAL_CONTEXT_CLASS = "javax.naming.InitialContext";
     private static final String CDI_SPI_CLASS = "javax.enterprise.inject.spi.CDI";
 
+
+    /**
+     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
+     */
+    private interface BeanManagerProvider {
+        Object provide() throws InvocationTargetException, IllegalAccessException,
+                NoSuchMethodException, InstantiationException, ClassNotFoundException;
+    }
+
+    /**
+     * Handles common invocation exceptions for getting bean manager reflectively.
+     *
+     * @return bean manager instance or null if javax.naming is not available or insufficient permissions.
+     */
+    private static Object getBeanManager(BeanManagerProvider command) throws ClassNotFoundException {
+        try {
+            return command.provide();
+        } catch (NoSuchMethodException | InstantiationException e) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+        } catch (IllegalAccessException e) {
+            //insufficient permissions for reflective invocation, don't fail in this case
+            log.warning(e.getMessage());
+            log.warning(Messages.getMessage(MessageKeys.ILLEGAL_ACCESS, "lookup CDI bean manager"));
+            return null;
+        } catch (InvocationTargetException e) {
+            //likely no CDI container is running or bean manager JNDI lookup fails.
+            if (e.getCause() != null) {
+                log.finest(e.getMessage());
+            }
+            log.finest(Messages.getMessage(MessageKeys.NO_CDI_ENVIRONMENT));
+            return null;
+        }
+    }
+
+    /**
+     * Get bean manager from JNDI context.
+     *
+     * @return bean manager instance or null if javax.naming is not available.
+     */
+    private static Object getJndiBeanManager() {
+        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            try {
+                return getBeanManager(() -> {
+                    Class<?> initialContextClass = Class.forName(INITIAL_CONTEXT_CLASS);
+                    Method lookupMethod = initialContextClass.getMethod("lookup", String.class);
+                    Constructor<?> initialContextConstructor = initialContextClass.getConstructor();
+                    Object initialContextObject = initialContextConstructor.newInstance();
+                    return lookupMethod.invoke(initialContextObject, BEAN_MANAGER_NAME);
+                });
+            } catch (ClassNotFoundException e) {
+                log.finest(Messages.getMessage(MessageKeys.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
+                return null;
+            }
+        });
+    }
+
     /**
      * First check a CDI provider, if available use those.
      * Try to lookup in a JNDI if no provider is registered.
@@ -87,59 +143,4 @@ public class JsonbComponentInstanceCreatorFactory {
         });
     }
 
-    /**
-     * Get bean manager from JNDI context.
-     *
-     * @return bean manager instance or null if javax.naming is not available.
-     */
-    private static Object getJndiBeanManager() {
-        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            try {
-                return getBeanManager(() -> {
-                    Class<?> initialContextClass = Class.forName(INITIAL_CONTEXT_CLASS);
-                    Method lookupMethod = initialContextClass.getMethod("lookup", String.class);
-                    Constructor<?> initialContextConstructor = initialContextClass.getConstructor();
-                    Object initialContextObject = initialContextConstructor.newInstance();
-                    return lookupMethod.invoke(initialContextObject, BEAN_MANAGER_NAME);
-                });
-            } catch (ClassNotFoundException e) {
-                log.finest(Messages.getMessage(MessageKeys.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
-                return null;
-            }
-        });
-    }
-
-
-    /**
-     * Handles common invocation exceptions for getting bean manager reflectively.
-     *
-     * @return bean manager instance or null if javax.naming is not available or insufficient permissions.
-     */
-    private static Object getBeanManager(BeanManagerProvider command) throws ClassNotFoundException {
-        try {
-            return command.provide();
-        } catch (NoSuchMethodException | InstantiationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
-        } catch (IllegalAccessException e) {
-            //insufficient permissions for reflective invocation, don't fail in this case
-            log.warning(e.getMessage());
-            log.warning(Messages.getMessage(MessageKeys.ILLEGAL_ACCESS, "lookup CDI bean manager"));
-            return null;
-        } catch (InvocationTargetException e) {
-            //likely no CDI container is running or bean manager JNDI lookup fails.
-            if (e.getCause() != null) {
-                log.finest(e.getMessage());
-            }
-            log.finest(Messages.getMessage(MessageKeys.NO_CDI_ENVIRONMENT));
-            return null;
-        }
-    }
-
-    /**
-     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
-     */
-    private interface BeanManagerProvider {
-        Object provide() throws InvocationTargetException, IllegalAccessException,
-                NoSuchMethodException, InstantiationException, ClassNotFoundException;
-    }
 }

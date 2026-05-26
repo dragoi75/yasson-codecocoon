@@ -32,6 +32,15 @@ public abstract class ObjectProcessingContext {
      */
     private final Set<Object> processedItems = new HashSet<>();
 
+
+    public boolean unregisterProcessedObject(Object processedEntity) {
+        return processedItems.remove(processedEntity);
+    }
+
+    public boolean registerProcessedObject(Object processedEntity) {
+        return this.processedItems.add(processedEntity);
+    }
+
     /**
      * Parent instance for marshaller and unmarshaller.
      *
@@ -57,15 +66,6 @@ public abstract class ObjectProcessingContext {
      */
     public MappingContext getMappingContext() {
         return getJsonbContext().getMappingContext();
-    }
-
-
-    public boolean registerProcessedObject(Object processedEntity) {
-        return this.processedItems.add(processedEntity);
-    }
-
-    public boolean unregisterProcessedObject(Object processedEntity) {
-        return processedItems.remove(processedEntity);
     }
 
 }

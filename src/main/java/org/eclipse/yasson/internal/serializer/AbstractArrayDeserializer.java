@@ -38,28 +38,9 @@ public abstract class AbstractArrayDeserializer<T> extends BaseContainerDeserial
 
     protected final ClassModel componentClassModel;
 
-    protected AbstractArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-        if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectionTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
-        } else {
-            componentClass = ReflectionTypeUtils.getRawType(getRuntimeType()).getComponentType();
-        }
-        if (!DefaultSerializers.getInstance().isKnownType(componentClass)) {
-            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
-        } else {
-            componentClassModel = null;
-        }
-    }
-
     @Override
     public void addResult(Object result) {
         appendCaptor(convertNullToEmptyOptional(componentClass, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <X> void appendCaptor(X value) {
-        ((List<X>) getItems()).add(value);
     }
 
     @Override
@@ -76,4 +57,24 @@ public abstract class AbstractArrayDeserializer<T> extends BaseContainerDeserial
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }
+
+    @SuppressWarnings("unchecked")
+    private <X> void appendCaptor(X value) {
+        ((List<X>) getItems()).add(value);
+    }
+
+    protected AbstractArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+        if (getRuntimeType() instanceof GenericArrayType) {
+            componentClass = ReflectionTypeUtils.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+        } else {
+            componentClass = ReflectionTypeUtils.getRawType(getRuntimeType()).getComponentType();
+        }
+        if (!DefaultSerializers.getInstance().isKnownType(componentClass)) {
+            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
+        } else {
+            componentClassModel = null;
+        }
+    }
+
 }

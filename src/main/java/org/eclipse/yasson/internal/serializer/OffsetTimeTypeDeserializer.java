@@ -30,13 +30,9 @@ import java.util.Locale;
  */
 public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<OffsetTime> {
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public OffsetTimeTypeDeserializer(Customization customization) {
-        super(OffsetTime.class, customization);
+    @Override
+    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return OffsetTime.parse(jsonValue, formatter);
     }
 
     @Override
@@ -49,8 +45,13 @@ public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<Off
         return OffsetTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
     }
 
-    @Override
-    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return OffsetTime.parse(jsonValue, formatter);
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public OffsetTimeTypeDeserializer(Customization customization) {
+        super(OffsetTime.class, customization);
     }
+
 }

@@ -47,9 +47,13 @@ public class DefaultSerializers {
 
     private final SerializerProviderWrapper enumProvider;
 
-    private DefaultSerializers() {
-        this.serializers = initSerializers();
-        enumProvider = new SerializerProviderWrapper(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+
+    /**
+     * Singleton instance.
+     * @return instance
+     */
+    public static DefaultSerializers getInstance() {
+        return instance;
     }
 
     private Map<Class<?>, SerializerProviderWrapper> initSerializers() {
@@ -106,26 +110,6 @@ public class DefaultSerializers {
         return Collections.unmodifiableMap(serializers);
     }
 
-    /**
-     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
-     *
-     * @param clazz supported type class
-     * @param <T> Type of serializer
-     * @return serializer if found
-     */
-    public <T> Optional<SerializerProviderWrapper> findValueSerializerProvider(Class<T> clazz) {
-        Class<?> candidate = clazz;
-        do {
-            final SerializerProviderWrapper provider = serializers.get(candidate);
-            if (provider != null) {
-                return Optional.of(provider);
-            }
-            candidate = candidate.getSuperclass();
-        } while (candidate != null);
-
-        return findByCondition(clazz);
-    }
-
     private <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
         if (Enum.class.isAssignableFrom(clazz)) {
             return Optional.of(enumProvider);
@@ -156,12 +140,29 @@ public class DefaultSerializers {
         return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
     }
 
-
     /**
-     * Singleton instance.
-     * @return instance
+     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
+     *
+     * @param clazz supported type class
+     * @param <T> Type of serializer
+     * @return serializer if found
      */
-    public static DefaultSerializers getInstance() {
-        return instance;
+    public <T> Optional<SerializerProviderWrapper> findValueSerializerProvider(Class<T> clazz) {
+        Class<?> candidate = clazz;
+        do {
+            final SerializerProviderWrapper provider = serializers.get(candidate);
+            if (provider != null) {
+                return Optional.of(provider);
+            }
+            candidate = candidate.getSuperclass();
+        } while (candidate != null);
+
+        return findByCondition(clazz);
     }
+
+    private DefaultSerializers() {
+        this.serializers = initSerializers();
+        enumProvider = new SerializerProviderWrapper(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+    }
+
 }

@@ -39,6 +39,21 @@ public abstract class AbstractModelItem<T> implements CurrentItem<T> {
      */
     private final ClassModel classMeta;
 
+    @Override
+    public ClassModel getClassModel() {
+        return classMeta;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return currentItem;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return actualType;
+    }
+
     /**
      * Creates and populates an instance from given builder.
      *
@@ -61,21 +76,6 @@ public abstract class AbstractModelItem<T> implements CurrentItem<T> {
         this.currentItem = currentItem;
         this.actualType = actualType;
         this.classMeta = classMeta;
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        return classMeta;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return currentItem;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return actualType;
     }
 
 }

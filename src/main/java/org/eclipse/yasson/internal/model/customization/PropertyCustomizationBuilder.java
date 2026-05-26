@@ -41,6 +41,124 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
 
     private Class implementationClass;
 
+
+    /**
+     * Sets a presence of <i>read transient</i> customization.
+     *
+     * @param readTransient Presence of <i>read transient</i> customization.
+     */
+    public void setReadTransient(boolean readTransient) {
+        this.readTransient = readTransient;
+    }
+
+    /**
+     * Sets number formatter for formatting numbers during deserialization process.
+     *
+     * @param deserializeNumberFormatter Number formatter for formatting numbers during deserialization process.
+     */
+    public void setDeserializeNumberFormatter(JsonbNumberFormatter deserializeNumberFormatter) {
+        this.deserializeNumberFormatter = deserializeNumberFormatter;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @param implementationClass implementing property interface
+     */
+    public void setImplementationClass(Class implementationClass) {
+        this.implementationClass = implementationClass;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @return class implementing property interface
+     */
+    public Class getImplementationClass() {
+        return implementationClass;
+    }
+
+    /**
+     * Sets a property name which is written to JSON document on serialization.
+     *
+     * @param jsonWriteName Property name.
+     */
+    public void setJsonWriteName(String jsonWriteName) {
+        this.jsonWriteName = jsonWriteName;
+    }
+
+    /**
+     * Sets a JSON property name used to read a property value from on deserialization.
+     *
+     * @param jsonReadName JSON property name
+     */
+    public void setJsonReadName(String jsonReadName) {
+        this.jsonReadName = jsonReadName;
+    }
+
+    /**
+     * Returns true if <i>write transient</i> customization is present.
+     *
+     * @return True if <i>write transient</i> customization is present.
+     */
+    public boolean isWriteTransient() {
+        return writeTransient;
+    }
+
+    /**
+     * Gets a property name which is written to JSON document on serialization.
+     *
+     * @return Property name.
+     */
+    public String getJsonWriteName() {
+        return jsonWriteName;
+    }
+
+    /**
+     * Gets date formatter for formatting dates during deserialization process.
+     *
+     * @return Date formatter for formatting dates during deserialization process.
+     */
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
+    }
+
+    /**
+     * Sets a JSON property name used to read a property value from on deserialization.
+     *
+     * @return JSON property name
+     */
+    public String getJsonReadName() {
+        return jsonReadName;
+    }
+
+    /**
+     * Returns true if <i>read transient</i> customization is present.
+     *
+     * @return True if <i>read transient</i> customization is present.
+     */
+    public boolean isReadTransient() {
+        return readTransient;
+    }
+
+    /**
+     * Gets number formatter for formatting numbers during deserialization process.
+     *
+     * @return Number formatter for formatting numbers during deserialization process.
+     */
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
+    }
+
+    /**
+     * Sets date formatter for formatting dates during serialization process.
+     *
+     * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
+     */
+    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
+        this.serializeDateFormatter = serializeDateFormatter;
+    }
+
     /**
      * Creates a customization for class properties.
      *
@@ -60,30 +178,21 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
+     * Sets date formatter for formatting dates during deserialization process.
+     *
+     * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
+     */
+    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
+        this.deserializeDateFormatter = deserializeDateFormatter;
+    }
+
+    /**
      * Sets number formatter for formatting numbers during serialization process.
      *
      * @param serializeNumberFormatter Number formatter for formatting numbers during serialization process.
      */
     public void setSerializeNumberFormatter(JsonbNumberFormatter serializeNumberFormatter) {
         this.serializeNumberFormatter = serializeNumberFormatter;
-    }
-
-    /**
-     * Gets number formatter for formatting numbers during deserialization process.
-     *
-     * @return Number formatter for formatting numbers during deserialization process.
-     */
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    /**
-     * Sets number formatter for formatting numbers during deserialization process.
-     *
-     * @param deserializeNumberFormatter Number formatter for formatting numbers during deserialization process.
-     */
-    public void setDeserializeNumberFormatter(JsonbNumberFormatter deserializeNumberFormatter) {
-        this.deserializeNumberFormatter = deserializeNumberFormatter;
     }
 
     /**
@@ -96,96 +205,6 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Sets date formatter for formatting dates during serialization process.
-     *
-     * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
-     */
-    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
-        this.serializeDateFormatter = serializeDateFormatter;
-    }
-
-    /**
-     * Gets date formatter for formatting dates during deserialization process.
-     *
-     * @return Date formatter for formatting dates during deserialization process.
-     */
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
-    }
-
-    /**
-     * Sets date formatter for formatting dates during deserialization process.
-     *
-     * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
-     */
-    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
-        this.deserializeDateFormatter = deserializeDateFormatter;
-    }
-
-    /**
-     * Sets a JSON property name used to read a property value from on deserialization.
-     *
-     * @return JSON property name
-     */
-    public String getJsonReadName() {
-        return jsonReadName;
-    }
-
-    /**
-     * Sets a JSON property name used to read a property value from on deserialization.
-     *
-     * @param jsonReadName JSON property name
-     */
-    public void setJsonReadName(String jsonReadName) {
-        this.jsonReadName = jsonReadName;
-    }
-
-    /**
-     * Gets a property name which is written to JSON document on serialization.
-     *
-     * @return Property name.
-     */
-    public String getJsonWriteName() {
-        return jsonWriteName;
-    }
-
-    /**
-     * Sets a property name which is written to JSON document on serialization.
-     *
-     * @param jsonWriteName Property name.
-     */
-    public void setJsonWriteName(String jsonWriteName) {
-        this.jsonWriteName = jsonWriteName;
-    }
-
-    /**
-     * Returns true if <i>read transient</i> customization is present.
-     *
-     * @return True if <i>read transient</i> customization is present.
-     */
-    public boolean isReadTransient() {
-        return readTransient;
-    }
-
-    /**
-     * Sets a presence of <i>read transient</i> customization.
-     *
-     * @param readTransient Presence of <i>read transient</i> customization.
-     */
-    public void setReadTransient(boolean readTransient) {
-        this.readTransient = readTransient;
-    }
-
-    /**
-     * Returns true if <i>write transient</i> customization is present.
-     *
-     * @return True if <i>write transient</i> customization is present.
-     */
-    public boolean isWriteTransient() {
-        return writeTransient;
-    }
-
-    /**
      * Sets a presence of <i>write transient</i> customization.
      *
      * @param writeTransient Presence of <i>write transient</i> customization.
@@ -194,22 +213,4 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
         this.writeTransient = writeTransient;
     }
 
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class getImplementationClass() {
-        return implementationClass;
-    }
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @param implementationClass implementing property interface
-     */
-    public void setImplementationClass(Class implementationClass) {
-        this.implementationClass = implementationClass;
-    }
 }

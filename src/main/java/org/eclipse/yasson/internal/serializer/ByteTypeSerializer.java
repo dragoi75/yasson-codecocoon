@@ -24,6 +24,16 @@ import javax.json.stream.JsonGenerator;
  */
 public class ByteTypeSerializer extends AbstractNumberSerializer<Byte> {
 
+    @Override
+    protected void serializeNonFormatted(Byte obj, JsonGenerator generator) {
+        generator.write(obj);
+    }
+
+    @Override
+    protected void serializeNonFormatted(Byte obj, JsonGenerator generator, String key) {
+        generator.write(key, obj);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,13 +43,4 @@ public class ByteTypeSerializer extends AbstractNumberSerializer<Byte> {
         super(customization);
     }
 
-    @Override
-    protected void serializeNonFormatted(Byte obj, JsonGenerator generator, String key) {
-        generator.write(key, obj);
-    }
-
-    @Override
-    protected void serializeNonFormatted(Byte obj, JsonGenerator generator) {
-        generator.write(obj);
-    }
 }

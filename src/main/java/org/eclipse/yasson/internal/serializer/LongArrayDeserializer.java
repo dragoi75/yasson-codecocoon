@@ -27,10 +27,6 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
 
     private final List<Long> items = new ArrayList<>();
 
-    protected LongArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -45,4 +41,9 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
         }
         return longArray;
     }
+
+    protected LongArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

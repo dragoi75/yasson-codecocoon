@@ -27,6 +27,11 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTypeSerializ
 
     private DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
+
+    protected DateTimeFormatter getDefaultFormatter() {
+        return DEFAULT_FORMATTER;
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,8 +41,4 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTypeSerializ
         super(customization);
     }
 
-
-    protected DateTimeFormatter getDefaultFormatter() {
-        return DEFAULT_FORMATTER;
-    }
 }

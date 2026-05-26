@@ -38,88 +38,12 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
     protected JsonbRiEventParser.LevelParseContext parserContext;
 
     /**
-     * Create instance of current item with its builder.
-     *
-     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
-     */
-    protected BaseContainerDeserializer(JsonDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
-     *
-     * @param tokenStream JSON parser.
-     * @param deserializationState Deseriaization context.
-     * @param runtimeType Runtime type.
-     * @return Instance of a type for this item.
-     */
-    @Override
-    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationState, Type runtimeType) {
-        JsonUnmarshaller jsonUnmarshaller = (JsonUnmarshaller) deserializationState;
-        deserializeContents((JsonbNavigator) tokenStream, jsonUnmarshaller);
-        return getInstance((JsonUnmarshaller) deserializationState);
-    }
-
-    /**
      * Creates and initializes an instance of deserializing item.
      *
      * @param converter Current deserialization context.
      * @return An instance of deserializing item.
      */
     protected abstract T getInstance(JsonUnmarshaller converter);
-
-    protected void deserializeContents(JsonbNavigator tokenStream, JsonUnmarshaller deserializationState) {
-        parserContext = moveToStart(tokenStream);
-        while (tokenStream.hasNext()) {
-            final JsonParser.Event currentToken = tokenStream.next();
-            switch (currentToken) {
-                case START_OBJECT:
-                case START_ARRAY:
-                case VALUE_STRING:
-                case VALUE_NUMBER:
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                	try {
-                		deserializeElement(tokenStream, deserializationState);
-                	} catch (JsonbException ex) {
-                		if (parserContext == null || parserContext.getLastKeyName() == null)
-                			throw ex;
-                		else
-                            throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName() + 
-                					"' because of: " + ex.getMessage(), ex);
-                	}
-                    break;
-                case KEY_NAME:
-                    break;
-                case VALUE_NULL:
-                    addResult(null);
-                    break;
-                case END_OBJECT:
-                case END_ARRAY:
-                    return;
-                default:
-                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, currentToken));
-            }
-        }
-    }
-
-    /**
-     * Determine class mappings and create an instance of a new deserializer.
-     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
-     *
-     * @param tokenStream Json parser.
-     * @param deserializationState Current unmarshalling context.
-     */
-    protected abstract void deserializeElement(JsonParser tokenStream, JsonUnmarshaller deserializationState);
-
-    /**
-     * Move to first event for current deserializer structure.
-     *
-     * @param tokenStream Json parser.
-     * @return First event.
-     */
-    protected abstract JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator tokenStream);
 
     protected JsonDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext jsonUnmarshaller) {
         return new JsonDeserializerBuilder(jsonUnmarshaller).setWrapper(this).setJsonValueType(parserContext.getLastEvent());
@@ -136,6 +60,24 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
         }
         return deserializerFactory.buildDeserializer();
     }
+
+    /**
+     * After object is transitively deserialized from JSON, "append" it to its wrapper.
+     * In case of a field set value to field, in case of collections
+     * or other embedded objects use methods provided.
+     *
+     * @param outputObject An instance result of an item.
+     */
+    public abstract void addResult(Object outputObject);
+
+    /**
+     * Determine class mappings and create an instance of a new deserializer.
+     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
+     *
+     * @param tokenStream Json parser.
+     * @param deserializationState Current unmarshalling context.
+     */
+    protected abstract void deserializeElement(JsonParser tokenStream, JsonUnmarshaller deserializationState);
 
     /**
      * If value is null and property model type is one of {@link Optional}, {@link OptionalDouble},
@@ -169,11 +111,70 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
     }
 
     /**
-     * After object is transitively deserialized from JSON, "append" it to its wrapper.
-     * In case of a field set value to field, in case of collections
-     * or other embedded objects use methods provided.
+     * Create instance of current item with its builder.
      *
-     * @param outputObject An instance result of an item.
+     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
      */
-    public abstract void addResult(Object outputObject);
+    protected BaseContainerDeserializer(JsonDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
+    /**
+     * Drives JSONP {@link JsonParser} to deserialize json document.
+     *
+     * @param tokenStream JSON parser.
+     * @param deserializationState Deseriaization context.
+     * @param runtimeType Runtime type.
+     * @return Instance of a type for this item.
+     */
+    @Override
+    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationState, Type runtimeType) {
+        JsonUnmarshaller jsonUnmarshaller = (JsonUnmarshaller) deserializationState;
+        deserializeContents((JsonbNavigator) tokenStream, jsonUnmarshaller);
+        return getInstance((JsonUnmarshaller) deserializationState);
+    }
+
+    protected void deserializeContents(JsonbNavigator tokenStream, JsonUnmarshaller deserializationState) {
+        parserContext = moveToStart(tokenStream);
+        while (tokenStream.hasNext()) {
+            final JsonParser.Event currentToken = tokenStream.next();
+            switch (currentToken) {
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                	try {
+                		deserializeElement(tokenStream, deserializationState);
+                	} catch (JsonbException ex) {
+                		if (parserContext == null || parserContext.getLastKeyName() == null)
+                			throw ex;
+                		else
+                            throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName() +
+                					"' because of: " + ex.getMessage(), ex);
+                	}
+                    break;
+                case KEY_NAME:
+                    break;
+                case VALUE_NULL:
+                    addResult(null);
+                    break;
+                case END_OBJECT:
+                case END_ARRAY:
+                    return;
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, currentToken));
+            }
+        }
+    }
+
+    /**
+     * Move to first event for current deserializer structure.
+     *
+     * @param tokenStream Json parser.
+     * @return First event.
+     */
+    protected abstract JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator tokenStream);
+
 }

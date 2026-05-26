@@ -30,6 +30,65 @@ public interface YassonJsonb extends javax.json.bind.Jsonb {
 
 
     /**
+     * Reads a {@link JsonStructure} and and converts it into
+     * resulting java content tree.
+     *
+     * @param jsonStructure
+     *      {@link JsonStructure} to be used as a source for conversion.
+     * @param runtimeType
+     *      Runtime type of the content tree's root object.
+     * @param <T>
+     *      Type of the content tree's root object.
+     *
+     * @return the newly created root object of the java content tree
+     *
+     * @throws JsonbException
+     *     If any unexpected error(s) occur(s) during deserialization.
+     * @throws NullPointerException
+     *      If any of the parameters is {@code null}.
+     */
+    <T> T fromJsonStructure(JsonStructure jsonStructure, Type runtimeType) throws JsonbException;
+
+    /**
+     * Writes the object content tree with a specified {@link JsonGenerator}.
+     * Provided json generator must be fully initialized, no further configurations are applied.
+     *
+     * @param object
+     *      The object content tree to be serialized.
+     * @param jsonGenerator
+     *      The json generator to write JSON data. The generator is not closed
+     *      on a completion for further interaction.
+     *
+     * @throws JsonbException If any unexpected problem occurs during the
+     * serialization.
+     * @throws NullPointerException
+     *      If any of the parameters is {@code null}.
+     *
+     * @since JSON Binding 1.0
+     */
+    void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException;
+
+    /**
+     * Serializes the object content tree to a {@link JsonStructure}.
+     *
+     * @param object
+     *      The object content tree to be serialized.
+     *
+     * @param runtimeType
+     *      Runtime type of the content tree's root object.
+     *
+     * @return The {@link JsonStructure} serialized from java content tree.
+     *
+     * @throws JsonbException If any unexpected problem occurs during the
+     * serialization.
+     * @throws NullPointerException
+     *      If any of the parameters is {@code null}.
+     *
+     * @since JSON Binding 1.0
+     */
+    JsonStructure toJsonStructure (Object object, Type runtimeType) throws JsonbException;
+
+    /**
      * Reads in a JSON data with a specified {@link JsonParser} and return the
      * resulting content tree. Provided json parser must be fully initialized,
      * no further configurations will be applied.
@@ -49,6 +108,46 @@ public interface YassonJsonb extends javax.json.bind.Jsonb {
      *      If any of the parameters is {@code null}.
      */
     <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException;
+
+    /**
+     * Writes the object content tree with a specified {@link JsonGenerator}.
+     * Provided json generator must be fully initialized, no further configurations are applied.
+     *
+     * @param object
+     *      The object content tree to be serialized.
+     *
+     * @param runtimeType
+     *      Runtime type of the content tree's root object.
+     *
+     * @param jsonGenerator
+     *      The json generator to write JSON data. The generator is not closed
+     *      on a completion for further interaction.
+     *
+     * @throws JsonbException If any unexpected problem occurs during the
+     * serialization.
+     * @throws NullPointerException
+     *      If any of the parameters is {@code null}.
+     *
+     * @since JSON Binding 1.0
+     */
+    void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException;
+
+    /**
+     * Serializes the object content tree to a {@link JsonStructure}.
+     *
+     * @param object
+     *      The object content tree to be serialized.
+     *
+     * @return The {@link JsonStructure} serialized from java content tree.
+     *
+     * @throws JsonbException If any unexpected problem occurs during the
+     * serialization.
+     * @throws NullPointerException
+     *      If any of the parameters is {@code null}.
+     *
+     * @since JSON Binding 1.0
+     */
+    JsonStructure toJsonStructure(Object object) throws JsonbException;
 
     /**
      * Reads in a JSON data with a specified {@link JsonParser} and return the
@@ -91,103 +190,4 @@ public interface YassonJsonb extends javax.json.bind.Jsonb {
      */
     <T> T fromJsonStructure(JsonStructure jsonStructure, Class<T> type) throws JsonbException;
 
-    /**
-     * Reads a {@link JsonStructure} and and converts it into
-     * resulting java content tree.
-     *
-     * @param jsonStructure
-     *      {@link JsonStructure} to be used as a source for conversion.
-     * @param runtimeType
-     *      Runtime type of the content tree's root object.
-     * @param <T>
-     *      Type of the content tree's root object.
-     *
-     * @return the newly created root object of the java content tree
-     *
-     * @throws JsonbException
-     *     If any unexpected error(s) occur(s) during deserialization.
-     * @throws NullPointerException
-     *      If any of the parameters is {@code null}.
-     */
-    <T> T fromJsonStructure(JsonStructure jsonStructure, Type runtimeType) throws JsonbException;
-
-
-    /**
-     * Writes the object content tree with a specified {@link JsonGenerator}.
-     * Provided json generator must be fully initialized, no further configurations are applied.
-     *
-     * @param object
-     *      The object content tree to be serialized.
-     * @param jsonGenerator
-     *      The json generator to write JSON data. The generator is not closed
-     *      on a completion for further interaction.
-     *
-     * @throws JsonbException If any unexpected problem occurs during the
-     * serialization.
-     * @throws NullPointerException
-     *      If any of the parameters is {@code null}.
-     *
-     * @since JSON Binding 1.0
-     */
-    void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException;
-
-    /**
-     * Writes the object content tree with a specified {@link JsonGenerator}.
-     * Provided json generator must be fully initialized, no further configurations are applied.
-     *
-     * @param object
-     *      The object content tree to be serialized.
-     *
-     * @param runtimeType
-     *      Runtime type of the content tree's root object.
-     *
-     * @param jsonGenerator
-     *      The json generator to write JSON data. The generator is not closed
-     *      on a completion for further interaction.
-     *
-     * @throws JsonbException If any unexpected problem occurs during the
-     * serialization.
-     * @throws NullPointerException
-     *      If any of the parameters is {@code null}.
-     *
-     * @since JSON Binding 1.0
-     */
-    void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException;
-
-    /**
-     * Serializes the object content tree to a {@link javax.json.JsonStructure}.
-     *
-     * @param object
-     *      The object content tree to be serialized.
-     *
-     * @return The {@link JsonStructure} serialized from java content tree.
-     *
-     * @throws JsonbException If any unexpected problem occurs during the
-     * serialization.
-     * @throws NullPointerException
-     *      If any of the parameters is {@code null}.
-     *
-     * @since JSON Binding 1.0
-     */
-    JsonStructure toJsonStructure(Object object) throws JsonbException;
-
-    /**
-     * Serializes the object content tree to a {@link javax.json.JsonStructure}.
-     *
-     * @param object
-     *      The object content tree to be serialized.
-     *
-     * @param runtimeType
-     *      Runtime type of the content tree's root object.
-     *
-     * @return The {@link JsonStructure} serialized from java content tree.
-     *
-     * @throws JsonbException If any unexpected problem occurs during the
-     * serialization.
-     * @throws NullPointerException
-     *      If any of the parameters is {@code null}.
-     *
-     * @since JSON Binding 1.0
-     */
-    JsonStructure toJsonStructure (Object object, Type runtimeType) throws JsonbException;
 }

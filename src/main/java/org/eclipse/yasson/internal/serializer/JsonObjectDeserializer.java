@@ -27,9 +27,10 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
 
     private JsonObject jsonObject;
 
+
     @Override
-    protected void deserializeContents(JsonbNavigator parser, JsonUnmarshaller context) {
-        this.jsonObject = parser.getObject();
+    public JsonObject getInstance(JsonUnmarshaller unmarshaller) {
+        return jsonObject;
     }
 
     /**
@@ -41,9 +42,9 @@ public class JsonObjectDeserializer extends AbstractJsonpDeserializer<JsonObject
         super(builder);
     }
 
-
     @Override
-    public JsonObject getInstance(JsonUnmarshaller unmarshaller) {
-        return jsonObject;
+    protected void deserializeContents(JsonbNavigator parser, JsonUnmarshaller context) {
+        this.jsonObject = parser.getObject();
     }
+
 }

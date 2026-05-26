@@ -44,6 +44,51 @@ public class MapDeserializer<T extends Map<?,?>> extends BaseContainerDeserializ
 
     private final T instance;
 
+    @Override
+    public void addResult(Object result) {
+        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
+    }
+
+    @Override
+    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
+    private Map getMapImpl(Class ifcType, JsonDeserializerBuilder builder) {
+        // SortedMap, NavigableMap
+        if (SortedMap.class.isAssignableFrom(ifcType)) {
+            Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
+            return SortedMap.class.isAssignableFrom(defaultMapImplType) ?
+                    (Map) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(defaultMapImplType) :
+                    new TreeMap<>();
+        }
+        return new HashMap<>();
+    }
+
+    @Override
+    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = createCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
+        addResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> void appendCaptor(String key, V value) {
+        ((Map<String, V>) getInstance(null)).put(key, value);
+    }
+
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return instance;
+    }
+
+    @SuppressWarnings("unchecked")
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<?> rawType = ReflectionTypeUtils.getRawType(getRuntimeType());
+        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
+                : (T) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(rawType);
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -59,48 +104,4 @@ public class MapDeserializer<T extends Map<?,?>> extends BaseContainerDeserializ
         this.instance = createInstance(builder);
     }
 
-    @SuppressWarnings("unchecked")
-    private T createInstance(JsonDeserializerBuilder builder) {
-        Class<?> rawType = ReflectionTypeUtils.getRawType(getRuntimeType());
-        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
-                : (T) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(rawType);
-    }
-
-    private Map getMapImpl(Class ifcType, JsonDeserializerBuilder builder) {
-        // SortedMap, NavigableMap
-        if (SortedMap.class.isAssignableFrom(ifcType)) {
-            Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
-            return SortedMap.class.isAssignableFrom(defaultMapImplType) ?
-                    (Map) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(defaultMapImplType) :
-                    new TreeMap<>();
-        }
-        return new HashMap<>();
-    }
-
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void addResult(Object result) {
-        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <V> void appendCaptor(String key, V value) {
-        ((Map<String, V>) getInstance(null)).put(key, value);
-    }
-
-    @Override
-    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = createCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
-        addResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
-    }
-
-    @Override
-    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
 }

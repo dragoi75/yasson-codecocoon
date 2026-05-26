@@ -37,27 +37,26 @@ class CollectionInstanceDeserializer<T extends Collection<?>> extends BaseContai
 
     private T elementValue;
 
-    /**
-     * @param deserializerFactory {@link JsonDeserializerBuilder ) used to build this instance
-     */
-    protected CollectionInstanceDeserializer(JsonDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-        elementType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
-                : Object.class;
+    @Override
+    protected void deserializeElement(JsonParser jsonReader, JsonUnmarshaller unmarshalEnv) {
+        final JsonbDeserializer<?> elementHandler = createCollectionOrMapItem(elementType, unmarshalEnv.getJsonbContext());
+        addResult(elementHandler.deserialize(jsonReader, unmarshalEnv, elementType));
+    }
 
-        elementValue = instantiate(deserializerFactory);
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return elementValue;
+    }
+
+    @Override
+    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator jsonReader) {
+        jsonReader.moveTo(JsonParser.Event.START_ARRAY);
+        return jsonReader.getCurrentLevel();
     }
 
     @SuppressWarnings("unchecked")
-    private T instantiate(JsonDeserializerBuilder deserializerFactory) {
-        Class<T> actualClass = (Class<T>) ReflectionTypeUtils.getRawType(getRuntimeType());
-
-        if (actualClass.isInterface()) {
-            final T element = instantiateInterface(actualClass);
-            if (element != null) return element;
-        }
-        return deserializerFactory.getJsonbContext().getInstanceCreator().getOrCreateInstance(actualClass);
+    private <T> void addElement(T newElement) {
+        ((Collection<T>) elementValue).add(newElement);
     }
 
     @SuppressWarnings("unchecked")
@@ -83,9 +82,27 @@ class CollectionInstanceDeserializer<T extends Collection<?>> extends BaseContai
         return null;
     }
 
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return elementValue;
+    @SuppressWarnings("unchecked")
+    private T instantiate(JsonDeserializerBuilder deserializerFactory) {
+        Class<T> actualClass = (Class<T>) ReflectionTypeUtils.getRawType(getRuntimeType());
+
+        if (actualClass.isInterface()) {
+            final T element = instantiateInterface(actualClass);
+            if (element != null) return element;
+        }
+        return deserializerFactory.getJsonbContext().getInstanceCreator().getOrCreateInstance(actualClass);
+    }
+
+    /**
+     * @param deserializerFactory {@link JsonDeserializerBuilder ) used to build this instance
+     */
+    protected CollectionInstanceDeserializer(JsonDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+        elementType = getRuntimeType() instanceof ParameterizedType ?
+                ReflectionTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0])
+                : Object.class;
+
+        elementValue = instantiate(deserializerFactory);
     }
 
     @Override
@@ -93,20 +110,4 @@ class CollectionInstanceDeserializer<T extends Collection<?>> extends BaseContai
         addElement(convertNullToEmptyOptional(elementType, outcome));
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> void addElement(T newElement) {
-        ((Collection<T>) elementValue).add(newElement);
-    }
-
-    @Override
-    protected void deserializeElement(JsonParser jsonReader, JsonUnmarshaller unmarshalEnv) {
-        final JsonbDeserializer<?> elementHandler = createCollectionOrMapItem(elementType, unmarshalEnv.getJsonbContext());
-        addResult(elementHandler.deserialize(jsonReader, unmarshalEnv, elementType));
-    }
-
-    @Override
-    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator jsonReader) {
-        jsonReader.moveTo(JsonParser.Event.START_ARRAY);
-        return jsonReader.getCurrentLevel();
-    }
 }

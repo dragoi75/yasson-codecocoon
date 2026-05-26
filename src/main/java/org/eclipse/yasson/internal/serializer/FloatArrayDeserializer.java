@@ -26,15 +26,6 @@ import java.util.List;
 public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     private final List<Float> items = new ArrayList<>();
 
-    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public float[] getInstance(JsonUnmarshaller unmarshaller) {
         final int size = items.size();
@@ -44,4 +35,14 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
         }
         return floatArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

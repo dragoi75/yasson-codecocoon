@@ -15,15 +15,38 @@ public class CreatorCustomization extends CustomizationBase {
 
     private PropertyModel propertyModel;
 
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    /**
+     * Set property referenced model.
+     * @param propertyModel referenced property model
+     */
+    public void setPropertyModel(PropertyModel propertyModel) {
+        this.propertyModel = propertyModel;
+    }
+
+    @Override
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        if (dateFormatter != null) {
+            return dateFormatter;
+        } else if (propertyModel != null) {
+            return propertyModel.getCustomization().getDeserializeDateFormatter();
+        }
+        return null;
+    }
+
     public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
         this.dateFormatter = dateFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     @Override
@@ -37,30 +60,8 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
         throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (dateFormatter != null) {
-            return dateFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeDateFormatter();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
-    }
-
-    /**
-     * Set property referenced model.
-     * @param propertyModel referenced property model
-     */
-    public void setPropertyModel(PropertyModel propertyModel) {
-        this.propertyModel = propertyModel;
-    }
 }

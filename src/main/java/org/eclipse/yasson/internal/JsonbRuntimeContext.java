@@ -53,6 +53,73 @@ public class JsonbRuntimeContext {
 
     private final InstanceFactory instanceFactory;
 
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentResolver;
+    }
+
+    private JsonbComponentInstanceCreator initializeComponentInstanceCreator(InstanceFactory instanceFactory) {
+        ServiceLoader<JsonbComponentInstanceCreator> serviceRegistry = AccessController
+                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
+                        .load(JsonbComponentInstanceCreator.class));
+        List<JsonbComponentInstanceCreator> creatorList = new ArrayList<>();
+        for (JsonbComponentInstanceCreator candidate : serviceRegistry) {
+            creatorList.add(candidate);
+        }
+        if (creatorList.isEmpty()) {
+            // No service provider found - use the defaults
+            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceFactory);
+        }
+        creatorList.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
+        JsonbComponentInstanceCreator candidate = creatorList.get(0);
+        RUNTIME_TRACE.finest("Component instance creator:" + candidate.getClass());
+        return candidate;
+    }
+
+    /**
+     * Gets component for annotation parsing.
+     *
+     * @return Annotation introspector.
+     */
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationInspector;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonEngine;
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configOptions;
+    }
+
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return configSettings;
+    }
+
+    /**
+     * Returns component for creating instances of non-parsed types.
+     * @return InstanceCreator
+     */
+    public InstanceFactory getInstanceCreator() {
+        return instanceFactory;
+    }
+
     /**
      * Creates and initialize context.
      *
@@ -72,34 +139,6 @@ public class JsonbRuntimeContext {
     }
 
     /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return configSettings;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mappingState;
-    }
-
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonEngine;
-    }
-
-    /**
      * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
      *
      * @return Instance creator.
@@ -109,53 +148,12 @@ public class JsonbRuntimeContext {
     }
 
     /**
-     * Component matcher for lookup of (de)serializers and adapters.
+     * Gets mapping context.
      *
-     * @return Component matcher.
+     * @return Mapping context.
      */
-    public ComponentMatcher getComponentMatcher() {
-        return componentResolver;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationInspector;
-    }
-
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configOptions;
-    }
-
-
-    /**
-     * Returns component for creating instances of non-parsed types.
-     * @return InstanceCreator
-     */
-    public InstanceFactory getInstanceCreator() {
-        return instanceFactory;
-    }
-
-    private JsonbComponentInstanceCreator initializeComponentInstanceCreator(InstanceFactory instanceFactory) {
-        ServiceLoader<JsonbComponentInstanceCreator> serviceRegistry = AccessController
-                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
-                        .load(JsonbComponentInstanceCreator.class));
-        List<JsonbComponentInstanceCreator> creatorList = new ArrayList<>();
-        for (JsonbComponentInstanceCreator candidate : serviceRegistry) {
-            creatorList.add(candidate);
-        }
-        if (creatorList.isEmpty()) {
-            // No service provider found - use the defaults
-            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceFactory);
-        }
-        creatorList.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
-        JsonbComponentInstanceCreator candidate = creatorList.get(0);
-        RUNTIME_TRACE.finest("Component instance creator:" + candidate.getClass());
-        return candidate;
+    public MappingContext getMappingContext() {
+        return mappingState;
     }
 
 }

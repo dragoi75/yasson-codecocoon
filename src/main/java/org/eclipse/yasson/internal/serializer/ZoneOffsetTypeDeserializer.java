@@ -26,6 +26,11 @@ import java.time.ZoneOffset;
  */
 public class ZoneOffsetTypeDeserializer extends AbstractValueTypeDeserializer<ZoneOffset> {
 
+    @Override
+    protected ZoneOffset deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
+        return ZoneOffset.of(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class ZoneOffsetTypeDeserializer extends AbstractValueTypeDeserializer<Zo
         super(ZoneOffset.class, customization);
     }
 
-    @Override
-    protected ZoneOffset deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
-        return ZoneOffset.of(jsonValue);
-    }
 }

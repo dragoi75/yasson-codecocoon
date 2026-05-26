@@ -24,6 +24,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class IntegerTypeSerializer extends AbstractNumberSerializer<Integer> {
 
+    @Override
+    protected void serializeNonFormatted(Integer obj, JsonGenerator generator) {
+        generator.write(obj);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,8 +43,4 @@ public class IntegerTypeSerializer extends AbstractNumberSerializer<Integer> {
         generator.write(key, obj);
     }
 
-    @Override
-    protected void serializeNonFormatted(Integer obj, JsonGenerator generator) {
-        generator.write(obj);
-    }
 }

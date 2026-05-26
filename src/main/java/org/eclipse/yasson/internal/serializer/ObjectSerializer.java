@@ -34,13 +34,27 @@ import java.util.OptionalLong;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(SerializerBuilder builder) {
-        super(builder);
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    private boolean isEmptyOptional(Object object) {
+        if (object instanceof Optional) {
+            return !((Optional) object).isPresent();
+        } else if (object instanceof OptionalInt) {
+            return !((OptionalInt) object).isPresent();
+        } else if (object instanceof OptionalLong) {
+            return !((OptionalLong) object).isPresent();
+        } else if (object instanceof OptionalDouble) {
+            return !((OptionalDouble) object).isPresent();
+        }
+        return false;
     }
 
     /**
@@ -54,22 +68,21 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         super(wrapper, runtimeType, classModel);
     }
 
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(SerializerBuilder builder) {
+        super(builder);
+    }
+
     @Override
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
         final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
         for (PropertyModel model : allProperties) {
             marshallProperty(object, generator, ctx, model);
         }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
     }
 
     @SuppressWarnings("unchecked")
@@ -102,19 +115,6 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
                     .setType(genericType).build();
             serializerCaptor(serializer, propertyValue, generator, ctx);
         }
-    }
-
-    private boolean isEmptyOptional(Object object) {
-        if (object instanceof Optional) {
-            return !((Optional) object).isPresent();
-        } else if (object instanceof OptionalInt) {
-            return !((OptionalInt) object).isPresent();
-        } else if (object instanceof OptionalLong) {
-            return !((OptionalLong) object).isPresent();
-        } else if (object instanceof OptionalDouble) {
-            return !((OptionalDouble) object).isPresent();
-        }
-        return false;
     }
 
 }

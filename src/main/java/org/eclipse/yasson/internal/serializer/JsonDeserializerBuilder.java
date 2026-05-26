@@ -51,13 +51,60 @@ public class JsonDeserializerBuilder extends BaseSerializerBuilder<JsonDeseriali
      */
     private JsonParser.Event parsedEvent;
 
+
+    private Class<?> getInterfaceMappedType(Class<?> ifaceType) {
+        if (ifaceType.isInterface()) {
+            Class implClass = null;
+            //annotation
+            if (customization instanceof PropertyCustomization) {
+                 implClass = ((PropertyCustomization) customization).getImplementationClass();
+            }
+            //JsonbConfig
+            if (implClass == null) {
+                implClass = jsonbContext.getConfigProperties().getUserTypeMapping().get(ifaceType);
+            }
+            if (implClass != null) {
+                if (!ifaceType.isAssignableFrom(implClass)) {
+                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implClass, ifaceType));
+                }
+                return implClass;
+            }
+        }
+        return null;
+    }
+
     /**
-     * Creates a new builder.
-     *
-     * @param runtimeContext Context.
+     * Instance is not created in case of array items, because, we don't know how long it should be
+     * till parser ends parsing.
      */
-    public JsonDeserializerBuilder(JsonbRuntimeContext runtimeContext) {
-        super(runtimeContext);
+    private JsonbDeserializer<?> createArrayItemDeserializer(Class<?> elementType) {
+        if (elementType == byte.class) {
+            return new ByteArrayDeserializer(this);
+        } else if (elementType == short.class) {
+            return new ShortArrayDeserializer(this);
+        } else if (elementType == int.class) {
+            return new IntArrayDeserializer(this);
+        } else if (elementType == long.class) {
+            return new LongArrayDeserializer(this);
+        } else if (elementType == float.class) {
+            return new FloatArrayDeserializer(this);
+        } else if (elementType == double.class) {
+            return new DoubleArrayDeserializer(this);
+        } else {
+            return new ObjectArrayDeserializer(this);
+        }
+    }
+
+    private boolean isByteArray(Class<?> targetType) {
+        return targetType.isArray() && targetType.getComponentType() == Byte.TYPE;
+    }
+
+    private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> targetType) {
+        final Optional<? extends SerializerProviderWrapper> supportedDeserializerProviderOpt = DefaultSerializers.getInstance().findValueSerializerProvider(targetType);
+        if (supportedDeserializerProviderOpt.isPresent()) {
+            return Optional.of(supportedDeserializerProviderOpt.get().getDeserializerProvider().provideDeserializer(customization));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -69,6 +116,77 @@ public class JsonDeserializerBuilder extends BaseSerializerBuilder<JsonDeseriali
     public JsonDeserializerBuilder setJsonValueType(JsonParser.Event incomingEvent) {
         this.parsedEvent = incomingEvent;
         return this;
+    }
+
+    private Type determineRuntimeType() {
+        Type runtimeType = ReflectionTypeUtils.resolveGenericType(wrapper, genericType != null ? genericType : this.runtimeType);
+        //Try to infer best from JSON event.
+        if (runtimeType == Object.class) {
+            switch (parsedEvent) {
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                return Boolean.class;
+                case VALUE_NUMBER:
+                return BigDecimal.class;
+                case VALUE_STRING:
+                return String.class;
+                case START_ARRAY:
+                return ArrayList.class;
+                case START_OBJECT:
+                    return jsonbContext.getConfigProperties().getDefaultMapImplType();
+                case VALUE_NULL:
+                    return Object.class;
+                default:
+                throw new IllegalStateException("Can't infer deserialization type type: " + parsedEvent);
+
+            }
+        }
+        return runtimeType;
+    }
+
+    /**
+     * Checks if event is a value event.
+     *
+     * @param incomingEvent JSON event to check.
+     * @return True if one of value events.
+     */
+    public static boolean isJsonValueEvent(JsonParser.Event incomingEvent) {
+        switch (incomingEvent) {
+            case VALUE_NULL:
+            case VALUE_FALSE:
+            case VALUE_TRUE:
+            case VALUE_NUMBER:
+            case VALUE_STRING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Creates a new builder.
+     *
+     * @param runtimeContext Context.
+     */
+    public JsonDeserializerBuilder(JsonbRuntimeContext runtimeContext) {
+        super(runtimeContext);
+    }
+
+    private <T,A> void setAdaptedItemCaptor(AdaptedObjectDeserializer<T,A> decorator, JsonbDeserializer<T> adaptedDeserializer) {
+        decorator.setAdaptedTypeDeserializer(adaptedDeserializer);
+    }
+
+    private boolean isCharArray(Class<?> targetType) {
+        return targetType.isArray() && targetType.getComponentType() == Character.TYPE;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonbDeserializer<?> wrapWithAdapter(Optional<AdapterBinding> adapterBindingOpt, JsonbDeserializer<?> deserializerItem) {
+        final Optional<JsonbDeserializer<?>> adaptedDeserializerOpt = adapterBindingOpt.map(adapterInfo -> {
+            setAdaptedItemCaptor((AdaptedObjectDeserializer)wrapper, deserializerItem);
+            return (JsonbDeserializer<?>)wrapper;
+        });
+        return adaptedDeserializerOpt.orElse(deserializerItem);
     }
 
     /**
@@ -178,121 +296,4 @@ public class JsonDeserializerBuilder extends BaseSerializerBuilder<JsonDeseriali
         throw new JsonbException("unresolved type for deserialization: " + getRuntimeType());
     }
 
-    /**
-     * Checks if event is a value event.
-     *
-     * @param incomingEvent JSON event to check.
-     * @return True if one of value events.
-     */
-    public static boolean isJsonValueEvent(JsonParser.Event incomingEvent) {
-        switch (incomingEvent) {
-            case VALUE_NULL:
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-            case VALUE_NUMBER:
-            case VALUE_STRING:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-
-    private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> targetType) {
-        final Optional<? extends SerializerProviderWrapper> supportedDeserializerProviderOpt = DefaultSerializers.getInstance().findValueSerializerProvider(targetType);
-        if (supportedDeserializerProviderOpt.isPresent()) {
-            return Optional.of(supportedDeserializerProviderOpt.get().getDeserializerProvider().provideDeserializer(customization));
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    private JsonbDeserializer<?> wrapWithAdapter(Optional<AdapterBinding> adapterBindingOpt, JsonbDeserializer<?> deserializerItem) {
-        final Optional<JsonbDeserializer<?>> adaptedDeserializerOpt = adapterBindingOpt.map(adapterInfo -> {
-            setAdaptedItemCaptor((AdaptedObjectDeserializer)wrapper, deserializerItem);
-            return (JsonbDeserializer<?>)wrapper;
-        });
-        return adaptedDeserializerOpt.orElse(deserializerItem);
-    }
-
-    private <T,A> void setAdaptedItemCaptor(AdaptedObjectDeserializer<T,A> decorator, JsonbDeserializer<T> adaptedDeserializer) {
-        decorator.setAdaptedTypeDeserializer(adaptedDeserializer);
-    }
-
-    private Type determineRuntimeType() {
-        Type runtimeType = ReflectionTypeUtils.resolveGenericType(wrapper, genericType != null ? genericType : this.runtimeType);
-        //Try to infer best from JSON event.
-        if (runtimeType == Object.class) {
-            switch (parsedEvent) {
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                return Boolean.class;
-                case VALUE_NUMBER:
-                return BigDecimal.class;
-                case VALUE_STRING:
-                return String.class;
-                case START_ARRAY:
-                return ArrayList.class;
-                case START_OBJECT:
-                    return jsonbContext.getConfigProperties().getDefaultMapImplType();
-                case VALUE_NULL:
-                    return Object.class;
-                default:
-                throw new IllegalStateException("Can't infer deserialization type type: " + parsedEvent);
-
-            }
-        }
-        return runtimeType;
-    }
-
-    private Class<?> getInterfaceMappedType(Class<?> ifaceType) {
-        if (ifaceType.isInterface()) {
-            Class implClass = null;
-            //annotation
-            if (customization instanceof PropertyCustomization) {
-                 implClass = ((PropertyCustomization) customization).getImplementationClass();
-            }
-            //JsonbConfig
-            if (implClass == null) {
-                implClass = jsonbContext.getConfigProperties().getUserTypeMapping().get(ifaceType);
-            }
-            if (implClass != null) {
-                if (!ifaceType.isAssignableFrom(implClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implClass, ifaceType));
-                }
-                return implClass;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Instance is not created in case of array items, because, we don't know how long it should be
-     * till parser ends parsing.
-     */
-    private JsonbDeserializer<?> createArrayItemDeserializer(Class<?> elementType) {
-        if (elementType == byte.class) {
-            return new ByteArrayDeserializer(this);
-        } else if (elementType == short.class) {
-            return new ShortArrayDeserializer(this);
-        } else if (elementType == int.class) {
-            return new IntArrayDeserializer(this);
-        } else if (elementType == long.class) {
-            return new LongArrayDeserializer(this);
-        } else if (elementType == float.class) {
-            return new FloatArrayDeserializer(this);
-        } else if (elementType == double.class) {
-            return new DoubleArrayDeserializer(this);
-        } else {
-            return new ObjectArrayDeserializer(this);
-        }
-    }
-
-    private boolean isByteArray(Class<?> targetType) {
-        return targetType.isArray() && targetType.getComponentType() == Byte.TYPE;
-    }
-
-    private boolean isCharArray(Class<?> targetType) {
-        return targetType.isArray() && targetType.getComponentType() == Character.TYPE;
-    }
 }
