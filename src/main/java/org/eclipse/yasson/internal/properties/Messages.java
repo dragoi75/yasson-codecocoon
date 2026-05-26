@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.properties;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ import java.util.ResourceBundle;
 public class Messages {
 
     private static final String MESSAGE_BUNDLE = "yasson-messages";
+
     private static final String ENCODING = "UTF-8";
 
     private Messages() {
@@ -70,26 +70,26 @@ public class Messages {
     }
 
     static class UTF8Control extends ResourceBundle.Control {
-        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-                throws IllegalAccessException, InstantiationException, IOException {
+
+        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
             // The below is a copy of the default implementation.
             String bundleName = toBundleName(baseName, locale);
             String resourceName = toResourceName(bundleName, "properties");
             ResourceBundle bundle = null;
             InputStream stream = null;
-            if (reload) {
+            if (!reload) {
+                stream = loader.getResourceAsStream(resourceName);
+            } else {
                 URL url = loader.getResource(resourceName);
-                if (url != null) {
+                if (null != url) {
                     URLConnection connection = url.openConnection();
-                    if (connection != null) {
+                    if (null != connection) {
                         connection.setUseCaches(false);
                         stream = connection.getInputStream();
                     }
                 }
-            } else {
-                stream = loader.getResourceAsStream(resourceName);
             }
-            if (stream != null) {
+            if (null != stream) {
                 try {
                     // Only this line is changed to make it to read properties files as UTF-8.
                     bundle = new PropertyResourceBundle(new InputStreamReader(stream, ENCODING));
@@ -100,5 +100,4 @@ public class Messages {
             return bundle;
         }
     }
-
 }

@@ -9,15 +9,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.GenericArrayType;
 import java.util.List;
-
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
 import org.eclipse.yasson.internal.ReflectiveTypeResolver;
@@ -35,6 +32,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
      * Runtime type class of an array.
      */
     private final Class<?> componentClass;
+
     private final ClassModel componentClassModel;
 
     /**
@@ -44,16 +42,15 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
      */
     AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);
-        if (getRuntimeType() instanceof GenericArrayType) {
-            componentClass = ReflectiveTypeResolver
-                    .getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
-        } else {
+        if (!(getRuntimeType() instanceof GenericArrayType)) {
             componentClass = ReflectiveTypeResolver.getRawType(getRuntimeType()).getComponentType();
-        }
-        if (!DefaultSerializers.isKnownType(componentClass)) {
-            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         } else {
+            componentClass = ReflectiveTypeResolver.getRawType(this, ((GenericArrayType) getRuntimeType()).getGenericComponentType());
+        }
+        if (DefaultSerializers.isKnownType(componentClass)) {
             componentClassModel = null;
+        } else {
+            componentClassModel = builder.getJsonbContext().getMappingContext().getOrCreateClassModel(componentClass);
         }
     }
 
@@ -78,8 +75,7 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     @Override
     protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass)
-                .withCustomization(componentClassModel == null ? null : componentClassModel.getClassCustomization()).build();
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass).withCustomization(null == componentClassModel ? null : componentClassModel.getClassCustomization()).build();
         appendResult(deserializer.deserialize(parser, context, componentClass));
     }
 

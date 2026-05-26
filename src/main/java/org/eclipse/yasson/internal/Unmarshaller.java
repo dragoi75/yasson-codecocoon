@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
@@ -54,8 +51,7 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     @SuppressWarnings("unchecked")
     private <T> T deserializeItem(Type type, JsonParser parser) {
         try {
-            DeserializerBuilder deserializerBuilder = new DeserializerBuilder(getJsonbContext())
-                    .withType(type).withJsonValueType(getRootEvent(parser));
+            DeserializerBuilder deserializerBuilder = new DeserializerBuilder(getJsonbContext()).withType(type).withJsonValueType(getRootEvent(parser));
             Class<?> rawType = ReflectiveTypeResolver.getRawType(type);
             ClassModel classModel = getMappingContext().getOrCreateClassModel(rawType);
             deserializerBuilder.withCustomization(classModel.getClassCustomization());
@@ -76,11 +72,10 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     private JsonParser.Event getRootEvent(JsonParser parser) {
         JsonbRiParser.LevelContext currentLevel = ((JsonbParser) parser).getCurrentLevel();
         //Wrapper parser is at start
-        if (currentLevel.getParent() == null) {
+        if (null == currentLevel.getParent()) {
             return parser.next();
         }
         final JsonParser.Event lastEvent = currentLevel.getLastEvent();
-        return lastEvent == JsonParser.Event.KEY_NAME ? parser.next() : lastEvent;
+        return JsonParser.Event.KEY_NAME == lastEvent ? parser.next() : lastEvent;
     }
-
 }

@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
@@ -17,12 +16,10 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.bind.serializer.JsonbDeserializer;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.JsonbParser;
 import org.eclipse.yasson.internal.JsonbRiParser;
@@ -83,34 +80,33 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
         parserContext = moveToFirst(parser);
         while (parser.hasNext()) {
             final JsonParser.Event event = parser.next();
-            switch (event) {
-            case START_OBJECT:
-            case START_ARRAY:
-            case VALUE_STRING:
-            case VALUE_NUMBER:
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                try {
-                    deserializeNext(parser, context);
-                } catch (JsonbException e) {
-                    if (parserContext == null || parserContext.getLastKeyName() == null) {
-                        throw e;
-                    } else {
-                        throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName()
-                                                         + "' because of: " + e.getMessage(), e);
+            switch(event) {
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    try {
+                        deserializeNext(parser, context);
+                    } catch (JsonbException e) {
+                        if (null != parserContext && null != parserContext.getLastKeyName()) {
+                            throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName() + "' because of: " + e.getMessage(), e);
+                        } else {
+                            throw e;
+                        }
                     }
-                }
-                break;
-            case KEY_NAME:
-                break;
-            case VALUE_NULL:
-                appendResult(null);
-                break;
-            case END_OBJECT:
-            case END_ARRAY:
-                return;
-            default:
-                throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
+                    break;
+                case KEY_NAME:
+                    break;
+                case VALUE_NULL:
+                    appendResult(null);
+                    break;
+                case END_OBJECT:
+                case END_ARRAY:
+                    return;
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeys.NOT_VALUE_TYPE, event));
             }
         }
     }
@@ -163,24 +159,28 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @return empty optional if applies
      */
     protected Object convertNullToOptionalEmpty(Type propertyType, Object value) {
-        if (value != null) {
+        if (null != value) {
             return value;
         }
-
         if (!(propertyType instanceof Class)) {
             propertyType = ReflectiveTypeResolver.getRawType(ReflectiveTypeResolver.resolveTypeDefault(this, propertyType));
         }
-
-        if (propertyType == Optional.class) {
-            return Optional.empty();
-        } else if (propertyType == OptionalInt.class) {
-            return OptionalInt.empty();
-        } else if (propertyType == OptionalLong.class) {
-            return OptionalLong.empty();
-        } else if (propertyType == OptionalDouble.class) {
-            return OptionalDouble.empty();
+        if (Optional.class != propertyType) {
+            if (OptionalInt.class != propertyType) {
+                if (OptionalLong.class != propertyType) {
+                    if (OptionalDouble.class != propertyType) {
+                        return null;
+                    } else {
+                        return OptionalDouble.empty();
+                    }
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
+                return OptionalInt.empty();
+            }
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

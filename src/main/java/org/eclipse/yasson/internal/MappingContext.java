@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.util.ArrayDeque;
@@ -17,7 +16,6 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotatedElement;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
@@ -31,6 +29,7 @@ import org.eclipse.yasson.internal.serializer.DefaultSerializers;
  * Thread safe.
  */
 public class MappingContext {
+
     private final JsonbRuntimeContext jsonbContext;
 
     private final ConcurrentHashMap<Class<?>, ClassModel> classes = new ConcurrentHashMap<>();
@@ -59,40 +58,34 @@ public class MappingContext {
      */
     public ClassModel getOrCreateClassModel(Class<?> clazz) {
         ClassModel classModel = classes.get(clazz);
-        if (classModel != null) {
+        if (null != classModel) {
             return classModel;
         }
-
         Deque<Class<?>> newClassModels = new ArrayDeque<>();
-        for (Class<?> classToParse = clazz; classToParse != Object.class; classToParse = classToParse.getSuperclass()) {
-            if (classToParse == null) {
+        Class<?> classToParse = clazz;
+        while (Object.class != classToParse) {
+            if (null == classToParse) {
                 break;
             }
             newClassModels.push(classToParse);
+            classToParse = classToParse.getSuperclass();
         }
-        if (clazz == Object.class) {
+        if (Object.class == clazz) {
             return classes.computeIfAbsent(clazz, (c) -> new ClassModel(c, null, null, null));
         }
-
         ClassModel parentClassModel = null;
         while (!newClassModels.isEmpty()) {
             Class<?> toParse = newClassModels.pop();
-            parentClassModel = classes
-                    .computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
+            parentClassModel = classes.computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
         }
         return classes.get(clazz);
     }
 
-    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
-                                                                                ClassParser classParser,
-                                                                                JsonbRuntimeContext jsonbContext) {
+    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbRuntimeContext jsonbContext) {
         return aClass -> {
             JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
             ClassCustomization customization = jsonbContext.getAnnotationIntrospector().introspectCustomization(clsElement);
-            ClassModel newClassModel = new ClassModel(aClass,
-                                                      customization,
-                                                      parentClassModel,
-                                                      jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            ClassModel newClassModel = new ClassModel(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
             if (!DefaultSerializers.isKnownType(aClass)) {
                 classParser.parseProperties(newClassModel, clsElement);
             }

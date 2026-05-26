@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.text.DecimalFormat;
@@ -18,9 +17,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.JsonbRuntimeContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.properties.MessageKeys;
@@ -52,10 +49,9 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
      * @return formatted number value
      */
     protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbRuntimeContext jsonbContext) {
-        if (getCustomization() == null || getCustomization().getDeserializeNumberFormatter() == null) {
+        if (null == getCustomization() || null == getCustomization().getDeserializeNumberFormatter()) {
             return Optional.empty();
         }
-
         final JsonbNumberFormatter numberFormat = getCustomization().getDeserializeNumberFormatter();
         //consider synchronizing on format instance or per thread cache.
         Locale locale = jsonbContext.getConfigProperties().getLocale(numberFormat.getLocale());
@@ -72,7 +68,7 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
     private String compatibilityChanger(String value, Locale locale) {
         char beforeJdk13GroupSeparator = '\u00A0';
         char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
-        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && beforeJdk13GroupSeparator != frenchGroupingSeparator) {
+        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
             //JDK-8225245
             return value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
         }
