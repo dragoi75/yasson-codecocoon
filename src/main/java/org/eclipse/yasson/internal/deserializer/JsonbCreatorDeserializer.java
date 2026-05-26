@@ -83,7 +83,7 @@ class JsonbCreatorDeserializer implements ModelUnmarshaller<JsonParser> {
             case VALUE_TRUE:
                 if (propertyDeserializerChains.containsKey(key)) {
                     try {
-                        Object o = propertyDeserializerChains.get(key).deserialize(parser, context);
+                        Object o = propertyDeserializerChains.get(key).unmarshal(parser, context);
                         if (creatorParams.contains(key)) {
                             paramValues.put(key, o);
                         }
@@ -104,7 +104,7 @@ class JsonbCreatorDeserializer implements ModelUnmarshaller<JsonParser> {
                     if (paramValues.containsKey(param)) {
                         params[i] = paramValues.get(param);
                     } else {
-                        params[i] = defaultCreatorValues.get(param).deserialize(null, context);
+                        params[i] = defaultCreatorValues.get(param).unmarshal(null, context);
                     }
                 }
                 context.setInstance(creator.call(params, clazz));

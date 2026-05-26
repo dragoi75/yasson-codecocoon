@@ -75,7 +75,7 @@ class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
             case VALUE_TRUE:
                 if (fieldDeserializers.containsKey(propertyName)) {
                     try {
-                        fieldDeserializers.get(propertyName).deserialize(jsonInput, deserState);
+                        fieldDeserializers.get(propertyName).unmarshal(jsonInput, deserState);
                     } catch (JsonbException ex) {
                         throw new JsonbException("Unable to deserialize property '" + propertyName + "' because of: " + ex.getMessage(), ex);
                     }
