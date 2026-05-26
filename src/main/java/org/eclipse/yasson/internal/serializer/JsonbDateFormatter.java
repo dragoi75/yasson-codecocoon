@@ -49,6 +49,43 @@ public class JsonbDateFormatter {
     private final String locale;
 
     /**
+     * Format string to be used either by formatter.
+     * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
+     * which is not threadsafe.
+     *
+     * @return Format.
+     */
+    public String getFormat() {
+        return format;
+    }
+
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
+    }
+
+    /**
+     * Locale to use with formatter.
+     *
+     * @return Locale.
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+    /**
      * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
      * @param dateTimeFormatter Reused time formatter.
@@ -74,40 +111,4 @@ public class JsonbDateFormatter {
         this.dateTimeFormatter = null;
     }
 
-    /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
-     *
-     * @return Formatter instance.
-     */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
-    }
-
-    /**
-     * Format string to be used either by formatter.
-     * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
-     * which is not threadsafe.
-     *
-     * @return Format.
-     */
-    public String getFormat() {
-        return format;
-    }
-
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
 }

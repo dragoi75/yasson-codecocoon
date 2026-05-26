@@ -36,6 +36,52 @@ public class ClassSerializationConfig extends CustomizationBase {
 
     private final PropertyVisibilityStrategy fieldVisibilityPolicy;
 
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return timestampFormatter;
+    }
+
+    /**
+     * Property visibility strategy for this class model.
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return fieldVisibilityPolicy;
+    }
+
+    /**
+     * Sets sorted properties.
+     *
+     * @param fieldSequence sorted names of properties
+     */
+    public void setPropertyOrder(String[] fieldSequence) {
+        this.fieldSequence = fieldSequence;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return decimalFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return timestampFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return decimalFormatter;
+    }
+
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return fieldSequence;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -71,52 +117,6 @@ public class ClassSerializationConfig extends CustomizationBase {
      */
     public JsonbCreator getCreator() {
         return instanceFactory;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return fieldSequence;
-    }
-
-    /**
-     * Sets sorted properties.
-     *
-     * @param fieldSequence sorted names of properties
-     */
-    public void setPropertyOrder(String[] fieldSequence) {
-        this.fieldSequence = fieldSequence;
-    }
-
-    /**
-     * Property visibility strategy for this class model.
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return fieldVisibilityPolicy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return decimalFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return decimalFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return timestampFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return timestampFormatter;
     }
 
 }

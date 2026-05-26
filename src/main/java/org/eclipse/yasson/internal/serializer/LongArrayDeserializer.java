@@ -27,15 +27,6 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
 
     private final List<Long> items = new ArrayList<>();
 
-    protected LongArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public long[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +38,14 @@ public class LongArrayDeserializer extends AbstractArrayDeserializer<long[]> {
         }
         return longArray;
     }
+
+    protected LongArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
 }

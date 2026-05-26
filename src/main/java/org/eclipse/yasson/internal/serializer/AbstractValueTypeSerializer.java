@@ -29,6 +29,8 @@ public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<
 
     protected final Customization customization;
 
+    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
+
     /**
      * Creates a new instance.
      *
@@ -51,5 +53,4 @@ public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<
         serialize(obj, generator, marshaller);
     }
 
-    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
 }

@@ -30,20 +30,6 @@ import java.util.Base64;
  */
 public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Customization model.
-     */
-    public ByteArrayBase64Serializer(Customization customization) {
-        super(customization);
-    }
-
-    @Override
-    protected void serialize(byte[] obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
-    }
-
     private Base64.Encoder getEncoder(String strategy) {
         switch (strategy) {
             case BinaryDataStrategy.BASE_64:
@@ -55,4 +41,19 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
                         "Invalid strategy: " + strategy));
         }
     }
+
+    @Override
+    protected void serialize(byte[] obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Customization model.
+     */
+    public ByteArrayBase64Serializer(Customization customization) {
+        super(customization);
+    }
+
 }

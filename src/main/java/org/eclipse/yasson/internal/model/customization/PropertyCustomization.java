@@ -41,6 +41,44 @@ public class PropertyCustomization extends CustomizationBase {
 
     private final Class implementationClass;
 
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
+     */
+    public boolean isReadTransient() {
+        return readTransient;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return serializeDateFormatter;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
+     */
+    public boolean isWriteTransient() {
+        return writeTransient;
+    }
+
+    /**
+     * Name if specified for property setter with {@link javax.json.bind.annotation.JsonbProperty}.
+     *
+     * @return read name
+     */
+    public String getJsonReadName() {
+        return jsonReadName;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -60,12 +98,22 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     /**
-     * Name if specified for property setter with {@link javax.json.bind.annotation.JsonbProperty}.
+     * Implementation class if property is interface type.
      *
-     * @return read name
+     * @return class implementing property interface
      */
-    public String getJsonReadName() {
-        return jsonReadName;
+    public Class getImplementationClass() {
+        return implementationClass;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return serializeNumberFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
     }
 
     /**
@@ -75,54 +123,6 @@ public class PropertyCustomization extends CustomizationBase {
      */
     public String getJsonWriteName() {
         return jsonWriteName;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return serializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return serializeDateFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
-    }
-
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
-     *
-     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
-     */
-    public boolean isReadTransient() {
-        return readTransient;
-    }
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
-     *
-     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
-     */
-    public boolean isWriteTransient() {
-        return writeTransient;
-    }
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class getImplementationClass() {
-        return implementationClass;
     }
 
 }

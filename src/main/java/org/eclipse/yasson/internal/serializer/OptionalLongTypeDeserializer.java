@@ -32,6 +32,15 @@ import java.util.OptionalLong;
  */
 public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<OptionalLong> {
 
+    @Override
+    protected OptionalLong deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalLong.of(Long.parseLong(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -50,12 +59,4 @@ public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<
         return deserialize(parser.getString(), (Unmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalLong deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalLong.of(Long.parseLong(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
-        }
-    }
 }

@@ -40,8 +40,28 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
     private MethodHandle setHandle;
 
 
-    MethodHandleValuePropagation(Property property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        super(property, propertyVisibilityStrategy);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(Object object) {
+        try {
+            return getHandle.invoke(object);
+        } catch (Throwable throwable) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValue(Object object, Object value) {
+        try {
+            setHandle.invoke(object, value);
+        } catch (Throwable throwable) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
+        }
     }
 
     @Override
@@ -80,29 +100,8 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         }
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(Object object, Object value) {
-        try {
-            setHandle.invoke(object, value);
-        } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object getValue(Object object) {
-        try {
-            return getHandle.invoke(object);
-        } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
-        }
+    MethodHandleValuePropagation(Property property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        super(property, propertyVisibilityStrategy);
     }
 
 }

@@ -25,6 +25,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
 
+    @Override
+    protected void serialize(Enum obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(obj.name());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,8 +39,4 @@ public class EnumTypeSerializer extends AbstractValueTypeSerializer<Enum> {
         super(customization);
     }
 
-    @Override
-    protected void serialize(Enum obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(obj.name());
-    }
 }

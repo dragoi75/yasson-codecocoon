@@ -44,12 +44,6 @@ public class MappingContext {
 
         private JsonbContext jsonbContext;
 
-        public ParseClassModelFunction(ClassDescriptor parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
-            this.parentClassModel = parentClassModel;
-            this.classParser = classParser;
-            this.jsonbContext = jsonbContext;
-        }
-
         @Override
         public ClassDescriptor apply(Class aClass) {
             final JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
@@ -58,6 +52,13 @@ public class MappingContext {
             classParser.parseProperties(newClassModel, clsElement);
             return newClassModel;
         }
+
+        public ParseClassModelFunction(ClassDescriptor parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
+            this.parentClassModel = parentClassModel;
+            this.classParser = classParser;
+            this.jsonbContext = jsonbContext;
+        }
+
     }
 
     private final JsonbContext jsonbContext;
@@ -69,6 +70,26 @@ public class MappingContext {
     private final ClassParser classParser;
 
     /**
+     * Gets serializer provider for given class.
+     *
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param jsonbContext Context. Required.
@@ -77,6 +98,42 @@ public class MappingContext {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.classParser = new ClassParser(jsonbContext);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassDescriptor getClassModel(Class<?> clazz) {
+        return classes.get(clazz);
+    }
+
+    /**
+     * Provided class class model is returned first by iterator.
+     * Following class models are sorted by hierarchy from provided class up to the Object.class.
+     *
+     * @param clazz class to start iteration of class models from
+     * @return iterator of class models
+     */
+    public Iterator<ClassDescriptor> classModelIterator(final Class<?> clazz) {
+        return new Iterator<ClassDescriptor>() {
+
+            private Class<?> next = clazz;
+
+            @Override
+            public boolean hasNext() {
+                return Object.class != next;
+            }
+
+            @Override
+            public ClassDescriptor next() {
+                final ClassDescriptor result = classes.get(next);
+                next = next.getSuperclass();
+                return result;
+            }
+        };
     }
 
     /**
@@ -112,59 +169,4 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
-    /**
-     * Provided class class model is returned first by iterator.
-     * Following class models are sorted by hierarchy from provided class up to the Object.class.
-     *
-     * @param clazz class to start iteration of class models from
-     * @return iterator of class models
-     */
-    public Iterator<ClassDescriptor> classModelIterator(final Class<?> clazz) {
-        return new Iterator<ClassDescriptor>() {
-
-            private Class<?> next = clazz;
-
-            @Override
-            public boolean hasNext() {
-                return Object.class != next;
-            }
-
-            @Override
-            public ClassDescriptor next() {
-                final ClassDescriptor result = classes.get(next);
-                next = next.getSuperclass();
-                return result;
-            }
-        };
-    }
-
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassDescriptor getClassModel(Class<?> clazz) {
-        return classes.get(clazz);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

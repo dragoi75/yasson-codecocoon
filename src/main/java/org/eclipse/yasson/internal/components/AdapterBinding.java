@@ -29,20 +29,6 @@ public class AdapterBinding extends AbstractComponentBinding {
     private final JsonbAdapter<?,?> adapter;
 
     /**
-     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
-     * @param fromType from not null
-     * @param toType to not null
-     * @param adapter components not null
-     */
-    public AdapterBinding(Type fromType, Type toType, JsonbAdapter<?, ?> adapter) {
-        super(fromType);
-        Objects.requireNonNull(toType);
-        Objects.requireNonNull(adapter);
-        this.toType = toType;
-        this.adapter = adapter;
-    }
-
-    /**
      * Represents a type to which to adapt into.
      *
      * During marshalling object property is adapted to this type and result is marshalled
@@ -66,4 +52,19 @@ public class AdapterBinding extends AbstractComponentBinding {
     public Class<?> getComponentClass() {
         return adapter.getClass();
     }
+
+    /**
+     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
+     * @param fromType from not null
+     * @param toType to not null
+     * @param adapter components not null
+     */
+    public AdapterBinding(Type fromType, Type toType, JsonbAdapter<?, ?> adapter) {
+        super(fromType);
+        Objects.requireNonNull(toType);
+        Objects.requireNonNull(adapter);
+        this.toType = toType;
+        this.adapter = adapter;
+    }
+
 }

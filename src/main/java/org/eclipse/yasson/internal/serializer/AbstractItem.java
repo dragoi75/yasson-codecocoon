@@ -39,6 +39,16 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
      */
     private final ClassDescriptor classModel;
 
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
     /**
      * Creates and populates an instance from given builder.
      *
@@ -66,16 +76,6 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
     @Override
     public ClassDescriptor getClassModel() {
         return classModel;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return runtimeType;
     }
 
 }

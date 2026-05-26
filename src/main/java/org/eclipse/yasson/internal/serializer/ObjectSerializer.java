@@ -34,44 +34,6 @@ import java.util.OptionalLong;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(SerializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param wrapper wrapped item
-     * @param runtimeType class type
-     * @param classModel model of the class
-     */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
-        super(wrapper, runtimeType, classModel);
-    }
-
-    @Override
-    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        final BeanPropertyDescriptor[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
-        for (BeanPropertyDescriptor model : allProperties) {
-            marshallProperty(object, generator, ctx, model);
-        }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
     @SuppressWarnings("unchecked")
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, BeanPropertyDescriptor propertyModel) {
         Marshaller marshaller = (Marshaller) ctx;
@@ -96,6 +58,22 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
     }
 
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper wrapped item
+     * @param runtimeType class type
+     * @param classModel model of the class
+     */
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassDescriptor classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
     private boolean isEmptyOptional(Object object) {
         if (!(object instanceof Optional)) {
             if (!(object instanceof OptionalInt)) {
@@ -114,4 +92,27 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
         return false;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(SerializerBuilder builder) {
+        super(builder);
+    }
+
+    @Override
+    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
+        final BeanPropertyDescriptor[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+        for (BeanPropertyDescriptor model : allProperties) {
+            marshallProperty(object, generator, ctx, model);
+        }
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
 }

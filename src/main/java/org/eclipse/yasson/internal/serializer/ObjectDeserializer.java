@@ -47,18 +47,19 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
 
         private final BeanPropertyDescriptor propertyModel;
 
-        public LastPropertyModel(String jsonKeyName, BeanPropertyDescriptor propertyModel) {
-            this.jsonKeyName = jsonKeyName;
-            this.propertyModel = propertyModel;
+        public BeanPropertyDescriptor getPropertyModel() {
+            return propertyModel;
         }
 
         public String getJsonKeyName() {
             return jsonKeyName;
         }
 
-        public BeanPropertyDescriptor getPropertyModel() {
-            return propertyModel;
+        public LastPropertyModel(String jsonKeyName, BeanPropertyDescriptor propertyModel) {
+            this.jsonKeyName = jsonKeyName;
+            this.propertyModel = propertyModel;
         }
+
     }
 
     private static final Logger log = Logger.getLogger(ObjectDeserializer.class.getName());
@@ -69,58 +70,44 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
 
     private LastPropertyModel lastPropertyModel;
 
-    /**
-     * Creates instance of an item.
-     * @param builder builder to build from
-     */
-    protected ObjectDeserializer(DeserializerBuilder builder) {
-        super(builder);
+    private static class ValueWrapper {
+
+        private final CreatorModel creatorModel;
+
+        private final BeanPropertyDescriptor propertyModel;
+
+        private final Object value;
+
+        public CreatorModel getCreatorModel() {
+            return creatorModel;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public BeanPropertyDescriptor getPropertyModel() {
+            return propertyModel;
+        }
+
+        public ValueWrapper(CreatorModel creator, Object value) {
+            this.creatorModel = creator;
+            this.value = value;
+            propertyModel = null;
+        }
+
+        public ValueWrapper(BeanPropertyDescriptor propertyModel, Object value) {
+            this.propertyModel = propertyModel;
+            this.value = value;
+            creatorModel = null;
+        }
+
     }
 
-    /**
-     * Due to support of custom (parametrized) constructors and factory methods, values are held in map,
-     * which is transferred into instance values by calling getInstance.
-     *
-     * @param unmarshaller Current deserialization context.
-     * @return An instance of deserializing item.
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(Unmarshaller unmarshaller) {
-        if (null != instance) {
-            return instance;
-        }
-        final Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
-        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
-        instance = null != creator ? createInstance((Class<T>) rawType, creator) : ReflectionUtils.createNoArgConstructorInstance((Constructor<T>) getClassModel().getDefaultConstructor());
-        //values must be set in order, in which they appears in JSON by spec
-        values.forEach((key, wrapper) -> {
-            //skip creator values
-            if (null != wrapper.getCreatorModel()) {
-                return;
-            }
-            final BeanPropertyDescriptor propertyModel = wrapper.getPropertyModel();
-            propertyModel.setValue(instance, wrapper.getValue());
-        });
-        return instance;
-    }
-
-    /**
-     * Creates instance with custom jsonb creator (parameterized constructor or factory method)
-     */
-    private T createInstance(Class<T> rawType, JsonbCreator creator) {
-        final T instance;
-        final List<Object> paramValues = new ArrayList<>();
-        for (CreatorModel param : creator.getParams()) {
-            final ValueWrapper valueWrapper = values.get(param.getName());
-            //required by spec
-            if (null == valueWrapper) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
-            }
-            paramValues.add(valueWrapper.getValue());
-        }
-        instance = creator.call(paramValues.toArray(), rawType);
-        return instance;
+    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
     }
 
     /**
@@ -174,12 +161,6 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         parser.skipJsonStructure();
     }
 
-    @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
-
     protected BeanPropertyDescriptor getModel() {
         final String lastKeyName = parserContext.getLastKeyName();
         if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
@@ -189,36 +170,58 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         return lastPropertyModel.getPropertyModel();
     }
 
-    private static class ValueWrapper {
-
-        private final CreatorModel creatorModel;
-
-        private final BeanPropertyDescriptor propertyModel;
-
-        private final Object value;
-
-        public ValueWrapper(CreatorModel creator, Object value) {
-            this.creatorModel = creator;
-            this.value = value;
-            propertyModel = null;
-        }
-
-        public ValueWrapper(BeanPropertyDescriptor propertyModel, Object value) {
-            this.propertyModel = propertyModel;
-            this.value = value;
-            creatorModel = null;
-        }
-
-        public CreatorModel getCreatorModel() {
-            return creatorModel;
-        }
-
-        public BeanPropertyDescriptor getPropertyModel() {
-            return propertyModel;
-        }
-
-        public Object getValue() {
-            return value;
-        }
+    /**
+     * Creates instance of an item.
+     * @param builder builder to build from
+     */
+    protected ObjectDeserializer(DeserializerBuilder builder) {
+        super(builder);
     }
+
+    /**
+     * Creates instance with custom jsonb creator (parameterized constructor or factory method)
+     */
+    private T createInstance(Class<T> rawType, JsonbCreator creator) {
+        final T instance;
+        final List<Object> paramValues = new ArrayList<>();
+        for (CreatorModel param : creator.getParams()) {
+            final ValueWrapper valueWrapper = values.get(param.getName());
+            //required by spec
+            if (null == valueWrapper) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
+            }
+            paramValues.add(valueWrapper.getValue());
+        }
+        instance = creator.call(paramValues.toArray(), rawType);
+        return instance;
+    }
+
+    /**
+     * Due to support of custom (parametrized) constructors and factory methods, values are held in map,
+     * which is transferred into instance values by calling getInstance.
+     *
+     * @param unmarshaller Current deserialization context.
+     * @return An instance of deserializing item.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public T getInstance(Unmarshaller unmarshaller) {
+        if (null != instance) {
+            return instance;
+        }
+        final Class<?> rawType = ReflectionUtils.getRawType(getRuntimeType());
+        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
+        instance = null != creator ? createInstance((Class<T>) rawType, creator) : ReflectionUtils.createNoArgConstructorInstance((Constructor<T>) getClassModel().getDefaultConstructor());
+        //values must be set in order, in which they appears in JSON by spec
+        values.forEach((key, wrapper) -> {
+            //skip creator values
+            if (null != wrapper.getCreatorModel()) {
+                return;
+            }
+            final BeanPropertyDescriptor propertyModel = wrapper.getPropertyModel();
+            propertyModel.setValue(instance, wrapper.getValue());
+        });
+        return instance;
+    }
+
 }

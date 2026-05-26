@@ -27,6 +27,16 @@ public class ReflectionPropagation extends PropertyValuePropagation {
 
     private SetValueCommand setValueCommand;
 
+    @Override
+    Object getValue(Object object) {
+        return getValueCommand.getValue(object);
+    }
+
+    @Override
+    void setValue(Object object, Object value) {
+        setValueCommand.setValue(object, value);
+    }
+
     public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
         super(property, strategy);
     }
@@ -63,13 +73,4 @@ public class ReflectionPropagation extends PropertyValuePropagation {
         }
     }
 
-    @Override
-    void setValue(Object object, Object value) {
-        setValueCommand.setValue(object, value);
-    }
-
-    @Override
-    Object getValue(Object object) {
-        return getValueCommand.getValue(object);
-    }
 }

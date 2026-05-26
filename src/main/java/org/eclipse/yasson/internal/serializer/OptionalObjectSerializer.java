@@ -42,37 +42,20 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
 
     private final Type optionalValueType;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public OptionalObjectSerializer(SerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.customization = builder.getCustomization();
-        this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
-    }
-
-    private Type resolveOptionalType(Type runtimeType) {
-        if (runtimeType instanceof ParameterizedType) {
-            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
+    static <T> boolean handleEmpty(T value, Predicate<T> presentCheck, Customization customization, JsonGenerator generator, Marshaller marshaller) {
+        if (null != value && presentCheck.test(value)) {
+            return false;
+        } else {
+            if (null == customization) {
+                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
+            } else {
+                if (customization.isNillable()) {
+                    generator.writeNull();
+                    return true;
+                }
+            }
+            return true;
         }
-        return Object.class;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        return null;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return optionalValueType;
     }
 
     public Customization getCustomization() {
@@ -90,24 +73,42 @@ public class OptionalObjectSerializer<T extends Optional<?>> implements CurrentI
         serialCaptor(serializer, optionalValue, generator, ctx);
     }
 
-    static <T> boolean handleEmpty(T value, Predicate<T> presentCheck, Customization customization, JsonGenerator generator, Marshaller marshaller) {
-        if (null != value && presentCheck.test(value)) {
-            return false;
-        } else {
-            if (null == customization) {
-                marshaller.getJsonbContext().getConfigProperties().getNullSerializer().serialize(value, generator, marshaller);
-            } else {
-                if (customization.isNillable()) {
-                    generator.writeNull();
-                    return true;
-                }
-            }
-            return true;
-        }
+    @Override
+    public Type getRuntimeType() {
+        return optionalValueType;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
     }
 
     @SuppressWarnings("unchecked")
     private <T> void serialCaptor(JsonbSerializer<?> serializer, T object, JsonGenerator generator, SerializationContext context) {
         ((JsonbSerializer<T>) serializer).serialize(object, generator, context);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public OptionalObjectSerializer(SerializerBuilder builder) {
+        this.wrapper = builder.getWrapper();
+        this.customization = builder.getCustomization();
+        this.optionalValueType = resolveOptionalType(builder.getRuntimeType());
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return null;
+    }
+
+    private Type resolveOptionalType(Type runtimeType) {
+        if (runtimeType instanceof ParameterizedType) {
+            return ((ParameterizedType) runtimeType).getActualTypeArguments()[0];
+        }
+        return Object.class;
+    }
+
 }

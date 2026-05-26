@@ -18,8 +18,21 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
-        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    }
+
+    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
+        final Parameter[] parameters = executable.getParameters();
+        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        int i = 0;
+        while (parameters.length > i) {
+            final Parameter parameter = parameters[i];
+            creatorModels[i] = new CreatorModel(properties[i], parameter, jsonbContext);
+            i += 1;
+        }
+        return new JsonbCreator(executable, creatorModels);
     }
 
     /**
@@ -55,20 +68,8 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
-        final Parameter[] parameters = executable.getParameters();
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
-        int i = 0;
-        while (parameters.length > i) {
-            final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorModel(properties[i], parameter, jsonbContext);
-            i += 1;
-        }
-        return new JsonbCreator(executable, creatorModels);
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
+        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
-    }
 }

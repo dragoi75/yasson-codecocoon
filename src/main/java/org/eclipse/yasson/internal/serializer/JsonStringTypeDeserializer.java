@@ -28,6 +28,15 @@ import java.lang.reflect.Type;
  */
 public class JsonStringTypeDeserializer extends AbstractValueTypeDeserializer<JsonString> {
 
+    @Override
+    protected JsonString deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
+        final JsonObject jsonObject = factory.createObjectBuilder()
+                .add("json", jsonValue)
+                .build();
+        return jsonObject.getJsonString("json");
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,12 +46,4 @@ public class JsonStringTypeDeserializer extends AbstractValueTypeDeserializer<Js
         super(JsonString.class, customization);
     }
 
-    @Override
-    protected JsonString deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
-        final JsonObject jsonObject = factory.createObjectBuilder()
-                .add("json", jsonValue)
-                .build();
-        return jsonObject.getJsonString("json");
-    }
 }

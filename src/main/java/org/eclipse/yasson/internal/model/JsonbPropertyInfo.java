@@ -33,12 +33,43 @@ public class JsonbPropertyInfo {
     private CurrentItem<?> wrapper;
 
     /**
-     * Gets context.
+     * Gets wrapper.
      *
-     * @return Context.
+     * @return Wrapper.
      */
-    public JsonbContext getContext() {
-        return context;
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Gets class model.
+     *
+     * @return Class model.
+     */
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Sets runtime type.
+     *
+     * @param runtimeType Runtime type to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
+        this.runtimeType = runtimeType;
+        return this;
+    }
+
+    /**
+     * Sets wrapper.
+     *
+     * @param wrapper Wrapper to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
+        return this;
     }
 
     /**
@@ -62,26 +93,6 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Sets runtime type.
-     *
-     * @param runtimeType Runtime type to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
-        return this;
-    }
-
-    /**
-     * Gets class model.
-     *
-     * @return Class model.
-     */
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    /**
      * Sets class model.
      *
      * @param classModel Class model to set.
@@ -93,22 +104,12 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets wrapper.
+     * Gets context.
      *
-     * @return Wrapper.
+     * @return Context.
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    public JsonbContext getContext() {
+        return context;
     }
 
-    /**
-     * Sets wrapper.
-     *
-     * @param wrapper Wrapper to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
-        return this;
-    }
 }

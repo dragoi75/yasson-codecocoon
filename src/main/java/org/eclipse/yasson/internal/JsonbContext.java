@@ -53,6 +53,51 @@ public class JsonbContext {
 
     private final InstanceCreator instanceCreator;
 
+
+    /**
+     * Returns component for creating instances of non-parsed types.
+     * @return InstanceCreator
+     */
+    public InstanceCreator getInstanceCreator() {
+        return instanceCreator;
+    }
+
+    /**
+     * Gets component for annotation parsing.
+     *
+     * @return Annotation introspector.
+     */
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationIntrospector;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentMatcher;
+    }
+
+    private JsonbComponentInstanceCreator initComponentInstanceCreator(InstanceCreator instanceCreator) {
+        ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
+                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
+                        .load(JsonbComponentInstanceCreator.class));
+        List<JsonbComponentInstanceCreator> creators = new ArrayList<>();
+        for (JsonbComponentInstanceCreator creator : loader) {
+            creators.add(creator);
+        }
+        if (creators.isEmpty()) {
+            // No service provider found - use the defaults
+            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceCreator);
+        }
+        creators.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
+        JsonbComponentInstanceCreator creator = creators.get(0);
+        log.finest("Component instance creator:" + creator.getClass());
+        return creator;
+    }
+
     /**
      * Creates and initialize context.
      *
@@ -72,23 +117,13 @@ public class JsonbContext {
     }
 
     /**
-     * Gets {@link JsonbConfig}.
+     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
      *
-     * @return Configuration.
+     * @return Instance creator.
      */
-    public JsonbConfig getConfig() {
-        return jsonbConfig;
+    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
+        return componentInstanceCreator;
     }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mappingContext;
-    }
-
 
     /**
      * Gets JSONP provider.
@@ -100,62 +135,25 @@ public class JsonbContext {
     }
 
     /**
-     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
+     * Gets mapping context.
      *
-     * @return Instance creator.
+     * @return Mapping context.
      */
-    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        return componentInstanceCreator;
+    public MappingContext getMappingContext() {
+        return mappingContext;
     }
-
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationIntrospector;
-    }
-
 
     public JsonbConfigProperties getConfigProperties() {
         return configProperties;
     }
 
-
     /**
-     * Returns component for creating instances of non-parsed types.
-     * @return InstanceCreator
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
      */
-    public InstanceCreator getInstanceCreator() {
-        return instanceCreator;
-    }
-
-    private JsonbComponentInstanceCreator initComponentInstanceCreator(InstanceCreator instanceCreator) {
-        ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
-                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
-                        .load(JsonbComponentInstanceCreator.class));
-        List<JsonbComponentInstanceCreator> creators = new ArrayList<>();
-        for (JsonbComponentInstanceCreator creator : loader) {
-            creators.add(creator);
-        }
-        if (creators.isEmpty()) {
-            // No service provider found - use the defaults
-            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator(instanceCreator);
-        }
-        creators.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
-        JsonbComponentInstanceCreator creator = creators.get(0);
-        log.finest("Component instance creator:" + creator.getClass());
-        return creator;
+    public JsonbConfig getConfig() {
+        return jsonbConfig;
     }
 
 }

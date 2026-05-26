@@ -56,52 +56,8 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
 
     protected final JsonbContext jsonbContext;
 
-    /**
-     * Crates a builder.
-     *
-     * @param jsonbContext Not null.
-     */
-    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-    }
-
-    /**
-     * Wrapper item for this item.
-     *
-     * @param wrapper not null.
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
-        return (T) this;
-    }
-
-    /**
-     * Customization of the class
-     *
-     * @param customization Class customization
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
-        return (T) this;
-    }
-
-    /**
-     * Gets or load class model for a class an its superclasses.
-     *
-     * @param rawType Class to get model for.
-     * @return Class model.
-     */
-    protected ClassDescriptor getClassModel(Class<?> rawType) {
-        ClassDescriptor classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (null == classModel) {
-            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
-        }
-        return classModel;
+    public Customization getCustomization() {
+        return customization;
     }
 
     /**
@@ -124,13 +80,17 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
-     * Otherwise provided type in type field, or type of field model.
+     * Gets or load class model for a class an its superclasses.
      *
-     * @return runtime type
+     * @param rawType Class to get model for.
+     * @return Class model.
      */
-    public Type getRuntimeType() {
-        return runtimeType;
+    protected ClassDescriptor getClassModel(Class<?> rawType) {
+        ClassDescriptor classModel = jsonbContext.getMappingContext().getClassModel(rawType);
+        if (null == classModel) {
+            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+        }
+        return classModel;
     }
 
     /**
@@ -147,6 +107,26 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
+     * Otherwise provided type in type field, or type of field model.
+     *
+     * @return runtime type
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
+     * Crates a builder.
+     *
+     * @param jsonbContext Not null.
+     */
+    public AbstractSerializerBuilder(JsonbContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+    }
+
+    /**
      * Jsonb runtime context.
      *
      * @return jsonb context
@@ -155,7 +135,28 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
         return jsonbContext;
     }
 
-    public Customization getCustomization() {
-        return customization;
+    /**
+     * Customization of the class
+     *
+     * @param customization Class customization
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T withCustomization(Customization customization) {
+        this.customization = customization;
+        return (T) this;
     }
+
+    /**
+     * Wrapper item for this item.
+     *
+     * @param wrapper not null.
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
+        return (T) this;
+    }
+
 }

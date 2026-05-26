@@ -42,27 +42,18 @@ public class InstanceCreator {
 
         private final Constructor<?> constructor;
 
-        public ConstructorCreator(Constructor<?> constructor) {
-            this.constructor = constructor;
-        }
-
         @Override
         public Object createInstance() {
             return ReflectionUtils.createNoArgConstructorInstance(constructor);
         }
+
+        public ConstructorCreator(Constructor<?> constructor) {
+            this.constructor = constructor;
+        }
+
     }
 
     private final Map<Class, Creator> creators;
-
-    public InstanceCreator() {
-        creators = new HashMap<>();
-        creators.put(ArrayList.class, ArrayList::new);
-        creators.put(LinkedList.class, LinkedList::new);
-        creators.put(HashSet.class, HashSet::new);
-        creators.put(TreeSet.class, TreeSet::new);
-        creators.put(HashMap.class, HashMap::new);
-        creators.put(TreeMap.class, TreeMap::new);
-    }
 
     /**
      * Create an instance of the given class with its default constructor.
@@ -80,4 +71,15 @@ public class InstanceCreator {
         }
         return (T) creator.createInstance();
     }
+
+    public InstanceCreator() {
+        creators = new HashMap<>();
+        creators.put(ArrayList.class, ArrayList::new);
+        creators.put(LinkedList.class, LinkedList::new);
+        creators.put(HashSet.class, HashSet::new);
+        creators.put(TreeSet.class, TreeSet::new);
+        creators.put(HashMap.class, HashMap::new);
+        creators.put(TreeMap.class, TreeMap::new);
+    }
+
 }
