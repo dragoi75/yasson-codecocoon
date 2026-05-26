@@ -23,12 +23,13 @@ import org.eclipse.yasson.spi.JsonbComponentInstanceCreator;
 public class DefaultConstructorCreator implements JsonbComponentInstanceCreator {
 
     @Override
+    public void close() throws IOException {
+
+    }
+
+    @Override
     public <T> T getOrCreateComponent(Class<T> componentClass) {
         return InstanceCreator.createInstance(componentClass);
     }
 
-    @Override
-    public void close() throws IOException {
-
-    }
 }

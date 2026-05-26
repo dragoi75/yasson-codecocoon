@@ -32,13 +32,15 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     private JsonValue currentValue;
 
-    /**
-     * Creates new array iterator.
-     *
-     * @param jsonArray json array
-     */
-    public JsonArrayIterator(JsonArray jsonArray) {
-        this.valueIterator = jsonArray.iterator();
+    @Override
+    JsonbException createIncompatibleValueError() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeysEnum.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
+                                                      getValue().getValueType()));
+    }
+
+    @Override
+    JsonValue getValue() {
+        return currentValue;
     }
 
     /**
@@ -52,6 +54,23 @@ public class JsonArrayIterator extends JsonStructureIterator {
     }
 
     @Override
+    String getString() {
+        if (currentValue instanceof JsonString) {
+            return ((JsonString) currentValue).getString();
+        }
+        return currentValue.toString();
+    }
+
+    /**
+     * Creates new array iterator.
+     *
+     * @param jsonArray json array
+     */
+    public JsonArrayIterator(JsonArray jsonArray) {
+        this.valueIterator = jsonArray.iterator();
+    }
+
+    @Override
     public JsonParser.Event next() {
         if (valueIterator.hasNext()) {
             currentValue = valueIterator.next();
@@ -60,22 +79,4 @@ public class JsonArrayIterator extends JsonStructureIterator {
         return JsonParser.Event.END_ARRAY;
     }
 
-    @Override
-    JsonValue getValue() {
-        return currentValue;
-    }
-
-    @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeysEnum.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
-                                                      getValue().getValueType()));
-    }
-
-    @Override
-    String getString() {
-        if (currentValue instanceof JsonString) {
-            return ((JsonString) currentValue).getString();
-        }
-        return currentValue.toString();
-    }
 }

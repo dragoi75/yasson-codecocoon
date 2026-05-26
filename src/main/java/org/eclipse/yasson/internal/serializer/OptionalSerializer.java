@@ -25,15 +25,15 @@ class OptionalSerializer implements ModelSerializer {
 
     private final ModelSerializer delegate;
 
-    OptionalSerializer(ModelSerializer delegate) {
-        this.delegate = delegate;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         Optional<Object> optional = (Optional<Object>) value;
         delegate.serialize(optional == null ? null : optional.orElse(null), generator, context);
+    }
+
+    OptionalSerializer(ModelSerializer delegate) {
+        this.delegate = delegate;
     }
 
 }

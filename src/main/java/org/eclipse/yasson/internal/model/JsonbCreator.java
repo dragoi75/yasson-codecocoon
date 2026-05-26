@@ -32,6 +32,30 @@ public class JsonbCreator {
     private final CreatorModel[] params;
 
     /**
+     * Find creator parameter by name.
+     *
+     * @param paramName parameter name as it appear in json document.
+     * @return Creator parameter.
+     */
+    public CreatorModel findByName(String paramName) {
+        for (CreatorModel param : params) {
+            if (param.getName().equals(paramName)) {
+                return param;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorModel[] getParams() {
+        return params;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param executable    Executable.
@@ -73,27 +97,4 @@ public class JsonbCreator {
         return findByName(paramName) != null;
     }
 
-    /**
-     * Find creator parameter by name.
-     *
-     * @param paramName parameter name as it appear in json document.
-     * @return Creator parameter.
-     */
-    public CreatorModel findByName(String paramName) {
-        for (CreatorModel param : params) {
-            if (param.getName().equals(paramName)) {
-                return param;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorModel[] getParams() {
-        return params;
-    }
 }

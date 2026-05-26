@@ -22,12 +22,13 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  */
 class PeriodDeserializer extends TypeDeserializer {
 
-    PeriodDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         return Period.parse(value);
     }
+
+    PeriodDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

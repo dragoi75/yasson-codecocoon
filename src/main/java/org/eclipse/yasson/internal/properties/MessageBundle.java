@@ -30,45 +30,6 @@ public class MessageBundle {
     private static final String I18N_BASE_NAME = "yasson-messages";
     private static final String CHARACTER_ENCODING = "UTF-8";
 
-    private MessageBundle() {
-    }
-
-    /**
-     * Gets message by key. Default locale is used.
-     *
-     * @param messageId     Message key.
-     * @param args Message parameters.
-     * @return Formatted message in string.
-     */
-    public static String getMessage(MessageKeysEnum messageId, Object... args) {
-        return getMessage(messageId, Locale.getDefault(), args);
-    }
-
-    /**
-     * Gets message by key and locale.
-     *
-     * @param messageId     Message key.
-     * @param languageTag  Locale.
-     * @param args Message parameters.
-     * @return Formatted message in string.
-     */
-    public static String getMessage(MessageKeysEnum messageId, Locale languageTag, Object... args) {
-        ResourceBundle resourceBundle = getResourceBundle(languageTag);
-        MessageFormat messageFormat = new MessageFormat(resourceBundle.getString(messageId.getKey()));
-        return messageFormat.format(args);
-    }
-
-    /**
-     * ResourceBundle.Control is not supported when loaded from JPMS native module.
-     */
-    private static ResourceBundle getResourceBundle(Locale languageTag) {
-        try {
-            return ResourceBundle.getBundle(I18N_BASE_NAME, languageTag, new UTF8ResourceBundleControl());
-        } catch (UnsupportedOperationException e) {
-            return ResourceBundle.getBundle(I18N_BASE_NAME, languageTag);
-        }
-    }
-
     static class UTF8ResourceBundleControl extends ResourceBundle.Control {
         public ResourceBundle newBundle(String baseIdentifier, Locale languageTag, String format, ClassLoader classProvider, boolean refreshNeeded)
                 throws IllegalAccessException, InstantiationException, IOException {
@@ -99,6 +60,45 @@ public class MessageBundle {
             }
             return resourceBundle;
         }
+    }
+
+    /**
+     * ResourceBundle.Control is not supported when loaded from JPMS native module.
+     */
+    private static ResourceBundle getResourceBundle(Locale languageTag) {
+        try {
+            return ResourceBundle.getBundle(I18N_BASE_NAME, languageTag, new UTF8ResourceBundleControl());
+        } catch (UnsupportedOperationException e) {
+            return ResourceBundle.getBundle(I18N_BASE_NAME, languageTag);
+        }
+    }
+
+    /**
+     * Gets message by key and locale.
+     *
+     * @param messageId     Message key.
+     * @param languageTag  Locale.
+     * @param args Message parameters.
+     * @return Formatted message in string.
+     */
+    public static String getMessage(MessageKeysEnum messageId, Locale languageTag, Object... args) {
+        ResourceBundle resourceBundle = getResourceBundle(languageTag);
+        MessageFormat messageFormat = new MessageFormat(resourceBundle.getString(messageId.getKey()));
+        return messageFormat.format(args);
+    }
+
+    private MessageBundle() {
+    }
+
+    /**
+     * Gets message by key. Default locale is used.
+     *
+     * @param messageId     Message key.
+     * @param args Message parameters.
+     * @return Formatted message in string.
+     */
+    public static String getMessage(MessageKeysEnum messageId, Object... args) {
+        return getMessage(messageId, Locale.getDefault(), args);
     }
 
 }

@@ -16,10 +16,11 @@ import java.lang.invoke.MethodHandles;
 
 class ModulesUtil {
 
-    private ModulesUtil() {
-    }
-
     static MethodHandles.Lookup lookup(){
         return MethodHandles.publicLookup();
     }
+
+    private ModulesUtil() {
+    }
+
 }

@@ -42,15 +42,14 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
 
     private ModelDeserializer<String> actualDeserializer;
 
-    AbstractDateDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-        this.actualDeserializer = actualDeserializer(builder.getConfigProperties(), builder.getCustomization());
-    }
-
-    AbstractDateDeserializer(Class<Date> clazz) {
-        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
-        this.actualDeserializer = null;
-    }
+    /**
+     * Parse java.time date object with provided formatter.
+     *
+     * @param jsonValue string value to parse from
+     * @param formatter a formatter to use
+     * @return parsed date object
+     */
+    abstract T parseWithFormatter(String jsonValue, DateTimeFormatter formatter);
 
     private ModelDeserializer<String> actualDeserializer(JsonbConfigProperties properties, Customization customization) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(properties, customization);
@@ -77,6 +76,40 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         };
     }
 
+    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
+        try {
+            return parseWithFormatter(jsonValue, formatter);
+        } catch (DateTimeException e) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.DATE_PARSE_ERROR, jsonValue, getType()), e);
+        }
+    }
+
+    AbstractDateDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+        this.actualDeserializer = actualDeserializer(builder.getConfigProperties(), builder.getCustomization());
+    }
+
+    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
+        return formatter.getZone() != null
+                ? formatter
+                : formatter.withZone(UTC);
+    }
+
+    /**
+     * Parse java.time date object with default formatter.
+     * Different default formatter for each date object type is used.
+     *
+     * @param jsonValue string value to parse from
+     * @param locale    annotated locale or default
+     * @return parsed date object
+     */
+    abstract T parseDefault(String jsonValue, Locale locale);
+
+    AbstractDateDeserializer(Class<Date> clazz) {
+        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
+        this.actualDeserializer = null;
+    }
+
     private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
         return Optional.ofNullable(customization.getDeserializeDateFormatter())
                 .orElse(properties.getConfigDateFormatter());
@@ -98,38 +131,5 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
      * @return date object
      */
     abstract T fromInstant(Instant instant);
-
-    /**
-     * Parse java.time date object with default formatter.
-     * Different default formatter for each date object type is used.
-     *
-     * @param jsonValue string value to parse from
-     * @param locale    annotated locale or default
-     * @return parsed date object
-     */
-    abstract T parseDefault(String jsonValue, Locale locale);
-
-    /**
-     * Parse java.time date object with provided formatter.
-     *
-     * @param jsonValue string value to parse from
-     * @param formatter a formatter to use
-     * @return parsed date object
-     */
-    abstract T parseWithFormatter(String jsonValue, DateTimeFormatter formatter);
-
-    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
-        try {
-            return parseWithFormatter(jsonValue, formatter);
-        } catch (DateTimeException e) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.DATE_PARSE_ERROR, jsonValue, getType()), e);
-        }
-    }
-
-    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return formatter.getZone() != null
-                ? formatter
-                : formatter.withZone(UTC);
-    }
 
 }

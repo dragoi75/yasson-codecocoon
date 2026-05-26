@@ -51,6 +51,71 @@ public class JsonbDateFormatter {
     private final String format;
     private final String locale;
 
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        JsonbDateFormatter that = (JsonbDateFormatter) o;
+        return Objects.equals(format, that.format)
+                && Objects.equals(locale, that.locale)
+                && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
+    }
+
+    /**
+     * Format string to be used either by formatter.
+     * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
+     * which is not threadsafe.
+     *
+     * @return Format.
+     */
+    public String getFormat() {
+        return format;
+    }
+
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateTimeFormatter, format, locale);
+    }
+
+    @Override
+    public String toString() {
+        return "JsonbDateFormatter{"
+                + "dateTimeFormatter=" + dateTimeFormatter
+                + ", format='" + format + '\''
+                + ", locale='" + locale + '\''
+                + '}';
+    }
+
+    /**
+     * Locale to use with formatter.
+     *
+     * @return Locale.
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
+    }
+
     /**
      * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
@@ -77,68 +142,4 @@ public class JsonbDateFormatter {
         this.dateTimeFormatter = null;
     }
 
-    /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
-     *
-     * @return Formatter instance.
-     */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
-    }
-
-    /**
-     * Format string to be used either by formatter.
-     * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
-     * which is not threadsafe.
-     *
-     * @return Format.
-     */
-    public String getFormat() {
-        return format;
-    }
-
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        JsonbDateFormatter that = (JsonbDateFormatter) o;
-        return Objects.equals(format, that.format)
-                && Objects.equals(locale, that.locale)
-                && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(dateTimeFormatter, format, locale);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonbDateFormatter{"
-                + "dateTimeFormatter=" + dateTimeFormatter
-                + ", format='" + format + '\''
-                + ", locale='" + locale + '\''
-                + '}';
-    }
 }

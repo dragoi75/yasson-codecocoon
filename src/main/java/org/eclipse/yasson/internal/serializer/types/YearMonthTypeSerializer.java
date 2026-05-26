@@ -24,8 +24,9 @@ class YearMonthTypeSerializer extends AbstractDateSerializer<YearMonth> {
 
     private static final DateTimeFormatter DEFAULT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM").withZone(UTC);
 
-    YearMonthTypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
+    @Override
+    protected String formatDefault(YearMonth value, Locale locale) {
+        return DEFAULT_FORMAT.withLocale(locale).format(value);
     }
 
     @Override
@@ -33,9 +34,8 @@ class YearMonthTypeSerializer extends AbstractDateSerializer<YearMonth> {
         return value.atDay(1).atStartOfDay(UTC).toInstant();
     }
 
-    @Override
-    protected String formatDefault(YearMonth value, Locale locale) {
-        return DEFAULT_FORMAT.withLocale(locale).format(value);
+    YearMonthTypeSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

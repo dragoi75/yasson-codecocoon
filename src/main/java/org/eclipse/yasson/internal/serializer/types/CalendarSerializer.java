@@ -24,15 +24,6 @@ import java.util.Locale;
  */
 class CalendarSerializer extends AbstractDateSerializer<Calendar> {
 
-    CalendarSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
-    @Override
-    protected Instant toInstant(Calendar value) {
-        return value.toInstant();
-    }
-
     @Override
     protected String formatDefault(Calendar value, Locale locale) {
         DateTimeFormatter formatter = value.isSet(Calendar.HOUR) || value.isSet(Calendar.HOUR_OF_DAY)
@@ -46,6 +37,15 @@ class CalendarSerializer extends AbstractDateSerializer<Calendar> {
     protected TemporalAccessor toTemporalAccessor(Calendar object) {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.getTimeInMillis()),
                                        object.getTimeZone().toZoneId());
+    }
+
+    CalendarSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
+    @Override
+    protected Instant toInstant(Calendar value) {
+        return value.toInstant();
     }
 
 }

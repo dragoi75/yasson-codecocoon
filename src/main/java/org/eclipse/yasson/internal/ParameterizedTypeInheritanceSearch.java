@@ -30,6 +30,35 @@ class ParameterizedTypeInheritanceSearch {
 
     private final Deque<ParameterizedType> genericSubtypeDeque = new ArrayDeque<>();
 
+    private Type findRuntimeTypeArgument(ParameterizedType runtimeParamType, TypeVariable<?> genericTypeParam) {
+        if (ReflectiveTypeResolver.getRawType(runtimeParamType) != genericTypeParam.getGenericDeclaration()) {
+            return null;
+        }
+        TypeVariable[] typeBounds = genericTypeParam.getGenericDeclaration().getTypeParameters();
+        for (int index = 0; index < typeBounds.length; index++) {
+            if (typeBounds[index].equals(genericTypeParam)) {
+                Type matchedType = runtimeParamType.getActualTypeArguments()[index];
+                //Propagated generic types to another generic classes
+                if (matchedType instanceof TypeVariable<?>) {
+                    return verifySubclassRuntimeInfo((TypeVariable) matchedType);
+                }
+                //found runtime matchedGenericType
+                return matchedType;
+            }
+        }
+        return null;
+    }
+
+    private static ParameterizedType locateParameterizedSuperclass(Type candidateType) {
+        if (candidateType == null || candidateType instanceof ParameterizedType) {
+            return (ParameterizedType) candidateType;
+        }
+        if (!(candidateType instanceof Class)) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RESOLVE_PARAMETRIZED_TYPE, candidateType));
+        }
+        return locateParameterizedSuperclass(((Class) candidateType).getGenericSuperclass());
+    }
+
     /**
      * Searches the hierarchy of classes to resolve a type variable. If typevar resolved value is another typevar redirection
      * (propagated from wrapping class),
@@ -94,32 +123,4 @@ class ParameterizedTypeInheritanceSearch {
         return findRuntimeTypeArgument(subclassParamType, genericTypeParam);
     }
 
-    private Type findRuntimeTypeArgument(ParameterizedType runtimeParamType, TypeVariable<?> genericTypeParam) {
-        if (ReflectiveTypeResolver.getRawType(runtimeParamType) != genericTypeParam.getGenericDeclaration()) {
-            return null;
-        }
-        TypeVariable[] typeBounds = genericTypeParam.getGenericDeclaration().getTypeParameters();
-        for (int index = 0; index < typeBounds.length; index++) {
-            if (typeBounds[index].equals(genericTypeParam)) {
-                Type matchedType = runtimeParamType.getActualTypeArguments()[index];
-                //Propagated generic types to another generic classes
-                if (matchedType instanceof TypeVariable<?>) {
-                    return verifySubclassRuntimeInfo((TypeVariable) matchedType);
-                }
-                //found runtime matchedGenericType
-                return matchedType;
-            }
-        }
-        return null;
-    }
-
-    private static ParameterizedType locateParameterizedSuperclass(Type candidateType) {
-        if (candidateType == null || candidateType instanceof ParameterizedType) {
-            return (ParameterizedType) candidateType;
-        }
-        if (!(candidateType instanceof Class)) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RESOLVE_PARAMETRIZED_TYPE, candidateType));
-        }
-        return locateParameterizedSuperclass(((Class) candidateType).getGenericSuperclass());
-    }
 }

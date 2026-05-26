@@ -41,6 +41,55 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
+    @Override
+    public void skipObject() {
+        if (!iterators.isEmpty()) {
+            JsonStructureIterator current = iterators.peek();
+            if (current instanceof JsonObjectIterator) {
+                iterators.pop();
+            }
+        }
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
+    }
+
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public void skipArray() {
+        if (!iterators.isEmpty()) {
+            JsonStructureIterator current = iterators.peek();
+            if (current instanceof JsonArrayIterator) {
+                iterators.pop();
+            }
+        }
+    }
+
+    private JsonNumber getJsonNumberValue() {
+        JsonStructureIterator iterator = iterators.peek();
+        JsonValue value = iterator.getValue();
+        if (value.getValueType() != JsonValue.ValueType.NUMBER) {
+            throw iterator.createIncompatibleValueError();
+        }
+        return (JsonNumber) value;
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
+    }
+
     /**
      * Creates new {@link JsonStructure} parser.
      *
@@ -48,11 +97,6 @@ public class JsonStructureToParserAdapter implements JsonParser {
      */
     public JsonStructureToParserAdapter(JsonStructure structure) {
         this.rootStructure = structure;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return iterators.peek().hasNext();
     }
 
     @Override
@@ -79,18 +123,15 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
+    public JsonObject getObject() {
+        JsonStructureIterator current = iterators.peek();
+        if (current instanceof JsonObjectIterator) {
+            //Remove child iterator as getObject() method contract says
+            iterators.pop();
+            return current.getValue().asJsonObject();
+        } else {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Outside of object context"));
+        }
     }
 
     @Override
@@ -104,53 +145,13 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public JsonObject getObject() {
-        JsonStructureIterator current = iterators.peek();
-        if (current instanceof JsonObjectIterator) {
-            //Remove child iterator as getObject() method contract says
-            iterators.pop();
-            return current.getValue().asJsonObject();
-        } else {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Outside of object context"));
-        }
-    }
-
-    private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (value.getValueType() != JsonValue.ValueType.NUMBER) {
-            throw iterator.createIncompatibleValueError();
-        }
-        return (JsonNumber) value;
+    public boolean hasNext() {
+        return iterators.peek().hasNext();
     }
 
     @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
+    public String getString() {
+        return iterators.peek().getString();
     }
 
-    @Override
-    public void skipArray() {
-        if (!iterators.isEmpty()) {
-            JsonStructureIterator current = iterators.peek();
-            if (current instanceof JsonArrayIterator) {
-                iterators.pop();
-            }
-        }
-    }
-
-    @Override
-    public void skipObject() {
-        if (!iterators.isEmpty()) {
-            JsonStructureIterator current = iterators.peek();
-            if (current instanceof JsonObjectIterator) {
-                iterators.pop();
-            }
-        }
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

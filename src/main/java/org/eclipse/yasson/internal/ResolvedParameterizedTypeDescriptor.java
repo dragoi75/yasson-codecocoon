@@ -32,32 +32,6 @@ class ResolvedParameterizedTypeDescriptor implements ParameterizedType {
      */
     private final Type[] typeArguments;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param sourceParameterizedType         Original type.
-     * @param typeArguments Resolved type arguments.
-     */
-    ResolvedParameterizedTypeDescriptor(ParameterizedType sourceParameterizedType, Type[] typeArguments) {
-        this.sourceParameterizedType = sourceParameterizedType;
-        this.typeArguments = typeArguments;
-    }
-
-    /**
-     * Type arguments with resolved TypeVariables.
-     *
-     * @return type args
-     */
-    @Override
-    public Type[] getActualTypeArguments() {
-        return typeArguments;
-    }
-
-    @Override
-    public Type getRawType() {
-        return sourceParameterizedType.getRawType();
-    }
-
     @Override
     public Type getOwnerType() {
         return sourceParameterizedType.getOwnerType();
@@ -97,4 +71,31 @@ class ResolvedParameterizedTypeDescriptor implements ParameterizedType {
                 ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
                 ^ (getRawType() == null ? 0 : getRawType().hashCode());
     }
+
+    @Override
+    public Type getRawType() {
+        return sourceParameterizedType.getRawType();
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param sourceParameterizedType         Original type.
+     * @param typeArguments Resolved type arguments.
+     */
+    ResolvedParameterizedTypeDescriptor(ParameterizedType sourceParameterizedType, Type[] typeArguments) {
+        this.sourceParameterizedType = sourceParameterizedType;
+        this.typeArguments = typeArguments;
+    }
+
+    /**
+     * Type arguments with resolved TypeVariables.
+     *
+     * @return type args
+     */
+    @Override
+    public Type[] getActualTypeArguments() {
+        return typeArguments;
+    }
+
 }

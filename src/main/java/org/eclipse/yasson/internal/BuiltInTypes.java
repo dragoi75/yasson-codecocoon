@@ -105,23 +105,15 @@ public class BuiltInTypes {
         BUILD_IN_SUPPORT = Set.copyOf(buildInTypes);
     }
 
-    private BuiltInTypes() {
-        throw new IllegalStateException("Util class cannot be instantiated");
-    }
-
-    /**
-     * Check whether the class is available.
-     *
-     * @param className name of the checked class
-     * @return true if available, otherwise false
-     */
-    public static boolean isClassAvailable(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
+    private static boolean findIfClassIsSupported(Class<?> clazz) {
+        Class<?> current = clazz;
+        do {
+            if (BUILD_IN_SUPPORT.contains(current)) {
+                return true;
+            }
+            current = current.getSuperclass();
+        } while (current != null);
+        return false;
     }
 
     /**
@@ -140,14 +132,23 @@ public class BuiltInTypes {
         return knownContainerValueType || findIfClassIsSupported(clazz);
     }
 
-    private static boolean findIfClassIsSupported(Class<?> clazz) {
-        Class<?> current = clazz;
-        do {
-            if (BUILD_IN_SUPPORT.contains(current)) {
-                return true;
-            }
-            current = current.getSuperclass();
-        } while (current != null);
-        return false;
+    /**
+     * Check whether the class is available.
+     *
+     * @param className name of the checked class
+     * @return true if available, otherwise false
+     */
+    public static boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
     }
+
+    private BuiltInTypes() {
+        throw new IllegalStateException("Util class cannot be instantiated");
+    }
+
 }

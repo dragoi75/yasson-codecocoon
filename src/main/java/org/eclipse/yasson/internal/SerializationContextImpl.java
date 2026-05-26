@@ -46,34 +46,6 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     private boolean containerWithNulls = true;
     private boolean root = true;
 
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext    Current context.
-     * @param rootRuntimeType Type of root object.
-     */
-    public SerializationContextImpl(JsonbContext jsonbContext, Type rootRuntimeType) {
-        super(jsonbContext);
-        this.runtimeType = rootRuntimeType;
-    }
-
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext Current context.
-     */
-    public SerializationContextImpl(JsonbContext jsonbContext) {
-        this(jsonbContext, null);
-    }
-
-    /**
-     * Set new current property key name.
-     *
-     * @param key key name
-     */
-    public void setKey(String key) {
-        this.key = key;
-    }
 
     /**
      * Current property key name.
@@ -82,6 +54,66 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
      */
     public String getKey() {
         return key;
+    }
+
+    /**
+     * Serializes root element.
+     *
+     * @param <T>       Root type
+     * @param root      Root.
+     * @param generator JSON generator.
+     */
+    public <T> void serializeObject(T root, JsonGenerator generator) {
+        Type type = determineSerializationType(root);
+        final ModelSerializer rootSerializer = getRootSerializer(type);
+        rootSerializer.serialize(root, generator, this);
+    }
+
+    private <T> Type determineSerializationType(T root) {
+        if (isRoot() && runtimeType != null) {
+            return runtimeType;
+        }
+        return root == null ? Object.class : root.getClass();
+    }
+
+    /**
+     * Set if container supports null values.
+     *
+     * @param writeNulls should write nulls in container
+     */
+    public void setContainerWithNulls(boolean writeNulls) {
+        this.containerWithNulls = writeNulls;
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Closes the generator on completion.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     */
+    public void marshall(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, true);
+    }
+
+    @Override
+    public <T> void serialize(T object, JsonGenerator generator) {
+        Objects.requireNonNull(object);
+        serializeObject(object, generator);
+    }
+
+    public ModelSerializer getRootSerializer(Type type) {
+        return getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
+    }
+
+    /**
+     * Removes processed object from the {@link Set}.
+     *
+     * @param object processed object
+     * @return if object was removed
+     */
+    public boolean removeProcessedObject(Object object) {
+        return currentlyProcessedObjects.remove(object);
     }
 
     /**
@@ -94,12 +126,22 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Set whether serialized value is root value.
+     * Creates Marshaller for generation to String.
      *
-     * @param root is root value
+     * @param jsonbContext Current context.
      */
-    public void setRoot(boolean root) {
-        this.root = root;
+    public SerializationContextImpl(JsonbContext jsonbContext) {
+        this(jsonbContext, null);
+    }
+
+    /**
+     * Adds currently processed object to the {@link Set}.
+     *
+     * @param object processed object
+     * @return if object was added
+     */
+    public boolean addProcessedObject(Object object) {
+        return this.currentlyProcessedObjects.add(object);
     }
 
     /**
@@ -113,12 +155,42 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Set if container supports null values.
+     * Set whether serialized value is root value.
      *
-     * @param writeNulls should write nulls in container
+     * @param root is root value
      */
-    public void setContainerWithNulls(boolean writeNulls) {
-        this.containerWithNulls = writeNulls;
+    public void setRoot(boolean root) {
+        this.root = root;
+    }
+
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbContext    Current context.
+     * @param rootRuntimeType Type of root object.
+     */
+    public SerializationContextImpl(JsonbContext jsonbContext, Type rootRuntimeType) {
+        super(jsonbContext);
+        this.runtimeType = rootRuntimeType;
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Leaves generator open for further interaction after completion.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     */
+    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, false);
+    }
+
+    @Override
+    public <T> void serialize(String key, T object, JsonGenerator generator) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(object);
+        setKey(key);
+        serializeObject(object, generator);
     }
 
     /**
@@ -149,84 +221,12 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Closes the generator on completion.
+     * Set new current property key name.
      *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
+     * @param key key name
      */
-    public void marshall(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, true);
+    public void setKey(String key) {
+        this.key = key;
     }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Leaves generator open for further interaction after completion.
-     *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
-     */
-    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, false);
-    }
-
-    @Override
-    public <T> void serialize(String key, T object, JsonGenerator generator) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(object);
-        setKey(key);
-        serializeObject(object, generator);
-    }
-
-    @Override
-    public <T> void serialize(T object, JsonGenerator generator) {
-        Objects.requireNonNull(object);
-        serializeObject(object, generator);
-    }
-
-    /**
-     * Serializes root element.
-     *
-     * @param <T>       Root type
-     * @param root      Root.
-     * @param generator JSON generator.
-     */
-    public <T> void serializeObject(T root, JsonGenerator generator) {
-        Type type = determineSerializationType(root);
-        final ModelSerializer rootSerializer = getRootSerializer(type);
-        rootSerializer.serialize(root, generator, this);
-    }
-
-    private <T> Type determineSerializationType(T root) {
-        if (isRoot() && runtimeType != null) {
-            return runtimeType;
-        }
-        return root == null ? Object.class : root.getClass();
-    }
-
-    public ModelSerializer getRootSerializer(Type type) {
-        return getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
-    }
-
-    /**
-     * Adds currently processed object to the {@link Set}.
-     *
-     * @param object processed object
-     * @return if object was added
-     */
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
-    }
-
-    /**
-     * Removes processed object from the {@link Set}.
-     *
-     * @param object processed object
-     * @return if object was removed
-     */
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
-    }
-
 
 }

@@ -26,10 +26,6 @@ class CyclicReferenceDeserializer implements ModelDeserializer<JsonParser> {
     private final Type type;
     private ModelDeserializer<JsonParser> delegate;
 
-    CyclicReferenceDeserializer(Type type) {
-        this.type = type;
-    }
-
     @Override
     public Object deserialize(JsonParser value, DeserializationContextImpl context) {
         if (delegate == null) {
@@ -37,4 +33,9 @@ class CyclicReferenceDeserializer implements ModelDeserializer<JsonParser> {
         }
         return delegate.deserialize(value, context);
     }
+
+    CyclicReferenceDeserializer(Type type) {
+        this.type = type;
+    }
+
 }

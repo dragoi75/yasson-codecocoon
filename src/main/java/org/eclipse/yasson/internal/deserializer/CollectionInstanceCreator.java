@@ -41,26 +41,6 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
     private final Class<?> clazz;
     private final boolean isEnumSet;
 
-    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
-        this.delegate = delegate;
-        this.clazz = implementationClass(ReflectiveTypeResolver.getRawType(type));
-        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
-        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        Object instance;
-        if (isEnumSet) {
-            instance = EnumSet.noneOf((Class<Enum>) type);
-        } else {
-            instance = InstanceCreator.createInstance(clazz);
-        }
-        context.setInstance(instance);
-        return delegate.deserialize(value, context);
-    }
-
     private Class<?> implementationClass(Class<?> type) {
         if (type.isInterface()) {
             return createInterfaceInstance(type);
@@ -86,4 +66,25 @@ class CollectionInstanceCreator implements ModelDeserializer<JsonParser> {
         }
         return ifcType;
     }
+
+    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
+        this.delegate = delegate;
+        this.clazz = implementationClass(ReflectiveTypeResolver.getRawType(type));
+        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
+        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+        Object instance;
+        if (isEnumSet) {
+            instance = EnumSet.noneOf((Class<Enum>) type);
+        } else {
+            instance = InstanceCreator.createInstance(clazz);
+        }
+        context.setInstance(instance);
+        return delegate.deserialize(value, context);
+    }
+
 }

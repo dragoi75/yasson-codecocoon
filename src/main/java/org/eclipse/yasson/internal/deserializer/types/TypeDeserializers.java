@@ -126,8 +126,16 @@ public class TypeDeserializers {
         OPTIONAL_TYPES.put(OptionalDouble.class, Double.class);
     }
 
-    private TypeDeserializers() {
-        throw new IllegalStateException("Utility classes cannot be instantiated");
+    private static ModelDeserializer<JsonParser> assignableCases(TypeDeserializerBuilder builder,
+                                                                 JsonParser.Event[] checker) {
+        if (Enum.class.isAssignableFrom(builder.getClazz())) {
+            return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)),
+                                       builder.getClazz(),
+                                       checker);
+        } else if (Object.class.equals(builder.getClazz())) {
+            return new ObjectTypeDeserializer(builder);
+        }
+        return null;
     }
 
     /**
@@ -183,16 +191,8 @@ public class TypeDeserializers {
         return null;
     }
 
-    private static ModelDeserializer<JsonParser> assignableCases(TypeDeserializerBuilder builder,
-                                                                 JsonParser.Event[] checker) {
-        if (Enum.class.isAssignableFrom(builder.getClazz())) {
-            return new PositionChecker(new ValueExtractor(new EnumDeserializer(builder)),
-                                       builder.getClazz(),
-                                       checker);
-        } else if (Object.class.equals(builder.getClazz())) {
-            return new ObjectTypeDeserializer(builder);
-        }
-        return null;
+    private TypeDeserializers() {
+        throw new IllegalStateException("Utility classes cannot be instantiated");
     }
 
 }

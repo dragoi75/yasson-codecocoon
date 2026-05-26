@@ -21,10 +21,6 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  */
 class EnumSerializer extends TypeSerializer<Enum<?>> {
 
-    EnumSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Enum<?> value, JsonGenerator generator, SerializationContextImpl context) {
         generator.write(value.name());
@@ -34,4 +30,9 @@ class EnumSerializer extends TypeSerializer<Enum<?>> {
     void serializeKey(Enum<?> key, JsonGenerator generator, SerializationContextImpl context) {
         generator.writeKey(key.name());
     }
+
+    EnumSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
 }

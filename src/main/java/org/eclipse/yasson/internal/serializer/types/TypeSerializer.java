@@ -24,25 +24,6 @@ abstract class TypeSerializer<T> implements ModelSerializer {
 
     private final ModelSerializer serializer;
 
-    TypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        if (serializerBuilder.isKey()) {
-            serializer = new KeySerializer();
-        } else {
-            serializer = new ValueSerializer();
-        }
-    }
-
-    @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        serializer.serialize(value, generator, context);
-    }
-
-    abstract void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context);
-
-    void serializeKey(T key, JsonGenerator generator, SerializationContextImpl context) {
-        generator.writeKey(String.valueOf(key));
-    }
-
     private final class ValueSerializer implements ModelSerializer {
 
         @SuppressWarnings("unchecked")
@@ -62,4 +43,24 @@ abstract class TypeSerializer<T> implements ModelSerializer {
         }
 
     }
+
+    void serializeKey(T key, JsonGenerator generator, SerializationContextImpl context) {
+        generator.writeKey(String.valueOf(key));
+    }
+
+    TypeSerializer(TypeSerializerBuilder serializerBuilder) {
+        if (serializerBuilder.isKey()) {
+            serializer = new KeySerializer();
+        } else {
+            serializer = new ValueSerializer();
+        }
+    }
+
+    abstract void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context);
+
+    @Override
+    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        serializer.serialize(value, generator, context);
+    }
+
 }

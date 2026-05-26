@@ -57,9 +57,20 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     private State state = State.START;
 
-    JsonObjectIterator(JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
-        this.keyIterator = jsonObject.keySet().iterator();
+    /**
+     * Current key this iterator is pointing at.
+     *
+     * @return Current key.
+     */
+    public String getKey() {
+        return currentKey;
+    }
+
+    @Override
+    JsonbException createIncompatibleValueError() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeysEnum.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
+                                                      getValue().getValueType(),
+                                                      currentKey));
     }
 
     private void nextKey() {
@@ -70,25 +81,37 @@ public class JsonObjectIterator extends JsonStructureIterator {
     }
 
     @Override
+    String getString() {
+        if (state == State.KEY) {
+            return currentKey;
+        }
+        return super.getString();
+    }
+
+    private void setState(State state) {
+        this.state = state;
+    }
+
+    @Override
     public JsonParser.Event next() {
         switch (state) {
         case START:
             if (keyIterator.hasNext()) {
                 nextKey();
-                setState(JsonObjectIterator.State.KEY);
+                setState(State.KEY);
                 return JsonParser.Event.KEY_NAME;
             } else {
                 setState(State.END);
                 return JsonParser.Event.END_OBJECT;
             }
         case KEY:
-            setState(JsonObjectIterator.State.VALUE);
+            setState(State.VALUE);
             JsonValue value = getValue();
             return getValueEvent(value);
         case VALUE:
             if (keyIterator.hasNext()) {
                 nextKey();
-                setState(JsonObjectIterator.State.KEY);
+                setState(State.KEY);
                 return JsonParser.Event.KEY_NAME;
             }
             setState(State.END);
@@ -97,6 +120,11 @@ public class JsonObjectIterator extends JsonStructureIterator {
             throw new JsonbException("Illegal state");
         }
 
+    }
+
+    JsonObjectIterator(JsonObject jsonObject) {
+        this.jsonObject = jsonObject;
+        this.keyIterator = jsonObject.keySet().iterator();
     }
 
     @Override
@@ -117,31 +145,4 @@ public class JsonObjectIterator extends JsonStructureIterator {
         return jsonObject.get(currentKey);
     }
 
-    @Override
-    String getString() {
-        if (state == JsonObjectIterator.State.KEY) {
-            return currentKey;
-        }
-        return super.getString();
-    }
-
-    @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeysEnum.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT,
-                                                      getValue().getValueType(),
-                                                      currentKey));
-    }
-
-    private void setState(State state) {
-        this.state = state;
-    }
-
-    /**
-     * Current key this iterator is pointing at.
-     *
-     * @return Current key.
-     */
-    public String getKey() {
-        return currentKey;
-    }
 }

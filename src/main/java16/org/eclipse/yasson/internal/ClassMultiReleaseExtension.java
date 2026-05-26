@@ -31,12 +31,13 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class ClassMultiReleaseExtension {
 
-    private ClassMultiReleaseExtension() {
-        throw new IllegalStateException("This class cannot be instantiated");
-    }
-
-    static boolean shouldTransformToPropertyName(Method method) {
-        return !method.getDeclaringClass().isRecord();
+    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
+        if (clazz.isRecord()) {
+            if (clazz.getDeclaredConstructors().length > 1) {
+                return Optional.of(new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
+            }
+        }
+        return Optional.empty();
     }
 
     static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
@@ -44,6 +45,14 @@ public class ClassMultiReleaseExtension {
                 && method.getParameterCount() == 0
                 && !void.class.equals(method.getReturnType())
                 && classProperties.containsKey(method.getName());
+    }
+
+    public static boolean isRecord(Class<?> clazz) {
+        return clazz.isRecord();
+    }
+
+    private ClassMultiReleaseExtension() {
+        throw new IllegalStateException("This class cannot be instantiated");
     }
 
     static JsonbCreator findCreator(Class<?> clazz,
@@ -58,17 +67,8 @@ public class ClassMultiReleaseExtension {
         return null;
     }
 
-    public static boolean isRecord(Class<?> clazz) {
-        return clazz.isRecord();
-    }
-
-    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
-        if (clazz.isRecord()) {
-            if (clazz.getDeclaredConstructors().length > 1) {
-                return Optional.of(new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
-            }
-        }
-        return Optional.empty();
+    static boolean shouldTransformToPropertyName(Method method) {
+        return !method.getDeclaringClass().isRecord();
     }
 
 }

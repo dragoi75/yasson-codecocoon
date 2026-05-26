@@ -33,80 +33,6 @@ public class ClassCustomization extends CustomizationBase {
     private final TypeInheritanceConfiguration typeInheritanceConfiguration;
 
     /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
-     */
-    private ClassCustomization(Builder builder) {
-        super(builder);
-        this.creator = builder.creator;
-        this.propertyOrder = builder.propertyOrder;
-        this.numberFormatter = builder.numberFormatter;
-        this.dateTimeFormatter = builder.dateTimeFormatter;
-        this.propertyVisibilityStrategy = builder.propertyVisibilityStrategy;
-        this.typeInheritanceConfiguration = builder.typeInheritanceConfiguration;
-    }
-
-    public static ClassCustomization empty() {
-        return EMPTY;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
-
-    /**
-     * Property visibility strategy for this class model.
-     *
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    public TypeInheritanceConfiguration getPolymorphismConfig() {
-        return typeInheritanceConfiguration;
-    }
-
-    /**
      * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
      */
     public static class Builder extends CustomizationBase.Builder<Builder, ClassCustomization> {
@@ -118,7 +44,19 @@ public class ClassCustomization extends CustomizationBase {
         private PropertyVisibilityStrategy propertyVisibilityStrategy;
         private TypeInheritanceConfiguration typeInheritanceConfiguration;
 
-        private Builder() {
+        @Override
+        public ClassCustomization build() {
+            return new ClassCustomization(this);
+        }
+
+        public Builder dateTimeFormatter(JsonbDateFormatter dateTimeFormatter) {
+            this.dateTimeFormatter = dateTimeFormatter;
+            return this;
+        }
+
+        public Builder polymorphismConfig(TypeInheritanceConfiguration typeInheritanceConfiguration) {
+            this.typeInheritanceConfiguration = typeInheritanceConfiguration;
+            return this;
         }
 
         @Override
@@ -137,9 +75,7 @@ public class ClassCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder propertyOrder(String[] propertyOrder) {
-            this.propertyOrder = propertyOrder;
-            return this;
+        private Builder() {
         }
 
         public Builder numberFormatter(JsonbNumberFormatter numberFormatter) {
@@ -147,8 +83,8 @@ public class ClassCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder dateTimeFormatter(JsonbDateFormatter dateTimeFormatter) {
-            this.dateTimeFormatter = dateTimeFormatter;
+        public Builder propertyOrder(String[] propertyOrder) {
+            this.propertyOrder = propertyOrder;
             return this;
         }
 
@@ -157,16 +93,80 @@ public class ClassCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder polymorphismConfig(TypeInheritanceConfiguration typeInheritanceConfiguration) {
-            this.typeInheritanceConfiguration = typeInheritanceConfiguration;
-            return this;
-        }
+    }
 
-        @Override
-        public ClassCustomization build() {
-            return new ClassCustomization(this);
-        }
+    /**
+     * Property visibility strategy for this class model.
+     *
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
 
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    public TypeInheritanceConfiguration getPolymorphismConfig() {
+        return typeInheritanceConfiguration;
+    }
+
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
+    }
+
+    public static ClassCustomization empty() {
+        return EMPTY;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    private ClassCustomization(Builder builder) {
+        super(builder);
+        this.creator = builder.creator;
+        this.propertyOrder = builder.propertyOrder;
+        this.numberFormatter = builder.numberFormatter;
+        this.dateTimeFormatter = builder.dateTimeFormatter;
+        this.propertyVisibilityStrategy = builder.propertyVisibilityStrategy;
+        this.typeInheritanceConfiguration = builder.typeInheritanceConfiguration;
+    }
+
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return creator;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
 }

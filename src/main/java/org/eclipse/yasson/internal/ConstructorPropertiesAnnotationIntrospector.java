@@ -31,6 +31,22 @@ class ConstructorPropertiesAnnotationIntrospector {
     private final JsonbContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    }
+
+    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
+        final Parameter[] parameters = executable.getParameters();
+
+        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            final Parameter parameter = parameters[i];
+            creatorModels[i] = new CreatorModel(properties[i], parameter, executable, jsonbContext);
+        }
+        return new JsonbCreator(executable, creatorModels);
+    }
+
     public static ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
         return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
@@ -77,19 +93,4 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
-        final Parameter[] parameters = executable.getParameters();
-
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorModel(properties[i], parameter, executable, jsonbContext);
-        }
-        return new JsonbCreator(executable, creatorModels);
-    }
-
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
-    }
 }

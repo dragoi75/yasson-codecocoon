@@ -34,81 +34,46 @@ public class Property {
 
     private JsonbAnnotatedElement<Method> setterElement;
 
-    /**
-     * Create instance of property.
-     *
-     * @param name                not null
-     * @param declaringClassModel Class model for a class declaring property.
-     */
-    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
-        this.name = name;
-        this.declaringClassElement = declaringClassModel;
-    }
-
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * {@link Field} representing property if any.
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (fieldElement == null) {
-            return null;
+    Type getSetterType() {
+        Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
+        if (genericParameterTypes.length != 1) {
+            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
-        return fieldElement.getElement();
+        return genericParameterTypes[0];
     }
 
     /**
-     * @param field field not null
-     */
-    public void setField(Field field) {
-        this.fieldElement = new JsonbAnnotatedElement<>(field);
-    }
-
-    /**
-     * {@link Method} representing getter of a property if any.
+     * Element with setter and its annotations.
      *
-     * @return getter if present
+     * @return setter with annotations
      */
-    public Method getGetter() {
-        if (getterElement == null) {
-            return null;
-        }
-        return getterElement.getElement();
+    public JsonbAnnotatedElement<Method> getSetterElement() {
+        return setterElement;
     }
 
     /**
-     * @param getter not null
-     */
-    public void setGetter(Method getter) {
-        this.getterElement = new JsonbAnnotatedElement<>(getter);
-    }
-
-    /**
-     * {@link Method} representing setter of a property if any.
+     * Element with getter and its annotations.
      *
-     * @return setter if present
+     * @return getter with annotations
      */
-    public Method getSetter() {
-        if (setterElement == null) {
-            return null;
+    public JsonbAnnotatedElement<Method> getGetterElement() {
+        return getterElement;
+    }
+
+    Type getGetterType() {
+        if (getGetter() != null) {
+            return getGetter().getGenericReturnType();
         }
-        return setterElement.getElement();
+        return null;
     }
 
     /**
-     * @param setter setter not null
+     * Element with field and its annotations.
+     *
+     * @return field with annotations
      */
-    public void setSetter(Method setter) {
-        this.setterElement = new JsonbAnnotatedElement<>(setter);
+    public JsonbAnnotatedElement<Field> getFieldElement() {
+        return fieldElement;
     }
 
     /**
@@ -119,6 +84,13 @@ public class Property {
      */
     public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
         return declaringClassElement;
+    }
+
+    /**
+     * @param setter setter not null
+     */
+    public void setSetter(Method setter) {
+        this.setterElement = new JsonbAnnotatedElement<>(setter);
     }
 
     /**
@@ -138,46 +110,74 @@ public class Property {
         throw new JsonbException("Empty property: " + name);
     }
 
-    Type getGetterType() {
-        if (getGetter() != null) {
-            return getGetter().getGenericReturnType();
+    /**
+     * {@link Method} representing getter of a property if any.
+     *
+     * @return getter if present
+     */
+    public Method getGetter() {
+        if (getterElement == null) {
+            return null;
         }
-        return null;
+        return getterElement.getElement();
     }
 
-    Type getSetterType() {
-        Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
-        if (genericParameterTypes.length != 1) {
-            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
+    /**
+     * {@link Field} representing property if any.
+     *
+     * @return field if present
+     */
+    public Field getField() {
+        if (fieldElement == null) {
+            return null;
         }
-        return genericParameterTypes[0];
+        return fieldElement.getElement();
     }
 
     /**
-     * Element with field and its annotations.
+     * {@link Method} representing setter of a property if any.
      *
-     * @return field with annotations
+     * @return setter if present
      */
-    public JsonbAnnotatedElement<Field> getFieldElement() {
-        return fieldElement;
+    public Method getSetter() {
+        if (setterElement == null) {
+            return null;
+        }
+        return setterElement.getElement();
     }
 
     /**
-     * Element with getter and its annotations.
+     * Create instance of property.
      *
-     * @return getter with annotations
+     * @param name                not null
+     * @param declaringClassModel Class model for a class declaring property.
      */
-    public JsonbAnnotatedElement<Method> getGetterElement() {
-        return getterElement;
+    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
+        this.name = name;
+        this.declaringClassElement = declaringClassModel;
     }
 
     /**
-     * Element with setter and its annotations.
-     *
-     * @return setter with annotations
+     * @param getter not null
      */
-    public JsonbAnnotatedElement<Method> getSetterElement() {
-        return setterElement;
+    public void setGetter(Method getter) {
+        this.getterElement = new JsonbAnnotatedElement<>(getter);
+    }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param field field not null
+     */
+    public void setField(Field field) {
+        this.fieldElement = new JsonbAnnotatedElement<>(field);
     }
 
 }

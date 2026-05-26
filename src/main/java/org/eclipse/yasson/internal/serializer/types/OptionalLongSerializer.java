@@ -26,10 +26,6 @@ class OptionalLongSerializer implements ModelSerializer {
 
     private final ModelSerializer typeSerializer;
 
-    OptionalLongSerializer(ModelSerializer typeSerializer) {
-        this.typeSerializer = typeSerializer;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalLong optionalLong = (OptionalLong) value;
@@ -39,4 +35,9 @@ class OptionalLongSerializer implements ModelSerializer {
             typeSerializer.serialize(null, generator, context);
         }
     }
+
+    OptionalLongSerializer(ModelSerializer typeSerializer) {
+        this.typeSerializer = typeSerializer;
+    }
+
 }
