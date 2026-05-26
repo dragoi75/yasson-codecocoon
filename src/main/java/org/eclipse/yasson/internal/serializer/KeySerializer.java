@@ -23,15 +23,6 @@ public class KeySerializer implements ModelMarshaller {
 
     private final ModelMarshaller backingMarshaller;
 
-    /**
-     * Create new instance.
-     *
-     * @param backingMarshaller delegate to be called after the key is written
-     */
-    public KeySerializer(ModelMarshaller backingMarshaller) {
-        this.backingMarshaller = backingMarshaller;
-    }
-
     @Override
     public void marshal(Object inputObject, JsonGenerator jsonWriter, SerializationContextImpl serializationEnvironment) {
         if (serializationEnvironment.getKey() != null) {
@@ -39,6 +30,15 @@ public class KeySerializer implements ModelMarshaller {
             serializationEnvironment.setKey(null);
         }
         backingMarshaller.marshal(inputObject, jsonWriter, serializationEnvironment);
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param backingMarshaller delegate to be called after the key is written
+     */
+    public KeySerializer(ModelMarshaller backingMarshaller) {
+        this.backingMarshaller = backingMarshaller;
     }
 
 }

@@ -31,21 +31,20 @@ class ConstructorPropertiesAnnotationIntrospector {
     private final JsonBindingContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
-    public static ConstructorPropertiesAnnotationIntrospector forContext(JsonBindingContext jsonbContext) {
-        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
+    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
+        final Parameter[] parameters = executable.getParameters();
+
+        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            final Parameter parameter = parameters[i];
+            creatorModels[i] = new CreatorModel(properties[i], parameter, executable, jsonbContext);
+        }
+        return new JsonbCreator(executable, creatorModels);
     }
 
-    /**
-     * Only for testing and internal purposes.
-     * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonBindingContext)}.
-     *
-     * @param context          {@link JsonBindingContext}
-     * @param annotationFinder {@link AnnotationFinder}
-     */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonBindingContext context, AnnotationFinder annotationFinder) {
-        this.jsonbContext = context;
-        this.constructorProperties = annotationFinder;
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
     }
 
     public JsonbCreator getCreator(Constructor<?>[] constructors) {
@@ -77,19 +76,21 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
-        final Parameter[] parameters = executable.getParameters();
-
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorModel(properties[i], parameter, executable, jsonbContext);
-        }
-        return new JsonbCreator(executable, creatorModels);
+    public static ConstructorPropertiesAnnotationIntrospector forContext(JsonBindingContext jsonbContext) {
+        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
 
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    /**
+     * Only for testing and internal purposes.
+     * <p>
+     * Please use static factory methods e.g. {@link #forContext(JsonBindingContext)}.
+     *
+     * @param context          {@link JsonBindingContext}
+     * @param annotationFinder {@link AnnotationFinder}
+     */
+    protected ConstructorPropertiesAnnotationIntrospector(JsonBindingContext context, AnnotationFinder annotationFinder) {
+        this.jsonbContext = context;
+        this.constructorProperties = annotationFinder;
     }
+
 }

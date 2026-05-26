@@ -139,20 +139,6 @@ public class TypeSerializerRegistry {
 
     }
 
-    private TypeSerializerRegistry() {
-        throw new IllegalStateException("Util class cannot be instantiated");
-    }
-
-    /**
-     * Whether type is the supported key type.
-     *
-     * @param keyType key type
-     * @return whether type is supported key type
-     */
-    public static boolean isSupportedMapKey(Class<?> keyType) {
-        return Enum.class.isAssignableFrom(keyType) || ALLOWED_KEY_TYPES.contains(keyType);
-    }
-
     /**
      * Create new type serializer.
      *
@@ -223,6 +209,20 @@ public class TypeSerializerRegistry {
         return marshaller == null
                 ? null
                 : SerializationModelBuilder.wrapWithCommonSet(marshaller, customizer, bindingContext);
+    }
+
+    private TypeSerializerRegistry() {
+        throw new IllegalStateException("Util class cannot be instantiated");
+    }
+
+    /**
+     * Whether type is the supported key type.
+     *
+     * @param keyType key type
+     * @return whether type is supported key type
+     */
+    public static boolean isSupportedMapKey(Class<?> keyType) {
+        return Enum.class.isAssignableFrom(keyType) || ALLOWED_KEY_TYPES.contains(keyType);
     }
 
 }

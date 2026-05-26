@@ -55,6 +55,24 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
+     * Class model of parent class if present.
+     *
+     * @return class model of a parent
+     */
+    public ClassDescriptor getParentClassModel() {
+        return parentDescriptor;
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return sorted class properties.
+     */
+    public BeanPropertyDescriptor[] getSortedProperties() {
+        return orderedProperties;
+    }
+
+    /**
      * Gets a property model by default (non customized) name.
      *
      * @param propertyName A name as parsed from field / getter / setter without annotation customizing.
@@ -65,22 +83,22 @@ public class ClassDescriptor {
     }
 
     /**
-     * Create instance of class model.
+     * Sets parsed properties of the class.
      *
-     * @param targetClass                  Class to model.
-     * @param serializationConfig          Customization of the class parsed from annotations.
-     * @param parentDescriptor       Class model of parent class.
-     * @param namingStrategy Property naming strategy.
+     * @param parsedProps class properties
      */
-    public ClassDescriptor(Class<?> targetClass,
-                           ClassSerializationConfig serializationConfig,
-                           ClassDescriptor parentDescriptor,
-                           PropertyNamingStrategy namingStrategy) {
-        this.targetClass = targetClass;
-        this.serializationConfig = serializationConfig;
-        this.parentDescriptor = parentDescriptor;
-        this.namingStrategy = namingStrategy;
-        setProperties(new ArrayList<>());
+    public void setProperties(List<BeanPropertyDescriptor> parsedProps) {
+        orderedProperties = parsedProps.toArray(new BeanPropertyDescriptor[] {});
+        this.propertyMap = parsedProps.stream().collect(Collectors.toMap(BeanPropertyDescriptor::getPropertyName, (modifier) -> modifier));
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, BeanPropertyDescriptor> getProperties() {
+        return Collections.unmodifiableMap(propertyMap);
     }
 
     /**
@@ -111,6 +129,41 @@ public class ClassDescriptor {
     }
 
     /**
+     * Default no argument constructor of the class used for deserialization.
+     *
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
+        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
+        // Note: Null is a valid result and needs to be cached.
+        if (!initializedFlag.get()) {
+            noArgConstructor = ReflectionHelper.getDefaultConstructor(targetClass, false);
+            initializedFlag.set(true);
+        }
+        return noArgConstructor;
+    }
+
+    /**
+     * Create instance of class model.
+     *
+     * @param targetClass                  Class to model.
+     * @param serializationConfig          Customization of the class parsed from annotations.
+     * @param parentDescriptor       Class model of parent class.
+     * @param namingStrategy Property naming strategy.
+     */
+    public ClassDescriptor(Class<?> targetClass,
+                           ClassSerializationConfig serializationConfig,
+                           ClassDescriptor parentDescriptor,
+                           PropertyNamingStrategy namingStrategy) {
+        this.targetClass = targetClass;
+        this.serializationConfig = serializationConfig;
+        this.parentDescriptor = parentDescriptor;
+        this.namingStrategy = namingStrategy;
+        setProperties(new ArrayList<>());
+    }
+
+    /**
      * Check if name is equal according to property strategy.
      * In case of {@link PropertyNamingStrategyProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
      * User can provide own strategy implementation, cast to custom interface is not an option.
@@ -126,15 +179,6 @@ public class ClassDescriptor {
     }
 
     /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return targetClass;
-    }
-
-    /**
      * Introspected customization for a class.
      *
      * @return Immutable class customization.
@@ -144,55 +188,12 @@ public class ClassDescriptor {
     }
 
     /**
-     * Class model of parent class if present.
+     * Gets type.
      *
-     * @return class model of a parent
+     * @return Type.
      */
-    public ClassDescriptor getParentClassModel() {
-        return parentDescriptor;
+    public Class<?> getType() {
+        return targetClass;
     }
 
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return sorted class properties.
-     */
-    public BeanPropertyDescriptor[] getSortedProperties() {
-        return orderedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProps class properties
-     */
-    public void setProperties(List<BeanPropertyDescriptor> parsedProps) {
-        orderedProperties = parsedProps.toArray(new BeanPropertyDescriptor[] {});
-        this.propertyMap = parsedProps.stream().collect(Collectors.toMap(BeanPropertyDescriptor::getPropertyName, (modifier) -> modifier));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, BeanPropertyDescriptor> getProperties() {
-        return Collections.unmodifiableMap(propertyMap);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     *
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
-        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
-        // Note: Null is a valid result and needs to be cached.
-        if (!initializedFlag.get()) {
-            noArgConstructor = ReflectionHelper.getDefaultConstructor(targetClass, false);
-            initializedFlag.set(true);
-        }
-        return noArgConstructor;
-    }
 }

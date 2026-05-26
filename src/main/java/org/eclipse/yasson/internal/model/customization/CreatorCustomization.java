@@ -26,75 +26,31 @@ public class CreatorCustomization extends CustomizationBase {
     private final boolean required;
     private BeanPropertyDescriptor propertyModel;
 
-    /**
-     * Creates new creator customization instance.
-     *
-     * @param builder builder of the customization
-     */
-    private CreatorCustomization(Builder builder) {
-        super(builder);
-        this.numberFormatter = builder.numberFormatter;
-        this.dateFormatter = builder.dateFormatter;
-        this.required = builder.required;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (numberFormatter != null) {
-            return numberFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeNumberFormatter();
-        }
-        return null;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (dateFormatter != null) {
-            return dateFormatter;
-        } else if (propertyModel != null) {
-            return propertyModel.getCustomization().getDeserializeDateFormatter();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
-    }
-
-    /**
-     * Set property referenced model.
-     *
-     * @param propertyModel referenced property model
-     */
-    public void setPropertyModel(BeanPropertyDescriptor propertyModel) {
-        this.propertyModel = propertyModel;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
-
     public static final class Builder extends CustomizationBase.Builder<Builder, CreatorCustomization> {
 
         private JsonbNumberFormatter numberFormatter;
         private JsonbDateFormatter dateFormatter;
         private boolean required = false;
+
+        public Builder dateFormatter(JsonbDateFormatter dateFormatter) {
+            this.dateFormatter = dateFormatter;
+            return this;
+        }
+
+        @Override
+        public CreatorCustomization build() {
+            return new CreatorCustomization(this);
+        }
+
+        public Builder numberFormatter(JsonbNumberFormatter numberFormatter) {
+            this.numberFormatter = numberFormatter;
+            return this;
+        }
+
+        public Builder required(boolean required) {
+            this.required = required;
+            return this;
+        }
 
         private Builder() {
         }
@@ -107,26 +63,70 @@ public class CreatorCustomization extends CustomizationBase {
             return this;
         }
 
-        public Builder numberFormatter(JsonbNumberFormatter numberFormatter) {
-            this.numberFormatter = numberFormatter;
-            return this;
-        }
+    }
 
-        public Builder dateFormatter(JsonbDateFormatter dateFormatter) {
-            this.dateFormatter = dateFormatter;
-            return this;
-        }
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
 
-        public Builder required(boolean required) {
-            this.required = required;
-            return this;
-        }
+    @Override
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    }
 
-        @Override
-        public CreatorCustomization build() {
-            return new CreatorCustomization(this);
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        if (dateFormatter != null) {
+            return dateFormatter;
+        } else if (propertyModel != null) {
+            return propertyModel.getCustomization().getDeserializeDateFormatter();
         }
+        return null;
+    }
 
+    /**
+     * Set property referenced model.
+     *
+     * @param propertyModel referenced property model
+     */
+    public void setPropertyModel(BeanPropertyDescriptor propertyModel) {
+        this.propertyModel = propertyModel;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    /**
+     * Creates new creator customization instance.
+     *
+     * @param builder builder of the customization
+     */
+    private CreatorCustomization(Builder builder) {
+        super(builder);
+        this.numberFormatter = builder.numberFormatter;
+        this.dateFormatter = builder.dateFormatter;
+        this.required = builder.required;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        if (numberFormatter != null) {
+            return numberFormatter;
+        } else if (propertyModel != null) {
+            return propertyModel.getCustomization().getDeserializeNumberFormatter();
+        }
+        return null;
     }
 
 }

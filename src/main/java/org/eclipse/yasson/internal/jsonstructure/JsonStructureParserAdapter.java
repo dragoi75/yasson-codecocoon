@@ -38,6 +38,37 @@ public class JsonStructureParserAdapter implements JsonParser {
 
     private final JsonStructure rootNode;
 
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    @Override
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
+    }
+
+    @Override
+    public JsonObject getObject() {
+//        ((JsonObjectIterator) iterators.peek()).jsonObject
+        return cursorStack.peek().getValue().asJsonObject();
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
+    @Override
+    public void close() {
+        //noop
+    }
+
     /**
      * Creates new {@link JsonStructure} parser.
      *
@@ -48,8 +79,8 @@ public class JsonStructureParserAdapter implements JsonParser {
     }
 
     @Override
-    public boolean hasNext() {
-        return cursorStack.peek().hasNext();
+    public String getString() {
+        return cursorStack.peek().getString();
     }
 
     @Override
@@ -76,34 +107,13 @@ public class JsonStructureParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return cursorStack.peek().getString();
+    public boolean hasNext() {
+        return cursorStack.peek().hasNext();
     }
 
     @Override
     public boolean isIntegralNumber() {
         return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
-    }
-
-    @Override
-    public JsonObject getObject() {
-//        ((JsonObjectIterator) iterators.peek()).jsonObject
-        return cursorStack.peek().getValue().asJsonObject();
     }
 
     private JsonNumber getJsonNumberValue() {
@@ -115,13 +125,4 @@ public class JsonStructureParserAdapter implements JsonParser {
         return (JsonNumber) jsonElement;
     }
 
-    @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

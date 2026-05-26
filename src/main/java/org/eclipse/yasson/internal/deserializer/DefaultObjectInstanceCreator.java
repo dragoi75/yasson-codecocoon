@@ -32,6 +32,16 @@ class DefaultObjectInstanceCreator implements ModelParser<JsonParser> {
     private final Constructor<?> defaultConstructor;
     private final JsonbException exception;
 
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        if (exception != null) {
+            throw exception;
+        }
+        Object instance = ReflectionHelper.instantiateNoArgConstructor(defaultConstructor);
+        context.setInstance(instance);
+        return delegate.deserializeModel(value, context);
+    }
+
     DefaultObjectInstanceCreator(ModelParser<JsonParser> delegate,
                                  Class<?> clazz,
                                  Constructor<?> defaultConstructor) {
@@ -47,13 +57,4 @@ class DefaultObjectInstanceCreator implements ModelParser<JsonParser> {
         }
     }
 
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        if (exception != null) {
-            throw exception;
-        }
-        Object instance = ReflectionHelper.instantiateNoArgConstructor(defaultConstructor);
-        context.setInstance(instance);
-        return delegate.deserializeModel(value, context);
-    }
 }

@@ -25,15 +25,6 @@ public class ValueExtractor implements ModelParser<JsonParser> {
 
     private final TypeDeserializer delegate;
 
-    /**
-     * Create new instance.
-     *
-     * @param delegate delegate to accept extracted value
-     */
-    public ValueExtractor(TypeDeserializer delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         JsonParser.Event last = context.getLastValueEvent();
@@ -53,4 +44,14 @@ public class ValueExtractor implements ModelParser<JsonParser> {
             throw new JsonbException("Could not extract data. Received event: " + last);
         }
     }
+
+    /**
+     * Create new instance.
+     *
+     * @param delegate delegate to accept extracted value
+     */
+    public ValueExtractor(TypeDeserializer delegate) {
+        this.delegate = delegate;
+    }
+
 }

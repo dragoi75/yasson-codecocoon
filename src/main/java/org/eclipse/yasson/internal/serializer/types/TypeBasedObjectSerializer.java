@@ -36,30 +36,6 @@ public class TypeBasedObjectSerializer extends TypeSerializer<Object> {
     private final List<Type> typeSequence;
     private final boolean keyFlag;
 
-    TypeBasedObjectSerializer(TypeSerializerBuilder typeBuilder) {
-        super(typeBuilder);
-        this.serializationCustomizer = typeBuilder.getCustomization();
-        this.serializerMap = new ConcurrentHashMap<>();
-        this.typeSequence = new LinkedList<>(typeBuilder.getChain());
-        this.keyFlag = typeBuilder.isKey();
-    }
-
-    @Override
-    void serializeValue(Object obj, JsonGenerator jsonOut, SerializationContextImpl ctx) {
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        resolveSerializer(obj, jsonOut, ctx);
-    }
-
-    @Override
-    void serializeKey(Object identifier, JsonGenerator jsonOut, SerializationContextImpl ctx) {
-        if (identifier == null) {
-            super.serializeKey(null, jsonOut, ctx);
-            return;
-        }
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        resolveSerializer(identifier, jsonOut, ctx);
-    }
-
     private void resolveSerializer(Object identifier, JsonGenerator jsonOut, SerializationContextImpl ctx) {
         Class<?> targetClass = identifier.getClass();
         serializerMap.computeIfAbsent(targetClass, aClass -> {
@@ -77,4 +53,29 @@ public class TypeBasedObjectSerializer extends TypeSerializer<Object> {
     public void registerSpecificSerializer(Class<?> targetClass, ModelMarshaller marshallerInstance) {
         serializerMap.put(targetClass, marshallerInstance);
     }
+
+    @Override
+    void serializeKey(Object identifier, JsonGenerator jsonOut, SerializationContextImpl ctx) {
+        if (identifier == null) {
+            super.serializeKey(null, jsonOut, ctx);
+            return;
+        }
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        resolveSerializer(identifier, jsonOut, ctx);
+    }
+
+    @Override
+    void serializeValue(Object obj, JsonGenerator jsonOut, SerializationContextImpl ctx) {
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        resolveSerializer(obj, jsonOut, ctx);
+    }
+
+    TypeBasedObjectSerializer(TypeSerializerBuilder typeBuilder) {
+        super(typeBuilder);
+        this.serializationCustomizer = typeBuilder.getCustomization();
+        this.serializerMap = new ConcurrentHashMap<>();
+        this.typeSequence = new LinkedList<>(typeBuilder.getChain());
+        this.keyFlag = typeBuilder.isKey();
+    }
+
 }

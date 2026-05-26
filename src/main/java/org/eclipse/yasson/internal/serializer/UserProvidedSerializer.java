@@ -24,15 +24,15 @@ class UserProvidedSerializer<T> implements ModelMarshaller {
 
     private final JsonbSerializer<T> customSerializer;
 
-    UserProvidedSerializer(JsonbSerializer<T> customSerializer) {
-        this.customSerializer = customSerializer;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void marshal(Object objectToMarshal, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
         YassonGenerator jsonbWriter = new YassonGenerator(jsonWriter);
         customSerializer.serialize((T) objectToMarshal, jsonbWriter, serializationState);
+    }
+
+    UserProvidedSerializer(JsonbSerializer<T> customSerializer) {
+        this.customSerializer = customSerializer;
     }
 
 }

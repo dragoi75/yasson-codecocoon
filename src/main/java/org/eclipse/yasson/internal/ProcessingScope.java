@@ -30,24 +30,6 @@ public abstract class ProcessingScope {
     private final Set<Object> processedObjects = new HashSet<>();
 
     /**
-     * Parent for marshaller and unmarshaller.
-     *
-     * @param jsonBindingContext context of Jsonb
-     */
-    public ProcessingScope(JsonBindingContext jsonBindingContext) {
-        this.jsonBindingContext = jsonBindingContext;
-    }
-
-    /**
-     * Jsonb context.
-     *
-     * @return jsonb context
-     */
-    public JsonBindingContext getJsonbContext() {
-        return jsonBindingContext;
-    }
-
-    /**
      * Mapping context.
      *
      * @return mapping context
@@ -74,6 +56,24 @@ public abstract class ProcessingScope {
      */
     public boolean removeProcessedObject(Object item) {
         return processedObjects.remove(item);
+    }
+
+    /**
+     * Jsonb context.
+     *
+     * @return jsonb context
+     */
+    public JsonBindingContext getJsonbContext() {
+        return jsonBindingContext;
+    }
+
+    /**
+     * Parent for marshaller and unmarshaller.
+     *
+     * @param jsonBindingContext context of Jsonb
+     */
+    public ProcessingScope(JsonBindingContext jsonBindingContext) {
+        this.jsonBindingContext = jsonBindingContext;
     }
 
 }

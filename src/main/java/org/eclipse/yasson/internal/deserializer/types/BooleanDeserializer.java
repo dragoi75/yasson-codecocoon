@@ -21,8 +21,9 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
  */
 class BooleanDeserializer extends TypeDeserializer {
 
-    BooleanDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
+    @Override
+    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
+        return value;
     }
 
     @Override
@@ -30,8 +31,8 @@ class BooleanDeserializer extends TypeDeserializer {
         return Boolean.parseBoolean(value);
     }
 
-    @Override
-    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
-        return value;
+    BooleanDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
+
 }

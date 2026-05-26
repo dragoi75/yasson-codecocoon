@@ -27,11 +27,6 @@ class OptionalIntDeserializer implements ModelParser<JsonParser> {
     private final ModelParser<JsonParser> extractor;
     private final ModelParser<Object> delegate;
 
-    OptionalIntDeserializer(ModelParser<JsonParser> extractor, ModelParser<Object> delegate) {
-        this.extractor = extractor;
-        this.delegate = delegate;
-    }
-
     @Override
     public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
         if (context.getLastValueEvent() == JsonParser.Event.VALUE_NULL) {
@@ -40,4 +35,10 @@ class OptionalIntDeserializer implements ModelParser<JsonParser> {
         OptionalInt optional = OptionalInt.of((Integer) extractor.deserializeModel(value, context));
         return delegate.deserializeModel(optional, context);
     }
+
+    OptionalIntDeserializer(ModelParser<JsonParser> extractor, ModelParser<Object> delegate) {
+        this.extractor = extractor;
+        this.delegate = delegate;
+    }
+
 }

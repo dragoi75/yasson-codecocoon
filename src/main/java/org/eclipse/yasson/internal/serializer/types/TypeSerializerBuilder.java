@@ -29,6 +29,14 @@ class TypeSerializerBuilder {
     private final JsonBindingContext jsonbContext;
     private final boolean key;
 
+    public JsonBindingContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    public SerializationCustomizer getCustomization() {
+        return customization;
+    }
+
     TypeSerializerBuilder(List<Type> chain,
                           Class<?> clazz,
                           SerializationCustomizer customization,
@@ -41,6 +49,10 @@ class TypeSerializerBuilder {
         this.key = key;
     }
 
+    public boolean isKey() {
+        return key;
+    }
+
     public List<Type> getChain() {
         return chain;
     }
@@ -49,15 +61,4 @@ class TypeSerializerBuilder {
         return clazz;
     }
 
-    public SerializationCustomizer getCustomization() {
-        return customization;
-    }
-
-    public JsonBindingContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    public boolean isKey() {
-        return key;
-    }
 }

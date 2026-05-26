@@ -37,10 +37,11 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
     private final ModelParser<String> actualDeserializer;
     private final boolean integerOnly;
 
-    AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
-        super(builder);
-        this.actualDeserializer = actualDeserializer(builder);
-        this.integerOnly = integerOnly;
+    abstract T parseNumberValue(String value);
+
+    @Override
+    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
+        return actualDeserializer.deserializeModel(value, context);
     }
 
     private ModelParser<String> actualDeserializer(TypeDeserializerBuilder builder) {
@@ -72,6 +73,12 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
         };
     }
 
+    AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
+        super(builder);
+        this.actualDeserializer = actualDeserializer(builder);
+        this.integerOnly = integerOnly;
+    }
+
     private Function<String, String> createCompatibilityValueChanger(Locale locale) {
         char beforeJdk13GroupSeparator = '\u00A0';
         char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
@@ -80,13 +87,6 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
             return value -> value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
         }
         return value -> value;
-    }
-
-    abstract T parseNumberValue(String value);
-
-    @Override
-    Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
-        return actualDeserializer.deserializeModel(value, context);
     }
 
 }

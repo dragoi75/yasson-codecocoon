@@ -26,18 +26,8 @@ class TypeDeserializerBuilder {
     private final JsonbConfigurationProperties configProperties;
     private final ModelParser<Object> delegate;
 
-    TypeDeserializerBuilder(Class<?> clazz,
-                            SerializationCustomizer customization,
-                            JsonbConfigurationProperties configProperties,
-                            ModelParser<Object> delegate) {
-        this.clazz = Objects.requireNonNull(clazz);
-        this.customization = customization == null ? ClassSerializationConfig.emptyConfig() : customization;
-        this.configProperties = configProperties;
-        this.delegate = Objects.requireNonNull(delegate);
-    }
-
-    public Class<?> getClazz() {
-        return clazz;
+    public SerializationCustomizer getCustomization() {
+        return customization;
     }
 
     public JsonbConfigurationProperties getConfigProperties() {
@@ -48,8 +38,18 @@ class TypeDeserializerBuilder {
         return delegate;
     }
 
-    public SerializationCustomizer getCustomization() {
-        return customization;
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
+    TypeDeserializerBuilder(Class<?> clazz,
+                            SerializationCustomizer customization,
+                            JsonbConfigurationProperties configProperties,
+                            ModelParser<Object> delegate) {
+        this.clazz = Objects.requireNonNull(clazz);
+        this.customization = customization == null ? ClassSerializationConfig.emptyConfig() : customization;
+        this.configProperties = configProperties;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
 }

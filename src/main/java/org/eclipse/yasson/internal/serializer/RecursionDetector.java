@@ -26,10 +26,6 @@ class RecursionDetector implements ModelMarshaller {
 
     private final ModelMarshaller underlyingMarshaller;
 
-    RecursionDetector(ModelMarshaller underlyingMarshaller) {
-        this.underlyingMarshaller = underlyingMarshaller;
-    }
-
     @Override
     public void marshal(Object inputObject, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
         if (!serializationState.addProcessedObject(inputObject)) {
@@ -37,6 +33,10 @@ class RecursionDetector implements ModelMarshaller {
         }
         underlyingMarshaller.marshal(inputObject, jsonWriter, serializationState);
         serializationState.removeProcessedObject(inputObject);
+    }
+
+    RecursionDetector(ModelMarshaller underlyingMarshaller) {
+        this.underlyingMarshaller = underlyingMarshaller;
     }
 
 }

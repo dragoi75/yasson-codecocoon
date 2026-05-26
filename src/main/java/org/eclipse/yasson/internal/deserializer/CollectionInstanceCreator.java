@@ -41,6 +41,32 @@ class CollectionInstanceCreator implements ModelParser<JsonParser> {
     private final Class<?> clazz;
     private final boolean isEnumSet;
 
+    private Class<?> createInterfaceInstance(Class<?> ifcType) {
+        if (List.class.isAssignableFrom(ifcType)) {
+            return ArrayList.class;
+        }
+        if (Set.class.isAssignableFrom(ifcType)) {
+            if (SortedSet.class.isAssignableFrom(ifcType)) {
+                return TreeSet.class;
+            }
+            return HashSet.class;
+        }
+        if (Queue.class.isAssignableFrom(ifcType)) {
+            return ArrayDeque.class;
+        }
+        if (Collection.class == ifcType) {
+            return ArrayList.class;
+        }
+        return ifcType;
+    }
+
+    private Class<?> implementationClass(Class<?> type) {
+        if (type.isInterface()) {
+            return createInterfaceInstance(type);
+        }
+        return type;
+    }
+
     CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
         this.delegate = delegate;
         this.clazz = implementationClass(ReflectionHelper.getRawType(type));
@@ -61,29 +87,4 @@ class CollectionInstanceCreator implements ModelParser<JsonParser> {
         return delegate.deserializeModel(value, context);
     }
 
-    private Class<?> implementationClass(Class<?> type) {
-        if (type.isInterface()) {
-            return createInterfaceInstance(type);
-        }
-        return type;
-    }
-
-    private Class<?> createInterfaceInstance(Class<?> ifcType) {
-        if (List.class.isAssignableFrom(ifcType)) {
-            return ArrayList.class;
-        }
-        if (Set.class.isAssignableFrom(ifcType)) {
-            if (SortedSet.class.isAssignableFrom(ifcType)) {
-                return TreeSet.class;
-            }
-            return HashSet.class;
-        }
-        if (Queue.class.isAssignableFrom(ifcType)) {
-            return ArrayDeque.class;
-        }
-        if (Collection.class == ifcType) {
-            return ArrayList.class;
-        }
-        return ifcType;
-    }
 }

@@ -22,13 +22,13 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
  */
 class NumberDeserializer extends TypeDeserializer {
 
-    NumberDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return new BigDecimal(value);
+    }
+
+    NumberDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
 
 }

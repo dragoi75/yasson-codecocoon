@@ -28,11 +28,6 @@ class NullVisibilityToggle implements ModelMarshaller {
     private final boolean showNullValues;
     private final ModelMarshaller innerMarshaller;
 
-    NullVisibilityToggle(boolean showNullValues, ModelMarshaller innerMarshaller) {
-        this.showNullValues = showNullValues;
-        this.innerMarshaller = innerMarshaller;
-    }
-
     @Override
     public void marshal(Object objectToMarshal, JsonGenerator jsonWriter, SerializationContextImpl serializationCtx) {
         boolean wasEnabled = serializationCtx.isContainerWithNulls();
@@ -40,4 +35,10 @@ class NullVisibilityToggle implements ModelMarshaller {
         innerMarshaller.marshal(objectToMarshal, jsonWriter, serializationCtx);
         serializationCtx.setContainerWithNulls(wasEnabled);
     }
+
+    NullVisibilityToggle(boolean showNullValues, ModelMarshaller innerMarshaller) {
+        this.showNullValues = showNullValues;
+        this.innerMarshaller = innerMarshaller;
+    }
+
 }

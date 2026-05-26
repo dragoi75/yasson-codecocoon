@@ -36,21 +36,6 @@ class MapInstanceCreator implements ModelParser<JsonParser> {
     private final JsonbConfigurationProperties configProperties;
     private final Class<?> clazz;
 
-    MapInstanceCreator(MapDeserializer delegate,
-                       JsonbConfigurationProperties configProperties,
-                       Class<?> clazz) {
-        this.delegate = delegate;
-        this.configProperties = configProperties;
-        this.clazz = clazz;
-    }
-
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        Map<?, ?> map = createInstance(clazz);
-        context.setInstance(map);
-        return delegate.deserializeModel(value, context);
-    }
-
     private Map<?, ?> createInstance(Class<?> clazz) {
         return clazz.isInterface()
                 ? getMapImpl(clazz)
@@ -73,6 +58,21 @@ class MapInstanceCreator implements ModelParser<JsonParser> {
                     : new TreeMap<>();
         }
         return new HashMap<>();
+    }
+
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        Map<?, ?> map = createInstance(clazz);
+        context.setInstance(map);
+        return delegate.deserializeModel(value, context);
+    }
+
+    MapInstanceCreator(MapDeserializer delegate,
+                       JsonbConfigurationProperties configProperties,
+                       Class<?> clazz) {
+        this.delegate = delegate;
+        this.configProperties = configProperties;
+        this.clazz = clazz;
     }
 
 }

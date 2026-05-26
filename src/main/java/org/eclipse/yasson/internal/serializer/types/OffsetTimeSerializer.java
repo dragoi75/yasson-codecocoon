@@ -27,10 +27,6 @@ import org.eclipse.yasson.internal.properties.MessageProvider;
  */
 class OffsetTimeSerializer extends AbstractDateSerializer<OffsetTime> {
 
-    OffsetTimeSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     protected Instant toInstant(OffsetTime value) {
         throw new JsonbException(MessageProvider.getMessage(MessageConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
@@ -40,4 +36,9 @@ class OffsetTimeSerializer extends AbstractDateSerializer<OffsetTime> {
     protected String formatDefault(OffsetTime value, Locale locale) {
         return DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format(value);
     }
+
+    OffsetTimeSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
 }

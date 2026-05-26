@@ -101,14 +101,153 @@ public class DeserializationModelFactory {
     private final JsonBindingContext jsonBinding;
     private final Map<Class<?>, Class<?>> userTypeMap;
 
-    /**
-     * Create new instance.
-     *
-     * @param jsonBinding jsonb context
-     */
-    public DeserializationModelFactory(JsonBindingContext jsonBinding) {
-        this.jsonBinding = jsonBinding;
-        this.userTypeMap = jsonBinding.getConfigProperties().getUserTypeMapping();
+    private static final class CachedEntry {
+
+        private final Type targetType;
+        private final JsonbNumberFormatter decimalFormatter;
+        private final JsonbDateFormatter isoDateFormat;
+
+        @Override
+        public String toString() {
+            return "CachedItem{"
+                    + "type=" + targetType
+                    + ", numberFormatter=" + decimalFormatter
+                    + ", dateFormatter=" + isoDateFormat
+                    + '}';
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(targetType, decimalFormatter, isoDateFormat);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            CachedEntry otherEntry = (CachedEntry) obj;
+            return Objects.equals(targetType, otherEntry.targetType)
+                    && Objects.equals(decimalFormatter, otherEntry.decimalFormatter)
+                    && Objects.equals(isoDateFormat, otherEntry.isoDateFormat);
+        }
+
+        CachedEntry(Type targetType, JsonbNumberFormatter decimalFormatter, JsonbDateFormatter isoDateFormat) {
+            this.targetType = targetType;
+            this.decimalFormatter = decimalFormatter;
+            this.isoDateFormat = isoDateFormat;
+        }
+
+    }
+
+    private ModelParser<JsonParser> buildGenericArrayDeserializer(CachedEntry cacheEntry,
+                                                                  Class<?> rawClass,
+                                                                  LinkedList<Type> typeQueue,
+                                                                  SerializationCustomizer customizer) {
+        GenericArrayType targetType = (GenericArrayType) cacheEntry.targetType;
+        Class<?> elementClass = ReflectionHelper.getRawType(targetType.getGenericComponentType());
+        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
+                                                                    targetType.getGenericComponentType(),
+                customizer,
+                                                                    JustReturn.instance());
+        return buildArrayCommonDeserializer(cacheEntry, rawClass, elementClass, typeParser);
+    }
+
+    private ModelParser<JsonParser> createTypeDeserializer(Class<?> rawClass,
+                                                           SerializationCustomizer serializationCustomizer,
+                                                           ModelParser<Object> delegateParser,
+                                                           Set<Event> eventSet) {
+        return TypeDeserializers
+                .getTypeDeserializer(rawClass, serializationCustomizer, jsonBinding.getConfigProperties(), delegateParser, eventSet);
+    }
+
+    private CachedEntry buildCachedItem(Type targetType, SerializationCustomizer serializationCustomizer) {
+        return new CachedEntry(targetType, serializationCustomizer.getDeserializeNumberFormatter(), serializationCustomizer.getDeserializeDateFormatter());
+    }
+
+    private OptionalDeserializer buildOptionalDeserializer(LinkedList<Type> typeQueue,
+                                                           Type targetType,
+                                                           SerializationCustomizer customizer,
+                                                           CachedEntry cacheEntry) {
+        Type collectionType = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
+                : Object.class;
+        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue, collectionType, customizer, JustReturn.instance());
+        OptionalDeserializer optionalReader = new OptionalDeserializer(typeParser, JustReturn.instance());
+        modelRegistry.put(cacheEntry, optionalReader);
+        return optionalReader;
+    }
+
+    private ModelParser<JsonParser> createTypeProcessor(LinkedList<Type> typeQueue,
+                                                        Type targetType,
+                                                        SerializationCustomizer serializationCustomizer,
+                                                        ModelParser<Object> memberParser) {
+        return createTypeProcessor(typeQueue, targetType, serializationCustomizer, memberParser, PositionChecker.Checker.VALUES.getEvents());
+    }
+
+    private Function<String, String> propertyNameTransformer() {
+        boolean ignoreCase = jsonBinding.getConfig()
+                .getProperty(PROPERTY_NAMING_STRATEGY)
+                .filter(propertyName -> propertyName.equals(PropertyNamingStrategy.CASE_INSENSITIVE))
+                .isPresent();
+
+        return ignoreCase
+                ? String::toLowerCase
+                : input -> input;
+    }
+
+    private ModelParser<JsonParser> createTypeDeserializer(Class<?> rawClass,
+                                                           SerializationCustomizer serializationCustomizer,
+                                                           ModelParser<Object> delegateParser) {
+        return createTypeDeserializer(rawClass, serializationCustomizer, delegateParser, PositionChecker.Checker.VALUES.getEvents());
+    }
+
+    private ModelParser<JsonParser> processMemberType(LinkedList<Type> typeQueue,
+                                                      BeanPropertyDescriptor propertyDescriptor,
+                                                      boolean hasFactory) {
+        ModelParser<Object> memberParser;
+        Type targetType = propertyDescriptor.getPropertyDeserializationType();
+        memberParser = new ValueSetterDeserializer(propertyDescriptor.getSetValueHandle());
+        if (hasFactory) {
+            memberParser = new DeferredDeserializer(memberParser);
+        }
+        return createTypeProcessor(typeQueue, targetType, propertyDescriptor.getCustomization(), memberParser);
+    }
+
+    private Set<String> gatherIgnoredProperties(TypeInheritanceSettings inheritanceSettings) {
+        Set<String> excludedProperties = new HashSet<>();
+        if (inheritanceSettings != null) {
+            TypeInheritanceSettings activeSettings = inheritanceSettings;
+            while (activeSettings != null) {
+                excludedProperties.add(activeSettings.getFieldName());
+                activeSettings = activeSettings.getParentConfig();
+            }
+        }
+        return excludedProperties;
+    }
+
+    private ModelParser<JsonParser> buildCollectionDeserializer(CachedEntry cacheEntry,
+                                                                Class<?> rawClass,
+                                                                LinkedList<Type> typeQueue,
+                                                                SerializationCustomizer customizer) {
+        Type targetType = cacheEntry.targetType;
+        Type collectionType = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
+                : Object.class;
+        collectionType = ReflectionHelper.determineType(typeQueue, collectionType);
+        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
+                collectionType,
+                customizer,
+                                                                    JustReturn.instance());
+        CollectionDeserializer collectionParser = new CollectionDeserializer(typeParser);
+        CollectionInstanceCreator collectionCreator = new CollectionInstanceCreator(collectionParser, targetType);
+        PositionChecker positionValidator = new PositionChecker(collectionCreator, rawClass, Event.START_ARRAY);
+        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
+        modelRegistry.put(cacheEntry, nullValidator);
+        return nullValidator;
     }
 
     /**
@@ -123,19 +262,67 @@ public class DeserializationModelFactory {
         return createDeserializerChain(typeQueue, targetType, classDescriptor.getClassCustomization(), classDescriptor);
     }
 
-    private ModelParser<JsonParser> createDeserializerChain(LinkedList<Type> typeQueue,
-                                                            Type targetType,
-                                                            SerializationCustomizer customizer,
-                                                            ClassDescriptor classDescriptor) {
-        if (typeQueue.contains(targetType)) {
-            return new CyclicReferenceDeserializer(targetType);
+    private List<String> getCreatorParamsList(JsonbCreator factoryMethod) {
+        return Arrays.stream(factoryMethod.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param jsonBinding jsonb context
+     */
+    public DeserializationModelFactory(JsonBindingContext jsonBinding) {
+        this.jsonBinding = jsonBinding;
+        this.userTypeMap = jsonBinding.getConfigProperties().getUserTypeMapping();
+    }
+
+    private ModelParser<JsonParser> createTypeProcessor(LinkedList<Type> typeQueue,
+                                                        Type targetType,
+                                                        SerializationCustomizer serializationCustomizer,
+                                                        ModelParser<Object> memberParser,
+                                                        Set<Event> eventSet) {
+        Type resolvedType = ReflectionHelper.determineType(typeQueue, targetType);
+        Class<?> rawClass = ReflectionHelper.getRawType(resolvedType);
+        Optional<DeserializerBinding<?>> bindingOpt = findUserDeserializer(resolvedType,
+                                                                                (ComponentBindingCustomization) serializationCustomizer);
+        if (bindingOpt.isPresent()) {
+            //TODO remove or not? fix for deserializer cycle
+            //            ModelDeserializer<JsonParser> exactType = createNewChain(chain, memberDeserializer, rawType,
+            //            resolved, customization);
+            //            return new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(),
+            //                                               exactType,
+            //                                               memberDeserializer,
+            //                                               resolved,
+            //                                               customization);
+            return new UserDefinedDeserializer(bindingOpt.get().getJsonbDeserializer(),
+                    memberParser,
+                    resolvedType,
+                    serializationCustomizer);
         }
-        try {
-            typeQueue.add(targetType);
-            return createDeserializerChainInternal(typeQueue, targetType, customizer, classDescriptor);
-        } finally {
-            typeQueue.removeLast();
+        Optional<AdapterBindingInfo> adapterInfoOpt = findAdapterBinding(resolvedType, (ComponentBindingCustomization) serializationCustomizer);
+        if (adapterInfoOpt.isPresent()) {
+            AdapterBindingInfo bindingInfo = adapterInfoOpt.get();
+            ModelParser<JsonParser> typeParser = createTypeDeserializer(ReflectionHelper.getRawType(bindingInfo.getToType()),
+                    serializationCustomizer,
+                                                                              JustReturn.instance(), eventSet);
+            if (typeParser == null) {
+                typeParser = createDeserializerChain(bindingInfo.getToType());
+            }
+            ModelParser<JsonParser> adapterModel = typeParser;
+
+            AdapterDeserializer adapterHandler = new AdapterDeserializer(bindingInfo, memberParser);
+            return (jsonReader, deserializer) -> {
+                DefaultDeserializationContext localContext = new DefaultDeserializationContext(deserializer);
+                Object parsedValue = adapterModel.deserializeModel(jsonReader, localContext);
+                return adapterHandler.deserializeModel(parsedValue, deserializer);
+            };
         }
+        ModelParser<JsonParser> typeParser = createTypeDeserializer(rawClass, serializationCustomizer, memberParser, eventSet);
+        if (typeParser == null) {
+            Class<?> implementationClass = resolveImplementationClass(rawClass, serializationCustomizer);
+            return createContextSwitcher(typeQueue, memberParser, implementationClass, resolvedType, serializationCustomizer);
+        }
+        return typeParser;
     }
 
     private ModelParser<JsonParser> createDeserializerChainInternal(LinkedList<Type> typeQueue,
@@ -192,6 +379,130 @@ public class DeserializationModelFactory {
         } else {
             return buildObjectDeserializer(typeQueue, targetType, customizer, classDescriptor, rawClass, cacheEntry);
         }
+    }
+
+    private Optional<AdapterBindingInfo> findAdapterBinding(Type targetType, ComponentBindingCustomization classConfig) {
+        return jsonBinding.getComponentMatcher().getDeserializeAdapterBinding(targetType, classConfig);
+    }
+
+    private ModelParser<JsonParser> buildMapDeserializer(CachedEntry cacheEntry,
+                                                         Class<?> rawClass,
+                                                         LinkedList<Type> typeQueue,
+                                                         SerializationCustomizer customizer) {
+        Type targetType = cacheEntry.targetType;
+        Type mapKeyType = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
+                : Object.class;
+        Type mapValueType = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[1]
+                : Object.class;
+        ModelParser<JsonParser> keyParser = createTypeProcessor(typeQueue,
+                mapKeyType,
+                                                                   ClassSerializationConfig.emptyConfig(),
+                                                                   JustReturn.instance(),
+                MAP_KEY_EVENT_TYPES);
+        ModelParser<JsonParser> valueParser = createTypeProcessor(typeQueue,
+                mapValueType,
+                customizer,
+                                                                     JustReturn.instance());
+
+        MapDeserializer mapParser = new MapDeserializer(keyParser, valueParser);
+        MapInstanceCreator mapFactory = new MapInstanceCreator(mapParser,
+                                                                       jsonBinding.getConfigProperties(),
+                rawClass);
+        PositionChecker positionValidator = new PositionChecker(mapFactory, rawClass, PositionChecker.Checker.CONTAINER);
+        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
+        modelRegistry.put(cacheEntry, nullValidator);
+        return nullValidator;
+    }
+
+    private ModelParser<JsonParser> buildArrayDeserializer(CachedEntry cacheEntry,
+                                                           Class<?> rawClass,
+                                                           LinkedList<Type> typeQueue,
+                                                           SerializationCustomizer customizer) {
+        JsonbConfigurationProperties jsonbConfig = jsonBinding.getConfigProperties();
+        if (rawClass.equals(byte[].class) && !jsonbConfig.getBinaryDataStrategy().equals(BinaryDataStrategy.BYTE)) {
+            String approach = jsonbConfig.getBinaryDataStrategy();
+            ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
+                                                                        String.class,
+                    customizer,
+                                                                        JustReturn.instance());
+            ModelParser<JsonParser> base64Parser = ArrayInstanceCreator.createBase64Deserializer(approach,
+                    typeParser);
+            NullCheckDeserializer nullValidator = new NullCheckDeserializer(base64Parser, JustReturn.instance());
+            modelRegistry.put(cacheEntry, nullValidator);
+            return nullValidator;
+        }
+        Class<?> arrayClass = rawClass.getComponentType();
+        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
+                arrayClass,
+                customizer,
+                                                                    JustReturn.instance());
+        return buildArrayCommonDeserializer(cacheEntry, rawClass, arrayClass, typeParser);
+    }
+
+    private ModelParser<JsonParser> createContextSwitcher(LinkedList<Type> typeQueue,
+                                                          ModelParser<Object> memberParser,
+                                                          Class<?> rawClass,
+                                                          Type targetType,
+                                                          SerializationCustomizer customizer) {
+        ClassDescriptor classDescriptor = jsonBinding.getMappingContext().getOrCreateClassModel(rawClass);
+        ModelParser<JsonParser> modelParser = createDeserializerChain(typeQueue, targetType, customizer, classDescriptor);
+        return new ContextSwitcher(memberParser, modelParser);
+    }
+
+    private Optional<DeserializerBinding<?>> findUserDeserializer(Type targetType, ComponentBindingCustomization classConfig) {
+        return jsonBinding.getComponentMatcher().getDeserializerBinding(targetType, classConfig);
+    }
+
+    private Class<?> resolveImplementationClass(Class<?> rawClass, SerializationCustomizer serializationCustomizer) {
+        if (rawClass.isInterface()) {
+            Class<?> implType = null;
+            //annotation
+            if (serializationCustomizer instanceof PropertyCustomization) {
+                implType = ((PropertyCustomization) serializationCustomizer).getImplementationClass();
+            }
+            //JsonbConfig
+            if (implType == null) {
+                implType = jsonBinding.getConfigProperties().getUserTypeMapping().get(rawClass);
+            }
+            if (implType != null) {
+                if (!rawClass.isAssignableFrom(implType)) {
+                    throw new JsonbException(MessageProvider.getMessage(MessageConstants.IMPL_CLASS_INCOMPATIBLE,
+                            implType,
+                            rawClass));
+                }
+                return implType;
+            }
+        }
+        return rawClass;
+    }
+
+    private ModelParser<JsonParser> createDeserializerChain(LinkedList<Type> typeQueue,
+                                                            Type targetType,
+                                                            SerializationCustomizer customizer,
+                                                            ClassDescriptor classDescriptor) {
+        if (typeQueue.contains(targetType)) {
+            return new CyclicReferenceDeserializer(targetType);
+        }
+        try {
+            typeQueue.add(targetType);
+            return createDeserializerChainInternal(typeQueue, targetType, customizer, classDescriptor);
+        } finally {
+            typeQueue.removeLast();
+        }
+    }
+
+    private ModelParser<JsonParser> buildArrayCommonDeserializer(CachedEntry cacheEntry,
+                                                                 Class<?> rawClass,
+                                                                 Class<?> elementClass,
+                                                                 ModelParser<JsonParser> typeParser) {
+        ArrayDeserializer arrayReader = new ArrayDeserializer(typeParser);
+        ArrayInstanceCreator instanceFactory = ArrayInstanceCreator.create(rawClass, elementClass, arrayReader);
+        PositionChecker positionValidator = new PositionChecker(instanceFactory, rawClass, Event.START_ARRAY);
+        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
+        modelRegistry.put(cacheEntry, nullValidator);
+        return nullValidator;
     }
 
     private ModelParser<JsonParser> buildObjectDeserializer(LinkedList<Type> typeQueue,
@@ -258,316 +569,6 @@ public class DeserializationModelFactory {
         ModelParser<JsonParser> nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
         modelRegistry.put(cacheEntry, nullValidator);
         return nullValidator;
-    }
-
-    private ModelParser<JsonParser> buildCollectionDeserializer(CachedEntry cacheEntry,
-                                                                Class<?> rawClass,
-                                                                LinkedList<Type> typeQueue,
-                                                                SerializationCustomizer customizer) {
-        Type targetType = cacheEntry.targetType;
-        Type collectionType = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
-                : Object.class;
-        collectionType = ReflectionHelper.determineType(typeQueue, collectionType);
-        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
-                collectionType,
-                customizer,
-                                                                    JustReturn.instance());
-        CollectionDeserializer collectionParser = new CollectionDeserializer(typeParser);
-        CollectionInstanceCreator collectionCreator = new CollectionInstanceCreator(collectionParser, targetType);
-        PositionChecker positionValidator = new PositionChecker(collectionCreator, rawClass, Event.START_ARRAY);
-        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
-        modelRegistry.put(cacheEntry, nullValidator);
-        return nullValidator;
-    }
-
-    private ModelParser<JsonParser> buildMapDeserializer(CachedEntry cacheEntry,
-                                                         Class<?> rawClass,
-                                                         LinkedList<Type> typeQueue,
-                                                         SerializationCustomizer customizer) {
-        Type targetType = cacheEntry.targetType;
-        Type mapKeyType = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
-                : Object.class;
-        Type mapValueType = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[1]
-                : Object.class;
-        ModelParser<JsonParser> keyParser = createTypeProcessor(typeQueue,
-                mapKeyType,
-                                                                   ClassSerializationConfig.emptyConfig(),
-                                                                   JustReturn.instance(),
-                MAP_KEY_EVENT_TYPES);
-        ModelParser<JsonParser> valueParser = createTypeProcessor(typeQueue,
-                mapValueType,
-                customizer,
-                                                                     JustReturn.instance());
-
-        MapDeserializer mapParser = new MapDeserializer(keyParser, valueParser);
-        MapInstanceCreator mapFactory = new MapInstanceCreator(mapParser,
-                                                                       jsonBinding.getConfigProperties(),
-                rawClass);
-        PositionChecker positionValidator = new PositionChecker(mapFactory, rawClass, PositionChecker.Checker.CONTAINER);
-        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
-        modelRegistry.put(cacheEntry, nullValidator);
-        return nullValidator;
-    }
-
-    private ModelParser<JsonParser> buildArrayDeserializer(CachedEntry cacheEntry,
-                                                           Class<?> rawClass,
-                                                           LinkedList<Type> typeQueue,
-                                                           SerializationCustomizer customizer) {
-        JsonbConfigurationProperties jsonbConfig = jsonBinding.getConfigProperties();
-        if (rawClass.equals(byte[].class) && !jsonbConfig.getBinaryDataStrategy().equals(BinaryDataStrategy.BYTE)) {
-            String approach = jsonbConfig.getBinaryDataStrategy();
-            ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
-                                                                        String.class,
-                    customizer,
-                                                                        JustReturn.instance());
-            ModelParser<JsonParser> base64Parser = ArrayInstanceCreator.createBase64Deserializer(approach,
-                    typeParser);
-            NullCheckDeserializer nullValidator = new NullCheckDeserializer(base64Parser, JustReturn.instance());
-            modelRegistry.put(cacheEntry, nullValidator);
-            return nullValidator;
-        }
-        Class<?> arrayClass = rawClass.getComponentType();
-        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
-                arrayClass,
-                customizer,
-                                                                    JustReturn.instance());
-        return buildArrayCommonDeserializer(cacheEntry, rawClass, arrayClass, typeParser);
-    }
-
-    private ModelParser<JsonParser> buildGenericArrayDeserializer(CachedEntry cacheEntry,
-                                                                  Class<?> rawClass,
-                                                                  LinkedList<Type> typeQueue,
-                                                                  SerializationCustomizer customizer) {
-        GenericArrayType targetType = (GenericArrayType) cacheEntry.targetType;
-        Class<?> elementClass = ReflectionHelper.getRawType(targetType.getGenericComponentType());
-        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue,
-                                                                    targetType.getGenericComponentType(),
-                customizer,
-                                                                    JustReturn.instance());
-        return buildArrayCommonDeserializer(cacheEntry, rawClass, elementClass, typeParser);
-    }
-
-    private ModelParser<JsonParser> buildArrayCommonDeserializer(CachedEntry cacheEntry,
-                                                                 Class<?> rawClass,
-                                                                 Class<?> elementClass,
-                                                                 ModelParser<JsonParser> typeParser) {
-        ArrayDeserializer arrayReader = new ArrayDeserializer(typeParser);
-        ArrayInstanceCreator instanceFactory = ArrayInstanceCreator.create(rawClass, elementClass, arrayReader);
-        PositionChecker positionValidator = new PositionChecker(instanceFactory, rawClass, Event.START_ARRAY);
-        NullCheckDeserializer nullValidator = new NullCheckDeserializer(positionValidator, JustReturn.instance());
-        modelRegistry.put(cacheEntry, nullValidator);
-        return nullValidator;
-    }
-
-    private OptionalDeserializer buildOptionalDeserializer(LinkedList<Type> typeQueue,
-                                                           Type targetType,
-                                                           SerializationCustomizer customizer,
-                                                           CachedEntry cacheEntry) {
-        Type collectionType = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
-                : Object.class;
-        ModelParser<JsonParser> typeParser = createTypeProcessor(typeQueue, collectionType, customizer, JustReturn.instance());
-        OptionalDeserializer optionalReader = new OptionalDeserializer(typeParser, JustReturn.instance());
-        modelRegistry.put(cacheEntry, optionalReader);
-        return optionalReader;
-    }
-
-    private Set<String> gatherIgnoredProperties(TypeInheritanceSettings inheritanceSettings) {
-        Set<String> excludedProperties = new HashSet<>();
-        if (inheritanceSettings != null) {
-            TypeInheritanceSettings activeSettings = inheritanceSettings;
-            while (activeSettings != null) {
-                excludedProperties.add(activeSettings.getFieldName());
-                activeSettings = activeSettings.getParentConfig();
-            }
-        }
-        return excludedProperties;
-    }
-
-    private Function<String, String> propertyNameTransformer() {
-        boolean ignoreCase = jsonBinding.getConfig()
-                .getProperty(PROPERTY_NAMING_STRATEGY)
-                .filter(propertyName -> propertyName.equals(PropertyNamingStrategy.CASE_INSENSITIVE))
-                .isPresent();
-
-        return ignoreCase
-                ? String::toLowerCase
-                : input -> input;
-    }
-
-    private Optional<AdapterBindingInfo> findAdapterBinding(Type targetType, ComponentBindingCustomization classConfig) {
-        return jsonBinding.getComponentMatcher().getDeserializeAdapterBinding(targetType, classConfig);
-    }
-
-    private Optional<DeserializerBinding<?>> findUserDeserializer(Type targetType, ComponentBindingCustomization classConfig) {
-        return jsonBinding.getComponentMatcher().getDeserializerBinding(targetType, classConfig);
-    }
-
-    private List<String> getCreatorParamsList(JsonbCreator factoryMethod) {
-        return Arrays.stream(factoryMethod.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
-    }
-
-    private ModelParser<JsonParser> processMemberType(LinkedList<Type> typeQueue,
-                                                      BeanPropertyDescriptor propertyDescriptor,
-                                                      boolean hasFactory) {
-        ModelParser<Object> memberParser;
-        Type targetType = propertyDescriptor.getPropertyDeserializationType();
-        memberParser = new ValueSetterDeserializer(propertyDescriptor.getSetValueHandle());
-        if (hasFactory) {
-            memberParser = new DeferredDeserializer(memberParser);
-        }
-        return createTypeProcessor(typeQueue, targetType, propertyDescriptor.getCustomization(), memberParser);
-    }
-
-    private ModelParser<JsonParser> createTypeProcessor(LinkedList<Type> typeQueue,
-                                                        Type targetType,
-                                                        SerializationCustomizer serializationCustomizer,
-                                                        ModelParser<Object> memberParser) {
-        return createTypeProcessor(typeQueue, targetType, serializationCustomizer, memberParser, PositionChecker.Checker.VALUES.getEvents());
-    }
-
-    private ModelParser<JsonParser> createTypeProcessor(LinkedList<Type> typeQueue,
-                                                        Type targetType,
-                                                        SerializationCustomizer serializationCustomizer,
-                                                        ModelParser<Object> memberParser,
-                                                        Set<Event> eventSet) {
-        Type resolvedType = ReflectionHelper.determineType(typeQueue, targetType);
-        Class<?> rawClass = ReflectionHelper.getRawType(resolvedType);
-        Optional<DeserializerBinding<?>> bindingOpt = findUserDeserializer(resolvedType,
-                                                                                (ComponentBindingCustomization) serializationCustomizer);
-        if (bindingOpt.isPresent()) {
-            //TODO remove or not? fix for deserializer cycle
-            //            ModelDeserializer<JsonParser> exactType = createNewChain(chain, memberDeserializer, rawType,
-            //            resolved, customization);
-            //            return new UserDefinedDeserializer(deserializerBinding.get().getJsonbDeserializer(),
-            //                                               exactType,
-            //                                               memberDeserializer,
-            //                                               resolved,
-            //                                               customization);
-            return new UserDefinedDeserializer(bindingOpt.get().getJsonbDeserializer(),
-                    memberParser,
-                    resolvedType,
-                    serializationCustomizer);
-        }
-        Optional<AdapterBindingInfo> adapterInfoOpt = findAdapterBinding(resolvedType, (ComponentBindingCustomization) serializationCustomizer);
-        if (adapterInfoOpt.isPresent()) {
-            AdapterBindingInfo bindingInfo = adapterInfoOpt.get();
-            ModelParser<JsonParser> typeParser = createTypeDeserializer(ReflectionHelper.getRawType(bindingInfo.getToType()),
-                    serializationCustomizer,
-                                                                              JustReturn.instance(), eventSet);
-            if (typeParser == null) {
-                typeParser = createDeserializerChain(bindingInfo.getToType());
-            }
-            ModelParser<JsonParser> adapterModel = typeParser;
-
-            AdapterDeserializer adapterHandler = new AdapterDeserializer(bindingInfo, memberParser);
-            return (jsonReader, deserializer) -> {
-                DefaultDeserializationContext localContext = new DefaultDeserializationContext(deserializer);
-                Object parsedValue = adapterModel.deserializeModel(jsonReader, localContext);
-                return adapterHandler.deserializeModel(parsedValue, deserializer);
-            };
-        }
-        ModelParser<JsonParser> typeParser = createTypeDeserializer(rawClass, serializationCustomizer, memberParser, eventSet);
-        if (typeParser == null) {
-            Class<?> implementationClass = resolveImplementationClass(rawClass, serializationCustomizer);
-            return createContextSwitcher(typeQueue, memberParser, implementationClass, resolvedType, serializationCustomizer);
-        }
-        return typeParser;
-    }
-
-    private ModelParser<JsonParser> createContextSwitcher(LinkedList<Type> typeQueue,
-                                                          ModelParser<Object> memberParser,
-                                                          Class<?> rawClass,
-                                                          Type targetType,
-                                                          SerializationCustomizer customizer) {
-        ClassDescriptor classDescriptor = jsonBinding.getMappingContext().getOrCreateClassModel(rawClass);
-        ModelParser<JsonParser> modelParser = createDeserializerChain(typeQueue, targetType, customizer, classDescriptor);
-        return new ContextSwitcher(memberParser, modelParser);
-    }
-
-    private ModelParser<JsonParser> createTypeDeserializer(Class<?> rawClass,
-                                                           SerializationCustomizer serializationCustomizer,
-                                                           ModelParser<Object> delegateParser) {
-        return createTypeDeserializer(rawClass, serializationCustomizer, delegateParser, PositionChecker.Checker.VALUES.getEvents());
-    }
-
-    private ModelParser<JsonParser> createTypeDeserializer(Class<?> rawClass,
-                                                           SerializationCustomizer serializationCustomizer,
-                                                           ModelParser<Object> delegateParser,
-                                                           Set<JsonParser.Event> eventSet) {
-        return TypeDeserializers
-                .getTypeDeserializer(rawClass, serializationCustomizer, jsonBinding.getConfigProperties(), delegateParser, eventSet);
-    }
-
-    private Class<?> resolveImplementationClass(Class<?> rawClass, SerializationCustomizer serializationCustomizer) {
-        if (rawClass.isInterface()) {
-            Class<?> implType = null;
-            //annotation
-            if (serializationCustomizer instanceof PropertyCustomization) {
-                implType = ((PropertyCustomization) serializationCustomizer).getImplementationClass();
-            }
-            //JsonbConfig
-            if (implType == null) {
-                implType = jsonBinding.getConfigProperties().getUserTypeMapping().get(rawClass);
-            }
-            if (implType != null) {
-                if (!rawClass.isAssignableFrom(implType)) {
-                    throw new JsonbException(MessageProvider.getMessage(MessageConstants.IMPL_CLASS_INCOMPATIBLE,
-                            implType,
-                            rawClass));
-                }
-                return implType;
-            }
-        }
-        return rawClass;
-    }
-
-    private CachedEntry buildCachedItem(Type targetType, SerializationCustomizer serializationCustomizer) {
-        return new CachedEntry(targetType, serializationCustomizer.getDeserializeNumberFormatter(), serializationCustomizer.getDeserializeDateFormatter());
-    }
-
-    private static final class CachedEntry {
-
-        private final Type targetType;
-        private final JsonbNumberFormatter decimalFormatter;
-        private final JsonbDateFormatter isoDateFormat;
-
-        CachedEntry(Type targetType, JsonbNumberFormatter decimalFormatter, JsonbDateFormatter isoDateFormat) {
-            this.targetType = targetType;
-            this.decimalFormatter = decimalFormatter;
-            this.isoDateFormat = isoDateFormat;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            CachedEntry otherEntry = (CachedEntry) obj;
-            return Objects.equals(targetType, otherEntry.targetType)
-                    && Objects.equals(decimalFormatter, otherEntry.decimalFormatter)
-                    && Objects.equals(isoDateFormat, otherEntry.isoDateFormat);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(targetType, decimalFormatter, isoDateFormat);
-        }
-
-        @Override
-        public String toString() {
-            return "CachedItem{"
-                    + "type=" + targetType
-                    + ", numberFormatter=" + decimalFormatter
-                    + ", dateFormatter=" + isoDateFormat
-                    + '}';
-        }
     }
 
 }

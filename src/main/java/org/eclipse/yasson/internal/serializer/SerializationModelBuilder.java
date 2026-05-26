@@ -53,264 +53,6 @@ public class SerializationModelBuilder {
     private final Map<Type, ModelMarshaller> dynamicSerializers = new ConcurrentHashMap<>();
     private final JsonBindingContext jsonbBindingContext;
 
-    /**
-     * Create new instance.
-     *
-     * @param jsonbBindingContext jsonb context
-     */
-    public SerializationModelBuilder(JsonBindingContext jsonbBindingContext) {
-        this.jsonbBindingContext = jsonbBindingContext;
-    }
-
-    /**
-     * Wrap {@link ModelMarshaller} in the common set of serializers.
-     *
-     * @param modelMarshaller serializer to be wrapped
-     * @param serializationCustomizer   component customization
-     * @param jsonbBindingContext    jsonb context
-     * @return wrapped serializer
-     */
-    public static ModelMarshaller wrapWithCommonSet(ModelMarshaller modelMarshaller,
-                                                    SerializationCustomizer serializationCustomizer,
-                                                    JsonBindingContext jsonbBindingContext) {
-        return Stream.of(modelMarshaller)
-                .map(KeySerializer::new)
-                .map(marshallingFunction -> new NullValueSerializer(marshallingFunction, serializationCustomizer, jsonbBindingContext))
-                .findFirst()
-                .get();
-    }
-
-    /**
-     * Create new {@link ModelMarshaller} of the given type.
-     *
-     * @param targetType               type to be serialized
-     * @param isRoot          whether it is a root value
-     * @param useRootAdapter whether to resolve root adapter
-     * @return type model serializer
-     */
-    public ModelMarshaller buildSerializerChain(Type targetType, boolean isRoot, boolean useRootAdapter) {
-        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
-        ClassDescriptor classDescriptor = jsonbBindingContext.getMappingContext().getOrCreateClassModel(rawClass);
-        LinkedList<Type> typeSequence = new LinkedList<>();
-        return buildSerializerChain(typeSequence, targetType, classDescriptor.getClassCustomization(), isRoot, false, useRootAdapter);
-    }
-
-    /**
-     * Create new {@link ModelMarshaller} of the given type.
-     *
-     * @param typeSequence                 chain of types used before the one currently processed
-     * @param targetType                  type to be serialized
-     * @param propertyCustomizer component customization
-     * @param isRoot             whether it is a root value
-     * @param keyFlag                 whether it is a key
-     * @return type model serializer
-     */
-    public ModelMarshaller resolveSerializerChainRuntime(LinkedList<Type> typeSequence,
-                                                         Type targetType,
-                                                         SerializationCustomizer propertyCustomizer,
-                                                         boolean isRoot,
-                                                         boolean keyFlag) {
-        if (typeSequence.contains(targetType)) {
-            return new CircularReferenceSerializer(targetType);
-        }
-        //If the class instance and class of the field are the same and there has been generics specified for this field,
-        //we need to use those instead of raw type.
-        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
-        Class<?> lastRawClass = ReflectionHelper.getRawType(typeSequence.getLast());
-        if (lastRawClass.equals(rawClass)) {
-            return buildSerializerChainInternal(typeSequence, typeSequence.getLast(), propertyCustomizer, isRoot, keyFlag, true);
-        }
-        return buildSerializerChainInternal(typeSequence, targetType, propertyCustomizer, isRoot, keyFlag, true);
-    }
-
-    private ModelMarshaller buildSerializerChain(LinkedList<Type> typeSequence,
-                                                 Type targetType,
-                                                 SerializationCustomizer propertyCustomizer,
-                                                 boolean isRoot,
-                                                 boolean keyFlag,
-                                                 boolean useRootAdapter) {
-        if (typeSequence.contains(targetType)) {
-            return new CircularReferenceSerializer(targetType);
-        }
-        try {
-            typeSequence.add(targetType);
-            return buildSerializerChainInternal(typeSequence, targetType, propertyCustomizer, isRoot, keyFlag, useRootAdapter);
-        } finally {
-            typeSequence.removeLast();
-        }
-    }
-
-    private ModelMarshaller buildSerializerChainInternal(LinkedList<Type> typeSequence,
-                                                         Type targetType,
-                                                         SerializationCustomizer propertyCustomizer,
-                                                         boolean isRoot,
-                                                         boolean keyFlag,
-                                                         boolean useRootAdapter) {
-        if (explicitSerializers.containsKey(targetType)) {
-            return explicitSerializers.get(targetType);
-        }
-        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
-        Optional<ModelMarshaller> optionalMarshaller = resolveUserSerializer(targetType,
-                                                                     (ComponentBindingCustomization) propertyCustomizer);
-        if (optionalMarshaller.isPresent()) {
-            return optionalMarshaller.get();
-        }
-        if (useRootAdapter) {
-            Optional<AdapterBindingInfo> adapterBindingOpt = resolveAdapterBinding(targetType, (ComponentBindingCustomization) propertyCustomizer);
-            if (adapterBindingOpt.isPresent()) {
-                AdapterBindingInfo adapterInfo = adapterBindingOpt.get();
-                Type targetTypeLocal = adapterInfo.getToType();
-                Class<?> rawTargetClass = ReflectionHelper.getRawType(targetTypeLocal);
-                ModelMarshaller resolvedMarshaller = TypeSerializerRegistry
-                        .getTypeSerializer(rawTargetClass, propertyCustomizer, jsonbBindingContext);
-                if (resolvedMarshaller == null) {
-                    resolvedMarshaller = buildSerializerChain(targetTypeLocal, isRoot, !targetType.equals(targetTypeLocal));
-                }
-                AdapterMarshaller adapterMarshaller = new AdapterMarshaller(adapterInfo, resolvedMarshaller);
-                RecursionDetector recursionDetector = new RecursionDetector(adapterMarshaller);
-                NullValueSerializer nullValueSerializer = new NullValueSerializer(recursionDetector, propertyCustomizer, jsonbBindingContext);
-                explicitSerializers.put(targetType, nullValueSerializer);
-                return nullValueSerializer;
-            }
-        }
-
-        ModelMarshaller resolvedMarshaller = null;
-        if (!Object.class.equals(rawClass)) {
-            resolvedMarshaller = TypeSerializerRegistry.getTypeSerializer(typeSequence, rawClass, propertyCustomizer, jsonbBindingContext, keyFlag);
-        }
-        if (resolvedMarshaller != null) {
-            if (jsonbBindingContext.getConfigProperties().isStrictIJson() && isRoot) {
-                throw new JsonbException(MessageProvider.getMessage(MessageConstants.IJSON_ENABLED_SINGLE_VALUE));
-            }
-            return resolvedMarshaller;
-        }
-        ClassDescriptor classDescriptor = jsonbBindingContext.getMappingContext().getOrCreateClassModel(rawClass);
-        if (Collection.class.isAssignableFrom(rawClass)) {
-            return buildCollectionSerializer(typeSequence, targetType, propertyCustomizer);
-        } else if (Map.class.isAssignableFrom(rawClass)) {
-            return buildMapSerializer(typeSequence, targetType, propertyCustomizer);
-        } else if (rawClass.isArray()) {
-            return buildArraySerializer(typeSequence, rawClass, propertyCustomizer);
-        } else if (targetType instanceof GenericArrayType) {
-            return buildGenericArraySerializer(typeSequence, targetType, propertyCustomizer);
-        } else if (Optional.class.equals(rawClass)) {
-            return buildOptionalSerializer(typeSequence, targetType, propertyCustomizer, keyFlag);
-        }
-        return buildObjectSerializer(typeSequence, targetType, classDescriptor);
-    }
-
-    private ModelMarshaller buildObjectSerializer(LinkedList<Type> typeSequence,
-                                                  Type targetType,
-                                                  ClassDescriptor classDescriptor) {
-        LinkedHashMap<String, ModelMarshaller> propertyMarshallers = new LinkedHashMap<>();
-        TypeInheritanceSettings inheritanceConfig = classDescriptor.getClassCustomization().getPolymorphismConfig();
-        if (inheritanceConfig != null) {
-            addPolymorphicProperty(inheritanceConfig, propertyMarshallers, classDescriptor);
-        }
-        for (BeanPropertyDescriptor propDescriptor : classDescriptor.getSortedProperties()) {
-            if (propDescriptor.isReadable()) {
-                String propName = propDescriptor.getWriteName();
-                ModelMarshaller memberMarshaller = resolveMemberSerializer(typeSequence,
-                                                               propDescriptor.getPropertySerializationType(),
-                                                               propDescriptor.getCustomization(),
-                                                               false);
-                propertyMarshallers.put(propName, new ValueGetterDelegatingSerializer(propDescriptor.getGetValueHandle(), memberMarshaller));
-            }
-        }
-        ModelMarshaller objectMarshaller = new ObjectMarshaller(propertyMarshallers);
-        RecursionDetector recursionDetector = new RecursionDetector(objectMarshaller);
-        KeySerializer keySerializer = new KeySerializer(recursionDetector);
-        NullVisibilityToggle nullToggle = new NullVisibilityToggle(false, keySerializer);
-        NullValueSerializer nullValueSerializer = new NullValueSerializer(nullToggle, classDescriptor.getClassCustomization(),
-                jsonbBindingContext);
-        explicitSerializers.put(targetType, nullValueSerializer);
-        return nullValueSerializer;
-    }
-
-    private void addPolymorphicProperty(TypeInheritanceSettings inheritanceConfig,
-                                        LinkedHashMap<String, ModelMarshaller> propertyMarshallers,
-                                        ClassDescriptor classDescriptor) {
-        Class<?> rawClass = classDescriptor.getType();
-        String typeKey = inheritanceConfig.getAliases().get(rawClass);
-        ModelMarshaller marshallingFunction = createPolymorphicPropertySerializer(inheritanceConfig, typeKey);
-        if (marshallingFunction != null) {
-            if (inheritanceConfig.getParentConfig() != null) {
-                addParentPolymorphicProperty(inheritanceConfig.getParentConfig(), propertyMarshallers, classDescriptor);
-            }
-            propertyMarshallers.put(inheritanceConfig.getFieldName(), marshallingFunction);
-        }
-        for (BeanPropertyDescriptor propDescriptor : classDescriptor.getSortedProperties()) {
-            if (propertyMarshallers.containsKey(propDescriptor.getWriteName())) {
-                throw new JsonbException("CHANGE naming conflict!");
-            }
-        }
-    }
-
-    private void addParentPolymorphicProperty(TypeInheritanceSettings inheritanceConfig,
-                                              LinkedHashMap<String, ModelMarshaller> propertyMarshallers,
-                                              ClassDescriptor classDescriptor) {
-        Class<?> rawClass = classDescriptor.getType();
-        TypeInheritanceSettings currentConfig = inheritanceConfig;
-        LinkedHashMap<String, ModelMarshaller> additionsMap = new LinkedHashMap<>();
-        while (currentConfig != null) {
-            TypeInheritanceSettings nestedConfig = currentConfig;
-            String typeKey = nestedConfig.getAliases().entrySet().stream()
-                    .filter(mapPair -> mapPair.getKey().isAssignableFrom(rawClass))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(null);
-            if (typeKey != null) {
-                ModelMarshaller marshallingFunction = createPolymorphicPropertySerializer(nestedConfig, typeKey);
-                additionsMap.put(currentConfig.getFieldName(), marshallingFunction);
-                currentConfig = currentConfig.getParentConfig();
-            }
-        }
-        ListIterator<Map.Entry<String, ModelMarshaller>> listCursor = new ArrayList<>(additionsMap.entrySet())
-                .listIterator(additionsMap.size());
-        while (listCursor.hasPrevious()) {
-            Map.Entry<String, ModelMarshaller> mapPair = listCursor.previous();
-            propertyMarshallers.put(mapPair.getKey(), mapPair.getValue());
-        }
-    }
-
-    private ModelMarshaller createPolymorphicPropertySerializer(TypeInheritanceSettings inheritanceConfig,
-                                                                String typeKey) {
-        if (typeKey != null) {
-            return (value, jsonWriter, context) -> jsonWriter.write(inheritanceConfig.getFieldName(), typeKey);
-        }
-        return null;
-    }
-
-    private ModelMarshaller buildCollectionSerializer(LinkedList<Type> typeSequence,
-                                                      Type targetType,
-                                                      SerializationCustomizer serializationCustomizer) {
-        Type collectionElement = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
-                : Object.class;
-        ModelMarshaller resolvedMarshaller = resolveMemberSerializer(typeSequence, collectionElement, serializationCustomizer, false);
-        CollectionMarshaller collectionMarshaller = new CollectionMarshaller(resolvedMarshaller);
-        KeySerializer keySerializer = new KeySerializer(collectionMarshaller);
-        NullVisibilityToggle nullToggle = new NullVisibilityToggle(true, keySerializer);
-        return new NullValueSerializer(nullToggle, serializationCustomizer, jsonbBindingContext);
-    }
-
-    private ModelMarshaller buildMapSerializer(LinkedList<Type> typeSequence, Type targetType, SerializationCustomizer propertyCustomizer) {
-        Type keyClass = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
-                : Object.class;
-        Type valueClass = targetType instanceof ParameterizedType
-                ? ((ParameterizedType) targetType).getActualTypeArguments()[1]
-                : Object.class;
-        Type keyResolution = ReflectionHelper.determineType(typeSequence, keyClass);
-        Class<?> componentClass = ReflectionHelper.getRawType(keyResolution);
-        ModelMarshaller keyMarshaller = resolveMemberSerializer(typeSequence, keyClass, ClassSerializationConfig.emptyConfig(), true);
-        ModelMarshaller valueMarshaller = resolveMemberSerializer(typeSequence, valueClass, propertyCustomizer, false);
-        AbstractMapSerializer mapMarshaller = AbstractMapSerializer.createMapSerializer(componentClass, keyMarshaller, valueMarshaller);
-        KeySerializer keySerializer = new KeySerializer(mapMarshaller);
-        NullVisibilityToggle nullToggle = new NullVisibilityToggle(true, keySerializer);
-        return new NullValueSerializer(nullToggle, propertyCustomizer, jsonbBindingContext);
-    }
-
     private ModelMarshaller buildArraySerializer(LinkedList<Type> typeSequence,
                                                  Class<?> arrayClass,
                                                  SerializationCustomizer propertyCustomizer) {
@@ -334,15 +76,29 @@ public class SerializationModelBuilder {
         return new NullValueSerializer(nullToggle, propertyCustomizer, jsonbBindingContext);
     }
 
-    private ModelMarshaller buildOptionalSerializer(LinkedList<Type> typeSequence,
-                                                    Type targetType,
-                                                    SerializationCustomizer propertyCustomizer,
-                                                    boolean keyFlag) {
-        Type optionalDescriptor = targetType instanceof ParameterizedType
+    private ModelMarshaller createPolymorphicPropertySerializer(TypeInheritanceSettings inheritanceConfig,
+                                                                String typeKey) {
+        if (typeKey != null) {
+            return (value, jsonWriter, context) -> jsonWriter.write(inheritanceConfig.getFieldName(), typeKey);
+        }
+        return null;
+    }
+
+    private ModelMarshaller buildMapSerializer(LinkedList<Type> typeSequence, Type targetType, SerializationCustomizer propertyCustomizer) {
+        Type keyClass = targetType instanceof ParameterizedType
                 ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
                 : Object.class;
-        ModelMarshaller modelMarshaller = resolveMemberSerializer(typeSequence, optionalDescriptor, propertyCustomizer, keyFlag);
-        return new OptionalValueSerializer(modelMarshaller);
+        Type valueClass = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[1]
+                : Object.class;
+        Type keyResolution = ReflectionHelper.determineType(typeSequence, keyClass);
+        Class<?> componentClass = ReflectionHelper.getRawType(keyResolution);
+        ModelMarshaller keyMarshaller = resolveMemberSerializer(typeSequence, keyClass, ClassSerializationConfig.emptyConfig(), true);
+        ModelMarshaller valueMarshaller = resolveMemberSerializer(typeSequence, valueClass, propertyCustomizer, false);
+        AbstractMapSerializer mapMarshaller = AbstractMapSerializer.createMapSerializer(componentClass, keyMarshaller, valueMarshaller);
+        KeySerializer keySerializer = new KeySerializer(mapMarshaller);
+        NullVisibilityToggle nullToggle = new NullVisibilityToggle(true, keySerializer);
+        return new NullValueSerializer(nullToggle, propertyCustomizer, jsonbBindingContext);
     }
 
     private ModelMarshaller resolveMemberSerializer(LinkedList<Type> typeSequence,
@@ -415,6 +171,153 @@ public class SerializationModelBuilder {
         return resolvedMarshaller;
     }
 
+    private ModelMarshaller buildOptionalSerializer(LinkedList<Type> typeSequence,
+                                                    Type targetType,
+                                                    SerializationCustomizer propertyCustomizer,
+                                                    boolean keyFlag) {
+        Type optionalDescriptor = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
+                : Object.class;
+        ModelMarshaller modelMarshaller = resolveMemberSerializer(typeSequence, optionalDescriptor, propertyCustomizer, keyFlag);
+        return new OptionalValueSerializer(modelMarshaller);
+    }
+
+    private void addParentPolymorphicProperty(TypeInheritanceSettings inheritanceConfig,
+                                              LinkedHashMap<String, ModelMarshaller> propertyMarshallers,
+                                              ClassDescriptor classDescriptor) {
+        Class<?> rawClass = classDescriptor.getType();
+        TypeInheritanceSettings currentConfig = inheritanceConfig;
+        LinkedHashMap<String, ModelMarshaller> additionsMap = new LinkedHashMap<>();
+        while (currentConfig != null) {
+            TypeInheritanceSettings nestedConfig = currentConfig;
+            String typeKey = nestedConfig.getAliases().entrySet().stream()
+                    .filter(mapPair -> mapPair.getKey().isAssignableFrom(rawClass))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
+            if (typeKey != null) {
+                ModelMarshaller marshallingFunction = createPolymorphicPropertySerializer(nestedConfig, typeKey);
+                additionsMap.put(currentConfig.getFieldName(), marshallingFunction);
+                currentConfig = currentConfig.getParentConfig();
+            }
+        }
+        ListIterator<Map.Entry<String, ModelMarshaller>> listCursor = new ArrayList<>(additionsMap.entrySet())
+                .listIterator(additionsMap.size());
+        while (listCursor.hasPrevious()) {
+            Map.Entry<String, ModelMarshaller> mapPair = listCursor.previous();
+            propertyMarshallers.put(mapPair.getKey(), mapPair.getValue());
+        }
+    }
+
+    private ModelMarshaller buildSerializerChainInternal(LinkedList<Type> typeSequence,
+                                                         Type targetType,
+                                                         SerializationCustomizer propertyCustomizer,
+                                                         boolean isRoot,
+                                                         boolean keyFlag,
+                                                         boolean useRootAdapter) {
+        if (explicitSerializers.containsKey(targetType)) {
+            return explicitSerializers.get(targetType);
+        }
+        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
+        Optional<ModelMarshaller> optionalMarshaller = resolveUserSerializer(targetType,
+                                                                     (ComponentBindingCustomization) propertyCustomizer);
+        if (optionalMarshaller.isPresent()) {
+            return optionalMarshaller.get();
+        }
+        if (useRootAdapter) {
+            Optional<AdapterBindingInfo> adapterBindingOpt = resolveAdapterBinding(targetType, (ComponentBindingCustomization) propertyCustomizer);
+            if (adapterBindingOpt.isPresent()) {
+                AdapterBindingInfo adapterInfo = adapterBindingOpt.get();
+                Type targetTypeLocal = adapterInfo.getToType();
+                Class<?> rawTargetClass = ReflectionHelper.getRawType(targetTypeLocal);
+                ModelMarshaller resolvedMarshaller = TypeSerializerRegistry
+                        .getTypeSerializer(rawTargetClass, propertyCustomizer, jsonbBindingContext);
+                if (resolvedMarshaller == null) {
+                    resolvedMarshaller = buildSerializerChain(targetTypeLocal, isRoot, !targetType.equals(targetTypeLocal));
+                }
+                AdapterMarshaller adapterMarshaller = new AdapterMarshaller(adapterInfo, resolvedMarshaller);
+                RecursionDetector recursionDetector = new RecursionDetector(adapterMarshaller);
+                NullValueSerializer nullValueSerializer = new NullValueSerializer(recursionDetector, propertyCustomizer, jsonbBindingContext);
+                explicitSerializers.put(targetType, nullValueSerializer);
+                return nullValueSerializer;
+            }
+        }
+
+        ModelMarshaller resolvedMarshaller = null;
+        if (!Object.class.equals(rawClass)) {
+            resolvedMarshaller = TypeSerializerRegistry.getTypeSerializer(typeSequence, rawClass, propertyCustomizer, jsonbBindingContext, keyFlag);
+        }
+        if (resolvedMarshaller != null) {
+            if (jsonbBindingContext.getConfigProperties().isStrictIJson() && isRoot) {
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.IJSON_ENABLED_SINGLE_VALUE));
+            }
+            return resolvedMarshaller;
+        }
+        ClassDescriptor classDescriptor = jsonbBindingContext.getMappingContext().getOrCreateClassModel(rawClass);
+        if (Collection.class.isAssignableFrom(rawClass)) {
+            return buildCollectionSerializer(typeSequence, targetType, propertyCustomizer);
+        } else if (Map.class.isAssignableFrom(rawClass)) {
+            return buildMapSerializer(typeSequence, targetType, propertyCustomizer);
+        } else if (rawClass.isArray()) {
+            return buildArraySerializer(typeSequence, rawClass, propertyCustomizer);
+        } else if (targetType instanceof GenericArrayType) {
+            return buildGenericArraySerializer(typeSequence, targetType, propertyCustomizer);
+        } else if (Optional.class.equals(rawClass)) {
+            return buildOptionalSerializer(typeSequence, targetType, propertyCustomizer, keyFlag);
+        }
+        return buildObjectSerializer(typeSequence, targetType, classDescriptor);
+    }
+
+    /**
+     * Create new {@link ModelMarshaller} of the given type.
+     *
+     * @param targetType               type to be serialized
+     * @param isRoot          whether it is a root value
+     * @param useRootAdapter whether to resolve root adapter
+     * @return type model serializer
+     */
+    public ModelMarshaller buildSerializerChain(Type targetType, boolean isRoot, boolean useRootAdapter) {
+        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
+        ClassDescriptor classDescriptor = jsonbBindingContext.getMappingContext().getOrCreateClassModel(rawClass);
+        LinkedList<Type> typeSequence = new LinkedList<>();
+        return buildSerializerChain(typeSequence, targetType, classDescriptor.getClassCustomization(), isRoot, false, useRootAdapter);
+    }
+
+    private ModelMarshaller buildSerializerChain(LinkedList<Type> typeSequence,
+                                                 Type targetType,
+                                                 SerializationCustomizer propertyCustomizer,
+                                                 boolean isRoot,
+                                                 boolean keyFlag,
+                                                 boolean useRootAdapter) {
+        if (typeSequence.contains(targetType)) {
+            return new CircularReferenceSerializer(targetType);
+        }
+        try {
+            typeSequence.add(targetType);
+            return buildSerializerChainInternal(typeSequence, targetType, propertyCustomizer, isRoot, keyFlag, useRootAdapter);
+        } finally {
+            typeSequence.removeLast();
+        }
+    }
+
+    /**
+     * Wrap {@link ModelMarshaller} in the common set of serializers.
+     *
+     * @param modelMarshaller serializer to be wrapped
+     * @param serializationCustomizer   component customization
+     * @param jsonbBindingContext    jsonb context
+     * @return wrapped serializer
+     */
+    public static ModelMarshaller wrapWithCommonSet(ModelMarshaller modelMarshaller,
+                                                    SerializationCustomizer serializationCustomizer,
+                                                    JsonBindingContext jsonbBindingContext) {
+        return Stream.of(modelMarshaller)
+                .map(KeySerializer::new)
+                .map(marshallingFunction -> new NullValueSerializer(marshallingFunction, serializationCustomizer, jsonbBindingContext))
+                .findFirst()
+                .get();
+    }
+
     private Optional<ModelMarshaller> resolveUserSerializer(Type targetType, ComponentBindingCustomization componentCustomizer) {
         final ComponentBindingResolver bindingResolver = jsonbBindingContext.getComponentMatcher();
         return bindingResolver.getSerializerBinding(targetType, componentCustomizer)
@@ -428,6 +331,103 @@ public class SerializationModelBuilder {
 
     private Optional<AdapterBindingInfo> resolveAdapterBinding(Type targetType, ComponentBindingCustomization componentCustomizer) {
         return jsonbBindingContext.getComponentMatcher().getSerializeAdapterBinding(targetType, componentCustomizer);
+    }
+
+    /**
+     * Create new {@link ModelMarshaller} of the given type.
+     *
+     * @param typeSequence                 chain of types used before the one currently processed
+     * @param targetType                  type to be serialized
+     * @param propertyCustomizer component customization
+     * @param isRoot             whether it is a root value
+     * @param keyFlag                 whether it is a key
+     * @return type model serializer
+     */
+    public ModelMarshaller resolveSerializerChainRuntime(LinkedList<Type> typeSequence,
+                                                         Type targetType,
+                                                         SerializationCustomizer propertyCustomizer,
+                                                         boolean isRoot,
+                                                         boolean keyFlag) {
+        if (typeSequence.contains(targetType)) {
+            return new CircularReferenceSerializer(targetType);
+        }
+        //If the class instance and class of the field are the same and there has been generics specified for this field,
+        //we need to use those instead of raw type.
+        Class<?> rawClass = ReflectionHelper.getRawType(targetType);
+        Class<?> lastRawClass = ReflectionHelper.getRawType(typeSequence.getLast());
+        if (lastRawClass.equals(rawClass)) {
+            return buildSerializerChainInternal(typeSequence, typeSequence.getLast(), propertyCustomizer, isRoot, keyFlag, true);
+        }
+        return buildSerializerChainInternal(typeSequence, targetType, propertyCustomizer, isRoot, keyFlag, true);
+    }
+
+    private void addPolymorphicProperty(TypeInheritanceSettings inheritanceConfig,
+                                        LinkedHashMap<String, ModelMarshaller> propertyMarshallers,
+                                        ClassDescriptor classDescriptor) {
+        Class<?> rawClass = classDescriptor.getType();
+        String typeKey = inheritanceConfig.getAliases().get(rawClass);
+        ModelMarshaller marshallingFunction = createPolymorphicPropertySerializer(inheritanceConfig, typeKey);
+        if (marshallingFunction != null) {
+            if (inheritanceConfig.getParentConfig() != null) {
+                addParentPolymorphicProperty(inheritanceConfig.getParentConfig(), propertyMarshallers, classDescriptor);
+            }
+            propertyMarshallers.put(inheritanceConfig.getFieldName(), marshallingFunction);
+        }
+        for (BeanPropertyDescriptor propDescriptor : classDescriptor.getSortedProperties()) {
+            if (propertyMarshallers.containsKey(propDescriptor.getWriteName())) {
+                throw new JsonbException("CHANGE naming conflict!");
+            }
+        }
+    }
+
+    /**
+     * Create new instance.
+     *
+     * @param jsonbBindingContext jsonb context
+     */
+    public SerializationModelBuilder(JsonBindingContext jsonbBindingContext) {
+        this.jsonbBindingContext = jsonbBindingContext;
+    }
+
+    private ModelMarshaller buildCollectionSerializer(LinkedList<Type> typeSequence,
+                                                      Type targetType,
+                                                      SerializationCustomizer serializationCustomizer) {
+        Type collectionElement = targetType instanceof ParameterizedType
+                ? ((ParameterizedType) targetType).getActualTypeArguments()[0]
+                : Object.class;
+        ModelMarshaller resolvedMarshaller = resolveMemberSerializer(typeSequence, collectionElement, serializationCustomizer, false);
+        CollectionMarshaller collectionMarshaller = new CollectionMarshaller(resolvedMarshaller);
+        KeySerializer keySerializer = new KeySerializer(collectionMarshaller);
+        NullVisibilityToggle nullToggle = new NullVisibilityToggle(true, keySerializer);
+        return new NullValueSerializer(nullToggle, serializationCustomizer, jsonbBindingContext);
+    }
+
+    private ModelMarshaller buildObjectSerializer(LinkedList<Type> typeSequence,
+                                                  Type targetType,
+                                                  ClassDescriptor classDescriptor) {
+        LinkedHashMap<String, ModelMarshaller> propertyMarshallers = new LinkedHashMap<>();
+        TypeInheritanceSettings inheritanceConfig = classDescriptor.getClassCustomization().getPolymorphismConfig();
+        if (inheritanceConfig != null) {
+            addPolymorphicProperty(inheritanceConfig, propertyMarshallers, classDescriptor);
+        }
+        for (BeanPropertyDescriptor propDescriptor : classDescriptor.getSortedProperties()) {
+            if (propDescriptor.isReadable()) {
+                String propName = propDescriptor.getWriteName();
+                ModelMarshaller memberMarshaller = resolveMemberSerializer(typeSequence,
+                                                               propDescriptor.getPropertySerializationType(),
+                                                               propDescriptor.getCustomization(),
+                                                               false);
+                propertyMarshallers.put(propName, new ValueGetterDelegatingSerializer(propDescriptor.getGetValueHandle(), memberMarshaller));
+            }
+        }
+        ModelMarshaller objectMarshaller = new ObjectMarshaller(propertyMarshallers);
+        RecursionDetector recursionDetector = new RecursionDetector(objectMarshaller);
+        KeySerializer keySerializer = new KeySerializer(recursionDetector);
+        NullVisibilityToggle nullToggle = new NullVisibilityToggle(false, keySerializer);
+        NullValueSerializer nullValueSerializer = new NullValueSerializer(nullToggle, classDescriptor.getClassCustomization(),
+                jsonbBindingContext);
+        explicitSerializers.put(targetType, nullValueSerializer);
+        return nullValueSerializer;
     }
 
 }

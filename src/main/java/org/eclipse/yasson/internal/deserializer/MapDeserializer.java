@@ -27,10 +27,29 @@ class MapDeserializer implements ModelParser<JsonParser> {
     private final ModelParser<JsonParser> keyDelegate;
     private final ModelParser<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelParser<JsonParser> keyDelegate,
-                    ModelParser<JsonParser> valueDelegate) {
-        this.keyDelegate = keyDelegate;
-        this.valueDelegate = valueDelegate;
+    private enum Mode {
+
+        NONE,
+        NORMAL,
+        OBJECT
+
+    }
+
+    private enum State {
+
+        NEXT,
+        VALUE,
+        KEY,
+        DONE
+
+    }
+
+    private void validateKeyName(String keyName, State state) {
+        if (state == State.KEY && !keyName.equals("key")) {
+            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
+        } else if (state == State.VALUE && !keyName.equals("value")) {
+            throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -95,14 +114,6 @@ class MapDeserializer implements ModelParser<JsonParser> {
         return map;
     }
 
-    private void validateKeyName(String keyName, State state) {
-        if (state == State.KEY && !keyName.equals("key")) {
-            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
-        } else if (state == State.VALUE && !keyName.equals("value")) {
-            throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
-        }
-    }
-
     private Object deserializeValue(JsonParser parser,
                                     DefaultDeserializationContext context,
                                     ModelParser<JsonParser> deserializer) {
@@ -110,21 +121,10 @@ class MapDeserializer implements ModelParser<JsonParser> {
         return deserializer.deserializeModel(parser, keyContext);
     }
 
-    private enum Mode {
-
-        NONE,
-        NORMAL,
-        OBJECT
-
-    }
-
-    private enum State {
-
-        NEXT,
-        VALUE,
-        KEY,
-        DONE
-
+    MapDeserializer(ModelParser<JsonParser> keyDelegate,
+                    ModelParser<JsonParser> valueDelegate) {
+        this.keyDelegate = keyDelegate;
+        this.valueDelegate = valueDelegate;
     }
 
 }

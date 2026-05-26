@@ -45,9 +45,182 @@ abstract class AbstractArraySerializer implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
 
-    protected AbstractArraySerializer(ModelMarshaller modelMarshaller) {
-        this.modelMarshaller = modelMarshaller;
+    private static final class BinaryArraySerializer extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            byte[] bytes = (byte[]) element;
+            for (byte byteValue : bytes) {
+                getValueSerializer().marshal(byteValue, jsonGenerator, serializationContext);
+            }
+        }
+
+        BinaryArraySerializer(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
     }
+
+    private static final class Base64ByteArrayEncoder implements ModelMarshaller {
+
+        private final Base64.Encoder base64Encoder;
+
+        private Base64.Encoder getEncoder(String encodingStrategy) {
+            switch (encodingStrategy) {
+            case BinaryDataStrategy.BASE_64:
+                return Base64.getEncoder();
+            case BinaryDataStrategy.BASE_64_URL:
+                return Base64.getUrlEncoder();
+            default:
+                throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + encodingStrategy));
+            }
+        }
+
+        Base64ByteArrayEncoder(String encodingStrategy) {
+            this.base64Encoder = getEncoder(encodingStrategy);
+        }
+
+        @Override
+        public void marshal(Object element, JsonGenerator jsonGenerator, SerializationContextImpl context) {
+            byte[] bytes = (byte[]) element;
+            jsonGenerator.write(base64Encoder.encodeToString(bytes));
+        }
+
+    }
+
+    private static final class ShortArraySerializerImpl extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            short[] bytes = (short[]) element;
+            for (short shortValue : bytes) {
+                getValueSerializer().marshal(shortValue, jsonGenerator, serializationContext);
+            }
+        }
+
+        ShortArraySerializerImpl(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class IntArraySerializer extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            int[] bytes = (int[]) element;
+            for (int intValue : bytes) {
+                getValueSerializer().marshal(intValue, jsonGenerator, serializationContext);
+            }
+        }
+
+        IntArraySerializer(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class LongArrayEncoder extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            long[] bytes = (long[]) element;
+            for (long item : bytes) {
+                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
+            }
+        }
+
+        LongArrayEncoder(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class FloatArrayEncoder extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            float[] bytes = (float[]) element;
+            for (float item : bytes) {
+                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
+            }
+        }
+
+        FloatArrayEncoder(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class PrimitiveDoubleArraySerializer extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            double[] bytes = (double[]) element;
+            for (double item : bytes) {
+                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
+            }
+        }
+
+        PrimitiveDoubleArraySerializer(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class BooleanArrayEncoder extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            boolean[] bytes = (boolean[]) element;
+            for (boolean byteValue : bytes) {
+                getValueSerializer().marshal(byteValue, jsonGenerator, serializationContext);
+            }
+        }
+
+        BooleanArrayEncoder(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class CharArraySerializer extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            char[] bytes = (char[]) element;
+            for (char charValue : bytes) {
+                getValueSerializer().marshal(charValue, jsonGenerator, serializationContext);
+            }
+        }
+
+        CharArraySerializer(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    private static final class ObjectArrayEncoder extends AbstractArraySerializer {
+
+        @Override
+        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
+            Object[] bytes = (Object[]) element;
+            for (Object obj : bytes) {
+                getValueSerializer().marshal(obj, jsonGenerator, serializationContext);
+            }
+        }
+
+        ObjectArrayEncoder(ModelMarshaller modelMarshaller) {
+            super(modelMarshaller);
+        }
+
+    }
+
+    protected ModelMarshaller getValueSerializer() {
+        return modelMarshaller;
+    }
+
+    abstract void serializeElements(Object value, JsonGenerator generator, SerializationContextImpl context);
 
     public static ModelMarshaller createEncoder(Class<?> componentType,
                                                 JsonBindingContext bindingContext,
@@ -62,187 +235,15 @@ abstract class AbstractArraySerializer implements ModelMarshaller {
         return new ObjectArrayEncoder(modelMarshaller);
     }
 
+    protected AbstractArraySerializer(ModelMarshaller modelMarshaller) {
+        this.modelMarshaller = modelMarshaller;
+    }
+
     @Override
     public void marshal(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
         jsonGenerator.writeStartArray();
         serializeElements(element, jsonGenerator, serializationContext);
         jsonGenerator.writeEnd();
-    }
-
-    abstract void serializeElements(Object value, JsonGenerator generator, SerializationContextImpl context);
-
-    protected ModelMarshaller getValueSerializer() {
-        return modelMarshaller;
-    }
-
-    private static final class BinaryArraySerializer extends AbstractArraySerializer {
-
-        BinaryArraySerializer(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            byte[] bytes = (byte[]) element;
-            for (byte byteValue : bytes) {
-                getValueSerializer().marshal(byteValue, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class Base64ByteArrayEncoder implements ModelMarshaller {
-
-        private final Base64.Encoder base64Encoder;
-
-        Base64ByteArrayEncoder(String encodingStrategy) {
-            this.base64Encoder = getEncoder(encodingStrategy);
-        }
-
-        @Override
-        public void marshal(Object element, JsonGenerator jsonGenerator, SerializationContextImpl context) {
-            byte[] bytes = (byte[]) element;
-            jsonGenerator.write(base64Encoder.encodeToString(bytes));
-        }
-
-        private Base64.Encoder getEncoder(String encodingStrategy) {
-            switch (encodingStrategy) {
-            case BinaryDataStrategy.BASE_64:
-                return Base64.getEncoder();
-            case BinaryDataStrategy.BASE_64_URL:
-                return Base64.getUrlEncoder();
-            default:
-                throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + encodingStrategy));
-            }
-        }
-    }
-
-    private static final class ShortArraySerializerImpl extends AbstractArraySerializer {
-
-        ShortArraySerializerImpl(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            short[] bytes = (short[]) element;
-            for (short shortValue : bytes) {
-                getValueSerializer().marshal(shortValue, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class IntArraySerializer extends AbstractArraySerializer {
-
-        IntArraySerializer(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            int[] bytes = (int[]) element;
-            for (int intValue : bytes) {
-                getValueSerializer().marshal(intValue, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class LongArrayEncoder extends AbstractArraySerializer {
-
-        LongArrayEncoder(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            long[] bytes = (long[]) element;
-            for (long item : bytes) {
-                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class FloatArrayEncoder extends AbstractArraySerializer {
-
-        FloatArrayEncoder(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            float[] bytes = (float[]) element;
-            for (float item : bytes) {
-                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class PrimitiveDoubleArraySerializer extends AbstractArraySerializer {
-
-        PrimitiveDoubleArraySerializer(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            double[] bytes = (double[]) element;
-            for (double item : bytes) {
-                getValueSerializer().marshal(item, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class BooleanArrayEncoder extends AbstractArraySerializer {
-
-        BooleanArrayEncoder(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            boolean[] bytes = (boolean[]) element;
-            for (boolean byteValue : bytes) {
-                getValueSerializer().marshal(byteValue, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class CharArraySerializer extends AbstractArraySerializer {
-
-        CharArraySerializer(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            char[] bytes = (char[]) element;
-            for (char charValue : bytes) {
-                getValueSerializer().marshal(charValue, jsonGenerator, serializationContext);
-            }
-        }
-
-    }
-
-    private static final class ObjectArrayEncoder extends AbstractArraySerializer {
-
-        ObjectArrayEncoder(ModelMarshaller modelMarshaller) {
-            super(modelMarshaller);
-        }
-
-        @Override
-        public void serializeElements(Object element, JsonGenerator jsonGenerator, SerializationContextImpl serializationContext) {
-            Object[] bytes = (Object[]) element;
-            for (Object obj : bytes) {
-                getValueSerializer().marshal(obj, jsonGenerator, serializationContext);
-            }
-        }
-
     }
 
 }

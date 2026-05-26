@@ -33,44 +33,70 @@ public class ClassSerializationConfig extends CustomizationBase {
     private final TypeInheritanceSettings inheritanceSettings;
 
     /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param binding not null
+     * The customization builder that would be used to build an instance of {@link ClassSerializationConfig} to ensure its immutability.
      */
-    private ClassSerializationConfig(BindingBuilder binding) {
-        super(binding);
-        this.factory = binding.factory;
-        this.fieldOrder = binding.fieldOrder;
-        this.numericFormatter = binding.numericFormatter;
-        this.temporalFormatter = binding.temporalFormatter;
-        this.fieldVisibilityPolicy = binding.fieldVisibilityPolicy;
-        this.inheritanceSettings = binding.inheritanceSettings;
+    public static class BindingBuilder extends CustomizationBase.Builder<BindingBuilder, ClassSerializationConfig> {
+
+        private JsonbCreator factory;
+        private String[] fieldOrder;
+        private JsonbNumberFormatter numericFormatter;
+        private JsonbDateFormatter temporalFormatter;
+        private PropertyVisibilityStrategy fieldVisibilityPolicy;
+        private TypeInheritanceSettings inheritanceSettings;
+
+        public BindingBuilder withPropertyVisibilityStrategy(PropertyVisibilityStrategy fieldVisibilityPolicy) {
+            this.fieldVisibilityPolicy = fieldVisibilityPolicy;
+            return this;
+        }
+
+        @Override
+        public ClassSerializationConfig build() {
+            return new ClassSerializationConfig(this);
+        }
+
+        public BindingBuilder withPolymorphismConfig(TypeInheritanceSettings inheritanceSettings) {
+            this.inheritanceSettings = inheritanceSettings;
+            return this;
+        }
+
+        public BindingBuilder withCreator(JsonbCreator factory) {
+            this.factory = factory;
+            return this;
+        }
+
+        public BindingBuilder withNumberFormatter(JsonbNumberFormatter numericFormatter) {
+            this.numericFormatter = numericFormatter;
+            return this;
+        }
+
+        @Override
+        public ClassSerializationConfig.BindingBuilder of(ClassSerializationConfig config) {
+            super.of(config);
+            withCreator(config.factory);
+            withPropertyOrder(config.fieldOrder);
+            withNumberFormatter(config.numericFormatter);
+            withDateTimeFormatter(config.temporalFormatter);
+            withPropertyVisibilityStrategy(config.fieldVisibilityPolicy);
+            return this;
+        }
+
+        public BindingBuilder withDateTimeFormatter(JsonbDateFormatter temporalFormatter) {
+            this.temporalFormatter = temporalFormatter;
+            return this;
+        }
+
+        private BindingBuilder() {
+        }
+
+        public BindingBuilder withPropertyOrder(String[] fieldOrder) {
+            this.fieldOrder = fieldOrder;
+            return this;
+        }
+
     }
 
-    public static ClassSerializationConfig emptyConfig() {
-        return DEFAULT_INSTANCE;
-    }
-
-    public static BindingBuilder newBuilder() {
-        return new BindingBuilder();
-    }
-
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return factory;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return fieldOrder;
+    public TypeInheritanceSettings getPolymorphismConfig() {
+        return inheritanceSettings;
     }
 
     /**
@@ -93,80 +119,54 @@ public class ClassSerializationConfig extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return temporalFormatter;
-    }
-
-    @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
         return temporalFormatter;
     }
 
-    public TypeInheritanceSettings getPolymorphismConfig() {
-        return inheritanceSettings;
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return factory;
+    }
+
+    public static BindingBuilder newBuilder() {
+        return new BindingBuilder();
     }
 
     /**
-     * The customization builder that would be used to build an instance of {@link ClassSerializationConfig} to ensure its immutability.
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
      */
-    public static class BindingBuilder extends CustomizationBase.Builder<BindingBuilder, ClassSerializationConfig> {
+    public String[] getPropertyOrder() {
+        return fieldOrder;
+    }
 
-        private JsonbCreator factory;
-        private String[] fieldOrder;
-        private JsonbNumberFormatter numericFormatter;
-        private JsonbDateFormatter temporalFormatter;
-        private PropertyVisibilityStrategy fieldVisibilityPolicy;
-        private TypeInheritanceSettings inheritanceSettings;
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return temporalFormatter;
+    }
 
-        private BindingBuilder() {
-        }
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param binding not null
+     */
+    private ClassSerializationConfig(BindingBuilder binding) {
+        super(binding);
+        this.factory = binding.factory;
+        this.fieldOrder = binding.fieldOrder;
+        this.numericFormatter = binding.numericFormatter;
+        this.temporalFormatter = binding.temporalFormatter;
+        this.fieldVisibilityPolicy = binding.fieldVisibilityPolicy;
+        this.inheritanceSettings = binding.inheritanceSettings;
+    }
 
-        @Override
-        public ClassSerializationConfig.BindingBuilder of(ClassSerializationConfig config) {
-            super.of(config);
-            withCreator(config.factory);
-            withPropertyOrder(config.fieldOrder);
-            withNumberFormatter(config.numericFormatter);
-            withDateTimeFormatter(config.temporalFormatter);
-            withPropertyVisibilityStrategy(config.fieldVisibilityPolicy);
-            return this;
-        }
-
-        public BindingBuilder withCreator(JsonbCreator factory) {
-            this.factory = factory;
-            return this;
-        }
-
-        public BindingBuilder withPropertyOrder(String[] fieldOrder) {
-            this.fieldOrder = fieldOrder;
-            return this;
-        }
-
-        public BindingBuilder withNumberFormatter(JsonbNumberFormatter numericFormatter) {
-            this.numericFormatter = numericFormatter;
-            return this;
-        }
-
-        public BindingBuilder withDateTimeFormatter(JsonbDateFormatter temporalFormatter) {
-            this.temporalFormatter = temporalFormatter;
-            return this;
-        }
-
-        public BindingBuilder withPropertyVisibilityStrategy(PropertyVisibilityStrategy fieldVisibilityPolicy) {
-            this.fieldVisibilityPolicy = fieldVisibilityPolicy;
-            return this;
-        }
-
-        public BindingBuilder withPolymorphismConfig(TypeInheritanceSettings inheritanceSettings) {
-            this.inheritanceSettings = inheritanceSettings;
-            return this;
-        }
-
-        @Override
-        public ClassSerializationConfig build() {
-            return new ClassSerializationConfig(this);
-        }
-
+    public static ClassSerializationConfig emptyConfig() {
+        return DEFAULT_INSTANCE;
     }
 
 }

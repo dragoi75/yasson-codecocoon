@@ -27,10 +27,6 @@ class CircularReferenceSerializer implements ModelMarshaller {
     private final Type modelClass;
     private ModelMarshaller modelMarshaller;
 
-    CircularReferenceSerializer(Type modelClass) {
-        this.modelClass = modelClass;
-    }
-
     @Override
     public void marshal(Object payload, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
         if (modelMarshaller == null) {
@@ -38,4 +34,9 @@ class CircularReferenceSerializer implements ModelMarshaller {
         }
         modelMarshaller.marshal(payload, jsonWriter, serializationState);
     }
+
+    CircularReferenceSerializer(Type modelClass) {
+        this.modelClass = modelClass;
+    }
+
 }

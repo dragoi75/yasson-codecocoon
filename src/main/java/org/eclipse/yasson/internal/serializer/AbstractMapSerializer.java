@@ -27,40 +27,11 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
     private final ModelMarshaller keyMarshaller;
     private final ModelMarshaller valueMarshaller;
 
-    AbstractMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
-        this.keyMarshaller = keyMarshaller;
-        this.valueMarshaller = valueMarshaller;
-    }
-
-    ModelMarshaller getKeySerializer() {
-        return keyMarshaller;
-    }
-
-    ModelMarshaller getValueSerializer() {
-        return valueMarshaller;
-    }
-
-    static AbstractMapSerializer createMapSerializer(Class<?> keyType, ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
-        if (TypeSerializerRegistry.isSupportedMapKey(keyType)) {
-            return new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
-        } else if (Object.class.equals(keyType)) {
-            return new RuntimeMapSerializer(keyMarshaller, valueMarshaller);
-        }
-        return new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
-    }
-
     private static final class RuntimeMapSerializer extends AbstractMapSerializer {
 
         private final StringKeyedMapSerializer stringKeyedMap;
         private final ObjectKeyedMapSerializer objectKeyedMap;
         private AbstractMapSerializer mapHandler;
-
-        RuntimeMapSerializer(ModelMarshaller keyMarshaller,
-                             ModelMarshaller valueMarshaller) {
-            super(keyMarshaller, valueMarshaller);
-            stringKeyedMap = new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
-            objectKeyedMap = new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -90,14 +61,16 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             mapHandler.marshal(obj, jsonGen, serializationCtx);
         }
 
+        RuntimeMapSerializer(ModelMarshaller keyMarshaller,
+                             ModelMarshaller valueMarshaller) {
+            super(keyMarshaller, valueMarshaller);
+            stringKeyedMap = new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
+            objectKeyedMap = new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
+        }
+
     }
 
     private static final class StringKeyedMapSerializer extends AbstractMapSerializer {
-
-        StringKeyedMapSerializer(ModelMarshaller keyMarshaller,
-                                 ModelMarshaller valueMarshaller) {
-            super(keyMarshaller, valueMarshaller);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -111,14 +84,14 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             jsonGen.writeEnd();
         }
 
-    }
-
-    private static final class ObjectKeyedMapSerializer extends AbstractMapSerializer {
-
-        ObjectKeyedMapSerializer(ModelMarshaller keyMarshaller,
+        StringKeyedMapSerializer(ModelMarshaller keyMarshaller,
                                  ModelMarshaller valueMarshaller) {
             super(keyMarshaller, valueMarshaller);
         }
+
+    }
+
+    private static final class ObjectKeyedMapSerializer extends AbstractMapSerializer {
 
         @SuppressWarnings("unchecked")
         @Override
@@ -140,6 +113,33 @@ abstract class AbstractMapSerializer implements ModelMarshaller {
             jsonGen.writeEnd();
         }
 
+        ObjectKeyedMapSerializer(ModelMarshaller keyMarshaller,
+                                 ModelMarshaller valueMarshaller) {
+            super(keyMarshaller, valueMarshaller);
+        }
+
+    }
+
+    static AbstractMapSerializer createMapSerializer(Class<?> keyType, ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
+        if (TypeSerializerRegistry.isSupportedMapKey(keyType)) {
+            return new StringKeyedMapSerializer(keyMarshaller, valueMarshaller);
+        } else if (Object.class.equals(keyType)) {
+            return new RuntimeMapSerializer(keyMarshaller, valueMarshaller);
+        }
+        return new ObjectKeyedMapSerializer(keyMarshaller, valueMarshaller);
+    }
+
+    ModelMarshaller getValueSerializer() {
+        return valueMarshaller;
+    }
+
+    AbstractMapSerializer(ModelMarshaller keyMarshaller, ModelMarshaller valueMarshaller) {
+        this.keyMarshaller = keyMarshaller;
+        this.valueMarshaller = valueMarshaller;
+    }
+
+    ModelMarshaller getKeySerializer() {
+        return keyMarshaller;
     }
 
 }

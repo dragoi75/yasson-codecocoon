@@ -32,35 +32,23 @@ class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param original         Original type.
-     * @param resolvedTypeArgs Resolved type arguments.
-     */
-    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
-        this.original = original;
-        this.resolvedTypeArgs = resolvedTypeArgs;
-    }
-
-    /**
-     * Type arguments with resolved TypeVariables.
-     *
-     * @return type args
-     */
     @Override
-    public Type[] getActualTypeArguments() {
-        return resolvedTypeArgs;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof ParameterizedType)) {
+            return false;
+        }
+        final ParameterizedType that = (ParameterizedType) o;
+        return this.getRawType().equals(that.getRawType())
+                && Objects.equals(this.getOwnerType(), that.getOwnerType())
+                && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
     }
 
     @Override
     public Type getRawType() {
         return original.getRawType();
-    }
-
-    @Override
-    public Type getOwnerType() {
-        return original.getOwnerType();
     }
 
     @Override
@@ -78,23 +66,36 @@ class ResolvedParameterizedType implements ParameterizedType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !(o instanceof ParameterizedType)) {
-            return false;
-        }
-        final ParameterizedType that = (ParameterizedType) o;
-        return this.getRawType().equals(that.getRawType())
-                && Objects.equals(this.getOwnerType(), that.getOwnerType())
-                && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
-    }
-
-    @Override
     public int hashCode() {
         return Arrays.hashCode(resolvedTypeArgs)
                 ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
                 ^ (getRawType() == null ? 0 : getRawType().hashCode());
     }
+
+    /**
+     * Type arguments with resolved TypeVariables.
+     *
+     * @return type args
+     */
+    @Override
+    public Type[] getActualTypeArguments() {
+        return resolvedTypeArgs;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param original         Original type.
+     * @param resolvedTypeArgs Resolved type arguments.
+     */
+    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
+        this.original = original;
+        this.resolvedTypeArgs = resolvedTypeArgs;
+    }
+
+    @Override
+    public Type getOwnerType() {
+        return original.getOwnerType();
+    }
+
 }

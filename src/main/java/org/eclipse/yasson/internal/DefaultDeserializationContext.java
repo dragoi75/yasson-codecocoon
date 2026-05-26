@@ -39,41 +39,9 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
     private SerializationCustomizer serializationCustomizer = ClassSerializationConfig.emptyConfig();
     private Object targetObject;
 
-    /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param binding context of Jsonb
-     */
-    public DefaultDeserializationContext(JsonBindingContext binding) {
-        super(binding);
-    }
-
-    /**
-     * Create new instance based on previous context.
-     *
-     * @param ctx previous deserialization context
-     */
-    public DefaultDeserializationContext(DefaultDeserializationContext ctx) {
-        super(ctx.getJsonbContext());
-        this.finalValueEvent = ctx.finalValueEvent;
-    }
-
-    /**
-     * Return instance of currently deserialized type.
-     *
-     * @return null if instance has not been created yet
-     */
-    public Object getInstance() {
-        return targetObject;
-    }
-
-    /**
-     * Set currently deserialized type instance.
-     *
-     * @param targetObject deserialized type instance
-     */
-    public void setInstance(Object targetObject) {
-        this.targetObject = targetObject;
+    @Override
+    public <T> T deserialize(Type target, JsonParser jsonReader) {
+        return deserializeValue(target, jsonReader);
     }
 
     /**
@@ -83,52 +51,6 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
      */
     public List<Runnable> getDeferredDeserializers() {
         return deferredSetters;
-    }
-
-    /**
-     * Return last obtained {@link JsonParser.Event} event.
-     *
-     * @return last obtained event
-     */
-    public JsonParser.Event getLastValueEvent() {
-        return finalValueEvent;
-    }
-
-    /**
-     * Set last obtained {@link JsonParser.Event} event.
-     *
-     * @param finalValueEvent last obtained event
-     */
-    public void setLastValueEvent(JsonParser.Event finalValueEvent) {
-        this.finalValueEvent = finalValueEvent;
-    }
-
-    /**
-     * Return customization used by currently processed user defined deserializer.
-     *
-     * @return currently used customization
-     */
-    public SerializationCustomizer getCustomization() {
-        return serializationCustomizer;
-    }
-
-    /**
-     * Set customization used by currently processed user defined deserializer.
-     *
-     * @param serializationCustomizer currently used customization
-     */
-    public void setCustomization(SerializationCustomizer serializationCustomizer) {
-        this.serializationCustomizer = serializationCustomizer;
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type target, JsonParser jsonReader) {
-        return deserializeValue(target, jsonReader);
     }
 
     @SuppressWarnings("unchecked")
@@ -149,10 +71,88 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
         }
     }
 
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
+    }
+
+    /**
+     * Return last obtained {@link JsonParser.Event} event.
+     *
+     * @return last obtained event
+     */
+    public JsonParser.Event getLastValueEvent() {
+        return finalValueEvent;
+    }
+
+    /**
+     * Create new instance based on previous context.
+     *
+     * @param ctx previous deserialization context
+     */
+    public DefaultDeserializationContext(DefaultDeserializationContext ctx) {
+        super(ctx.getJsonbContext());
+        this.finalValueEvent = ctx.finalValueEvent;
+    }
+
     private void validateState() {
         if (finalValueEvent == JsonParser.Event.KEY_NAME) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
+    }
+
+    /**
+     * Set currently deserialized type instance.
+     *
+     * @param targetObject deserialized type instance
+     */
+    public void setInstance(Object targetObject) {
+        this.targetObject = targetObject;
+    }
+
+    /**
+     * Set last obtained {@link JsonParser.Event} event.
+     *
+     * @param finalValueEvent last obtained event
+     */
+    public void setLastValueEvent(JsonParser.Event finalValueEvent) {
+        this.finalValueEvent = finalValueEvent;
+    }
+
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param binding context of Jsonb
+     */
+    public DefaultDeserializationContext(JsonBindingContext binding) {
+        super(binding);
+    }
+
+    /**
+     * Return customization used by currently processed user defined deserializer.
+     *
+     * @return currently used customization
+     */
+    public SerializationCustomizer getCustomization() {
+        return serializationCustomizer;
+    }
+
+    /**
+     * Return instance of currently deserialized type.
+     *
+     * @return null if instance has not been created yet
+     */
+    public Object getInstance() {
+        return targetObject;
+    }
+
+    /**
+     * Set customization used by currently processed user defined deserializer.
+     *
+     * @param serializationCustomizer currently used customization
+     */
+    public void setCustomization(SerializationCustomizer serializationCustomizer) {
+        this.serializationCustomizer = serializationCustomizer;
     }
 
 }

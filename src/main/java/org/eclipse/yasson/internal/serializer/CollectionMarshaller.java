@@ -25,10 +25,6 @@ class CollectionMarshaller implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
 
-    CollectionMarshaller(ModelMarshaller modelMarshaller) {
-        this.modelMarshaller = modelMarshaller;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void marshal(Object element, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
@@ -36,6 +32,10 @@ class CollectionMarshaller implements ModelMarshaller {
         jsonWriter.writeStartArray();
         items.forEach(elem -> modelMarshaller.marshal(elem, jsonWriter, serializationState));
         jsonWriter.writeEnd();
+    }
+
+    CollectionMarshaller(ModelMarshaller modelMarshaller) {
+        this.modelMarshaller = modelMarshaller;
     }
 
 }
