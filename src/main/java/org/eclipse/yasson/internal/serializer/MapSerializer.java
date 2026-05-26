@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.Map;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 import org.eclipse.yasson.internal.serializer.types.TypeSerializers;
 
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.serializer.types.TypeSerializers;
 abstract class MapSerializer implements ModelSerializer {
 
     private final ModelSerializer keySerializer;
+
     private final ModelSerializer valueSerializer;
 
     MapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
@@ -41,10 +39,12 @@ abstract class MapSerializer implements ModelSerializer {
     }
 
     static MapSerializer create(Class<?> keyClass, ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-        if (TypeSerializers.isSupportedMapKey(keyClass)) {
+        if (!TypeSerializers.isSupportedMapKey(keyClass)) {
+            if (Object.class.equals(keyClass)) {
+                return new DynamicMapSerializer(keySerializer, valueSerializer);
+            }
+        } else {
             return new StringKeyMapSerializer(keySerializer, valueSerializer);
-        } else if (Object.class.equals(keyClass)) {
-            return new DynamicMapSerializer(keySerializer, valueSerializer);
         }
         return new ObjectKeyMapSerializer(keySerializer, valueSerializer);
     }
@@ -52,11 +52,12 @@ abstract class MapSerializer implements ModelSerializer {
     private static final class DynamicMapSerializer extends MapSerializer {
 
         private final StringKeyMapSerializer stringMap;
+
         private final ObjectKeyMapSerializer objectMap;
+
         private MapSerializer serializer;
 
-        DynamicMapSerializer(ModelSerializer keySerializer,
-                                    ModelSerializer valueSerializer) {
+        DynamicMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
             super(keySerializer, valueSerializer);
             stringMap = new StringKeyMapSerializer(keySerializer, valueSerializer);
             objectMap = new ObjectKeyMapSerializer(keySerializer, valueSerializer);
@@ -65,12 +66,12 @@ abstract class MapSerializer implements ModelSerializer {
         @SuppressWarnings("unchecked")
         @Override
         public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-            if (serializer == null) {
+            if (null == serializer) {
                 //We have to be sure that Map with Object as a key contains only supported values for key:value format map.
                 Map<Object, Object> map = (Map<Object, Object>) value;
                 boolean suitable = true;
                 for (Object key : map.keySet()) {
-                    if (key == null) {
+                    if (null == key) {
                         if (context.getJsonbContext().getConfigProperties().isForceMapArraySerializerForNullKeys()) {
                             suitable = false;
                             break;
@@ -89,13 +90,11 @@ abstract class MapSerializer implements ModelSerializer {
             }
             serializer.serialize(value, generator, context);
         }
-
     }
 
     private static final class StringKeyMapSerializer extends MapSerializer {
 
-        StringKeyMapSerializer(ModelSerializer keySerializer,
-                                      ModelSerializer valueSerializer) {
+        StringKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
             super(keySerializer, valueSerializer);
         }
 
@@ -110,13 +109,11 @@ abstract class MapSerializer implements ModelSerializer {
             });
             generator.writeEnd();
         }
-
     }
 
     private static final class ObjectKeyMapSerializer extends MapSerializer {
 
-        ObjectKeyMapSerializer(ModelSerializer keySerializer,
-                                      ModelSerializer valueSerializer) {
+        ObjectKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
             super(keySerializer, valueSerializer);
         }
 
@@ -128,10 +125,10 @@ abstract class MapSerializer implements ModelSerializer {
             map.forEach((key, val) -> {
                 generator.writeStartObject();
                 generator.writeKey("key");
-                if (key == null) {
-                    generator.writeNull();
-                } else {
+                if (null != key) {
                     getKeySerializer().serialize(key, generator, context);
+                } else {
+                    generator.writeNull();
                 }
                 generator.writeKey("value");
                 getValueSerializer().serialize(val, generator, context);
@@ -139,7 +136,5 @@ abstract class MapSerializer implements ModelSerializer {
             });
             generator.writeEnd();
         }
-
     }
-
 }

@@ -9,14 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.Constructor;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.ClassMultiReleaseExtension;
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.ReflectionUtils;
@@ -29,27 +26,28 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 class DefaultObjectInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> delegate;
+
     private final Constructor<?> defaultConstructor;
+
     private final JsonbException exception;
 
-    DefaultObjectInstanceCreator(ModelUnmarshaller<JsonParser> delegate,
-                                 Class<?> clazz,
-                                 Constructor<?> defaultConstructor) {
+    DefaultObjectInstanceCreator(ModelUnmarshaller<JsonParser> delegate, Class<?> clazz, Constructor<?> defaultConstructor) {
         this.delegate = delegate;
         this.defaultConstructor = defaultConstructor;
-        if (clazz.isInterface()) {
-            this.exception = new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
-        } else if (defaultConstructor == null) {
-            this.exception = ClassMultiReleaseExtension.exceptionToThrow(clazz)
-                    .orElse(new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NO_DEFAULT_CONSTRUCTOR, clazz)));
+        if (!clazz.isInterface()) {
+            if (null != defaultConstructor) {
+                this.exception = null;
+            } else {
+                this.exception = ClassMultiReleaseExtension.exceptionToThrow(clazz).orElse(new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NO_DEFAULT_CONSTRUCTOR, clazz)));
+            }
         } else {
-            this.exception = null;
+            this.exception = new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INFER_TYPE_FOR_UNMARSHALL, clazz.getName()));
         }
     }
 
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        if (exception != null) {
+        if (null != exception) {
             throw exception;
         }
         Object instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);

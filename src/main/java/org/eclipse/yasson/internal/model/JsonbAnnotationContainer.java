@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.annotation.Annotation;
@@ -38,13 +37,12 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
      */
     public JsonbAnnotationContainer(T value) {
         for (Annotation marker : value.getAnnotations()) {
-            if (value instanceof Class) {
-                addAnnotation(marker, false, (Class<?>) value);
-            } else {
+            if (!(value instanceof Class)) {
                 addAnnotation(marker, false, null);
+            } else {
+                addAnnotation(marker, false, (Class<?>) value);
             }
         }
-
         this.value = value;
     }
 
@@ -65,10 +63,7 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
      * @return Annotation by passed type
      */
     public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationType) {
-        return Optional.ofNullable(annotationMap.get(annotationType))
-                .map(LinkedList::getFirst)
-                .map(AnnotationMetadata::getAnnotation)
-                .map(annotationType::cast);
+        return Optional.ofNullable(annotationMap.get(annotationType)).map(LinkedList::getFirst).map(AnnotationMetadata::getAnnotation).map(annotationType::cast);
     }
 
     public <AT extends Annotation> LinkedList<AnnotationMetadata<?>> getAnnotations(Class<AT> annotationType) {
@@ -81,10 +76,7 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
     }
 
     public Annotation[] getAnnotations() {
-        return annotationMap.values().stream()
-                .flatMap(Collection::stream)
-                .map(AnnotationMetadata::getAnnotation)
-                .toArray(Annotation[]::new);
+        return annotationMap.values().stream().flatMap(Collection::stream).map(AnnotationMetadata::getAnnotation).toArray(Annotation[]::new);
     }
 
     /**
@@ -94,24 +86,24 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
      * @param concreteType
      */
     public void addAnnotation(Annotation marker, boolean fromSuperclass, Class<?> concreteType) {
-//        if (annotations.containsKey(annotation.annotationType())) {
-//            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-//                                                         "Annotation already present: " + annotation));
-//        }
-//        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
-        annotationMap.computeIfAbsent(marker.annotationType(), aClass -> new LinkedList<>())
-                        .add(new AnnotationMetadata(marker, fromSuperclass, concreteType));
+        //        if (annotations.containsKey(annotation.annotationType())) {
+        //            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        //                                                         "Annotation already present: " + annotation));
+        //        }
+        //        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
+        annotationMap.computeIfAbsent(marker.annotationType(), aClass -> new LinkedList<>()).add(new AnnotationMetadata(marker, fromSuperclass, concreteType));
     }
 
     public void addAnnotationWrapper(AnnotationMetadata<?> metadata) {
-        annotationMap.computeIfAbsent(metadata.getAnnotation().annotationType(), aClass -> new LinkedList<>())
-                .add(metadata);
+        annotationMap.computeIfAbsent(metadata.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(metadata);
     }
 
     public static final class AnnotationMetadata<T extends Annotation> {
 
         private final T marker;
+
         private final boolean fromSuperclass;
+
         private final Class<?> concreteType;
 
         public AnnotationMetadata(T marker, boolean fromSuperclass, Class<?> concreteType) {

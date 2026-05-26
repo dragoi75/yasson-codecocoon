@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.annotation.Annotation;
@@ -20,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
@@ -30,10 +28,13 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 class AnnotationFinder {
 
     private static final String CONSTRUCTOR_PROPERTIES_ANNOTATION = "java.beans.ConstructorProperties";
+
     private static final Logger LOGGER = Logger.getLogger(AnnotationFinder.class.getName());
 
     private final String annotationClassName;
-    private final Class<? extends Annotation> annotationClass; // may be null
+
+    // may be null
+    private final Class<? extends Annotation> annotationClass;
 
     /**
      * Gets the {@link AnnotationFinder} for the given Annotation-Type.
@@ -71,7 +72,7 @@ class AnnotationFinder {
 
     @SuppressWarnings("unchecked")
     public <T extends Annotation> T in(Annotation[] annotations) {
-        if (annotationClass == null) {
+        if (null == annotationClass) {
             return null;
         }
         return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
@@ -89,14 +90,13 @@ class AnnotationFinder {
     }
 
     private Object invocateValueMethod(Annotation annotation) {
-        if (annotation == null) {
+        if (null == annotation) {
             return null;
         }
         try {
             return annotation.annotationType().getMethod("value").invoke(annotation);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = MessageBundle
-                    .getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
+            String message = MessageBundle.getMessage(MessageKeyConstants.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
             LOGGER.finest(message);
             return null;
         }
@@ -118,9 +118,7 @@ class AnnotationFinder {
      */
     // "static" to use it in a hybrid procedural and object oriented manner.
     @SuppressWarnings("unchecked")
-    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations,
-                                                          Class<T> annotationClass,
-                                                          Set<Annotation> processed) {
+    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass, Set<Annotation> processed) {
         for (Annotation candidate : declaredAnnotations) {
             final Class<? extends Annotation> annType = candidate.annotationType();
             if (annType.equals(annotationClass)) {
@@ -129,11 +127,9 @@ class AnnotationFinder {
             processed.add(candidate);
             final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
             inheritedAnnotations.removeAll(processed);
-            if (inheritedAnnotations.size() > 0) {
-                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]),
-                                                   annotationClass,
-                                                   processed);
-                if (inherited != null) {
+            if (0 < inheritedAnnotations.size()) {
+                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
+                if (null != inherited) {
                     return inherited;
                 }
             }

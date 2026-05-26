@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.lang.reflect.Type;
@@ -20,10 +19,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.JsonbConfigProperties;
 import org.eclipse.yasson.internal.JsonbDateFormatter;
@@ -54,15 +51,17 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
 
     private ModelUnmarshaller<String> actualDeserializer(JsonbConfigProperties properties, Customization customization) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(properties, customization);
-        if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
-            return (value, context) -> fromInstant(Instant.ofEpochMilli(Long.parseLong(value)));
-        } else if (formatter.getDateTimeFormatter() != null) {
-            return (value, context) -> parseWithFormatterInternal(value, formatter.getDateTimeFormatter());
-        } else {
-            DateTimeFormatter configDateTimeFormatter = properties.getConfigDateFormatter().getDateTimeFormatter();
-            if (configDateTimeFormatter != null) {
-                return (value, context) -> parseWithFormatterInternal(value, configDateTimeFormatter);
+        if (!JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
+            if (null == formatter.getDateTimeFormatter()) {
+                DateTimeFormatter configDateTimeFormatter = properties.getConfigDateFormatter().getDateTimeFormatter();
+                if (null != configDateTimeFormatter) {
+                    return (value, context) -> parseWithFormatterInternal(value, configDateTimeFormatter);
+                }
+            } else {
+                return (value, context) -> parseWithFormatterInternal(value, formatter.getDateTimeFormatter());
             }
+        } else {
+            return (value, context) -> fromInstant(Instant.ofEpochMilli(Long.parseLong(value)));
         }
         if (properties.isStrictIJson()) {
             return (value, context) -> parseWithFormatterInternal(value, JsonbDateFormatter.IJSON_DATE_FORMATTER);
@@ -78,13 +77,12 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
     }
 
     private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
-        return Optional.ofNullable(customization.getDeserializeDateFormatter())
-                .orElse(properties.getConfigDateFormatter());
+        return Optional.ofNullable(customization.getDeserializeDateFormatter()).orElse(properties.getConfigDateFormatter());
     }
 
     @Override
     public Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
-        if (actualDeserializer == null) {
+        if (null == actualDeserializer) {
             actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
         }
         return actualDeserializer.unmarshal(value, context);
@@ -127,9 +125,6 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
     }
 
     protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return formatter.getZone() != null
-                ? formatter
-                : formatter.withZone(UTC);
+        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
     }
-
 }

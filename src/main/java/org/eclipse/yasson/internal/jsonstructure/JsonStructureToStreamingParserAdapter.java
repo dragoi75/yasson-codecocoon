@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
@@ -55,22 +53,28 @@ public class JsonStructureToStreamingParserAdapter implements JsonParser {
     @Override
     public Event next() {
         if (structureWalkers.isEmpty()) {
-            if (rootNode instanceof JsonObject) {
+            if (!(rootNode instanceof JsonObject)) {
+                if (rootNode instanceof JsonArray) {
+                    structureWalkers.push(new JsonArrayValueIterator((JsonArray) rootNode));
+                    return Event.START_ARRAY;
+                }
+            } else {
                 structureWalkers.push(new JsonObjectKeyIterator((JsonObject) rootNode));
                 return Event.START_OBJECT;
-            } else if (rootNode instanceof JsonArray) {
-                structureWalkers.push(new JsonArrayValueIterator((JsonArray) rootNode));
-                return Event.START_ARRAY;
             }
         }
         JsonStructureWalker activeWalker = structureWalkers.peek();
         Event upcomingEvent = activeWalker.next();
-        if (upcomingEvent == Event.START_OBJECT) {
+        if (Event.START_OBJECT != upcomingEvent) {
+            if (Event.START_ARRAY != upcomingEvent) {
+                if (Event.END_OBJECT == upcomingEvent || Event.END_ARRAY == upcomingEvent) {
+                    structureWalkers.pop();
+                }
+            } else {
+                structureWalkers.push(new JsonArrayValueIterator((JsonArray) structureWalkers.peek().getValue()));
+            }
+        } else {
             structureWalkers.push(new JsonObjectKeyIterator((JsonObject) structureWalkers.peek().getValue()));
-        } else if (upcomingEvent == Event.START_ARRAY) {
-            structureWalkers.push(new JsonArrayValueIterator((JsonArray) structureWalkers.peek().getValue()));
-        } else if (upcomingEvent == Event.END_OBJECT || upcomingEvent == Event.END_ARRAY) {
-            structureWalkers.pop();
         }
         return upcomingEvent;
     }
@@ -102,14 +106,14 @@ public class JsonStructureToStreamingParserAdapter implements JsonParser {
 
     @Override
     public JsonObject getObject() {
-//        ((JsonObjectIterator) iterators.peek()).jsonObject
+        //        ((JsonObjectIterator) iterators.peek()).jsonObject
         return structureWalkers.peek().getValue().asJsonObject();
     }
 
     private JsonNumber getJsonNumberValue() {
         JsonStructureWalker walkerFrame = structureWalkers.peek();
         JsonValue numberNode = walkerFrame.getValue();
-        if (numberNode.getValueType() != JsonValue.ValueType.NUMBER) {
+        if (JsonValue.ValueType.NUMBER != numberNode.getValueType()) {
             throw walkerFrame.createIncompatibleValueException();
         }
         return (JsonNumber) numberNode;

@@ -9,20 +9,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonLocation;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
@@ -33,7 +30,9 @@ import org.eclipse.yasson.internal.DeserializationContextImplementation;
 class YassonParser implements JsonParser {
 
     private final JsonParser delegate;
+
     private final DeserializationContextImplementation context;
+
     private int level;
 
     YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextImplementation context) {
@@ -43,12 +42,14 @@ class YassonParser implements JsonParser {
     }
 
     private int determineLevelValue(Event firstEvent) {
-        switch (firstEvent) {
-        case START_ARRAY:
-        case START_OBJECT:
-            return 1; //container start, there will be more events to come
-        default:
-            return 0; //just this single value, do not allow reading more
+        switch(firstEvent) {
+            case START_ARRAY:
+            case START_OBJECT:
+                //container start, there will be more events to come
+                return 1;
+            default:
+                //just this single value, do not allow reading more
+                return 0;
         }
     }
 
@@ -60,7 +61,7 @@ class YassonParser implements JsonParser {
 
     @Override
     public boolean hasNext() {
-        if (level < 1) {
+        if (1 > level) {
             return false;
         }
         return delegate.hasNext();
@@ -71,17 +72,16 @@ class YassonParser implements JsonParser {
         validate();
         Event next = delegate.next();
         context.setLastValueEvent(next);
-        switch (next) {
-        case START_OBJECT:
-        case START_ARRAY:
-            level++;
-            break;
-        case END_OBJECT:
-        case END_ARRAY:
-            level--;
-            break;
-        default:
-            //no other changes needed
+        switch(next) {
+            case START_OBJECT:
+            case START_ARRAY:
+                level += 1;
+                break;
+            case END_OBJECT:
+            case END_ARRAY:
+                level -= 1;
+                break;
+            default:
         }
         return next;
     }
@@ -119,7 +119,7 @@ class YassonParser implements JsonParser {
     @Override
     public JsonObject getObject() {
         validate();
-        level--;
+        level -= 1;
         JsonObject jsonObject = delegate.getObject();
         context.setLastValueEvent(Event.END_OBJECT);
         return jsonObject;
@@ -128,20 +128,20 @@ class YassonParser implements JsonParser {
     @Override
     public JsonValue getValue() {
         final Event currentLevel = context.getLastValueEvent();
-        switch (currentLevel) {
-        case START_ARRAY:
-            return getArray();
-        case START_OBJECT:
-            return getObject();
-        default:
-            return delegate.getValue();
+        switch(currentLevel) {
+            case START_ARRAY:
+                return getArray();
+            case START_OBJECT:
+                return getObject();
+            default:
+                return delegate.getValue();
         }
     }
 
     @Override
     public JsonArray getArray() {
         validate();
-        level--;
+        level -= 1;
         JsonArray array = delegate.getArray();
         context.setLastValueEvent(Event.END_ARRAY);
         return array;
@@ -150,35 +150,35 @@ class YassonParser implements JsonParser {
     @Override
     public Stream<JsonValue> getArrayStream() {
         validate();
-        level--;
+        level -= 1;
         return delegate.getArrayStream();
     }
 
     @Override
     public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
         validate();
-        level--;
+        level -= 1;
         return delegate.getObjectStream();
     }
 
     @Override
     public Stream<JsonValue> getValueStream() {
         validate();
-        level--;
+        level -= 1;
         return delegate.getValueStream();
     }
 
     @Override
     public void skipArray() {
         validate();
-        level--;
+        level -= 1;
         delegate.skipArray();
     }
 
     @Override
     public void skipObject() {
         validate();
-        level--;
+        level -= 1;
         delegate.skipObject();
     }
 
@@ -188,7 +188,7 @@ class YassonParser implements JsonParser {
     }
 
     private void validate() {
-        if (level < 1) {
+        if (1 > level) {
             throw new NoSuchElementException("There are no more elements available!");
         }
     }

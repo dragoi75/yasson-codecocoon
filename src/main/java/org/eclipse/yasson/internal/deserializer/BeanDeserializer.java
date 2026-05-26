@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.EnumMap;
@@ -17,10 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
@@ -30,7 +27,9 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
 
-    static final Consumer<JsonParser> EMPTY_CONSUMER = jsonParser -> {};
+    static final Consumer<JsonParser> EMPTY_CONSUMER = jsonParser -> {
+    };
+
     static final EnumMap<JsonParser.Event, Consumer<JsonParser>> EVENT_CONSUMERS = new EnumMap<>(JsonParser.Event.class);
 
     static {
@@ -39,16 +38,16 @@ class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
     }
 
     private final Map<String, ModelUnmarshaller<JsonParser>> fieldDeserializers;
+
     private final Function<String, String> nameTransformer;
+
     private final Class<?> targetClass;
+
     private final boolean rejectUnknownProperties;
+
     private final Set<String> excludedFields;
 
-    BeanDeserializer(Map<String, ModelUnmarshaller<JsonParser>> fieldDeserializers,
-                     Function<String, String> nameTransformer,
-                     Class<?> targetClass,
-                     boolean rejectUnknownProperties,
-                     Set<String> excludedFields) {
+    BeanDeserializer(Map<String, ModelUnmarshaller<JsonParser>> fieldDeserializers, Function<String, String> nameTransformer, Class<?> targetClass, boolean rejectUnknownProperties, Set<String> excludedFields) {
         this.fieldDeserializers = Map.copyOf(fieldDeserializers);
         this.nameTransformer = nameTransformer;
         this.targetClass = targetClass;
@@ -62,36 +61,38 @@ class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
         while (jsonInput.hasNext()) {
             final JsonParser.Event upcomingEvent = jsonInput.next();
             deserState.setLastValueEvent(upcomingEvent);
-            switch (upcomingEvent) {
-            case KEY_NAME:
-                propertyName = nameTransformer.apply(jsonInput.getString());
-                break;
-            case VALUE_NULL:
-            case START_OBJECT:
-            case START_ARRAY:
-            case VALUE_STRING:
-            case VALUE_NUMBER:
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                if (fieldDeserializers.containsKey(propertyName)) {
-                    try {
-                        fieldDeserializers.get(propertyName).unmarshal(jsonInput, deserState);
-                    } catch (JsonbException ex) {
-                        throw new JsonbException("Unable to deserialize property '" + propertyName + "' because of: " + ex.getMessage(), ex);
+            switch(upcomingEvent) {
+                case KEY_NAME:
+                    propertyName = nameTransformer.apply(jsonInput.getString());
+                    break;
+                case VALUE_NULL:
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    if (!fieldDeserializers.containsKey(propertyName)) {
+                        if (!rejectUnknownProperties || excludedFields.contains(propertyName)) {
+                            //We need to skip the corresponding structure if property key was not found
+                            EVENT_CONSUMERS.getOrDefault(upcomingEvent, EMPTY_CONSUMER).accept(jsonInput);
+                        } else {
+                            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNKNOWN_JSON_PROPERTY, propertyName, targetClass));
+                        }
+                    } else {
+                        try {
+                            fieldDeserializers.get(propertyName).unmarshal(jsonInput, deserState);
+                        } catch (JsonbException ex) {
+                            throw new JsonbException("Unable to deserialize property '" + propertyName + "' because of: " + ex.getMessage(), ex);
+                        }
                     }
-                } else if (rejectUnknownProperties && !excludedFields.contains(propertyName)) {
-                    throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNKNOWN_JSON_PROPERTY, propertyName, targetClass));
-                } else {
-                    //We need to skip the corresponding structure if property key was not found
-                    EVENT_CONSUMERS.getOrDefault(upcomingEvent, EMPTY_CONSUMER).accept(jsonInput);
-                }
-                break;
-            case END_ARRAY:
-                break;
-            case END_OBJECT:
-                return deserState.getInstance();
-            default:
-                throw new JsonbException("Unexpected state: " + upcomingEvent);
+                    break;
+                case END_ARRAY:
+                    break;
+                case END_OBJECT:
+                    return deserState.getInstance();
+                default:
+                    throw new JsonbException("Unexpected state: " + upcomingEvent);
             }
         }
         return deserState.getInstance();

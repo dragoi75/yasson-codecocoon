@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer.types;
 
 import java.lang.reflect.Type;
@@ -19,9 +18,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 import java.util.function.Function;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.JsonbNumberFormatter;
 import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
@@ -35,6 +32,7 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserializer {
 
     private final ModelUnmarshaller<String> actualDeserializer;
+
     private final boolean integerOnly;
 
     AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
@@ -45,7 +43,7 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
 
     private ModelUnmarshaller<String> actualDeserializer(TypeDeserializerBuilder builder) {
         Customization customization = builder.getCustomization();
-        if (customization.getDeserializeNumberFormatter() == null) {
+        if (null == customization.getDeserializeNumberFormatter()) {
             return (value, context) -> {
                 try {
                     return parseNumberValue(value);
@@ -54,7 +52,6 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
                 }
             };
         }
-
         final JsonbNumberFormatter numberFormat = customization.getDeserializeNumberFormatter();
         //consider synchronizing on format instance or per thread cache.
         Locale locale = builder.getConfigProperties().getLocale(numberFormat.getLocale());
@@ -75,7 +72,7 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
     private Function<String, String> createCompatibilityValueChanger(Locale locale) {
         char beforeJdk13GroupSeparator = '\u00A0';
         char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
-        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && beforeJdk13GroupSeparator != frenchGroupingSeparator) {
+        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
             //JDK-8225245
             return value -> value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
         }
@@ -88,5 +85,4 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
     Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
         return actualDeserializer.unmarshal(value, context);
     }
-
 }

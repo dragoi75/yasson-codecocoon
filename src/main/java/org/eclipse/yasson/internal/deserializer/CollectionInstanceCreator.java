@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.ParameterizedType;
@@ -24,9 +23,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.InstanceCreator;
 import org.eclipse.yasson.internal.ReflectionUtils;
@@ -37,8 +34,11 @@ import org.eclipse.yasson.internal.ReflectionUtils;
 class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final CollectionDeserializer delegate;
+
     private final Type type;
+
     private final Class<?> clazz;
+
     private final boolean isEnumSet;
 
     CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
@@ -52,10 +52,10 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
         Object instance;
-        if (isEnumSet) {
-            instance = EnumSet.noneOf((Class<Enum>) type);
-        } else {
+        if (!isEnumSet) {
             instance = InstanceCreator.createInstance(clazz);
+        } else {
+            instance = EnumSet.noneOf((Class<Enum>) type);
         }
         context.setInstance(instance);
         return delegate.unmarshal(value, context);
@@ -81,7 +81,7 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
         if (Queue.class.isAssignableFrom(ifcType)) {
             return ArrayDeque.class;
         }
-        if (Collection.class == ifcType) {
+        if (ifcType == Collection.class) {
             return ArrayList.class;
         }
         return ifcType;

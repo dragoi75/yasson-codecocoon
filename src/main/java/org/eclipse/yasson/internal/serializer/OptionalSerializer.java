@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.util.Optional;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 
 /**
@@ -33,7 +30,6 @@ class OptionalSerializer implements ModelSerializer {
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         Optional<Object> optional = (Optional<Object>) value;
-        delegate.serialize(optional == null ? null : optional.orElse(null), generator, context);
+        delegate.serialize(null == optional ? null : optional.orElse(null), generator, context);
     }
-
 }

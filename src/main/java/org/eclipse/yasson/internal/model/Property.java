@@ -9,13 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.model;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
 import jakarta.json.bind.JsonbException;
 
 /**
@@ -60,7 +58,7 @@ public class Property {
      * @return field if present
      */
     public Field getField() {
-        if (fieldElement == null) {
+        if (null == fieldElement) {
             return null;
         }
         return fieldElement.getElement();
@@ -79,7 +77,7 @@ public class Property {
      * @return getter if present
      */
     public Method getGetter() {
-        if (getterElement == null) {
+        if (null == getterElement) {
             return null;
         }
         return getterElement.getElement();
@@ -98,7 +96,7 @@ public class Property {
      * @return setter if present
      */
     public Method getSetter() {
-        if (setterElement == null) {
+        if (null == setterElement) {
             return null;
         }
         return setterElement.getElement();
@@ -128,18 +126,22 @@ public class Property {
      * @return type of a property
      */
     public Type getPropertyType() {
-        if (getField() != null) {
+        if (null == getField()) {
+            if (null == getGetter()) {
+                if (null != getSetter()) {
+                    return getSetterType();
+                }
+            } else {
+                return getGetterType();
+            }
+        } else {
             return getField().getGenericType();
-        } else if (getGetter() != null) {
-            return getGetterType();
-        } else if (getSetter() != null) {
-            return getSetterType();
         }
         throw new JsonbException("Empty property: " + name);
     }
 
     Type getGetterType() {
-        if (getGetter() != null) {
+        if (null != getGetter()) {
             return getGetter().getGenericReturnType();
         }
         return null;
@@ -147,7 +149,7 @@ public class Property {
 
     Type getSetterType() {
         Type[] genericParameterTypes = getSetter().getGenericParameterTypes();
-        if (genericParameterTypes.length != 1) {
+        if (1 != genericParameterTypes.length) {
             throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
         return genericParameterTypes[0];
@@ -179,5 +181,4 @@ public class Property {
     public JsonbAnnotationContainer<Method> getSetterElement() {
         return setterElement;
     }
-
 }

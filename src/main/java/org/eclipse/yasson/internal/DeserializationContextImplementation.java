@@ -9,17 +9,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.DeserializationContext;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.deserializer.ModelUnmarshaller;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
 import org.eclipse.yasson.internal.model.customization.Customization;
@@ -30,9 +27,13 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  * Deserialization context implementation.
  */
 public class DeserializationContextImplementation extends ProcessingContext implements DeserializationContext {
+
     private final List<Runnable> pendingActions = new ArrayList<>();
+
     private JsonParser.Event previousEvent;
+
     private Customization customConfig = ClassCustomization.empty();
+
     private Object currentObject;
 
     /**
@@ -130,7 +131,7 @@ public class DeserializationContextImplementation extends ProcessingContext impl
     @SuppressWarnings("unchecked")
     private <T> T deserializeValue(Type targetDescriptor, JsonParser jsonReader) {
         try {
-            if (previousEvent == null) {
+            if (null == previousEvent) {
                 previousEvent = jsonReader.next();
                 validateState();
             }
@@ -144,9 +145,8 @@ public class DeserializationContextImplementation extends ProcessingContext impl
     }
 
     private void validateState() {
-        if (previousEvent == JsonParser.Event.KEY_NAME) {
+        if (JsonParser.Event.KEY_NAME == previousEvent) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
     }
-
 }

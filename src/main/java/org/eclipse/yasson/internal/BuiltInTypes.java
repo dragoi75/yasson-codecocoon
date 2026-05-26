@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.math.BigDecimal;
@@ -40,9 +39,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import jakarta.json.JsonValue;
 
 /**
@@ -131,12 +128,7 @@ public class BuiltInTypes {
      * @return whether is supported
      */
     public static boolean isKnownType(Class<?> clazz) {
-        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz)
-                || Map.class.isAssignableFrom(clazz)
-                || JsonValue.class.isAssignableFrom(clazz)
-                || Optional.class.isAssignableFrom(clazz)
-                || clazz.isArray();
-
+        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
         return knownContainerValueType || findIfClassIsSupported(clazz);
     }
 
@@ -147,7 +139,7 @@ public class BuiltInTypes {
                 return true;
             }
             current = current.getSuperclass();
-        } while (current != null);
+        } while (null != current);
         return false;
     }
 }

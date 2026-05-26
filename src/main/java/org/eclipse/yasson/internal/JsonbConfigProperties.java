@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.security.AccessController;
@@ -29,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.annotation.JsonbDateFormat;
@@ -38,7 +36,6 @@ import jakarta.json.bind.config.PropertyNamingStrategy;
 import jakarta.json.bind.config.PropertyOrderStrategy;
 import jakarta.json.bind.config.PropertyVisibilityStrategy;
 import jakarta.json.bind.serializer.JsonbSerializer;
-
 import org.eclipse.yasson.YassonConfig;
 import org.eclipse.yasson.internal.model.PropertyModel;
 import org.eclipse.yasson.internal.model.ReverseTreeMap;
@@ -54,28 +51,42 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
 @SuppressWarnings("rawtypes")
 public class JsonbConfigProperties {
 
-    private static final Map<String, Class<? extends Map>> PROPERTY_ORDER_STRATEGY_MAPS =
-            Map.of(PropertyOrderStrategy.LEXICOGRAPHICAL, TreeMap.class,
-                   PropertyOrderStrategy.REVERSE, ReverseTreeMap.class,
-                   PropertyOrderStrategy.ANY, HashMap.class);
+    private static final Map<String, Class<? extends Map>> PROPERTY_ORDER_STRATEGY_MAPS = Map.of(PropertyOrderStrategy.LEXICOGRAPHICAL, TreeMap.class, PropertyOrderStrategy.REVERSE, ReverseTreeMap.class, PropertyOrderStrategy.ANY, HashMap.class);
 
     private final JsonbConfig jsonbConfig;
+
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
+
     private final PropertyNamingStrategy propertyNamingStrategy;
+
     private final PropertyOrdering propertyOrdering;
+
     private final JsonbDateFormatter dateFormatter;
+
     private final Locale locale;
+
     private final String binaryDataStrategy;
+
     private final boolean nullable;
+
     private final boolean failOnUnknownProperties;
+
     private final boolean strictIJson;
+
     private final boolean zeroTimeDefaulting;
+
     private final boolean requiredCreatorParameters;
+
     private final boolean dateInMillisecondsAsString;
+
     private final Map<Class<?>, Class<?>> userTypeMapping;
+
     private final Class<?> defaultMapImplType;
+
     private final JsonbSerializer<Object> nullSerializer;
+
     private final Set<Class<?>> eagerInitClasses;
+
     private final boolean forceMapArraySerializerForNullKeys;
 
     /**
@@ -152,10 +163,12 @@ public class JsonbConfigProperties {
             return StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
         }
         Object propertyNamingStrategy = property.get();
-        if (propertyNamingStrategy instanceof String) {
+        if (!(propertyNamingStrategy instanceof String)) {
+            if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.PROPERTY_NAMING_STRATEGY_INVALID));
+            }
+        } else {
             return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
-        } else if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.PROPERTY_NAMING_STRATEGY_INVALID));
         }
         return (PropertyNamingStrategy) property.get();
     }
@@ -166,10 +179,12 @@ public class JsonbConfigProperties {
             return null;
         }
         final Object propertyVisibilityStrategy = property.get();
-        if (propertyVisibilityStrategy instanceof String) {
+        if (!(propertyVisibilityStrategy instanceof String)) {
+            if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
+                throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
+            }
+        } else {
             return VisibilityStrategiesProvider.getStrategy((String) propertyVisibilityStrategy);
-        } else if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
-            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
         }
         return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
     }
@@ -190,20 +205,16 @@ public class JsonbConfigProperties {
     }
 
     private boolean initRequiredCreatorParameters() {
-        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>)
-                () -> System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED));
-
-        if (sysProp != null) {
+        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED));
+        if (null != sysProp) {
             return Boolean.parseBoolean(sysProp);
         }
         return getConfigProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED, Boolean.class, false);
     }
 
     private boolean initDateInMillisecondsAsString() {
-        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>)
-                () -> System.getProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING));
-
-        if (sysProp != null) {
+        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING));
+        if (null != sysProp) {
             return Boolean.parseBoolean(sysProp);
         }
         return getConfigProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING, Boolean.class, false);
@@ -211,14 +222,12 @@ public class JsonbConfigProperties {
 
     @SuppressWarnings("unchecked")
     private JsonbSerializer<Object> initNullSerializer() {
-        return jsonbConfig.getProperty(YassonConfig.NULL_ROOT_SERIALIZER)
-                .map(o -> {
-                    if (!(o instanceof JsonbSerializer)) {
-                        throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class
-                                                         + "<Object>");
-                    }
-                    return (JsonbSerializer<Object>) o;
-                }).orElse(null);
+        return jsonbConfig.getProperty(YassonConfig.NULL_ROOT_SERIALIZER).map(o -> {
+            if (!(o instanceof JsonbSerializer)) {
+                throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class + "<Object>");
+            }
+            return (JsonbSerializer<Object>) o;
+        }).orElse(null);
     }
 
     private Set<Class<?>> initEagerInitClasses() {
@@ -261,13 +270,7 @@ public class JsonbConfigProperties {
 
     private <T> T getConfigProperty(String propertyName, Class<T> propertyType, T defaultValue) {
         Objects.requireNonNull(defaultValue, "Default value cannot be null");
-        return jsonbConfig.getProperty(propertyName)
-                .or(() -> Optional.of(defaultValue))
-                .filter(propertyType::isInstance)
-                .map(propertyType::cast)
-                .orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
-                                                                          propertyName,
-                                                                          propertyType.getSimpleName())));
+        return jsonbConfig.getProperty(propertyName).or(() -> Optional.of(defaultValue)).filter(propertyType::isInstance).map(propertyType::cast).orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, propertyType.getSimpleName())));
     }
 
     /**

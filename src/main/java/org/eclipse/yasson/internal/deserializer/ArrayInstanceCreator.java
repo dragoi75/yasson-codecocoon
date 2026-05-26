@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.lang.reflect.Array;
@@ -17,11 +16,9 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.BinaryDataStrategy;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
@@ -34,14 +31,7 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
     private static final Map<Class<?>, Function<ModelUnmarshaller<JsonParser>, ArrayInstanceCreator>> CACHE;
 
     static {
-        CACHE = Map.of(boolean[].class, BooleanArrayCreator::new,
-                       byte[].class, ByteArrayCreator::new,
-                       char[].class, CharArrayCreator::new,
-                       double[].class, DoubleArrayCreator::new,
-                       float[].class, FloatArrayCreator::new,
-                       int[].class, IntegerArrayCreator::new,
-                       long[].class, LongArrayCreator::new,
-                       short[].class, ShortArrayCreator::new);
+        CACHE = Map.of(boolean[].class, BooleanArrayCreator::new, byte[].class, ByteArrayCreator::new, char[].class, CharArrayCreator::new, double[].class, DoubleArrayCreator::new, float[].class, FloatArrayCreator::new, int[].class, IntegerArrayCreator::new, long[].class, LongArrayCreator::new, short[].class, ShortArrayCreator::new);
     }
 
     private final ModelUnmarshaller<JsonParser> delegate;
@@ -57,8 +47,7 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
         return new ObjectArrayCreator(delegate, componentClass);
     }
 
-    static ModelUnmarshaller<JsonParser> createBase64Deserializer(String strategy,
-                                                                  ModelUnmarshaller<JsonParser> delegate) {
+    static ModelUnmarshaller<JsonParser> createBase64Deserializer(String strategy, ModelUnmarshaller<JsonParser> delegate) {
         return new Base64ByteArray(strategy, delegate);
     }
 
@@ -83,11 +72,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 intArray[i] = (int) obj;
-                i++;
+                i += 1;
             }
             return intArray;
         }
-
     }
 
     private static final class ByteArrayCreator extends ArrayInstanceCreator {
@@ -102,11 +90,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 byteArray[i] = (byte) obj;
-                i++;
+                i += 1;
             }
             return byteArray;
         }
-
     }
 
     private static final class ShortArrayCreator extends ArrayInstanceCreator {
@@ -121,11 +108,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 shortArray[i] = (short) obj;
-                i++;
+                i += 1;
             }
             return shortArray;
         }
-
     }
 
     private static final class LongArrayCreator extends ArrayInstanceCreator {
@@ -140,11 +126,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 longArray[i] = (long) obj;
-                i++;
+                i += 1;
             }
             return longArray;
         }
-
     }
 
     private static final class FloatArrayCreator extends ArrayInstanceCreator {
@@ -159,11 +144,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 floatArray[i] = (float) obj;
-                i++;
+                i += 1;
             }
             return floatArray;
         }
-
     }
 
     private static final class DoubleArrayCreator extends ArrayInstanceCreator {
@@ -178,11 +162,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 doubleArray[i] = (double) obj;
-                i++;
+                i += 1;
             }
             return doubleArray;
         }
-
     }
 
     private static final class BooleanArrayCreator extends ArrayInstanceCreator {
@@ -197,11 +180,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 booleanArray[i] = (boolean) obj;
-                i++;
+                i += 1;
             }
             return booleanArray;
         }
-
     }
 
     private static final class CharArrayCreator extends ArrayInstanceCreator {
@@ -216,11 +198,10 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 charArray[i] = (char) obj;
-                i++;
+                i += 1;
             }
             return charArray;
         }
-
     }
 
     private static final class ObjectArrayCreator extends ArrayInstanceCreator {
@@ -238,32 +219,31 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             int i = 0;
             for (Object obj : collection) {
                 objectArray[i] = obj;
-                i++;
+                i += 1;
             }
             return objectArray;
         }
-
     }
 
     private static final class Base64ByteArray implements ModelUnmarshaller<JsonParser> {
 
         private final Base64.Decoder decoder;
+
         private final ModelUnmarshaller<JsonParser> delegate;
 
-        private Base64ByteArray(String strategy,
-                                ModelUnmarshaller<JsonParser> delegate) {
+        private Base64ByteArray(String strategy, ModelUnmarshaller<JsonParser> delegate) {
             this.decoder = getDecoder(strategy);
             this.delegate = delegate;
         }
 
         public Base64.Decoder getDecoder(String strategy) {
-            switch (strategy) {
-            case BinaryDataStrategy.BASE_64:
-                return Base64.getDecoder();
-            case BinaryDataStrategy.BASE_64_URL:
-                return Base64.getUrlDecoder();
-            default:
-                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Invalid strategy: " + strategy));
+            switch(strategy) {
+                case BinaryDataStrategy.BASE_64:
+                    return Base64.getDecoder();
+                case BinaryDataStrategy.BASE_64_URL:
+                    return Base64.getUrlDecoder();
+                default:
+                    throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Invalid strategy: " + strategy));
             }
         }
 

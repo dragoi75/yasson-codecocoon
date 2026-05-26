@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 
@@ -54,26 +51,32 @@ public class ReflectionUtils {
      * @return Class of a type.
      */
     public static Optional<Class<?>> getOptionalRawType(Type type) {
-        if (type instanceof Class) {
-            return Optional.of((Class<?>) type);
-        } else if (type instanceof ParameterizedType) {
-            return Optional.of((Class<?>) ((ParameterizedType) type).getRawType());
-        } else if (type instanceof GenericArrayType) {
-            return Optional.of(((GenericArrayType) type).getClass());
-        } else if (type instanceof TypeVariable) {
-            TypeVariable<?> typeVariable = TypeVariable.class.cast(type);
-            if (Objects.nonNull(typeVariable.getBounds())) {
-                Optional<Class<?>> specializedClass = Optional.empty();
-                for (Type bound : typeVariable.getBounds()) {
-                    Optional<Class<?>> boundRawType = getOptionalRawType(bound);
-                    if (boundRawType.isPresent() && !Object.class.equals(boundRawType.get())) {
-                        if (!specializedClass.isPresent() || specializedClass.get().isAssignableFrom(boundRawType.get())) {
-                            specializedClass = Optional.of(boundRawType.get());
+        if (!(type instanceof Class)) {
+            if (!(type instanceof ParameterizedType)) {
+                if (!(type instanceof GenericArrayType)) {
+                    if (type instanceof TypeVariable) {
+                        TypeVariable<?> typeVariable = TypeVariable.class.cast(type);
+                        if (Objects.nonNull(typeVariable.getBounds())) {
+                            Optional<Class<?>> specializedClass = Optional.empty();
+                            for (Type bound : typeVariable.getBounds()) {
+                                Optional<Class<?>> boundRawType = getOptionalRawType(bound);
+                                if (boundRawType.isPresent() && !Object.class.equals(boundRawType.get())) {
+                                    if (!specializedClass.isPresent() || specializedClass.get().isAssignableFrom(boundRawType.get())) {
+                                        specializedClass = Optional.of(boundRawType.get());
+                                    }
+                                }
+                            }
+                            return specializedClass;
                         }
                     }
+                } else {
+                    return Optional.of(((GenericArrayType) type).getClass());
                 }
-                return specializedClass;
+            } else {
+                return Optional.of((Class<?>) ((ParameterizedType) type).getRawType());
             }
+        } else {
+            return Optional.of((Class<?>) type);
         }
         return Optional.empty();
     }
@@ -88,8 +91,7 @@ public class ReflectionUtils {
      * @return Class of a raw type.
      */
     public static Class<?> getRawType(Type type) {
-        return getOptionalRawType(type)
-                .orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TYPE_RESOLUTION_ERROR, type)));
+        return getOptionalRawType(type).orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TYPE_RESOLUTION_ERROR, type)));
     }
 
     /**
@@ -103,12 +105,14 @@ public class ReflectionUtils {
      * @return resolved raw class
      */
     public static Class<?> resolveRawType(List<Type> chain, Type type) {
-        if (type instanceof Class) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) type).getRawType();
+        if (!(type instanceof Class)) {
+            if (!(type instanceof ParameterizedType)) {
+                return getRawType(resolveType(chain, type));
+            } else {
+                return (Class<?>) ((ParameterizedType) type).getRawType();
+            }
         } else {
-            return getRawType(resolveType(chain, type));
+            return (Class<?>) type;
         }
     }
 
@@ -133,12 +137,16 @@ public class ReflectionUtils {
             Type resolved = resolveType(chain, toResolve);
             return new GenericArrayTypeImpl(resolved);
         }
-        if (toResolve instanceof WildcardType) {
+        if (!(toResolve instanceof WildcardType)) {
+            if (!(toResolve instanceof TypeVariable)) {
+                if (toResolve instanceof ParameterizedType) {
+                    return resolveTypeArguments((ParameterizedType) toResolve, chain.get(chain.size() - 1));
+                }
+            } else {
+                return resolveItemVariableType(chain, (TypeVariable<?>) toResolve, warn);
+            }
+        } else {
             return resolveMostSpecificBound(chain, (WildcardType) toResolve, warn);
-        } else if (toResolve instanceof TypeVariable) {
-            return resolveItemVariableType(chain, (TypeVariable<?>) toResolve, warn);
-        } else if (toResolve instanceof ParameterizedType) {
-            return resolveTypeArguments((ParameterizedType) toResolve, chain.get(chain.size() - 1));
         }
         return type;
     }
@@ -169,54 +177,54 @@ public class ReflectionUtils {
      * @return Type of a generic "runtime" bound, not null.
      */
     public static Type resolveItemVariableType(List<Type> chain, TypeVariable<?> typeVariable, boolean warn) {
-//        if (chain == null) {
-//        Optional<Class<?>> optionalRawType = getOptionalRawType(typeVariable);
-//        if (optionalRawType.isPresent()) {
-//            return optionalRawType.get();
-//        }
-
+        //        if (chain == null) {
+        //        Optional<Class<?>> optionalRawType = getOptionalRawType(typeVariable);
+        //        if (optionalRawType.isPresent()) {
+        //            return optionalRawType.get();
+        //        }
         //            //Bound not found, treat it as an Object.class
-//            if (warn) {
-//                LOGGER.warning(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND,
-//                                                   typeVariable,
-//                                                   typeVariable.getGenericDeclaration()));
-//            }
-//            return Object.class;
-//        }
+        //            if (warn) {
+        //                LOGGER.warning(Messages.getMessage(MessageKeys.GENERIC_BOUND_NOT_FOUND,
+        //                                                   typeVariable,
+        //                                                   typeVariable.getGenericDeclaration()));
+        //            }
+        //            return Object.class;
+        //        }
         Type returnType = typeVariable;
-        for (int i = chain.size() - 1; i >= 0; i--) {
+        //        //Embedded items doesn't hold information about variable types
+        //        if (chain instanceof EmbeddedItem) {
+        //            return resolveItemVariableType(chain.getWrapper(), typeVariable, warn);
+        //        }
+        //
+        //        ParameterizedType wrapperParameterizedType = findParameterizedSuperclass(chain.getRuntimeType());
+        //
+        //        VariableTypeInheritanceSearch search = new VariableTypeInheritanceSearch();
+        //        Type foundType = search.searchParametrizedType(wrapperParameterizedType, typeVariable);
+        //        if (foundType != null) {
+        //            if (foundType instanceof TypeVariable) {
+        //                return resolveItemVariableType(chain.getWrapper(), (TypeVariable<?>) foundType, warn);
+        //            }
+        //            return foundType;
+        //        }
+        //
+        //        return resolveItemVariableType(chain.getWrapper(), typeVariable, warn);
+        int i = chain.size() - 1;
+        while (0 <= i) {
             Type type = chain.get(i);
             Type tmp = new VariableTypeInheritanceSearch().searchParametrizedType(type, (TypeVariable<?>) returnType);
-            if (tmp != null) {
+            if (null != tmp) {
                 returnType = tmp;
             }
             if (!(returnType instanceof TypeVariable)) {
                 break;
             }
+            i -= 1;
         }
         if (returnType instanceof TypeVariable) {
             //            throw new JsonbException("Could not resolve: " + unresolvedType);
             return Object.class;
         }
         return returnType;
-
-//        //Embedded items doesn't hold information about variable types
-//        if (chain instanceof EmbeddedItem) {
-//            return resolveItemVariableType(chain.getWrapper(), typeVariable, warn);
-//        }
-//
-//        ParameterizedType wrapperParameterizedType = findParameterizedSuperclass(chain.getRuntimeType());
-//
-//        VariableTypeInheritanceSearch search = new VariableTypeInheritanceSearch();
-//        Type foundType = search.searchParametrizedType(wrapperParameterizedType, typeVariable);
-//        if (foundType != null) {
-//            if (foundType instanceof TypeVariable) {
-//                return resolveItemVariableType(chain.getWrapper(), (TypeVariable<?>) foundType, warn);
-//            }
-//            return foundType;
-//        }
-//
-//        return resolveItemVariableType(chain.getWrapper(), typeVariable, warn);
     }
 
     /**
@@ -229,36 +237,35 @@ public class ReflectionUtils {
     public static Type resolveTypeArguments(ParameterizedType typeToResolve, Type typeToSearch) {
         final Type[] unresolvedArgs = typeToResolve.getActualTypeArguments();
         Type[] resolvedArgs = new Type[unresolvedArgs.length];
-        for (int i = 0; i < unresolvedArgs.length; i++) {
+        int i = 0;
+        while (unresolvedArgs.length > i) {
             Type unresolvedArg = unresolvedArgs[i];
-            if (!(unresolvedArg instanceof TypeVariable) && !(unresolvedArg instanceof GenericArrayType)) {
-                resolvedArgs[i] = unresolvedArg;
-            } else {
+            if ((unresolvedArg instanceof TypeVariable) || (unresolvedArg instanceof GenericArrayType)) {
                 Type variableType = unresolvedArg;
                 if (variableType instanceof GenericArrayType) {
                     variableType = ((GenericArrayType) variableType).getGenericComponentType();
                 }
-                resolvedArgs[i] = new VariableTypeInheritanceSearch()
-                        .searchParametrizedType(typeToSearch, (TypeVariable<?>) variableType);
-                if (resolvedArgs[i] == null) {
+                resolvedArgs[i] = new VariableTypeInheritanceSearch().searchParametrizedType(typeToSearch, (TypeVariable<?>) variableType);
+                if (null == resolvedArgs[i]) {
                     if (typeToSearch instanceof Class) {
                         return Object.class;
                     }
                     //No generic information available
-                    throw new IllegalStateException(MessageBundle.getMessage(MessageKeyConstants.GENERIC_BOUND_NOT_FOUND,
-                                                                        variableType,
-                                                                        typeToSearch));
+                    throw new IllegalStateException(MessageBundle.getMessage(MessageKeyConstants.GENERIC_BOUND_NOT_FOUND, variableType, typeToSearch));
                 }
+            } else {
+                resolvedArgs[i] = unresolvedArg;
             }
-            if (resolvedArgs[i] instanceof ParameterizedType) {
+            if (!(resolvedArgs[i] instanceof ParameterizedType)) {
+                if (unresolvedArg instanceof GenericArrayType) {
+                    resolvedArgs[i] = new GenericArrayTypeImpl(resolvedArgs[i]);
+                }
+            } else {
                 resolvedArgs[i] = resolveTypeArguments((ParameterizedType) resolvedArgs[i], typeToSearch);
-            } else if (unresolvedArg instanceof GenericArrayType) {
-                resolvedArgs[i] = new GenericArrayTypeImpl(resolvedArgs[i]);
             }
+            i += 1;
         }
-        return Arrays.equals(resolvedArgs, unresolvedArgs)
-                ? typeToResolve
-                : new ResolvedParameterizedType(typeToResolve, resolvedArgs);
+        return Arrays.equals(resolvedArgs, unresolvedArgs) ? typeToResolve : new ResolvedParameterizedType(typeToResolve, resolvedArgs);
     }
 
     /**
@@ -291,7 +298,7 @@ public class ReflectionUtils {
         return AccessController.doPrivileged((PrivilegedAction<Constructor<T>>) () -> {
             try {
                 final Constructor<T> declaredConstructor = clazz.getDeclaredConstructor();
-                if (declaredConstructor.getModifiers() == Modifier.PROTECTED) {
+                if (Modifier.PROTECTED == declaredConstructor.getModifiers()) {
                     declaredConstructor.setAccessible(true);
                 }
                 return declaredConstructor;
@@ -321,11 +328,9 @@ public class ReflectionUtils {
      */
     public static ParameterizedType findParameterizedType(Class<?> classToSearch, Class<?> parameterizedInterface) {
         Class current = classToSearch;
-        while (current != Object.class) {
+        while (Object.class != current) {
             for (Type currentInterface : current.getGenericInterfaces()) {
-                if (currentInterface instanceof ParameterizedType
-                        && parameterizedInterface.isAssignableFrom(
-                        ReflectionUtils.getRawType(((ParameterizedType) currentInterface).getRawType()))) {
+                if (currentInterface instanceof ParameterizedType && parameterizedInterface.isAssignableFrom(ReflectionUtils.getRawType(((ParameterizedType) currentInterface).getRawType()))) {
                     return (ParameterizedType) currentInterface;
                 }
             }
@@ -354,7 +359,7 @@ public class ReflectionUtils {
     }
 
     private static ParameterizedType findParameterizedSuperclass(Type type) {
-        if (type == null || type instanceof ParameterizedType) {
+        if (null == type || type instanceof ParameterizedType) {
             return (ParameterizedType) type;
         }
         if (!(type instanceof Class)) {
@@ -382,7 +387,7 @@ public class ReflectionUtils {
     }
 
     private static Class<?> getMostSpecificBound(List<Type> chain, Class<?> result, Type bound, boolean warn) {
-        if (bound == Object.class) {
+        if (Object.class == bound) {
             return result;
         }
         //if bound is type variable search recursively for wrapper generic expansion
@@ -396,6 +401,7 @@ public class ReflectionUtils {
     }
 
     public static final class GenericArrayTypeImpl implements GenericArrayType {
+
         private final Type genericComponentType;
 
         // private constructor enforces use of static factory
@@ -412,7 +418,8 @@ public class ReflectionUtils {
          * @since 1.5
          */
         public Type getGenericComponentType() {
-            return genericComponentType; // return cached component type
+            // return cached component type
+            return genericComponentType;
         }
 
         public String toString() {
@@ -421,12 +428,11 @@ public class ReflectionUtils {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof GenericArrayType) {
-                GenericArrayType that = (GenericArrayType) o;
-
-                return Objects.equals(genericComponentType, that.getGenericComponentType());
-            } else {
+            if (!(o instanceof GenericArrayType)) {
                 return false;
+            } else {
+                GenericArrayType that = (GenericArrayType) o;
+                return Objects.equals(genericComponentType, that.getGenericComponentType());
             }
         }
 

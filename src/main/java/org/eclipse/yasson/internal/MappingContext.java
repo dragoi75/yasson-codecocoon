@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.util.ArrayDeque;
@@ -17,7 +16,6 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
 import org.eclipse.yasson.internal.model.ClassModel;
 import org.eclipse.yasson.internal.model.JsonbAnnotationContainer;
 import org.eclipse.yasson.internal.model.customization.ClassCustomization;
@@ -29,6 +27,7 @@ import org.eclipse.yasson.internal.model.customization.ClassCustomization;
  * Thread safe.
  */
 public class MappingContext {
+
     private final JsonbContext jsonbContext;
 
     private final ConcurrentHashMap<Class<?>, ClassModel> classes = new ConcurrentHashMap<>();
@@ -55,52 +54,41 @@ public class MappingContext {
      */
     public ClassModel getOrCreateClassModel(Class<?> clazz) {
         ClassModel classModel = classes.get(clazz);
-        if (classModel != null) {
+        if (null != classModel) {
             return classModel;
         }
-
         Deque<Class<?>> newClassModels = new ArrayDeque<>();
-        for (Class<?> classToParse = clazz; classToParse != Object.class; classToParse = classToParse.getSuperclass()) {
-            if (classToParse == null) {
+        Class<?> classToParse = clazz;
+        while (Object.class != classToParse) {
+            if (null == classToParse) {
                 break;
             }
             newClassModels.push(classToParse);
+            classToParse = classToParse.getSuperclass();
         }
-        if (clazz == Object.class) {
+        if (Object.class == clazz) {
             return classes.computeIfAbsent(clazz, (c) -> new ClassModel(c, ClassCustomization.empty(), null, null));
         }
-
         ClassModel parentClassModel = null;
         while (!newClassModels.isEmpty()) {
             Class<?> toParse = newClassModels.pop();
-            parentClassModel = classes
-                    .computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
+            parentClassModel = classes.computeIfAbsent(toParse, createParseClassModelFunction(parentClassModel, classParser, jsonbContext));
         }
         return classes.get(clazz);
     }
 
-    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel,
-                                                                                ClassParser classParser,
-                                                                                JsonbContext jsonbContext) {
+    private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbContext jsonbContext) {
         return aClass -> {
             JsonbAnnotationContainer<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
-            ClassCustomization customization = jsonbContext.getAnnotationIntrospector()
-                    .introspectCustomization(clsElement,
-                                             parentClassModel == null
-                                                     ? ClassCustomization.empty()
-                                                     : parentClassModel.getClassCustomization(),
-                                             jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            ClassCustomization customization = jsonbContext.getAnnotationIntrospector().introspectCustomization(clsElement, null == parentClassModel ? ClassCustomization.empty() : parentClassModel.getClassCustomization(), jsonbContext.getConfigProperties().getPropertyNamingStrategy());
             //            PolymorphismSupport configPolymorphism = jsonbContext.getConfigProperties().getPolymorphismSupport();
-//            if (configPolymorphism != null) {
-//                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
-//                                                                     configPolymorphism.getClassPolymorphism(aClass),
-//                                                                     customization,
-//                                                                     aClass);
-//            }
-            ClassModel newClassModel = new ClassModel(aClass,
-                                                      customization,
-                                                      parentClassModel,
-                                                      jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            //            if (configPolymorphism != null) {
+            //                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
+            //                                                                     configPolymorphism.getClassPolymorphism(aClass),
+            //                                                                     customization,
+            //                                                                     aClass);
+            //            }
+            ClassModel newClassModel = new ClassModel(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
             if (!BuiltInTypes.isKnownType(aClass)) {
                 classParser.parseProperties(newClassModel, clsElement);
             }
@@ -108,40 +96,39 @@ public class MappingContext {
         };
     }
 
-//    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
-//                                                                           Optional<Polymorphism> maybeClassPolymorphism,
-//                                                                           ClassCustomization customization,
-//                                                                           Class<?> aClass) {
-//        PolymorphismConfig polymorphismConfig = customization.getPolymorphismConfig();
-//        PolymorphismConfig.Builder polyConfigBuilder;
-//        if (polymorphismConfig != null) {
-//            polyConfigBuilder = PolymorphismConfig.builder().of(polymorphismConfig);
-//        } else {
-//            polyConfigBuilder = PolymorphismConfig.builder();
-//            maybeClassPolymorphism.ifPresent(classPolymorphism -> polyConfigBuilder
-//                    .inherited(!classPolymorphism.getBoundClass().equals(aClass)));
-//        }
-//        generalPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
-//        generalPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
-//        polyConfigBuilder.whitelistedPackages(generalPolymorphism.getWhitelistedPackages());
-//
-//        maybeClassPolymorphism.ifPresent(classPolymorphism -> {
-//            classPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
-//            classPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
-//            classPolymorphism.getFormat().ifPresent(polyConfigBuilder::format);
-//            classPolymorphism.getAliases().forEach(polyConfigBuilder::alias);
-//            polyConfigBuilder.whitelistedPackages(classPolymorphism.getWhitelistedPackages());
-//        });
-//        PolymorphismConfig polyConfigMerged = polyConfigBuilder.build();
-//        if (polyConfigMerged.getFieldName() == null || polyConfigMerged.getFieldName().isEmpty()) {
-//            throw new JsonbException("Polymorphism type field name cannot be null or empty: " + aClass);
-//        }
-//        return ClassCustomization.builder()
-//                .of(customization)
-//                .polymorphismConfig(polyConfigMerged)
-//                .build();
-//    }
-
+    //    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
+    //                                                                           Optional<Polymorphism> maybeClassPolymorphism,
+    //                                                                           ClassCustomization customization,
+    //                                                                           Class<?> aClass) {
+    //        PolymorphismConfig polymorphismConfig = customization.getPolymorphismConfig();
+    //        PolymorphismConfig.Builder polyConfigBuilder;
+    //        if (polymorphismConfig != null) {
+    //            polyConfigBuilder = PolymorphismConfig.builder().of(polymorphismConfig);
+    //        } else {
+    //            polyConfigBuilder = PolymorphismConfig.builder();
+    //            maybeClassPolymorphism.ifPresent(classPolymorphism -> polyConfigBuilder
+    //                    .inherited(!classPolymorphism.getBoundClass().equals(aClass)));
+    //        }
+    //        generalPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
+    //        generalPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
+    //        polyConfigBuilder.whitelistedPackages(generalPolymorphism.getWhitelistedPackages());
+    //
+    //        maybeClassPolymorphism.ifPresent(classPolymorphism -> {
+    //            classPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
+    //            classPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
+    //            classPolymorphism.getFormat().ifPresent(polyConfigBuilder::format);
+    //            classPolymorphism.getAliases().forEach(polyConfigBuilder::alias);
+    //            polyConfigBuilder.whitelistedPackages(classPolymorphism.getWhitelistedPackages());
+    //        });
+    //        PolymorphismConfig polyConfigMerged = polyConfigBuilder.build();
+    //        if (polyConfigMerged.getFieldName() == null || polyConfigMerged.getFieldName().isEmpty()) {
+    //            throw new JsonbException("Polymorphism type field name cannot be null or empty: " + aClass);
+    //        }
+    //        return ClassCustomization.builder()
+    //                .of(customization)
+    //                .polymorphismConfig(polyConfigMerged)
+    //                .build();
+    //    }
     /**
      * Search for class model, without parsing if not found.
      *
@@ -151,5 +138,4 @@ public class MappingContext {
     public ClassModel getClassModel(Class<?> clazz) {
         return classes.get(clazz);
     }
-
 }

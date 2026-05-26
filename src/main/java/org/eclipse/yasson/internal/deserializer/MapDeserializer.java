@@ -9,14 +9,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import java.util.Map;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImplementation;
 
 /**
@@ -25,10 +22,10 @@ import org.eclipse.yasson.internal.DeserializationContextImplementation;
 class MapDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> keyDelegate;
+
     private final ModelUnmarshaller<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelUnmarshaller<JsonParser> keyDelegate,
-                    ModelUnmarshaller<JsonParser> valueDelegate) {
+    MapDeserializer(ModelUnmarshaller<JsonParser> keyDelegate, ModelUnmarshaller<JsonParser> valueDelegate) {
         this.keyDelegate = keyDelegate;
         this.valueDelegate = valueDelegate;
     }
@@ -45,86 +42,82 @@ class MapDeserializer implements ModelUnmarshaller<JsonParser> {
         while (parser.hasNext()) {
             final JsonParser.Event next = parser.next();
             context.setLastValueEvent(next);
-            switch (next) {
-            case KEY_NAME:
-                mode = mode == Mode.NONE ? Mode.NORMAL : mode;
-                if (mode == Mode.NORMAL) {
-                    keyValue = deserializeValue(parser, context, keyDelegate);
-                }
-                keyName = parser.getString();
-                break;
-            case START_OBJECT:
-                mode = mode == Mode.NONE ? Mode.OBJECT : mode;
-            case START_ARRAY:
-            case VALUE_STRING:
-            case VALUE_TRUE:
-            case VALUE_FALSE:
-            case VALUE_NUMBER:
-            case VALUE_NULL:
-                if (mode == Mode.OBJECT) {
-                    if (state == State.NEXT) {
-                        state = State.KEY;
-                    } else if (state == State.KEY) {
-                        validateKeyName(keyName, state);
-                        key = deserializeValue(parser, context, keyDelegate);
-                        state = State.VALUE;
-                    } else if (state == State.VALUE) {
-                        validateKeyName(keyName, state);
-                        Object value = deserializeValue(parser, context, valueDelegate);
-                        map.put(key, value);
-                        state = State.DONE;
-                    } else {
-                        throw new JsonbException("Only attributes 'key' and 'value' allowed!");
+            switch(next) {
+                case KEY_NAME:
+                    mode = Mode.NONE == mode ? Mode.NORMAL : mode;
+                    if (Mode.NORMAL == mode) {
+                        keyValue = deserializeValue(parser, context, keyDelegate);
                     }
-                } else {
-                    Object value = deserializeValue(parser, context, valueDelegate);
-                    map.put(keyValue, value);
-                }
-                break;
-            case END_OBJECT:
-                state = State.NEXT;
-                if (mode == Mode.OBJECT) {
+                    keyName = parser.getString();
                     break;
-                }
-            case END_ARRAY:
-                return map;
-            default:
-                throw new JsonbException("Unexpected state: " + next);
+                case START_OBJECT:
+                    mode = Mode.NONE == mode ? Mode.OBJECT : mode;
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_TRUE:
+                case VALUE_FALSE:
+                case VALUE_NUMBER:
+                case VALUE_NULL:
+                    if (Mode.OBJECT != mode) {
+                        Object value = deserializeValue(parser, context, valueDelegate);
+                        map.put(keyValue, value);
+                    } else {
+                        if (State.NEXT != state) {
+                            if (State.KEY != state) {
+                                if (State.VALUE != state) {
+                                    throw new JsonbException("Only attributes 'key' and 'value' allowed!");
+                                } else {
+                                    validateKeyName(keyName, state);
+                                    Object value = deserializeValue(parser, context, valueDelegate);
+                                    map.put(key, value);
+                                    state = State.DONE;
+                                }
+                            } else {
+                                validateKeyName(keyName, state);
+                                key = deserializeValue(parser, context, keyDelegate);
+                                state = State.VALUE;
+                            }
+                        } else {
+                            state = State.KEY;
+                        }
+                    }
+                    break;
+                case END_OBJECT:
+                    state = State.NEXT;
+                    if (Mode.OBJECT == mode) {
+                        break;
+                    }
+                case END_ARRAY:
+                    return map;
+                default:
+                    throw new JsonbException("Unexpected state: " + next);
             }
         }
         return map;
     }
 
     private void validateKeyName(String keyName, State state) {
-        if (state == State.KEY && !keyName.equals("key")) {
+        if (State.KEY != state || keyName.equals("key")) {
+            if (State.VALUE == state && !keyName.equals("value")) {
+                throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
+            }
+        } else {
             throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
-        } else if (state == State.VALUE && !keyName.equals("value")) {
-            throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
         }
     }
 
-    private Object deserializeValue(JsonParser parser,
-                                    DeserializationContextImplementation context,
-                                    ModelUnmarshaller<JsonParser> deserializer) {
+    private Object deserializeValue(JsonParser parser, DeserializationContextImplementation context, ModelUnmarshaller<JsonParser> deserializer) {
         DeserializationContextImplementation keyContext = new DeserializationContextImplementation(context);
         return deserializer.unmarshal(parser, keyContext);
     }
 
     private enum Mode {
 
-        NONE,
-        NORMAL,
-        OBJECT
-
+        NONE, NORMAL, OBJECT
     }
 
     private enum State {
 
-        NEXT,
-        VALUE,
-        KEY,
-        DONE
-
+        NEXT, VALUE, KEY, DONE
     }
-
 }
