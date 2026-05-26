@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.ParameterizedType;
@@ -17,9 +16,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
 import jakarta.json.bind.JsonbException;
-
 import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 import org.eclipse.yasson.internal.properties.MessageBundle;
 
@@ -39,7 +36,6 @@ class ParameterizedTypeInheritanceSearch {
      *
      * Example 1: typevar is resolved
      *
-     *
      * class GenericClass &lt;T&gt; {
      *     private T genericField;
      * }
@@ -50,10 +46,8 @@ class ParameterizedTypeInheritanceSearch {
      * In above case when ConcreteClass type is passed as runtime type and &lt;T&gt; as type variable, T is resolved to MyPojo.
      * </pre>
      *
-     *
      * <pre>
      * Example 2: typevar is resolved to another propagated typevar
-     *
      *
      * class WrapperGenericClass&lt;X&gt; {
      *     private GenericClass&lt;X&gt; propagatedGenericField
@@ -61,7 +55,6 @@ class ParameterizedTypeInheritanceSearch {
      *
      * class AnotherClass extends WrapperGenericClass&lt;MyPojo&gt; {
      * }
-     *
      *
      * In second case when GenericClass {@link ParameterizedType} is passed as runtime type and &lt;T&gt; as type variable,
      * T is resolved to propagated &lt;X&gt; by WrapperGenericClass.
@@ -75,11 +68,11 @@ class ParameterizedTypeInheritanceSearch {
      */
     Type findParametrizedType(Type targetType, TypeVariable<?> genericTypeParam) {
         ParameterizedType paramTypeInstance = locateParameterizedSuperclass(targetType);
-        if (paramTypeInstance == null) {
+        if (null == paramTypeInstance) {
             return null;
         }
         Type matchedType = findRuntimeTypeArgument(paramTypeInstance, genericTypeParam);
-        if (matchedType != null) {
+        if (null != matchedType) {
             return matchedType;
         }
         genericSubtypeDeque.push(paramTypeInstance);
@@ -87,7 +80,7 @@ class ParameterizedTypeInheritanceSearch {
     }
 
     private Type verifySubclassRuntimeInfo(TypeVariable genericTypeParam) {
-        if (genericSubtypeDeque.size() == 0) {
+        if (0 == genericSubtypeDeque.size()) {
             return genericTypeParam;
         }
         ParameterizedType subclassParamType = genericSubtypeDeque.pop();
@@ -95,11 +88,12 @@ class ParameterizedTypeInheritanceSearch {
     }
 
     private Type findRuntimeTypeArgument(ParameterizedType runtimeParamType, TypeVariable<?> genericTypeParam) {
-        if (ReflectiveTypeResolver.getRawType(runtimeParamType) != genericTypeParam.getGenericDeclaration()) {
+        if (genericTypeParam.getGenericDeclaration() != ReflectiveTypeResolver.getRawType(runtimeParamType)) {
             return null;
         }
         TypeVariable[] typeBounds = genericTypeParam.getGenericDeclaration().getTypeParameters();
-        for (int index = 0; index < typeBounds.length; index++) {
+        int index = 0;
+        while (typeBounds.length > index) {
             if (typeBounds[index].equals(genericTypeParam)) {
                 Type matchedType = runtimeParamType.getActualTypeArguments()[index];
                 //Propagated generic types to another generic classes
@@ -109,12 +103,13 @@ class ParameterizedTypeInheritanceSearch {
                 //found runtime matchedGenericType
                 return matchedType;
             }
+            index += 1;
         }
         return null;
     }
 
     private static ParameterizedType locateParameterizedSuperclass(Type candidateType) {
-        if (candidateType == null || candidateType instanceof ParameterizedType) {
+        if (null == candidateType || candidateType instanceof ParameterizedType) {
             return (ParameterizedType) candidateType;
         }
         if (!(candidateType instanceof Class)) {

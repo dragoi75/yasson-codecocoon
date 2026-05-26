@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import java.lang.reflect.Type;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.SerializationContextImpl;
 
 /**
@@ -25,6 +22,7 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
 class CyclicReferenceSerializer implements ModelSerializer {
 
     private final Type type;
+
     private ModelSerializer delegate;
 
     CyclicReferenceSerializer(Type type) {
@@ -33,7 +31,7 @@ class CyclicReferenceSerializer implements ModelSerializer {
 
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        if (delegate == null) {
+        if (null == delegate) {
             delegate = context.getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
         }
         delegate.serialize(value, generator, context);

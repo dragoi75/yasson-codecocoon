@@ -9,20 +9,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.jsonstructure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
 import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbException;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 
@@ -134,9 +131,7 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     private JsonObjectBuilder getJsonObjectBuilder(String keyName) {
         JsonStructureBuilder current = builders.peek();
         if (!(current instanceof JsonObjectBuilder)) {
-            throw new JsonbException(MessageBundle.getMessage(
-                    MessageKeysEnum.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass()
-                            + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, "Can't write key [" + keyName + "] into " + current.getClass() + "because " + current.getClass() + " is not an instance of " + JsonObjectBuilder.class));
         }
         return (JsonObjectBuilder) current;
     }
@@ -151,10 +146,10 @@ public class JsonGeneratorToStructureAdapter implements JsonGenerator {
     public JsonGenerator writeEnd() {
         JsonStructureBuilder builder = builders.pop();
         JsonStructure structure = builder.build();
-        if (builders.isEmpty()) {
-            this.root = structure;
-        } else {
+        if (!builders.isEmpty()) {
             builders.peek().put(structure);
+        } else {
+            this.root = structure;
         }
         return this;
     }

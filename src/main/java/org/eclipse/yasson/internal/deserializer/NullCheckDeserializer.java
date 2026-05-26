@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.deserializer;
 
 import jakarta.json.stream.JsonParser;
-
 import org.eclipse.yasson.internal.DeserializationContextImpl;
 
 /**
@@ -26,6 +24,7 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
 public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
 
     private final ModelDeserializer<JsonParser> nonNullDeserializer;
+
     private final ModelDeserializer<Object> nullDeserializer;
 
     /**
@@ -34,15 +33,14 @@ public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
      * @param nonNullDeserializer deserializer called when value is not null
      * @param nullDeserializer    deserializer called when value is null
      */
-    public NullCheckDeserializer(ModelDeserializer<JsonParser> nonNullDeserializer,
-                                 ModelDeserializer<Object> nullDeserializer) {
+    public NullCheckDeserializer(ModelDeserializer<JsonParser> nonNullDeserializer, ModelDeserializer<Object> nullDeserializer) {
         this.nonNullDeserializer = nonNullDeserializer;
         this.nullDeserializer = nullDeserializer;
     }
 
     @Override
     public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        if (context.getLastValueEvent() != JsonParser.Event.VALUE_NULL) {
+        if (JsonParser.Event.VALUE_NULL != context.getLastValueEvent()) {
             return nonNullDeserializer.deserialize(value, context);
         }
         return nullDeserializer.deserialize(null, context);

@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.ParameterizedType;
@@ -67,7 +66,7 @@ class ResolvedParameterizedTypeDescriptor implements ParameterizedType {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(sourceParameterizedType.toString());
-        if (typeArguments != null && typeArguments.length > 0) {
+        if (null != typeArguments && 0 < typeArguments.length) {
             builder.append(" resolved arguments: [");
             for (Type typeArgument : typeArguments) {
                 builder.append(typeArgument);
@@ -79,22 +78,18 @@ class ResolvedParameterizedTypeDescriptor implements ParameterizedType {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (obj == this) {
             return true;
         }
-        if (obj == null || !(obj instanceof ParameterizedType)) {
+        if (null == obj || !(obj instanceof ParameterizedType)) {
             return false;
         }
         final ParameterizedType otherParameterizedType = (ParameterizedType) obj;
-        return this.getRawType().equals(otherParameterizedType.getRawType())
-                && Objects.equals(this.getOwnerType(), otherParameterizedType.getOwnerType())
-                && Arrays.equals(typeArguments, otherParameterizedType.getActualTypeArguments());
+        return this.getRawType().equals(otherParameterizedType.getRawType()) && Objects.equals(this.getOwnerType(), otherParameterizedType.getOwnerType()) && Arrays.equals(typeArguments, otherParameterizedType.getActualTypeArguments());
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(typeArguments)
-                ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
-                ^ (getRawType() == null ? 0 : getRawType().hashCode());
+        return Arrays.hashCode(typeArguments) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
     }
 }

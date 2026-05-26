@@ -9,17 +9,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.config.PropertyNamingStrategy;
-
 import org.eclipse.yasson.internal.model.JsonbCreator;
 import org.eclipse.yasson.internal.model.Property;
 import org.eclipse.yasson.internal.properties.MessageKeysEnum;
@@ -40,18 +37,12 @@ public class ClassMultiReleaseExtension {
     }
 
     static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
-        return isRecord(method.getDeclaringClass())
-                && method.getParameterCount() == 0
-                && !void.class.equals(method.getReturnType())
-                && classProperties.containsKey(method.getName());
+        return isRecord(method.getDeclaringClass()) && 0 == method.getParameterCount() && !void.class.equals(method.getReturnType()) && classProperties.containsKey(method.getName());
     }
 
-    static JsonbCreator findCreator(Class<?> clazz,
-                                    Constructor<?>[] declaredConstructors,
-                                    AnnotationIntrospector introspector,
-                                    PropertyNamingStrategy propertyNamingStrategy) {
+    static JsonbCreator findCreator(Class<?> clazz, Constructor<?>[] declaredConstructors, AnnotationIntrospector introspector, PropertyNamingStrategy propertyNamingStrategy) {
         if (clazz.isRecord()) {
-            if (declaredConstructors.length == 1) {
+            if (1 == declaredConstructors.length) {
                 return introspector.createJsonbCreator(declaredConstructors[0], null, clazz, propertyNamingStrategy);
             }
         }
@@ -64,11 +55,10 @@ public class ClassMultiReleaseExtension {
 
     public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
         if (clazz.isRecord()) {
-            if (clazz.getDeclaredConstructors().length > 1) {
+            if (1 < clazz.getDeclaredConstructors().length) {
                 return Optional.of(new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
             }
         }
         return Optional.empty();
     }
-
 }

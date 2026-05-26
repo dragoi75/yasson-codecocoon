@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
@@ -18,12 +17,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.properties.MessageBundle;
 import org.eclipse.yasson.internal.properties.MessageKeysEnum;
 import org.eclipse.yasson.internal.serializer.ModelSerializer;
@@ -42,8 +39,11 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     private final Set<Object> currentlyProcessedObjects = new HashSet<>();
 
     private final Type runtimeType;
+
     private String key = null;
+
     private boolean containerWithNulls = true;
+
     private boolean root = true;
 
     /**
@@ -137,10 +137,10 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
             throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.INTERNAL_ERROR, e.getMessage()), e);
         } finally {
             try {
-                if (close) {
-                    jsonGenerator.close();
-                } else {
+                if (!close) {
                     jsonGenerator.flush();
+                } else {
+                    jsonGenerator.close();
                 }
             } catch (JsonGenerationException jge) {
                 LOGGER.severe(jge.getMessage());
@@ -198,10 +198,10 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     private <T> Type determineSerializationType(T root) {
-        if (isRoot() && runtimeType != null) {
+        if (isRoot() && null != runtimeType) {
             return runtimeType;
         }
-        return root == null ? Object.class : root.getClass();
+        return null == root ? Object.class : root.getClass();
     }
 
     public ModelSerializer getRootSerializer(Type type) {
@@ -227,6 +227,4 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     public boolean removeProcessedObject(Object object) {
         return currentlyProcessedObjects.remove(object);
     }
-
-
 }
