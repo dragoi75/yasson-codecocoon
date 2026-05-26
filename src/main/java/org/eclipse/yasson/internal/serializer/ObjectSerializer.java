@@ -38,7 +38,7 @@ class ObjectSerializer implements ModelMarshaller {
         propertySerializers.forEach((key, serializer) -> {
             try {
                 context.setKey(key);
-                serializer.serialize(value, generator, context);
+                serializer.marshal(value, generator, context);
             } catch (Exception e) {
                 throw new JsonbException(Messages.getMessage(MessageKeys.SERIALIZE_PROPERTY_ERROR, key,
                                                              value.getClass().getCanonicalName()), e);

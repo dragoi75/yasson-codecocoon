@@ -65,7 +65,7 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         cache.computeIfAbsent(clazz, aClass -> {
             SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
             return serializationModelCreator.serializerChainRuntime(new LinkedList<>(chain), clazz, customization, false, isKey);
-        }).serialize(key, generator, context);
+        }).marshal(key, generator, context);
     }
 
     /**
