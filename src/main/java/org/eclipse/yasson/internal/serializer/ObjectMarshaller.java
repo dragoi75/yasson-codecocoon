@@ -38,7 +38,7 @@ class ObjectMarshaller implements ModelMarshaller {
         fieldMarshallers.forEach((propName, marshaller) -> {
             try {
                 serializationSession.setKey(propName);
-                marshaller.serialize(inputObj, jsonWriter, serializationSession);
+                marshaller.marshal(inputObj, jsonWriter, serializationSession);
             } catch (Exception ex) {
                 throw new JsonbException(MessageProvider.getMessage(MessageConstants.SERIALIZE_PROPERTY_ERROR, propName,
                                                              inputObj.getClass().getCanonicalName()), ex);

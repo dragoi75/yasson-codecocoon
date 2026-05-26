@@ -65,7 +65,7 @@ public class TypeBasedObjectSerializer extends TypeSerializer<Object> {
         serializerMap.computeIfAbsent(targetClass, aClass -> {
             SerializationModelBuilder modelBuilder = ctx.getJsonbContext().getSerializationModelCreator();
             return modelBuilder.resolveSerializerChainRuntime(new LinkedList<>(typeSequence), targetClass, serializationCustomizer, false, keyFlag);
-        }).serialize(identifier, jsonOut, ctx);
+        }).marshal(identifier, jsonOut, ctx);
     }
 
     /**

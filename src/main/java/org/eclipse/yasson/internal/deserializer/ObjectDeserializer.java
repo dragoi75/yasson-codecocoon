@@ -65,7 +65,7 @@ class ObjectDeserializer implements ModelParser<JsonParser> {
             case VALUE_TRUE:
                 if (propertyDeserializerChains.containsKey(key)) {
                     try {
-                        propertyDeserializerChains.get(key).deserialize(parser, context);
+                        propertyDeserializerChains.get(key).deserializeModel(parser, context);
                     } catch (JsonbException e) {
                         throw new JsonbException("Unable to deserialize property '" + key + "' because of: " + e.getMessage(), e);
                     }

@@ -15,8 +15,8 @@ package org.eclipse.yasson.records;
 import jakarta.json.bind.JsonbException;
 
 import org.eclipse.yasson.Jsonbs;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
+import org.eclipse.yasson.internal.properties.MessageConstants;
+import org.eclipse.yasson.internal.properties.MessageProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,7 +69,7 @@ public class RecordTest {
         JsonbException jsonbException = assertThrows(JsonbException.class,
                                                      () -> Jsonbs.defaultJsonb.fromJson(expected,
                                                                                         CarWithMultipleConstructors.class));
-        String expectedMessage = Messages.getMessage(MessageKeys.RECORD_MULTIPLE_CONSTRUCTORS, CarWithMultipleConstructors.class);
+        String expectedMessage = MessageProvider.getMessage(MessageConstants.RECORD_MULTIPLE_CONSTRUCTORS, CarWithMultipleConstructors.class);
         assertThat(jsonbException.getMessage(), is(expectedMessage));
     }
 
