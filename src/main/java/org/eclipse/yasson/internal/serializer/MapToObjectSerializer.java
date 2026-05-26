@@ -38,38 +38,6 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
     private final MapSerializer<K, V> serializer;
 
     /**
-     * Creates an instance of {@link Map} serialization to {@code JsonObject}.
-     *
-     * @param serializer reference to {@link Map} serialization entry point
-     */
-    protected MapToObjectSerializer(MapSerializer<K, V> serializer) {
-        this.serializer = serializer;
-    }
-
-    /**
-     * Write start of {@link Map} serialization.
-     * Opens {@code JsonObject} block.
-     *
-     * @param generator JSON format generator
-     */
-    @Override
-    public void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    /**
-     * Write start of {@link Map} serialization.
-     * Opens {@code JsonObject} block.
-     *
-     * @param key       JSON key name
-     * @param generator JSON format generator
-     */
-    @Override
-    public void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
-    /**
      * Serialize content of provided {@link Map}.
      * Content of provided {@link Map} is written into {@code JsonObject} block. Map keys are written
      * as {@code JsonObject} property name {@link String}s.
@@ -98,6 +66,38 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
             generator.writeKey(keyString);
             serializer.serializeItem(value, generator, ctx);
         }
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Opens {@code JsonObject} block.
+     *
+     * @param key       JSON key name
+     * @param generator JSON format generator
+     */
+    @Override
+    public void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    /**
+     * Creates an instance of {@link Map} serialization to {@code JsonObject}.
+     *
+     * @param serializer reference to {@link Map} serialization entry point
+     */
+    protected MapToObjectSerializer(MapSerializer<K, V> serializer) {
+        this.serializer = serializer;
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Opens {@code JsonObject} block.
+     *
+     * @param generator JSON format generator
+     */
+    @Override
+    public void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
     }
 
 }

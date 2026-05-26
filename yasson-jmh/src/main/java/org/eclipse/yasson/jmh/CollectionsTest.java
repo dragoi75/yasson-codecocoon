@@ -26,6 +26,11 @@ public class CollectionsTest {
 
     private String json;
 
+    @Benchmark
+    public CollectionsData testDeserialize() {
+        return jsonb.fromJson(json, CollectionsData.class);
+    }
+
     @Setup(Level.Trial)
     public void setUp() {
         data = new CollectionsData();
@@ -44,8 +49,4 @@ public class CollectionsTest {
         return jsonb.toJson(data);
     }
 
-    @Benchmark
-    public CollectionsData testDeserialize() {
-        return jsonb.fromJson(json, CollectionsData.class);
-    }
 }

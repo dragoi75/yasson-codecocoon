@@ -24,15 +24,6 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
 
     private final List<Double> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of double array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +38,14 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
         }
         return doubleArray;
     }
+
+    /**
+     * Creates new instance of double array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

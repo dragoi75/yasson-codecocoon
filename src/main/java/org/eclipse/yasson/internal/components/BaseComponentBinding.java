@@ -24,16 +24,6 @@ public abstract class BaseComponentBinding {
     private final Type componentType;
 
     /**
-     * Creates info.
-     *
-     * @param componentType type to which component is bound.
-     */
-    public BaseComponentBinding(Type componentType) {
-        Objects.requireNonNull(componentType);
-        this.componentType = componentType;
-    }
-
-    /**
      * Resolved binding type of a component.
      *
      * @return binding type
@@ -48,4 +38,15 @@ public abstract class BaseComponentBinding {
      * @return component class
      */
     public abstract Class<?> getComponentClass();
+
+    /**
+     * Creates info.
+     *
+     * @param componentType type to which component is bound.
+     */
+    public BaseComponentBinding(Type componentType) {
+        Objects.requireNonNull(componentType);
+        this.componentType = componentType;
+    }
+
 }

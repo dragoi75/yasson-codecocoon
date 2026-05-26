@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
 
+    @Override
+    protected UUID deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return UUID.fromString(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class UUIDTypeDeserializer extends AbstractValueTypeDeserializer<UUID> {
         super(UUID.class, customization);
     }
 
-    @Override
-    protected UUID deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return UUID.fromString(jsonValue);
-    }
 }

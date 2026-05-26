@@ -34,6 +34,28 @@ public class CreatorModel {
     private final CreatorCustomization creatorCustomization;
 
     /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return type;
+    }
+
+    public CreatorCustomization getCustomization() {
+        return creatorCustomization;
+    }
+
+    /**
+     * Gets parameter name.
+     *
+     * @return Parameter name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param name      Parameter name
@@ -56,28 +78,6 @@ public class CreatorModel {
         builder.setDeserializerBinding(annotationIntrospector.getDeserializerBinding(clsElement));
         builder.setSerializerBinding(annotationIntrospector.getSerializerBinding(clsElement));
         this.creatorCustomization = new CreatorCustomization(builder, constructorNumberFormatter, constructorDateFormatter);
-    }
-
-    /**
-     * Gets parameter name.
-     *
-     * @return Parameter name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    public CreatorCustomization getCustomization() {
-        return creatorCustomization;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return type;
     }
 
 }

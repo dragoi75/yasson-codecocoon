@@ -36,13 +36,44 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
 
     private Class<?> objectClass;
 
+    private boolean isByteArray(Class<?> rawType) {
+        return rawType.isArray() && rawType.getComponentType() == Byte.TYPE;
+    }
+
     /**
-     * Creates a new builder.
-     *
-     * @param jsonbContext JSON-B context.
+     * Instance is not created in case of array items, because, we don't know how long it should be
+     * till parser ends parsing.
      */
-    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
+    private JsonbSerializer<?> createArrayItem(Class<?> componentType) {
+        if (componentType == byte.class) {
+            return new ByteArraySerializer(this);
+        } else if (componentType == short.class) {
+            return new ShortArraySerializer(this);
+        } else if (componentType == char.class) {
+            return new CharArraySerializer(this);
+        } else if (componentType == int.class) {
+            return new IntArraySerializer(this);
+        } else if (componentType == long.class) {
+            return new LongArraySerializer(this);
+        } else if (componentType == float.class) {
+            return new FloatArraySerializer(this);
+        } else if (componentType == double.class) {
+            return new DoubleArraySerializer(this);
+        } else if (componentType == boolean.class) {
+            return new BooleanArraySerializer(this);
+        } else {
+            return new ObjectArraySerializer<>(this);
+        }
+    }
+
+    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
+        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers
+                .findValueSerializerProvider(rawType);
+        if (supportedTypeSerializerOptional.isPresent()) {
+            return Optional
+                    .of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(getCustomization()));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -54,6 +85,23 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
     public SerializerBuilder withObjectClass(Class<?> objectClass) {
         this.objectClass = objectClass;
         return this;
+    }
+
+    private Type resolveRuntimeType() {
+        Type genericType = getGenericType();
+        if (genericType != null && genericType != Object.class) {
+            return genericType;
+        }
+        return objectClass;
+    }
+
+    /**
+     * Creates a new builder.
+     *
+     * @param jsonbContext JSON-B context.
+     */
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
     }
 
     /**
@@ -117,51 +165,4 @@ public class SerializerBuilder extends AbstractSerializerBuilder<SerializerBuild
 
     }
 
-    private boolean isByteArray(Class<?> rawType) {
-        return rawType.isArray() && rawType.getComponentType() == Byte.TYPE;
-    }
-
-    /**
-     * Instance is not created in case of array items, because, we don't know how long it should be
-     * till parser ends parsing.
-     */
-    private JsonbSerializer<?> createArrayItem(Class<?> componentType) {
-        if (componentType == byte.class) {
-            return new ByteArraySerializer(this);
-        } else if (componentType == short.class) {
-            return new ShortArraySerializer(this);
-        } else if (componentType == char.class) {
-            return new CharArraySerializer(this);
-        } else if (componentType == int.class) {
-            return new IntArraySerializer(this);
-        } else if (componentType == long.class) {
-            return new LongArraySerializer(this);
-        } else if (componentType == float.class) {
-            return new FloatArraySerializer(this);
-        } else if (componentType == double.class) {
-            return new DoubleArraySerializer(this);
-        } else if (componentType == boolean.class) {
-            return new BooleanArraySerializer(this);
-        } else {
-            return new ObjectArraySerializer<>(this);
-        }
-    }
-
-    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializers
-                .findValueSerializerProvider(rawType);
-        if (supportedTypeSerializerOptional.isPresent()) {
-            return Optional
-                    .of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(getCustomization()));
-        }
-        return Optional.empty();
-    }
-
-    private Type resolveRuntimeType() {
-        Type genericType = getGenericType();
-        if (genericType != null && genericType != Object.class) {
-            return genericType;
-        }
-        return objectClass;
-    }
 }

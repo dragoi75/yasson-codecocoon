@@ -28,20 +28,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public ByteArrayBase64Deserializer(Customization customization) {
-        super(byte[].class, customization);
-    }
-
-    @Override
-    protected byte[] deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return getDecoder(unmarshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonValue);
-    }
-
     private Base64.Decoder getDecoder(String strategy) {
         switch (strategy) {
         case BinaryDataStrategy.BASE_64:
@@ -52,4 +38,19 @@ public class ByteArrayBase64Deserializer extends AbstractValueTypeDeserializer<b
             throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Invalid strategy: " + strategy));
         }
     }
+
+    @Override
+    protected byte[] deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return getDecoder(unmarshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonValue);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public ByteArrayBase64Deserializer(Customization customization) {
+        super(byte[].class, customization);
+    }
+
 }

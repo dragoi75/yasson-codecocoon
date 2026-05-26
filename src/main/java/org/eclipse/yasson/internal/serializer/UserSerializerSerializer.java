@@ -34,17 +34,6 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
 
     private final ClassModel classModel;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param classModel     model
-     * @param userSerializer user serializer
-     */
-    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
-        this.classModel = classModel;
-        this.userSerializer = userSerializer;
-    }
-
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         ProcessingContext context = (Marshaller) ctx;
@@ -58,4 +47,16 @@ public class UserSerializerSerializer<T> implements JsonbSerializer<T> {
             context.removeProcessedObject(obj);
         }
     }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param classModel     model
+     * @param userSerializer user serializer
+     */
+    public UserSerializerSerializer(ClassModel classModel, JsonbSerializer<T> userSerializer) {
+        this.classModel = classModel;
+        this.userSerializer = userSerializer;
+    }
+
 }

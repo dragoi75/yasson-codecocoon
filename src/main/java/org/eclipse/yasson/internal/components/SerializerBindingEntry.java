@@ -26,17 +26,6 @@ public class SerializerBindingEntry<T> extends BaseComponentBinding {
     private final JsonbSerializer<T> jsonbAdapter;
 
     /**
-     * Creates a new instance.
-     *
-     * @param boundType     Generic type argument of serializer. Not null.
-     * @param jsonbAdapter Serializer. Can be null.
-     */
-    public SerializerBindingEntry(Type boundType, JsonbSerializer<T> jsonbAdapter) {
-        super(boundType);
-        this.jsonbAdapter = jsonbAdapter;
-    }
-
-    /**
      * Returns a serializer if any.
      *
      * @return Serializer.
@@ -54,4 +43,16 @@ public class SerializerBindingEntry<T> extends BaseComponentBinding {
     public Class<?> getComponentClass() {
         return jsonbAdapter.getClass();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param boundType     Generic type argument of serializer. Not null.
+     * @param jsonbAdapter Serializer. Can be null.
+     */
+    public SerializerBindingEntry(Type boundType, JsonbSerializer<T> jsonbAdapter) {
+        super(boundType);
+        this.jsonbAdapter = jsonbAdapter;
+    }
+
 }

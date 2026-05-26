@@ -40,15 +40,21 @@ public class Marshaller extends ProcessingContext implements SerializationContex
 
     private final Type runtimeType;
 
+    @Override
+    public <T> void serialize(T object, JsonGenerator generator) {
+        Objects.requireNonNull(object);
+        serializeRoot(object, generator);
+    }
+
     /**
-     * Creates Marshaller for generation to String.
+     * Marshals given object to provided Writer or OutputStream.
+     * Leaves generator open for further interaction after completion.
      *
-     * @param jsonbContext    Current context.
-     * @param rootRuntimeType Type of root object.
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
      */
-    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
-        super(jsonbContext);
-        this.runtimeType = rootRuntimeType;
+    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, false);
     }
 
     /**
@@ -59,6 +65,62 @@ public class Marshaller extends ProcessingContext implements SerializationContex
     public Marshaller(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
         this.runtimeType = null;
+    }
+
+    /**
+     * Serializes root element.
+     *
+     * @param <T>       Root type
+     * @param root      Root.
+     * @param generator JSON generator.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> void serializeRoot(T root, JsonGenerator generator) {
+        if (root == null) {
+            getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, generator, this);
+            return;
+        }
+        final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
+        if (getJsonbContext().getConfigProperties().isStrictIJson()
+                && rootSerializer instanceof AbstractValueTypeSerializer) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
+        }
+        rootSerializer.serialize(root, generator, this);
+    }
+
+    @Override
+    public <T> void serialize(String key, T object, JsonGenerator generator) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(object);
+        generator.writeKey(key);
+        serializeRoot(object, generator);
+    }
+
+    JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
+        final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
+        if (serializerProvider != null) {
+            return serializerProvider
+                    .provideSerializer(new JsonbPropertyInfo()
+                                               .withRuntimeType(runtimeType));
+        }
+        SerializerBuilder serializerBuilder = new SerializerBuilder(getJsonbContext())
+                .withObjectClass(rootClazz)
+                .withType(runtimeType);
+
+        ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
+        serializerBuilder.withCustomization(classModel.getClassCustomization());
+        return serializerBuilder.build();
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Closes the generator on completion.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     */
+    public void marshall(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, true);
     }
 
     /**
@@ -91,76 +153,14 @@ public class Marshaller extends ProcessingContext implements SerializationContex
     }
 
     /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Closes the generator on completion.
+     * Creates Marshaller for generation to String.
      *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
+     * @param jsonbContext    Current context.
+     * @param rootRuntimeType Type of root object.
      */
-    public void marshall(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, true);
+    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
+        super(jsonbContext);
+        this.runtimeType = rootRuntimeType;
     }
 
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Leaves generator open for further interaction after completion.
-     *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
-     */
-    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, false);
-    }
-
-    @Override
-    public <T> void serialize(String key, T object, JsonGenerator generator) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(object);
-        generator.writeKey(key);
-        serializeRoot(object, generator);
-    }
-
-    @Override
-    public <T> void serialize(T object, JsonGenerator generator) {
-        Objects.requireNonNull(object);
-        serializeRoot(object, generator);
-    }
-
-    /**
-     * Serializes root element.
-     *
-     * @param <T>       Root type
-     * @param root      Root.
-     * @param generator JSON generator.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> void serializeRoot(T root, JsonGenerator generator) {
-        if (root == null) {
-            getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, generator, this);
-            return;
-        }
-        final JsonbSerializer<T> rootSerializer = (JsonbSerializer<T>) getRootSerializer(root.getClass());
-        if (getJsonbContext().getConfigProperties().isStrictIJson()
-                && rootSerializer instanceof AbstractValueTypeSerializer) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.IJSON_ENABLED_SINGLE_VALUE));
-        }
-        rootSerializer.serialize(root, generator, this);
-    }
-
-    JsonbSerializer<?> getRootSerializer(Class<?> rootClazz) {
-        final ContainerSerializerProvider serializerProvider = getMappingContext().getSerializerProvider(rootClazz);
-        if (serializerProvider != null) {
-            return serializerProvider
-                    .provideSerializer(new JsonbPropertyInfo()
-                                               .withRuntimeType(runtimeType));
-        }
-        SerializerBuilder serializerBuilder = new SerializerBuilder(getJsonbContext())
-                .withObjectClass(rootClazz)
-                .withType(runtimeType);
-
-        ClassModel classModel = getMappingContext().getOrCreateClassModel(rootClazz);
-        serializerBuilder.withCustomization(classModel.getClassCustomization());
-        return serializerBuilder.build();
-    }
-    
 }

@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class BigIntegerTypeSerializer extends AbstractNumberSerializer<BigInteger> {
 
+    @Override
+    protected void serializeNonFormatted(BigInteger obj, JsonGenerator generator) {
+        generator.write(obj);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,8 +42,4 @@ public class BigIntegerTypeSerializer extends AbstractNumberSerializer<BigIntege
         generator.write(key, obj);
     }
 
-    @Override
-    protected void serializeNonFormatted(BigInteger obj, JsonGenerator generator) {
-        generator.write(obj);
-    }
 }

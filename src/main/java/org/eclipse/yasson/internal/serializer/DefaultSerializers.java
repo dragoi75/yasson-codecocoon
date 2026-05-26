@@ -60,6 +60,46 @@ public class DefaultSerializers {
 
     private static final SerializerProviderWrapper ENUM_PROVIDER = new SerializerProviderWrapper(EnumTypeSerializer::new, EnumTypeDeserializer::new);
 
+    private static <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
+        if (Enum.class.isAssignableFrom(clazz)) {
+            return Optional.of(ENUM_PROVIDER);
+        } else if (JsonString.class.isAssignableFrom(clazz)) {
+            return Optional.of(SERIALIZERS.get(JsonString.class));
+        } else if (JsonNumber.class.isAssignableFrom(clazz)) {
+            return Optional.of(SERIALIZERS.get(JsonNumber.class));
+        } else if (JsonValue.class.isAssignableFrom(clazz) && !(
+                JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
+            return Optional.of(SERIALIZERS.get(JsonValue.class));
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param clazz class to check
+     * @return true if supported
+     */
+    public static boolean isKnownType(Class<?> clazz) {
+        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz)
+                || Map.class.isAssignableFrom(clazz)
+                || JsonValue.class.isAssignableFrom(clazz)
+                || Optional.class.isAssignableFrom(clazz)
+                || clazz.isArray();
+
+        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
+    }
+
+    private static boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
+    }
+
     private DefaultSerializers() {
     }
 
@@ -78,7 +118,7 @@ public class DefaultSerializers {
                         new SerializerProviderWrapper(CharacterTypeSerializer::new, CharacterTypeDeserializer::new));
         serializers
                 .put(Character.TYPE, new SerializerProviderWrapper(CharacterTypeSerializer::new, CharacterTypeDeserializer::new));
-        
+
         if (isClassAvailable("java.sql.Date")) {
             serializers.put(Date.class, new SerializerProviderWrapper(SqlDateTypeSerializer::new, DateTypeDeserializer::new));
             serializers.put(java.sql.Date.class,
@@ -88,7 +128,7 @@ public class DefaultSerializers {
         } else {
             serializers.put(Date.class, new SerializerProviderWrapper(DateTypeSerializer::new, DateTypeDeserializer::new));
         }
-        
+
         serializers.put(Double.class, new SerializerProviderWrapper(DoubleTypeSerializer::new, DoubleTypeDeserializer::new));
         serializers.put(Double.TYPE, new SerializerProviderWrapper(DoubleTypeSerializer::new, DoubleTypeDeserializer::new));
         serializers.put(Float.class, new SerializerProviderWrapper(FloatTypeSerializer::new, FloatTypeDeserializer::new));
@@ -142,13 +182,13 @@ public class DefaultSerializers {
                         new SerializerProviderWrapper(BigDecimalTypeSerializer::new, BigDecimalTypeDeserializer::new));
         serializers.put(ZoneOffset.class,
                         new SerializerProviderWrapper(ZoneOffsetTypeSerializer::new, ZoneOffsetTypeDeserializer::new));
-        
+
         if (isClassAvailable("javax.xml.datatype.XMLGregorianCalendar")) {
             serializers.put(XMLGregorianCalendar.class,
                     new SerializerProviderWrapper(XMLGregorianCalendarTypeSerializer::new,
                                                   XMLGregorianCalendarTypeDeserializer::new));
         }
-        
+
         serializers.put(YearMonth.class,
                         new SerializerProviderWrapper(YearMonthTypeSerializer::new, YearMonthTypeDeserializer::new));
         serializers.put(MonthDay.class,
@@ -177,43 +217,4 @@ public class DefaultSerializers {
         return findByCondition(clazz);
     }
 
-    private static <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
-        if (Enum.class.isAssignableFrom(clazz)) {
-            return Optional.of(ENUM_PROVIDER);
-        } else if (JsonString.class.isAssignableFrom(clazz)) {
-            return Optional.of(SERIALIZERS.get(JsonString.class));
-        } else if (JsonNumber.class.isAssignableFrom(clazz)) {
-            return Optional.of(SERIALIZERS.get(JsonNumber.class));
-        } else if (JsonValue.class.isAssignableFrom(clazz) && !(
-                JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
-            return Optional.of(SERIALIZERS.get(JsonValue.class));
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param clazz class to check
-     * @return true if supported
-     */
-    public static boolean isKnownType(Class<?> clazz) {
-        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz)
-                || Map.class.isAssignableFrom(clazz)
-                || JsonValue.class.isAssignableFrom(clazz)
-                || Optional.class.isAssignableFrom(clazz)
-                || clazz.isArray();
-
-        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
-    }
-    
-    private static boolean isClassAvailable(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
-    }
 }

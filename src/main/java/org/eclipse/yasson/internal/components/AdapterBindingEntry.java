@@ -26,19 +26,18 @@ public class AdapterBindingEntry extends BaseComponentBinding {
 
     private final JsonbAdapter<?, ?> valueConverter;
 
+    @Override
+    public Class<?> getComponentClass() {
+        return valueConverter.getClass();
+    }
+
     /**
-     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
+     * Get actual components to adapt object value.
      *
-     * @param sourceType from not null
-     * @param targetType   to not null
-     * @param valueConverter  components not null
+     * @return components
      */
-    public AdapterBindingEntry(Type sourceType, Type targetType, JsonbAdapter<?, ?> valueConverter) {
-        super(sourceType);
-        Objects.requireNonNull(targetType);
-        Objects.requireNonNull(valueConverter);
-        this.targetType = targetType;
-        this.valueConverter = valueConverter;
+    public JsonbAdapter<?, ?> getAdapter() {
+        return valueConverter;
     }
 
     /**
@@ -54,16 +53,18 @@ public class AdapterBindingEntry extends BaseComponentBinding {
     }
 
     /**
-     * Get actual components to adapt object value.
+     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
      *
-     * @return components
+     * @param sourceType from not null
+     * @param targetType   to not null
+     * @param valueConverter  components not null
      */
-    public JsonbAdapter<?, ?> getAdapter() {
-        return valueConverter;
+    public AdapterBindingEntry(Type sourceType, Type targetType, JsonbAdapter<?, ?> valueConverter) {
+        super(sourceType);
+        Objects.requireNonNull(targetType);
+        Objects.requireNonNull(valueConverter);
+        this.targetType = targetType;
+        this.valueConverter = valueConverter;
     }
 
-    @Override
-    public Class<?> getComponentClass() {
-        return valueConverter.getClass();
-    }
 }

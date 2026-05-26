@@ -30,15 +30,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalLongTypeDeserializer(Customization customization) {
-        super(OptionalLong.class, customization);
-    }
-
     @Override
     public OptionalLong deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         final JsonParser.Event next = ((JsonbParser) parser).moveToValue();
@@ -56,4 +47,14 @@ public class OptionalLongTypeDeserializer extends AbstractValueTypeDeserializer<
             throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalLongTypeDeserializer(Customization customization) {
+        super(OptionalLong.class, customization);
+    }
+
 }

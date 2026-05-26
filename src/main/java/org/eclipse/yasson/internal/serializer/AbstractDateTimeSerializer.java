@@ -39,6 +39,32 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     public static final ZoneId UTC = ZoneId.of("UTC");
 
     /**
+     * Format date object as strict IJson date format.
+     *
+     * @param value value to format
+     * @return formatted result
+     */
+    protected String formatStrictIJson(T value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
+    }
+
+    /**
+     * Format date object with given formatter.
+     *
+     * @param value     date object to format
+     * @param formatter formatter to format with
+     * @return formatted result
+     */
+    protected String formatWithFormatter(T value, DateTimeFormatter formatter) {
+        return formatter.format(toTemporalAccessor(value));
+    }
+
+    @Override
+    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+        throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param customization Model customization.
@@ -47,37 +73,19 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
         super(customization);
     }
 
+    /**
+     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
+     *
+     * @param value date object to convert
+     * @return instant
+     */
+    protected abstract Instant toInstant(T value);
+
     @Override
     public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
         final JsonbRuntimeContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
         final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
         generator.write(toJson(obj, formatter, jsonbContext));
-    }
-
-    /**
-     * Converts to JSON string.
-     *
-     * @param object       Object to convert.
-     * @param formatter    Formatter to use.
-     * @param jsonbContext JSON-B context.
-     * @return JSON representation of given object.
-     */
-    public String toJson(T object, JsonbDateFormatter formatter, JsonbRuntimeContext jsonbContext) {
-        if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
-            return String.valueOf(toInstant(object).toEpochMilli());
-        } else if (formatter.getDateTimeFormatter() != null) {
-            return formatWithFormatter(object, formatter.getDateTimeFormatter());
-        } else {
-            DateTimeFormatter configDateTimeFormatter = jsonbContext.getConfigProperties().getConfigDateFormatter()
-                    .getDateTimeFormatter();
-            if (configDateTimeFormatter != null) {
-                return formatWithFormatter(object, configDateTimeFormatter);
-            }
-        }
-        if (jsonbContext.getConfigProperties().isStrictIJson()) {
-            return formatStrictIJson(object);
-        }
-        return formatDefault(object, jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
     }
 
     /**
@@ -119,14 +127,6 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     }
 
     /**
-     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
-     *
-     * @param value date object to convert
-     * @return instant
-     */
-    protected abstract Instant toInstant(T value);
-
-    /**
      * Format with default formatter for a given java.time date object.
      * Different default formatter for each date object type is used.
      *
@@ -137,28 +137,29 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
     protected abstract String formatDefault(T value, Locale locale);
 
     /**
-     * Format date object with given formatter.
+     * Converts to JSON string.
      *
-     * @param value     date object to format
-     * @param formatter formatter to format with
-     * @return formatted result
+     * @param object       Object to convert.
+     * @param formatter    Formatter to use.
+     * @param jsonbContext JSON-B context.
+     * @return JSON representation of given object.
      */
-    protected String formatWithFormatter(T value, DateTimeFormatter formatter) {
-        return formatter.format(toTemporalAccessor(value));
+    public String toJson(T object, JsonbDateFormatter formatter, JsonbRuntimeContext jsonbContext) {
+        if (JsonbDateFormat.TIME_IN_MILLIS.equals(formatter.getFormat())) {
+            return String.valueOf(toInstant(object).toEpochMilli());
+        } else if (formatter.getDateTimeFormatter() != null) {
+            return formatWithFormatter(object, formatter.getDateTimeFormatter());
+        } else {
+            DateTimeFormatter configDateTimeFormatter = jsonbContext.getConfigProperties().getConfigDateFormatter()
+                    .getDateTimeFormatter();
+            if (configDateTimeFormatter != null) {
+                return formatWithFormatter(object, configDateTimeFormatter);
+            }
+        }
+        if (jsonbContext.getConfigProperties().isStrictIJson()) {
+            return formatStrictIJson(object);
+        }
+        return formatDefault(object, jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
     }
 
-    /**
-     * Format date object as strict IJson date format.
-     *
-     * @param value value to format
-     * @return formatted result
-     */
-    protected String formatStrictIJson(T value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
-    }
-
-    @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
-        throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
-    }
 }

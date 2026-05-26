@@ -24,20 +24,6 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
 
     private final List<Short> items = new ArrayList<>();
 
-    /**
-     * Creates new short array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected ShortArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public short[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
         }
         return shortArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new short array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected ShortArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

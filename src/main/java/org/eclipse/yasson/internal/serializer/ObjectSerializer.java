@@ -37,26 +37,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(SerializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param wrapper     wrapped item
-     * @param runtimeType class type
-     * @param classModel  model of the class
-     */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        super(wrapper, runtimeType, classModel);
-    }
-
     @Override
     protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
         Marshaller context = (Marshaller) ctx;
@@ -81,13 +61,13 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
     }
 
     @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
     }
 
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
@@ -133,6 +113,26 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
             return !((OptionalDouble) object).isPresent();
         }
         return false;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper     wrapped item
+     * @param runtimeType class type
+     * @param classModel  model of the class
+     */
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(SerializerBuilder builder) {
+        super(builder);
     }
 
 }

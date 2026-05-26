@@ -24,20 +24,6 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
 
     private final List<Byte> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of byte array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected ByteArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public byte[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
         }
         return byteArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new instance of byte array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected ByteArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

@@ -22,13 +22,9 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
 
-    /**
-     * Creates new instance of json array serializer.
-     *
-     * @param builder serializer builder
-     */
-    protected JsonArraySerializer(SerializerBuilder builder) {
-        super(builder);
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
     }
 
     @Override
@@ -39,12 +35,17 @@ public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    @Override
     protected void writeStart(String key, JsonGenerator generator) {
         generator.writeStartArray(key);
     }
+
+    /**
+     * Creates new instance of json array serializer.
+     *
+     * @param builder serializer builder
+     */
+    protected JsonArraySerializer(SerializerBuilder builder) {
+        super(builder);
+    }
+
 }

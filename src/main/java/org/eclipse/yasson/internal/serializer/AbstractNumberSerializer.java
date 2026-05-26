@@ -30,6 +30,26 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     private final JsonbNumberFormatter formatter;
 
     /**
+     * Serialize raw number when NumberFormat is not present.
+     *
+     * @param obj       number
+     * @param generator generator to use
+     */
+    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
+
+    @Override
+    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+        if (formatter != null) {
+            final NumberFormat format = NumberFormat
+                    .getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
+            ((DecimalFormat) format).applyPattern(formatter.getFormat());
+            generator.write(format.format(obj));
+        } else {
+            serializeNonFormatted(obj, generator);
+        }
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param customization Model customization.
@@ -49,25 +69,5 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
      * @param key       json key
      */
     protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
-
-    @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
-        if (formatter != null) {
-            final NumberFormat format = NumberFormat
-                    .getInstance(marshaller.getJsonbContext().getConfigProperties().getLocale(formatter.getLocale()));
-            ((DecimalFormat) format).applyPattern(formatter.getFormat());
-            generator.write(format.format(obj));
-        } else {
-            serializeNonFormatted(obj, generator);
-        }
-    }
-
-    /**
-     * Serialize raw number when NumberFormat is not present.
-     *
-     * @param obj       number
-     * @param generator generator to use
-     */
-    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
 
 }

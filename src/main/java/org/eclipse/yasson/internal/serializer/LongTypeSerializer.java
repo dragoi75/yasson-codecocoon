@@ -21,15 +21,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class LongTypeSerializer extends AbstractNumberSerializer<Long> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public LongTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeNonFormatted(Long obj, JsonGenerator generator, String key) {
         generator.write(key, obj);
@@ -39,4 +30,14 @@ public class LongTypeSerializer extends AbstractNumberSerializer<Long> {
     protected void serializeNonFormatted(Long obj, JsonGenerator generator) {
         generator.write(obj);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public LongTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

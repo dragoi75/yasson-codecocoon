@@ -33,44 +33,6 @@ import jakarta.json.stream.JsonParser;
 public interface YassonJsonb extends jakarta.json.bind.Jsonb {
 
     /**
-     * Reads in a JSON data with a specified {@link JsonParser} and return the
-     * resulting content tree. Provided json parser must be fully initialized,
-     * no further configurations will be applied.
-     *
-     * @param jsonParser The json parser instance to be used to read JSON data.
-     * @param type       Type of the content tree's root object.
-     * @param <T>        Type of the content tree's root object.
-     * @return the newly created root object of the java content tree
-     * @throws JsonbException       If any unexpected error(s) occur(s) during deserialization.
-     */
-    <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException;
-
-    /**
-     * Reads in a JSON data with a specified {@link JsonParser} and return the
-     * resulting content tree. Provided json parser must be fully initialized,
-     * no further configurations will be applied.
-     *
-     * @param jsonParser  The json parser instance to be used to read JSON data.
-     * @param runtimeType Runtime type of the content tree's root object.
-     * @param <T>         Type of the content tree's root object.
-     * @return the newly created root object of the java content tree
-     * @throws JsonbException       If any unexpected error(s) occur(s) during deserialization.
-     */
-    <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException;
-
-    /**
-     * Reads a {@link JsonStructure} and and converts it into
-     * resulting java content tree.
-     *
-     * @param jsonStructure {@link JsonStructure} to be used as a source for conversion.
-     * @param type          Type of the content tree's root object.
-     * @param <T>           Type of the content tree's root object.
-     * @return the newly created root object of the java content tree
-     * @throws JsonbException       If any unexpected error(s) occur(s) during conversion.
-     */
-    <T> T fromJsonStructure(JsonStructure jsonStructure, Class<T> type) throws JsonbException;
-
-    /**
      * Reads a {@link JsonStructure} and and converts it into
      * resulting java content tree.
      *
@@ -96,6 +58,54 @@ public interface YassonJsonb extends jakarta.json.bind.Jsonb {
     void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException;
 
     /**
+     * Serializes the object content tree to a {@link JsonStructure}.
+     *
+     * @param object      The object content tree to be serialized.
+     * @param runtimeType Runtime type of the content tree's root object.
+     * @return The {@link JsonStructure} serialized from java content tree.
+     * @throws JsonbException       If any unexpected problem occurs during the
+     *                              serialization.
+     * @since JSON Binding 1.0
+     */
+    JsonStructure toJsonStructure(Object object, Type runtimeType) throws JsonbException;
+
+    /**
+     * Serializes the object content tree to a {@link JsonStructure}.
+     *
+     * @param object The object content tree to be serialized.
+     * @return The {@link JsonStructure} serialized from java content tree.
+     * @throws JsonbException       If any unexpected problem occurs during the
+     *                              serialization.
+     * @since JSON Binding 1.0
+     */
+    JsonStructure toJsonStructure(Object object) throws JsonbException;
+
+    /**
+     * Reads a {@link JsonStructure} and and converts it into
+     * resulting java content tree.
+     *
+     * @param jsonStructure {@link JsonStructure} to be used as a source for conversion.
+     * @param type          Type of the content tree's root object.
+     * @param <T>           Type of the content tree's root object.
+     * @return the newly created root object of the java content tree
+     * @throws JsonbException       If any unexpected error(s) occur(s) during conversion.
+     */
+    <T> T fromJsonStructure(JsonStructure jsonStructure, Class<T> type) throws JsonbException;
+
+    /**
+     * Reads in a JSON data with a specified {@link JsonParser} and return the
+     * resulting content tree. Provided json parser must be fully initialized,
+     * no further configurations will be applied.
+     *
+     * @param jsonParser  The json parser instance to be used to read JSON data.
+     * @param runtimeType Runtime type of the content tree's root object.
+     * @param <T>         Type of the content tree's root object.
+     * @return the newly created root object of the java content tree
+     * @throws JsonbException       If any unexpected error(s) occur(s) during deserialization.
+     */
+    <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException;
+
+    /**
      * Writes the object content tree with a specified {@link JsonGenerator}.
      * Provided json generator must be fully initialized, no further configurations are applied.
      *
@@ -110,25 +120,16 @@ public interface YassonJsonb extends jakarta.json.bind.Jsonb {
     void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException;
 
     /**
-     * Serializes the object content tree to a {@link jakarta.json.JsonStructure}.
+     * Reads in a JSON data with a specified {@link JsonParser} and return the
+     * resulting content tree. Provided json parser must be fully initialized,
+     * no further configurations will be applied.
      *
-     * @param object The object content tree to be serialized.
-     * @return The {@link JsonStructure} serialized from java content tree.
-     * @throws JsonbException       If any unexpected problem occurs during the
-     *                              serialization.
-     * @since JSON Binding 1.0
+     * @param jsonParser The json parser instance to be used to read JSON data.
+     * @param type       Type of the content tree's root object.
+     * @param <T>        Type of the content tree's root object.
+     * @return the newly created root object of the java content tree
+     * @throws JsonbException       If any unexpected error(s) occur(s) during deserialization.
      */
-    JsonStructure toJsonStructure(Object object) throws JsonbException;
+    <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException;
 
-    /**
-     * Serializes the object content tree to a {@link jakarta.json.JsonStructure}.
-     *
-     * @param object      The object content tree to be serialized.
-     * @param runtimeType Runtime type of the content tree's root object.
-     * @return The {@link JsonStructure} serialized from java content tree.
-     * @throws JsonbException       If any unexpected problem occurs during the
-     *                              serialization.
-     * @since JSON Binding 1.0
-     */
-    JsonStructure toJsonStructure(Object object, Type runtimeType) throws JsonbException;
 }

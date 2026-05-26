@@ -45,30 +45,6 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
     private final Calendar calendarTemplate;
     private final DatatypeFactory datatypeFactory;
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public XMLGregorianCalendarTypeDeserializer(Customization customization) {
-        super(XMLGregorianCalendar.class, customization);
-        this.calendarTemplate = new GregorianCalendar();
-        this.calendarTemplate.clear();
-        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
-        try {
-            this.datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.DATATYPE_FACTORY_CREATION_FAILED), e);
-        }
-    }
-
-    @Override
-    protected XMLGregorianCalendar fromInstant(Instant instant) {
-        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return datatypeFactory.newXMLGregorianCalendar(calendar);
-    }
-
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
         DateTimeFormatter formatter = jsonValue.contains("T")
@@ -91,4 +67,29 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
         return datatypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(result));
     }
+
+    @Override
+    protected XMLGregorianCalendar fromInstant(Instant instant) {
+        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
+        calendar.setTimeInMillis(instant.toEpochMilli());
+        return datatypeFactory.newXMLGregorianCalendar(calendar);
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public XMLGregorianCalendarTypeDeserializer(Customization customization) {
+        super(XMLGregorianCalendar.class, customization);
+        this.calendarTemplate = new GregorianCalendar();
+        this.calendarTemplate.clear();
+        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
+        try {
+            this.datatypeFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException e) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.DATATYPE_FACTORY_CREATION_FAILED), e);
+        }
+    }
+
 }

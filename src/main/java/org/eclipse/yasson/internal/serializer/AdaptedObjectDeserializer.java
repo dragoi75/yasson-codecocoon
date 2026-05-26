@@ -41,24 +41,12 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
     private final AbstractContainerDeserializer<?> wrapperItem;
 
     /**
-     * Creates decoration instance wrapping real adapted object item.
+     * Sets adapted item.
      *
-     * @param adapterInfo components type info
-     * @param wrapperItem wrapper item to get instance from
+     * @param adaptedTypeDeserializer Adapted item to set.
      */
-    public AdaptedObjectDeserializer(AdapterBindingEntry adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
-        this.adapterInfo = adapterInfo;
-        this.wrapperItem = wrapperItem;
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapperItem;
+    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedTypeDeserializer) {
+        this.adaptedTypeDeserializer = adaptedTypeDeserializer;
     }
 
     @Override
@@ -71,12 +59,19 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
     }
 
     /**
-     * Sets adapted item.
+     * Creates decoration instance wrapping real adapted object item.
      *
-     * @param adaptedTypeDeserializer Adapted item to set.
+     * @param adapterInfo components type info
+     * @param wrapperItem wrapper item to get instance from
      */
-    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedTypeDeserializer) {
-        this.adaptedTypeDeserializer = adaptedTypeDeserializer;
+    public AdaptedObjectDeserializer(AdapterBindingEntry adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+        this.adapterInfo = adapterInfo;
+        this.wrapperItem = wrapperItem;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapperItem;
     }
 
     @Override
@@ -93,4 +88,10 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
                                                          adapterInfo.getAdapter().getClass()), e);
         }
     }
+
+    @Override
+    public ClassModel getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
 }

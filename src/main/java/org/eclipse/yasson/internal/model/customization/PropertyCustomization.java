@@ -38,6 +38,52 @@ public class PropertyCustomization extends CustomizationBase {
 
     private final Class<?> implementationClass;
 
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return serializeDateFormatter;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @return class implementing property interface
+     */
+    public Class<?> getImplementationClass() {
+        return implementationClass;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process
+     * or not.
+     *
+     * @return true indicates that the underlying type/property should be included in deserialization process and false
+     * indicates it should not
+     */
+    public boolean isWriteTransient() {
+        return writeTransient;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during serialization process
+     * or not.
+     *
+     * @return true indicates that the underlying type/property should be included in serialization process and false indicates
+     * it should not
+     */
+    public boolean isReadTransient() {
+        return readTransient;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -58,13 +104,9 @@ public class PropertyCustomization extends CustomizationBase {
         this.implementationClass = builder.getImplementationClass();
     }
 
-    /**
-     * Name if specified for property setter with {@link jakarta.json.bind.annotation.JsonbProperty}.
-     *
-     * @return read name
-     */
-    public String getJsonReadName() {
-        return jsonReadName;
+    @Override
+    public AdapterBindingEntry getDeserializeAdapterBinding() {
+        return deserializeAdapter;
     }
 
     /**
@@ -77,64 +119,22 @@ public class PropertyCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return serializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return serializeDateFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
-    }
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during serialization process
-     * or not.
-     *
-     * @return true indicates that the underlying type/property should be included in serialization process and false indicates
-     * it should not
-     */
-    public boolean isReadTransient() {
-        return readTransient;
-    }
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process
-     * or not.
-     *
-     * @return true indicates that the underlying type/property should be included in deserialization process and false
-     * indicates it should not
-     */
-    public boolean isWriteTransient() {
-        return writeTransient;
-    }
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class<?> getImplementationClass() {
-        return implementationClass;
-    }
-
-    @Override
-    public AdapterBindingEntry getDeserializeAdapterBinding() {
-        return deserializeAdapter;
-    }
-
-    @Override
     public AdapterBindingEntry getSerializeAdapterBinding() {
         return serializeAdapter;
+    }
+
+    /**
+     * Name if specified for property setter with {@link jakarta.json.bind.annotation.JsonbProperty}.
+     *
+     * @return read name
+     */
+    public String getJsonReadName() {
+        return jsonReadName;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return serializeNumberFormatter;
     }
 
 }

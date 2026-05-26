@@ -25,6 +25,11 @@ public class JsonbDeserializerBinding<T> extends BaseComponentBinding {
 
     private final JsonbDeserializer<T> jsonbParser;
 
+    @Override
+    public Class<?> getComponentClass() {
+        return jsonbParser.getClass();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -45,8 +50,4 @@ public class JsonbDeserializerBinding<T> extends BaseComponentBinding {
         return jsonbParser;
     }
 
-    @Override
-    public Class<?> getComponentClass() {
-        return jsonbParser.getClass();
-    }
 }

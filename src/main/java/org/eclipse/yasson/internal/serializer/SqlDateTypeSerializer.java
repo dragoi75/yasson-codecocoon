@@ -24,26 +24,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  * @param <T> date type
  */
 public class SqlDateTypeSerializer<T extends Date> extends DateTypeSerializer<T> {
-    
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlDateTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
-    @Override
-    protected Instant toInstant(Date value) {
-        if (value instanceof java.sql.Date) {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(value.getTime());
-        } else {
-            return super.toInstant(value);
-        }
-    }
 
     @Override
     protected String formatDefault(Date value, Locale locale) {
@@ -62,4 +42,25 @@ public class SqlDateTypeSerializer<T extends Date> extends DateTypeSerializer<T>
             return super.formatWithFormatter(value, formatter);
         }
     }
+
+    @Override
+    protected Instant toInstant(Date value) {
+        if (value instanceof java.sql.Date) {
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(value.getTime());
+        } else {
+            return super.toInstant(value);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlDateTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

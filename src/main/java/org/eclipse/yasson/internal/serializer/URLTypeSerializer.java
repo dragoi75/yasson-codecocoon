@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class URLTypeSerializer extends AbstractValueTypeSerializer<URL> {
 
+    @Override
+    protected void serialize(URL obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class URLTypeSerializer extends AbstractValueTypeSerializer<URL> {
         super(customization);
     }
 
-    @Override
-    protected void serialize(URL obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

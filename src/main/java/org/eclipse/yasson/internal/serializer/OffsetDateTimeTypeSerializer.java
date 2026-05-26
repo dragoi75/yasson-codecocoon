@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class OffsetDateTimeTypeSerializer extends AbstractDateTimeSerializer<OffsetDateTime> {
 
+    @Override
+    protected String formatDefault(OffsetDateTime value, Locale locale) {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale).format(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,8 +43,4 @@ public class OffsetDateTimeTypeSerializer extends AbstractDateTimeSerializer<Off
         return value.toInstant();
     }
 
-    @Override
-    protected String formatDefault(OffsetDateTime value, Locale locale) {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale).format(value);
-    }
 }

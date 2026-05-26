@@ -51,6 +51,55 @@ public class JsonbRuntimeContext {
     private final InstanceCreator objectFactory;
 
     /**
+     * Gets component for annotation parsing.
+     *
+     * @return Annotation introspector.
+     */
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationInspector;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonSupplier;
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configProps;
+    }
+
+    /**
+     * Returns component for creating instances of non-parsed types.
+     *
+     * @return InstanceCreator
+     */
+    public InstanceCreator getInstanceCreator() {
+        return objectFactory;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentBindingResolver getComponentMatcher() {
+        return componentResolver;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mapContext;
+    }
+
+    /**
      * Creates and initialize context.
      *
      * @param configOptions  jsonb jsonbConfig not null
@@ -66,73 +115,6 @@ public class JsonbRuntimeContext {
         this.annotationInspector = new AnnotationIntrospector(this);
         this.jsonSupplier = jsonSupplier;
         this.configProps = new JsonbConfigProperties(configOptions);
-    }
-
-    /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return configOptions;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mapContext;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonSupplier;
-    }
-
-    /**
-     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
-     *
-     * @return Instance creator.
-     */
-    public JsonbComponentFactory getComponentInstanceCreator() {
-        return componentFactory;
-    }
-
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentBindingResolver getComponentMatcher() {
-        return componentResolver;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationInspector;
-    }
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configProps;
-    }
-
-    /**
-     * Returns component for creating instances of non-parsed types.
-     *
-     * @return InstanceCreator
-     */
-    public InstanceCreator getInstanceCreator() {
-        return objectFactory;
     }
 
     private JsonbComponentFactory initializeComponentInstanceCreator(InstanceCreator objectFactory) {
@@ -151,6 +133,24 @@ public class JsonbRuntimeContext {
         JsonbComponentFactory factory = factoryList.get(0);
         JSONB_LOG.finest("Component instance creator:" + factory.getClass());
         return factory;
+    }
+
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return configOptions;
+    }
+
+    /**
+     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
+     *
+     * @return Instance creator.
+     */
+    public JsonbComponentFactory getComponentInstanceCreator() {
+        return componentFactory;
     }
 
 }

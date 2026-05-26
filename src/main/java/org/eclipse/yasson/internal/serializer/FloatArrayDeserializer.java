@@ -23,15 +23,6 @@ import org.eclipse.yasson.internal.Unmarshaller;
 public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
     private final List<Float> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of float array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected FloatArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -46,4 +37,14 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
         }
         return floatArray;
     }
+
+    /**
+     * Creates new instance of float array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected FloatArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

@@ -40,6 +40,36 @@ public class MappingContext {
     private final ClassParser classParser;
 
     /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassModel getClassModel(Class<?> clazz) {
+        return classes.get(clazz);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz              Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param jsonbContext Context. Required.
@@ -100,33 +130,4 @@ public class MappingContext {
         };
     }
 
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassModel getClassModel(Class<?> clazz) {
-        return classes.get(clazz);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz              Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

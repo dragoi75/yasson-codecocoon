@@ -32,35 +32,9 @@ public class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param original         Original type.
-     * @param resolvedTypeArgs Resolved type arguments.
-     */
-    public ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
-        this.original = original;
-        this.resolvedTypeArgs = resolvedTypeArgs;
-    }
-
-    /**
-     * Type arguments with resolved TypeVariables.
-     *
-     * @return type args
-     */
-    @Override
-    public Type[] getActualTypeArguments() {
-        return resolvedTypeArgs;
-    }
-
     @Override
     public Type getRawType() {
         return original.getRawType();
-    }
-
-    @Override
-    public Type getOwnerType() {
-        return original.getOwnerType();
     }
 
     @Override
@@ -97,4 +71,31 @@ public class ResolvedParameterizedType implements ParameterizedType {
                 ^ (getOwnerType() == null ? 0 : getOwnerType().hashCode())
                 ^ (getRawType() == null ? 0 : getRawType().hashCode());
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param original         Original type.
+     * @param resolvedTypeArgs Resolved type arguments.
+     */
+    public ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
+        this.original = original;
+        this.resolvedTypeArgs = resolvedTypeArgs;
+    }
+
+    @Override
+    public Type getOwnerType() {
+        return original.getOwnerType();
+    }
+
+    /**
+     * Type arguments with resolved TypeVariables.
+     *
+     * @return type args
+     */
+    @Override
+    public Type[] getActualTypeArguments() {
+        return resolvedTypeArgs;
+    }
+
 }

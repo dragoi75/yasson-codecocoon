@@ -24,15 +24,6 @@ public class DefaultConstructorCreator implements JsonbComponentFactory {
 
     private final InstanceCreator creator;
 
-    /**
-     * Constructs default constructor creator.
-     *
-     * @param creator instance creator
-     */
-    DefaultConstructorCreator(InstanceCreator creator) {
-        this.creator = creator;
-    }
-
     @Override
     public <T> T getOrCreateComponent(Class<T> componentClass) {
         return creator.createInstance(componentClass);
@@ -42,4 +33,14 @@ public class DefaultConstructorCreator implements JsonbComponentFactory {
     public void close() throws IOException {
 
     }
+
+    /**
+     * Constructs default constructor creator.
+     *
+     * @param creator instance creator
+     */
+    DefaultConstructorCreator(InstanceCreator creator) {
+        this.creator = creator;
+    }
+
 }

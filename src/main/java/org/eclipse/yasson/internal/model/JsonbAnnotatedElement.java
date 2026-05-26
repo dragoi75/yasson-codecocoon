@@ -33,26 +33,8 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
 
     private final T element;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param element Element.
-     */
-    public JsonbAnnotatedElement(T element) {
-        for (Annotation ann : element.getAnnotations()) {
-            annotations.put(ann.annotationType(), ann);
-        }
-
-        this.element = element;
-    }
-
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return element;
+    public Annotation[] getAnnotations() {
+        return annotations.values().toArray(new Annotation[0]);
     }
 
     /**
@@ -63,10 +45,6 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
      */
     public <AT extends Annotation> AT getAnnotation(Class<AT> annotationClass) {
         return annotationClass.cast(annotations.get(annotationClass));
-    }
-
-    public Annotation[] getAnnotations() {
-        return annotations.values().toArray(new Annotation[0]);
     }
 
     /**
@@ -81,4 +59,27 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
         }
         annotations.put(annotation.annotationType(), annotation);
     }
+
+    /**
+     * Gets element.
+     *
+     * @return Element.
+     */
+    public T getElement() {
+        return element;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param element Element.
+     */
+    public JsonbAnnotatedElement(T element) {
+        for (Annotation ann : element.getAnnotations()) {
+            annotations.put(ann.annotationType(), ann);
+        }
+
+        this.element = element;
+    }
+
 }

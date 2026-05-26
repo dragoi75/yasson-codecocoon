@@ -33,22 +33,17 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     private static final Logger LOGGER = Logger.getLogger(Unmarshaller.class.getName());
 
     /**
-     * Creates instance of unmarshaller.
-     *
-     * @param jsonbContext context to use
+     * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
+     * custom user deserializer.
      */
-    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
-    }
-
-    @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
+    private JsonParser.Event getRootEvent(JsonParser parser) {
+        JsonbRiParser.LevelContext currentLevel = ((JsonbParser) parser).getCurrentLevel();
+        //Wrapper parser is at start
+        if (currentLevel.getParent() == null) {
+            return parser.next();
+        }
+        final JsonParser.Event lastEvent = currentLevel.getLastEvent();
+        return lastEvent == JsonParser.Event.KEY_NAME ? parser.next() : lastEvent;
     }
 
     @SuppressWarnings("unchecked")
@@ -70,17 +65,22 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
     }
 
     /**
-     * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
-     * custom user deserializer.
+     * Creates instance of unmarshaller.
+     *
+     * @param jsonbContext context to use
      */
-    private JsonParser.Event getRootEvent(JsonParser parser) {
-        JsonbRiParser.LevelContext currentLevel = ((JsonbParser) parser).getCurrentLevel();
-        //Wrapper parser is at start
-        if (currentLevel.getParent() == null) {
-            return parser.next();
-        }
-        final JsonParser.Event lastEvent = currentLevel.getLastEvent();
-        return lastEvent == JsonParser.Event.KEY_NAME ? parser.next() : lastEvent;
+    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
+    }
+
+    @Override
+    public <T> T deserialize(Type type, JsonParser parser) {
+        return deserializeItem(type, parser);
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
+        return deserializeItem(clazz, parser);
     }
 
 }

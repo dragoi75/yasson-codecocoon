@@ -38,18 +38,24 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
-    /**
-     * Creates new {@link JsonStructure} parser.
-     *
-     * @param structure json structure
-     */
-    public JsonStructureToParserAdapter(JsonStructure structure) {
-        this.rootStructure = structure;
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
     }
 
     @Override
-    public boolean hasNext() {
-        return iterators.peek().hasNext();
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
+    }
+
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
     }
 
     @Override
@@ -76,26 +82,6 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
     public BigDecimal getBigDecimal() {
         return getJsonNumberValue().bigDecimalValue();
     }
@@ -110,12 +96,27 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
     }
 
     @Override
-    public void close() {
-        //noop
+    public boolean hasNext() {
+        return iterators.peek().hasNext();
     }
+
+    /**
+     * Creates new {@link JsonStructure} parser.
+     *
+     * @param structure json structure
+     */
+    public JsonStructureToParserAdapter(JsonStructure structure) {
+        this.rootStructure = structure;
+    }
+
+    @Override
+    public String getString() {
+        return iterators.peek().getString();
+    }
+
 }

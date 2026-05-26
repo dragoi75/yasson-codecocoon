@@ -28,6 +28,18 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[]> {
 
+    private Base64.Encoder getEncoder(String strategy) {
+        switch (strategy) {
+        case BinaryDataStrategy.BASE_64:
+            return Base64.getEncoder();
+        case BinaryDataStrategy.BASE_64_URL:
+            return Base64.getUrlEncoder();
+        default:
+            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+                                                         "Invalid strategy: " + strategy));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -43,15 +55,4 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
                                 .encodeToString(obj));
     }
 
-    private Base64.Encoder getEncoder(String strategy) {
-        switch (strategy) {
-        case BinaryDataStrategy.BASE_64:
-            return Base64.getEncoder();
-        case BinaryDataStrategy.BASE_64_URL:
-            return Base64.getUrlEncoder();
-        default:
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-                                                         "Invalid strategy: " + strategy));
-        }
-    }
 }

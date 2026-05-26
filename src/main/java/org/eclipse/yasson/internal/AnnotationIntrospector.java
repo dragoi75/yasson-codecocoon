@@ -93,26 +93,51 @@ public class AnnotationIntrospector {
                           JsonbTypeAdapter.class, JsonbTypeSerializer.class, JsonbTypeDeserializer.class);
 
     /**
-     * Creates annotation introspecting component passing {@link JsonbRuntimeContext} inside.
+     * Finds annotations incompatible with {@link JsonbTransient} annotation.
      *
-     * @param jsonbContext mandatory
+     * @param target target to check
      */
-    public AnnotationIntrospector(JsonbRuntimeContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-        this.constructorPropertiesIntrospector = ConstructorPropertiesAnnotationIntrospector.forContext(jsonbContext);
+    @SuppressWarnings("unchecked")
+    public void checkTransientIncompatible(JsonbAnnotatedElement<?> target) {
+        if (target == null) {
+            return;
+        }
+
+        for (Class<? extends Annotation> ann : TRANSIENT_INCOMPATIBLE) {
+            Annotation annotation = findAnnotation(target.getAnnotations(), ann);
+            if (annotation != null) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
+            }
+        }
     }
 
     /**
-     * Gets a name of property for JSON marshalling.
-     * Can be different writeName for same property.
+     * Gets an annotation from first resolved annotation in a property in this order:
+     * <p>1. Field, 2. Getter, 3 Setter.</p>
+     * First found overrides other.
      *
-     * @param property property representation - field, getter, setter (not null)
-     * @return read name
+     * @param annotationClass Annotation class to search for
+     * @param property        property to search in
+     * @param <T>             Annotation type
+     * @return Annotation if found, null otherwise
      */
-    public String getJsonbPropertyJsonWriteName(Property property) {
-        Objects.requireNonNull(property);
-        return getJsonbPropertyCustomizedName(property, property.getGetterElement());
+    private <T extends Annotation> Optional<T> getAnnotationFromProperty(Class<T> annotationClass, Property property) {
+        T fieldAnnotation = getFieldAnnotation(annotationClass, property.getFieldElement());
+        if (fieldAnnotation != null) {
+            return Optional.of(fieldAnnotation);
+        }
+
+        T getterAnnotation = getMethodAnnotation(annotationClass, property.getGetterElement());
+        if (getterAnnotation != null) {
+            return Optional.of(getterAnnotation);
+        }
+
+        T setterAnnotation = getMethodAnnotation(annotationClass, property.getSetterElement());
+        if (setterAnnotation != null) {
+            return Optional.of(setterAnnotation);
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -127,196 +152,20 @@ public class AnnotationIntrospector {
         return getJsonbPropertyCustomizedName(property, property.getSetterElement());
     }
 
-    private String getJsonbPropertyCustomizedName(Property property, JsonbAnnotatedElement<Method> methodElement) {
-        JsonbProperty methodAnnotation = getMethodAnnotation(JsonbProperty.class, methodElement);
-        if (methodAnnotation != null && !methodAnnotation.value().isEmpty()) {
-            return methodAnnotation.value();
+    /**
+     * Returns {@link JsonbDateFormatter} instance if {@link JsonbDateFormat} annotation is present.
+     *
+     * @param param annotated method parameter
+     * @return formatter instance if {@link JsonbDateFormat} is present otherwise null
+     */
+    public JsonbDateFormatter getConstructorDateFormatter(JsonbAnnotatedElement<Parameter> param) {
+        JsonbDateFormat annotation = param.getAnnotation(JsonbDateFormat.class);
+        if (annotation != null) {
+            return new JsonbDateFormatter(DateTimeFormatter
+                                                  .ofPattern(annotation.value(), Locale.forLanguageTag(annotation.locale())),
+                                          annotation.value(), annotation.locale());
         }
-        //in case of property name getter/setter override field value
-        JsonbProperty fieldAnnotation = getFieldAnnotation(JsonbProperty.class, property.getFieldElement());
-        if (fieldAnnotation != null && !fieldAnnotation.value().isEmpty()) {
-            return fieldAnnotation.value();
-        }
-
         return null;
-    }
-
-    /**
-     * Searches for JsonbCreator annotation on constructors and static methods.
-     *
-     * @param clazz class to search
-     * @return JsonbCreator metadata object
-     */
-    public JsonbCreator getCreator(Class<?> clazz) {
-        JsonbCreator jsonbCreator = null;
-        Constructor<?>[] declaredConstructors =
-                AccessController.doPrivileged((PrivilegedAction<Constructor<?>[]>) clazz::getDeclaredConstructors);
-
-        for (Constructor<?> constructor : declaredConstructors) {
-            final jakarta.json.bind.annotation.JsonbCreator annot = findAnnotation(constructor.getDeclaredAnnotations(),
-                                                                                 jakarta.json.bind.annotation.JsonbCreator.class);
-            if (annot != null) {
-                jsonbCreator = createJsonbCreator(constructor, jsonbCreator, clazz);
-            }
-        }
-
-        Method[] declaredMethods =
-                AccessController.doPrivileged((PrivilegedAction<Method[]>) clazz::getDeclaredMethods);
-        for (Method method : declaredMethods) {
-            final jakarta.json.bind.annotation.JsonbCreator annot = findAnnotation(method.getDeclaredAnnotations(),
-                                                                                 jakarta.json.bind.annotation.JsonbCreator.class);
-            if (annot != null && Modifier.isStatic(method.getModifiers())) {
-                if (!clazz.equals(method.getReturnType())) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE,
-                                                                 method,
-                                                                 clazz));
-                }
-                jsonbCreator = createJsonbCreator(method, jsonbCreator, clazz);
-            }
-        }
-        if (jsonbCreator == null) {
-            jsonbCreator = constructorPropertiesIntrospector.getCreator(declaredConstructors);
-        }
-        return jsonbCreator;
-    }
-
-    private JsonbCreator createJsonbCreator(Executable executable, JsonbCreator existing, Class<?> clazz) {
-        if (existing != null) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.MULTIPLE_JSONB_CREATORS, clazz));
-        }
-
-        final Parameter[] parameters = executable.getParameters();
-
-        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            final Parameter parameter = parameters[i];
-            final JsonbProperty jsonbPropertyAnnotation = parameter.getAnnotation(JsonbProperty.class);
-            if (jsonbPropertyAnnotation != null && !jsonbPropertyAnnotation.value().isEmpty()) {
-                creatorModels[i] = new CreatorModel(jsonbPropertyAnnotation.value(), parameter, jsonbContext);
-            } else {
-                creatorModels[i] = new CreatorModel(parameter.getName(), parameter, jsonbContext);
-            }
-        }
-
-        return new JsonbCreator(executable, creatorModels);
-    }
-
-    /**
-     * Checks for {@link JsonbAdapter} on a property.
-     *
-     * @param property property not null
-     * @return components info
-     */
-    public AdapterBindingEntry getAdapterBinding(Property property) {
-        Objects.requireNonNull(property);
-        JsonbTypeAdapter adapterAnnotation = getAnnotationFromProperty(JsonbTypeAdapter.class, property)
-                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeAdapter.class));
-        if (adapterAnnotation == null) {
-            return null;
-        }
-
-        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectiveTypeResolver.getOptionalRawType(property.getPropertyType()));
-    }
-
-    /**
-     * Checks for {@link JsonbAdapter} on a type.
-     *
-     * @param clsElement type not null
-     * @return components info
-     */
-    public AdapterBindingEntry getAdapterBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
-        Objects.requireNonNull(clsElement);
-
-        JsonbTypeAdapter adapterAnnotation = clsElement.getElement().getAnnotation(JsonbTypeAdapter.class);
-        if (adapterAnnotation == null) {
-            return null;
-        }
-
-        return getAdapterBindingFromAnnotation(adapterAnnotation, Optional.ofNullable(clsElement.getElement()));
-    }
-
-    private AdapterBindingEntry getAdapterBindingFromAnnotation(JsonbTypeAdapter adapterAnnotation, Optional<Class<?>> expectedClass) {
-        final Class<? extends JsonbAdapter> adapterClass = adapterAnnotation.value();
-        final AdapterBindingEntry adapterBinding = jsonbContext.getComponentMatcher().inspectAdapterBinding(adapterClass, null);
-
-        if (expectedClass.isPresent() && !(
-                ReflectiveTypeResolver.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_INCOMPATIBLE,
-                                                         adapterBinding.getBindingType(),
-                                                         expectedClass.get()));
-        }
-        return adapterBinding;
-    }
-
-    /**
-     * Checks for {@link JsonbDeserializer} on a property.
-     *
-     * @param property property not null
-     * @return components info
-     */
-    public JsonbDeserializerBinding getDeserializerBinding(Property property) {
-        Objects.requireNonNull(property);
-        JsonbTypeDeserializer deserializerAnnotation = getAnnotationFromProperty(JsonbTypeDeserializer.class, property)
-                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeDeserializer.class));
-        if (deserializerAnnotation == null) {
-            return null;
-        }
-
-        final Class<? extends JsonbDeserializer> deserializerClass = deserializerAnnotation.value();
-        return jsonbContext.getComponentMatcher().inspectDeserializerBinding(deserializerClass, null);
-    }
-
-    /**
-     * Checks for {@link JsonbDeserializer} on a type.
-     *
-     * @param clsElement type not null
-     * @return components info
-     */
-    public JsonbDeserializerBinding getDeserializerBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
-        Objects.requireNonNull(clsElement);
-        JsonbTypeDeserializer deserializerAnnotation = clsElement.getElement().getAnnotation(JsonbTypeDeserializer.class);
-        if (deserializerAnnotation == null) {
-            return null;
-        }
-
-        final Class<? extends JsonbDeserializer> deserializerClass = deserializerAnnotation.value();
-        return jsonbContext.getComponentMatcher().inspectDeserializerBinding(deserializerClass, null);
-    }
-
-    /**
-     * Checks for {@link JsonbSerializer} on a property.
-     *
-     * @param property property not null
-     * @return components info
-     */
-    public SerializerBindingEntry getSerializerBinding(Property property) {
-        Objects.requireNonNull(property);
-        JsonbTypeSerializer serializerAnnotation = getAnnotationFromProperty(JsonbTypeSerializer.class, property)
-                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeSerializer.class));
-        if (serializerAnnotation == null) {
-            return null;
-        }
-
-        final Class<? extends JsonbSerializer> serializerClass = serializerAnnotation.value();
-        return jsonbContext.getComponentMatcher().inspectSerializerBinding(serializerClass, null);
-
-    }
-
-    /**
-     * Checks for {@link JsonbSerializer} on a type.
-     *
-     * @param clsElement type not null
-     * @return components info
-     */
-    public SerializerBindingEntry getSerializerBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
-        Objects.requireNonNull(clsElement);
-        JsonbTypeSerializer serializerAnnotation = clsElement.getElement().getAnnotation(JsonbTypeSerializer.class);
-        if (serializerAnnotation == null) {
-            return null;
-        }
-
-        final Class<? extends JsonbSerializer> serializerClass = serializerAnnotation.value();
-        return jsonbContext.getComponentMatcher().inspectSerializerBinding(serializerClass, null);
     }
 
     private <T extends Annotation> T getAnnotationFromPropertyType(Property property, Class<T> annotationClass) {
@@ -328,74 +177,17 @@ public class AnnotationIntrospector {
         return findAnnotation(collectAnnotations(optionalRawType.get()).getAnnotations(), annotationClass);
     }
 
-    /**
-     * Checks if property is nillable.
-     * Looks for {@link JsonbProperty} nillable attribute only.
-     * JsonbNillable is checked only for ClassModels.
-     *
-     * @param property property to search in, not null
-     * @return True if property should be serialized when null.
-     */
-    public Optional<Boolean> isPropertyNillable(Property property) {
-        Objects.requireNonNull(property);
+    private <T extends Annotation> void collectFromInterfaces(Class<T> annotationClass,
+                                                              Class clazz,
+                                                              Map<Class<?>, T> collectedAnnotations) {
 
-        final Optional<JsonbProperty> jsonbProperty = getAnnotationFromProperty(JsonbProperty.class, property);
-        return jsonbProperty.map(JsonbProperty::nillable);
-
-    }
-
-    /**
-     * Checks for JsonbNillable annotation on a class, its superclasses and interfaces.
-     *
-     * @param clazzElement class to search JsonbNillable in.
-     * @return true if found
-     */
-    public boolean isClassNillable(JsonbAnnotatedElement<Class<?>> clazzElement) {
-        final JsonbNillable jsonbNillable = findAnnotation(clazzElement.getAnnotations(), JsonbNillable.class);
-        if (jsonbNillable != null) {
-            return jsonbNillable.value();
+        for (Class<?> interfaceClass : clazz.getInterfaces()) {
+            T annotation = findAnnotation(interfaceClass.getDeclaredAnnotations(), annotationClass);
+            if (annotation != null) {
+                collectedAnnotations.put(interfaceClass, annotation);
+            }
+            collectFromInterfaces(annotationClass, interfaceClass, collectedAnnotations);
         }
-        Class<?> clazz = clazzElement.getElement();
-        if (clazz == Optional.class
-                || clazz == OptionalDouble.class
-                || clazz == OptionalInt.class 
-                || clazz == OptionalLong.class) {
-            return true;
-        }
-        return jsonbContext.getConfigProperties().getConfigNullable();
-    }
-
-    /**
-     * Checks for {@link JsonbPropertyOrder} annotation.
-     *
-     * @param clazzElement class to search on
-     * @return ordered properties names or null if not found
-     */
-    public String[] getPropertyOrder(JsonbAnnotatedElement<Class<?>> clazzElement) {
-        final JsonbPropertyOrder jsonbPropertyOrder = clazzElement.getElement().getAnnotation(JsonbPropertyOrder.class);
-        return jsonbPropertyOrder != null ? jsonbPropertyOrder.value() : null;
-    }
-
-    /**
-     * Checks if property is annotated transient. If JsonbTransient annotation is present on field getter or setter, and other
-     * annotation is present
-     * on either of it, JsonbException is thrown with message describing collision.
-     *
-     * @param property The property to inspect if there is any {@link JsonbTransient} annotation defined for it
-     * @return Set of {@link AnnotationTarget}s specifying in which scope the {@link JsonbTransient} is applied
-     */
-    public EnumSet<AnnotationTarget> getJsonbTransientCategorized(Property property) {
-        Objects.requireNonNull(property);
-        EnumSet<AnnotationTarget> transientTarget = EnumSet.noneOf(AnnotationTarget.class);
-        Map<AnnotationTarget, JsonbTransient> annotationFromPropertyCategorized = getAnnotationFromPropertyCategorized(
-                JsonbTransient.class,
-                property);
-        if (annotationFromPropertyCategorized.size() > 0) {
-            transientTarget.addAll(annotationFromPropertyCategorized.keySet());
-            return transientTarget;
-        }
-
-        return transientTarget;
     }
 
     /**
@@ -441,6 +233,102 @@ public class AnnotationIntrospector {
     }
 
     /**
+     * Checks for {@link JsonbAdapter} on a property.
+     *
+     * @param property property not null
+     * @return components info
+     */
+    public AdapterBindingEntry getAdapterBinding(Property property) {
+        Objects.requireNonNull(property);
+        JsonbTypeAdapter adapterAnnotation = getAnnotationFromProperty(JsonbTypeAdapter.class, property)
+                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeAdapter.class));
+        if (adapterAnnotation == null) {
+            return null;
+        }
+
+        return getAdapterBindingFromAnnotation(adapterAnnotation, ReflectiveTypeResolver.getOptionalRawType(property.getPropertyType()));
+    }
+
+    /**
+     * Creates {@link JsonbDateFormatter} caches formatter instance if possible.
+     * For DEFAULT_FORMAT appropriate singleton instances from java.time.format.DateTimeFormatter
+     * are used in date converters.
+     */
+    private JsonbDateFormatter createJsonbDateFormatter(String format, String locale, Property property) {
+        if (JsonbDateFormat.TIME_IN_MILLIS.equals(format) || JsonbDateFormat.DEFAULT_FORMAT.equals(format)) {
+            //for epochMillis formatter is not used, for default format singleton instances of DateTimeFormatter
+            //are used in the converters
+            return new JsonbDateFormatter(format, locale);
+        }
+
+        final Optional<Class<?>> optionalRawType = ReflectiveTypeResolver.getOptionalRawType(property.getPropertyType());
+        final Class<?> propertyRawType = optionalRawType.orElse(null);
+
+        if (propertyRawType != null
+                && !TemporalAccessor.class.isAssignableFrom(propertyRawType)
+                && !Date.class.isAssignableFrom(propertyRawType)
+                && !Calendar.class.isAssignableFrom(propertyRawType)) {
+            throw new IllegalStateException(Messages.getMessage(MessageKeys.UNSUPPORTED_DATE_TYPE, propertyRawType));
+        }
+
+        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
+        builder.appendPattern(format);
+        if (jsonbContext.getConfigProperties().isZeroTimeDefaulting()) {
+            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
+            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
+            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
+        }
+        DateTimeFormatter dateTimeFormatter = builder.toFormatter(Locale.forLanguageTag(locale));
+        return new JsonbDateFormatter(dateTimeFormatter, format, locale);
+    }
+
+    /**
+     * Checks for {@link JsonbDeserializer} on a property.
+     *
+     * @param property property not null
+     * @return components info
+     */
+    public JsonbDeserializerBinding getDeserializerBinding(Property property) {
+        Objects.requireNonNull(property);
+        JsonbTypeDeserializer deserializerAnnotation = getAnnotationFromProperty(JsonbTypeDeserializer.class, property)
+                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeDeserializer.class));
+        if (deserializerAnnotation == null) {
+            return null;
+        }
+
+        final Class<? extends JsonbDeserializer> deserializerClass = deserializerAnnotation.value();
+        return jsonbContext.getComponentMatcher().inspectDeserializerBinding(deserializerClass, null);
+    }
+
+    private <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass) {
+        return AnnotationFinder.findAnnotation(declaredAnnotations, annotationClass, new HashSet<>());
+    }
+
+    /**
+     * Checks if property is nillable.
+     * Looks for {@link JsonbProperty} nillable attribute only.
+     * JsonbNillable is checked only for ClassModels.
+     *
+     * @param property property to search in, not null
+     * @return True if property should be serialized when null.
+     */
+    public Optional<Boolean> isPropertyNillable(Property property) {
+        Objects.requireNonNull(property);
+
+        final Optional<JsonbProperty> jsonbProperty = getAnnotationFromProperty(JsonbProperty.class, property);
+        return jsonbProperty.map(JsonbProperty::nillable);
+
+    }
+
+    private void addIfNotPresent(JsonbAnnotatedElement<?> element, Annotation... annotations) {
+        for (Annotation annotation : annotations) {
+            if (element.getAnnotation(annotation.annotationType()) == null) {
+                element.putAnnotation(annotation);
+            }
+        }
+    }
+
+    /**
      * Search for {@link JsonbDateFormat} annotation on java class and construct {@link JsonbDateFormatter}.
      * If not found looks at annotations declared on property type class.
      *
@@ -457,6 +345,63 @@ public class AnnotationIntrospector {
     }
 
     /**
+     * Returns class if {@link ImplementationClass} annotation is present.
+     *
+     * @param property annotated property
+     * @return Class if {@link ImplementationClass} is present otherwise null
+     */
+    public Class<?> getImplementationClass(Property property) {
+        Optional<ImplementationClass> annotationFromProperty = getAnnotationFromProperty(ImplementationClass.class, property);
+        return annotationFromProperty.<Class<?>>map(ImplementationClass::value).orElse(null);
+    }
+
+    private <T extends Annotation> T getMethodAnnotation(Class<T> annotationClass, JsonbAnnotatedElement<Method> methodElement) {
+        if (methodElement == null) {
+            return null;
+        }
+        return findAnnotation(methodElement.getAnnotations(), annotationClass);
+    }
+
+    /**
+     * Searches for JsonbCreator annotation on constructors and static methods.
+     *
+     * @param clazz class to search
+     * @return JsonbCreator metadata object
+     */
+    public JsonbCreator getCreator(Class<?> clazz) {
+        JsonbCreator jsonbCreator = null;
+        Constructor<?>[] declaredConstructors =
+                AccessController.doPrivileged((PrivilegedAction<Constructor<?>[]>) clazz::getDeclaredConstructors);
+
+        for (Constructor<?> constructor : declaredConstructors) {
+            final jakarta.json.bind.annotation.JsonbCreator annot = findAnnotation(constructor.getDeclaredAnnotations(),
+                                                                                 jakarta.json.bind.annotation.JsonbCreator.class);
+            if (annot != null) {
+                jsonbCreator = createJsonbCreator(constructor, jsonbCreator, clazz);
+            }
+        }
+
+        Method[] declaredMethods =
+                AccessController.doPrivileged((PrivilegedAction<Method[]>) clazz::getDeclaredMethods);
+        for (Method method : declaredMethods) {
+            final jakarta.json.bind.annotation.JsonbCreator annot = findAnnotation(method.getDeclaredAnnotations(),
+                                                                                 jakarta.json.bind.annotation.JsonbCreator.class);
+            if (annot != null && Modifier.isStatic(method.getModifiers())) {
+                if (!clazz.equals(method.getReturnType())) {
+                    throw new JsonbException(Messages.getMessage(MessageKeys.INCOMPATIBLE_FACTORY_CREATOR_RETURN_TYPE,
+                                                                 method,
+                                                                 clazz));
+                }
+                jsonbCreator = createJsonbCreator(method, jsonbCreator, clazz);
+            }
+        }
+        if (jsonbCreator == null) {
+            jsonbCreator = constructorPropertiesIntrospector.getCreator(declaredConstructors);
+        }
+        return jsonbCreator;
+    }
+
+    /**
      * Search for {@link JsonbNumberFormat} annotation on java class.
      *
      * @param clazzElement class to search not null
@@ -468,6 +413,185 @@ public class AnnotationIntrospector {
             return null;
         }
         return new JsonbNumberFormatter(formatAnnotation.value(), formatAnnotation.locale());
+    }
+
+    /**
+     * Checks for {@link JsonbSerializer} on a property.
+     *
+     * @param property property not null
+     * @return components info
+     */
+    public SerializerBindingEntry getSerializerBinding(Property property) {
+        Objects.requireNonNull(property);
+        JsonbTypeSerializer serializerAnnotation = getAnnotationFromProperty(JsonbTypeSerializer.class, property)
+                .orElseGet(() -> getAnnotationFromPropertyType(property, JsonbTypeSerializer.class));
+        if (serializerAnnotation == null) {
+            return null;
+        }
+
+        final Class<? extends JsonbSerializer> serializerClass = serializerAnnotation.value();
+        return jsonbContext.getComponentMatcher().inspectSerializerBinding(serializerClass, null);
+
+    }
+
+    /**
+     * Get a @JsonbVisibility annotation from a class or its package.
+     *
+     * @param clazz Class to lookup annotation
+     * @return Instantiated PropertyVisibilityStrategy if annotation is present
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy(Class<?> clazz) {
+        JsonbVisibility visibilityAnnotation = findAnnotation(clazz.getDeclaredAnnotations(), JsonbVisibility.class);
+        if ((visibilityAnnotation == null) && (clazz.getPackage() != null)) {
+            visibilityAnnotation = findAnnotation(clazz.getPackage().getDeclaredAnnotations(), JsonbVisibility.class);
+        }
+        if (visibilityAnnotation != null) {
+            return ReflectiveTypeResolver.instantiateNoArg(
+                    ReflectiveTypeResolver.getDefaultConstructor(visibilityAnnotation.value(), true));
+        }
+        return jsonbContext.getConfigProperties().getPropertyVisibilityStrategy();
+    }
+
+    /**
+     * Processes customizations.
+     *
+     * @param clsElement Element to process.
+     * @return Populated {@link ClassCustomization} instance.
+     */
+    public ClassCustomization introspectCustomization(JsonbAnnotatedElement<Class<?>> clsElement) {
+        final ClassCustomizationBuilder builder = new ClassCustomizationBuilder();
+        builder.setNillable(isClassNillable(clsElement));
+        builder.setDateFormatter(getJsonbDateFormat(clsElement));
+        builder.setNumberFormatter(getJsonbNumberFormat(clsElement));
+        builder.setCreator(getCreator(clsElement.getElement()));
+        builder.setPropertyOrder(getPropertyOrder(clsElement));
+        builder.setAdapterInfo(getAdapterBinding(clsElement));
+        builder.setSerializerBinding(getSerializerBinding(clsElement));
+        builder.setDeserializerBinding(getDeserializerBinding(clsElement));
+        builder.setPropertyVisibilityStrategy(getPropertyVisibilityStrategy(clsElement.getElement()));
+        return builder.buildClassCustomization();
+    }
+
+    /**
+     * Get class interfaces recursively.
+     *
+     * @param cls Class to process.
+     * @return A list of all class interfaces.
+     */
+    public Set<Class<?>> collectInterfaces(Class<?> cls) {
+        Set<Class<?>> collected = new LinkedHashSet<>();
+        Queue<Class<?>> toScan = new LinkedList<>();
+        toScan.addAll(Arrays.asList(cls.getInterfaces()));
+        Class<?> nextIfc;
+        while ((nextIfc = toScan.poll()) != null) {
+            collected.add(nextIfc);
+            toScan.addAll(Arrays.asList(nextIfc.getInterfaces()));
+        }
+        return collected;
+    }
+
+    /**
+     * Checks for JsonbNillable annotation on a class, its superclasses and interfaces.
+     *
+     * @param clazzElement class to search JsonbNillable in.
+     * @return true if found
+     */
+    public boolean isClassNillable(JsonbAnnotatedElement<Class<?>> clazzElement) {
+        final JsonbNillable jsonbNillable = findAnnotation(clazzElement.getAnnotations(), JsonbNillable.class);
+        if (jsonbNillable != null) {
+            return jsonbNillable.value();
+        }
+        Class<?> clazz = clazzElement.getElement();
+        if (clazz == Optional.class
+                || clazz == OptionalDouble.class
+                || clazz == OptionalInt.class
+                || clazz == OptionalLong.class) {
+            return true;
+        }
+        return jsonbContext.getConfigProperties().getConfigNullable();
+    }
+
+    /**
+     * Creates annotation introspecting component passing {@link JsonbRuntimeContext} inside.
+     *
+     * @param jsonbContext mandatory
+     */
+    public AnnotationIntrospector(JsonbRuntimeContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+        this.constructorPropertiesIntrospector = ConstructorPropertiesAnnotationIntrospector.forContext(jsonbContext);
+    }
+
+    private <T extends Annotation> T getFieldAnnotation(Class<T> annotationClass, JsonbAnnotatedElement<Field> fieldElement) {
+        if (fieldElement == null) {
+            return null;
+        }
+        return findAnnotation(fieldElement.getAnnotations(), annotationClass);
+    }
+
+    private AdapterBindingEntry getAdapterBindingFromAnnotation(JsonbTypeAdapter adapterAnnotation, Optional<Class<?>> expectedClass) {
+        final Class<? extends JsonbAdapter> adapterClass = adapterAnnotation.value();
+        final AdapterBindingEntry adapterBinding = jsonbContext.getComponentMatcher().inspectAdapterBinding(adapterClass, null);
+
+        if (expectedClass.isPresent() && !(
+                ReflectiveTypeResolver.getRawType(adapterBinding.getBindingType()).isAssignableFrom(expectedClass.get()))) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_INCOMPATIBLE,
+                                                         adapterBinding.getBindingType(),
+                                                         expectedClass.get()));
+        }
+        return adapterBinding;
+    }
+
+    /**
+     * Checks for {@link JsonbAdapter} on a type.
+     *
+     * @param clsElement type not null
+     * @return components info
+     */
+    public AdapterBindingEntry getAdapterBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
+        Objects.requireNonNull(clsElement);
+
+        JsonbTypeAdapter adapterAnnotation = clsElement.getElement().getAnnotation(JsonbTypeAdapter.class);
+        if (adapterAnnotation == null) {
+            return null;
+        }
+
+        return getAdapterBindingFromAnnotation(adapterAnnotation, Optional.ofNullable(clsElement.getElement()));
+    }
+
+    /**
+     * Collect annotations of given class, its interfaces and the package.
+     *
+     * @param clazz Class to process.
+     * @return Element with class and annotations.
+     */
+    public JsonbAnnotatedElement<Class<?>> collectAnnotations(Class<?> clazz) {
+        JsonbAnnotatedElement<Class<?>> classElement = new JsonbAnnotatedElement<>(clazz);
+
+        if (DefaultSerializers.isKnownType(clazz)) {
+            return classElement;
+        }
+
+        for (Class<?> ifc : collectInterfaces(clazz)) {
+            addIfNotPresent(classElement, ifc.getDeclaredAnnotations());
+        }
+
+        if (!clazz.isPrimitive() && !clazz.isArray() && (clazz.getPackage() != null)) {
+            addIfNotPresent(classElement, clazz.getPackage().getAnnotations());
+        }
+        return classElement;
+    }
+
+    /**
+     * Gets a name of property for JSON marshalling.
+     * Can be different writeName for same property.
+     *
+     * @param property property representation - field, getter, setter (not null)
+     * @return read name
+     */
+    public String getJsonbPropertyJsonWriteName(Property property) {
+        Objects.requireNonNull(property);
+        return getJsonbPropertyCustomizedName(property, property.getGetterElement());
     }
 
     /**
@@ -507,113 +631,20 @@ public class AnnotationIntrospector {
     }
 
     /**
-     * Returns {@link JsonbNumberFormatter} instance if {@link JsonbNumberFormat} annotation is present.
+     * Checks for {@link JsonbSerializer} on a type.
      *
-     * @param param annotated method parameter
-     * @return formatter instance if {@link JsonbNumberFormat} is present otherwise null
+     * @param clsElement type not null
+     * @return components info
      */
-    public JsonbNumberFormatter getConstructorNumberFormatter(JsonbAnnotatedElement<Parameter> param) {
-        JsonbNumberFormat annotation = param.getAnnotation(JsonbNumberFormat.class);
-        if (annotation != null) {
-            return new JsonbNumberFormatter(annotation.value(), annotation.locale());
-        }
-        return null;
-    }
-
-    /**
-     * Returns {@link JsonbDateFormatter} instance if {@link JsonbDateFormat} annotation is present.
-     *
-     * @param param annotated method parameter
-     * @return formatter instance if {@link JsonbDateFormat} is present otherwise null
-     */
-    public JsonbDateFormatter getConstructorDateFormatter(JsonbAnnotatedElement<Parameter> param) {
-        JsonbDateFormat annotation = param.getAnnotation(JsonbDateFormat.class);
-        if (annotation != null) {
-            return new JsonbDateFormatter(DateTimeFormatter
-                                                  .ofPattern(annotation.value(), Locale.forLanguageTag(annotation.locale())),
-                                          annotation.value(), annotation.locale());
-        }
-        return null;
-    }
-
-    /**
-     * Creates {@link JsonbDateFormatter} caches formatter instance if possible.
-     * For DEFAULT_FORMAT appropriate singleton instances from java.time.format.DateTimeFormatter
-     * are used in date converters.
-     */
-    private JsonbDateFormatter createJsonbDateFormatter(String format, String locale, Property property) {
-        if (JsonbDateFormat.TIME_IN_MILLIS.equals(format) || JsonbDateFormat.DEFAULT_FORMAT.equals(format)) {
-            //for epochMillis formatter is not used, for default format singleton instances of DateTimeFormatter
-            //are used in the converters
-            return new JsonbDateFormatter(format, locale);
+    public SerializerBindingEntry getSerializerBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
+        Objects.requireNonNull(clsElement);
+        JsonbTypeSerializer serializerAnnotation = clsElement.getElement().getAnnotation(JsonbTypeSerializer.class);
+        if (serializerAnnotation == null) {
+            return null;
         }
 
-        final Optional<Class<?>> optionalRawType = ReflectiveTypeResolver.getOptionalRawType(property.getPropertyType());
-        final Class<?> propertyRawType = optionalRawType.orElse(null);
-
-        if (propertyRawType != null
-                && !TemporalAccessor.class.isAssignableFrom(propertyRawType)
-                && !Date.class.isAssignableFrom(propertyRawType)
-                && !Calendar.class.isAssignableFrom(propertyRawType)) {
-            throw new IllegalStateException(Messages.getMessage(MessageKeys.UNSUPPORTED_DATE_TYPE, propertyRawType));
-        }
-
-        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-        builder.appendPattern(format);
-        if (jsonbContext.getConfigProperties().isZeroTimeDefaulting()) {
-            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
-            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
-            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
-        }
-        DateTimeFormatter dateTimeFormatter = builder.toFormatter(Locale.forLanguageTag(locale));
-        return new JsonbDateFormatter(dateTimeFormatter, format, locale);
-    }
-
-    /**
-     * Get a @JsonbVisibility annotation from a class or its package.
-     *
-     * @param clazz Class to lookup annotation
-     * @return Instantiated PropertyVisibilityStrategy if annotation is present
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy(Class<?> clazz) {
-        JsonbVisibility visibilityAnnotation = findAnnotation(clazz.getDeclaredAnnotations(), JsonbVisibility.class);
-        if ((visibilityAnnotation == null) && (clazz.getPackage() != null)) {
-            visibilityAnnotation = findAnnotation(clazz.getPackage().getDeclaredAnnotations(), JsonbVisibility.class);
-        }
-        if (visibilityAnnotation != null) {
-            return ReflectiveTypeResolver.instantiateNoArg(
-                    ReflectiveTypeResolver.getDefaultConstructor(visibilityAnnotation.value(), true));
-        }
-        return jsonbContext.getConfigProperties().getPropertyVisibilityStrategy();
-    }
-
-    /**
-     * Gets an annotation from first resolved annotation in a property in this order:
-     * <p>1. Field, 2. Getter, 3 Setter.</p>
-     * First found overrides other.
-     *
-     * @param annotationClass Annotation class to search for
-     * @param property        property to search in
-     * @param <T>             Annotation type
-     * @return Annotation if found, null otherwise
-     */
-    private <T extends Annotation> Optional<T> getAnnotationFromProperty(Class<T> annotationClass, Property property) {
-        T fieldAnnotation = getFieldAnnotation(annotationClass, property.getFieldElement());
-        if (fieldAnnotation != null) {
-            return Optional.of(fieldAnnotation);
-        }
-
-        T getterAnnotation = getMethodAnnotation(annotationClass, property.getGetterElement());
-        if (getterAnnotation != null) {
-            return Optional.of(getterAnnotation);
-        }
-
-        T setterAnnotation = getMethodAnnotation(annotationClass, property.getSetterElement());
-        if (setterAnnotation != null) {
-            return Optional.of(setterAnnotation);
-        }
-
-        return Optional.empty();
+        final Class<? extends JsonbSerializer> serializerClass = serializerAnnotation.value();
+        return jsonbContext.getComponentMatcher().inspectSerializerBinding(serializerClass, null);
     }
 
     /**
@@ -652,133 +683,103 @@ public class AnnotationIntrospector {
         return result;
     }
 
-    private <T extends Annotation> T getFieldAnnotation(Class<T> annotationClass, JsonbAnnotatedElement<Field> fieldElement) {
-        if (fieldElement == null) {
+    private JsonbCreator createJsonbCreator(Executable executable, JsonbCreator existing, Class<?> clazz) {
+        if (existing != null) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.MULTIPLE_JSONB_CREATORS, clazz));
+        }
+
+        final Parameter[] parameters = executable.getParameters();
+
+        CreatorModel[] creatorModels = new CreatorModel[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            final Parameter parameter = parameters[i];
+            final JsonbProperty jsonbPropertyAnnotation = parameter.getAnnotation(JsonbProperty.class);
+            if (jsonbPropertyAnnotation != null && !jsonbPropertyAnnotation.value().isEmpty()) {
+                creatorModels[i] = new CreatorModel(jsonbPropertyAnnotation.value(), parameter, jsonbContext);
+            } else {
+                creatorModels[i] = new CreatorModel(parameter.getName(), parameter, jsonbContext);
+            }
+        }
+
+        return new JsonbCreator(executable, creatorModels);
+    }
+
+    private String getJsonbPropertyCustomizedName(Property property, JsonbAnnotatedElement<Method> methodElement) {
+        JsonbProperty methodAnnotation = getMethodAnnotation(JsonbProperty.class, methodElement);
+        if (methodAnnotation != null && !methodAnnotation.value().isEmpty()) {
+            return methodAnnotation.value();
+        }
+        //in case of property name getter/setter override field value
+        JsonbProperty fieldAnnotation = getFieldAnnotation(JsonbProperty.class, property.getFieldElement());
+        if (fieldAnnotation != null && !fieldAnnotation.value().isEmpty()) {
+            return fieldAnnotation.value();
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks for {@link JsonbPropertyOrder} annotation.
+     *
+     * @param clazzElement class to search on
+     * @return ordered properties names or null if not found
+     */
+    public String[] getPropertyOrder(JsonbAnnotatedElement<Class<?>> clazzElement) {
+        final JsonbPropertyOrder jsonbPropertyOrder = clazzElement.getElement().getAnnotation(JsonbPropertyOrder.class);
+        return jsonbPropertyOrder != null ? jsonbPropertyOrder.value() : null;
+    }
+
+    /**
+     * Checks if property is annotated transient. If JsonbTransient annotation is present on field getter or setter, and other
+     * annotation is present
+     * on either of it, JsonbException is thrown with message describing collision.
+     *
+     * @param property The property to inspect if there is any {@link JsonbTransient} annotation defined for it
+     * @return Set of {@link AnnotationTarget}s specifying in which scope the {@link JsonbTransient} is applied
+     */
+    public EnumSet<AnnotationTarget> getJsonbTransientCategorized(Property property) {
+        Objects.requireNonNull(property);
+        EnumSet<AnnotationTarget> transientTarget = EnumSet.noneOf(AnnotationTarget.class);
+        Map<AnnotationTarget, JsonbTransient> annotationFromPropertyCategorized = getAnnotationFromPropertyCategorized(
+                JsonbTransient.class,
+                property);
+        if (annotationFromPropertyCategorized.size() > 0) {
+            transientTarget.addAll(annotationFromPropertyCategorized.keySet());
+            return transientTarget;
+        }
+
+        return transientTarget;
+    }
+
+    /**
+     * Checks for {@link JsonbDeserializer} on a type.
+     *
+     * @param clsElement type not null
+     * @return components info
+     */
+    public JsonbDeserializerBinding getDeserializerBinding(JsonbAnnotatedElement<Class<?>> clsElement) {
+        Objects.requireNonNull(clsElement);
+        JsonbTypeDeserializer deserializerAnnotation = clsElement.getElement().getAnnotation(JsonbTypeDeserializer.class);
+        if (deserializerAnnotation == null) {
             return null;
         }
-        return findAnnotation(fieldElement.getAnnotations(), annotationClass);
-    }
 
-    private <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass) {
-        return AnnotationFinder.findAnnotation(declaredAnnotations, annotationClass, new HashSet<>());
-    }
-
-    /**
-     * Finds annotations incompatible with {@link JsonbTransient} annotation.
-     *
-     * @param target target to check
-     */
-    @SuppressWarnings("unchecked")
-    public void checkTransientIncompatible(JsonbAnnotatedElement<?> target) {
-        if (target == null) {
-            return;
-        }
-
-        for (Class<? extends Annotation> ann : TRANSIENT_INCOMPATIBLE) {
-            Annotation annotation = findAnnotation(target.getAnnotations(), ann);
-            if (annotation != null) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_TRANSIENT_WITH_OTHER_ANNOTATIONS));
-            }
-        }
-    }
-
-    private <T extends Annotation> T getMethodAnnotation(Class<T> annotationClass, JsonbAnnotatedElement<Method> methodElement) {
-        if (methodElement == null) {
-            return null;
-        }
-        return findAnnotation(methodElement.getAnnotations(), annotationClass);
-    }
-
-    private <T extends Annotation> void collectFromInterfaces(Class<T> annotationClass,
-                                                              Class clazz,
-                                                              Map<Class<?>, T> collectedAnnotations) {
-
-        for (Class<?> interfaceClass : clazz.getInterfaces()) {
-            T annotation = findAnnotation(interfaceClass.getDeclaredAnnotations(), annotationClass);
-            if (annotation != null) {
-                collectedAnnotations.put(interfaceClass, annotation);
-            }
-            collectFromInterfaces(annotationClass, interfaceClass, collectedAnnotations);
-        }
+        final Class<? extends JsonbDeserializer> deserializerClass = deserializerAnnotation.value();
+        return jsonbContext.getComponentMatcher().inspectDeserializerBinding(deserializerClass, null);
     }
 
     /**
-     * Get class interfaces recursively.
+     * Returns {@link JsonbNumberFormatter} instance if {@link JsonbNumberFormat} annotation is present.
      *
-     * @param cls Class to process.
-     * @return A list of all class interfaces.
+     * @param param annotated method parameter
+     * @return formatter instance if {@link JsonbNumberFormat} is present otherwise null
      */
-    public Set<Class<?>> collectInterfaces(Class<?> cls) {
-        Set<Class<?>> collected = new LinkedHashSet<>();
-        Queue<Class<?>> toScan = new LinkedList<>();
-        toScan.addAll(Arrays.asList(cls.getInterfaces()));
-        Class<?> nextIfc;
-        while ((nextIfc = toScan.poll()) != null) {
-            collected.add(nextIfc);
-            toScan.addAll(Arrays.asList(nextIfc.getInterfaces()));
+    public JsonbNumberFormatter getConstructorNumberFormatter(JsonbAnnotatedElement<Parameter> param) {
+        JsonbNumberFormat annotation = param.getAnnotation(JsonbNumberFormat.class);
+        if (annotation != null) {
+            return new JsonbNumberFormatter(annotation.value(), annotation.locale());
         }
-        return collected;
+        return null;
     }
 
-    /**
-     * Processes customizations.
-     *
-     * @param clsElement Element to process.
-     * @return Populated {@link ClassCustomization} instance.
-     */
-    public ClassCustomization introspectCustomization(JsonbAnnotatedElement<Class<?>> clsElement) {
-        final ClassCustomizationBuilder builder = new ClassCustomizationBuilder();
-        builder.setNillable(isClassNillable(clsElement));
-        builder.setDateFormatter(getJsonbDateFormat(clsElement));
-        builder.setNumberFormatter(getJsonbNumberFormat(clsElement));
-        builder.setCreator(getCreator(clsElement.getElement()));
-        builder.setPropertyOrder(getPropertyOrder(clsElement));
-        builder.setAdapterInfo(getAdapterBinding(clsElement));
-        builder.setSerializerBinding(getSerializerBinding(clsElement));
-        builder.setDeserializerBinding(getDeserializerBinding(clsElement));
-        builder.setPropertyVisibilityStrategy(getPropertyVisibilityStrategy(clsElement.getElement()));
-        return builder.buildClassCustomization();
-    }
-
-    /**
-     * Returns class if {@link ImplementationClass} annotation is present.
-     *
-     * @param property annotated property
-     * @return Class if {@link ImplementationClass} is present otherwise null
-     */
-    public Class<?> getImplementationClass(Property property) {
-        Optional<ImplementationClass> annotationFromProperty = getAnnotationFromProperty(ImplementationClass.class, property);
-        return annotationFromProperty.<Class<?>>map(ImplementationClass::value).orElse(null);
-    }
-
-    /**
-     * Collect annotations of given class, its interfaces and the package.
-     *
-     * @param clazz Class to process.
-     * @return Element with class and annotations.
-     */
-    public JsonbAnnotatedElement<Class<?>> collectAnnotations(Class<?> clazz) {
-        JsonbAnnotatedElement<Class<?>> classElement = new JsonbAnnotatedElement<>(clazz);
-        
-        if (DefaultSerializers.isKnownType(clazz)) {
-            return classElement;
-        }
-
-        for (Class<?> ifc : collectInterfaces(clazz)) {
-            addIfNotPresent(classElement, ifc.getDeclaredAnnotations());
-        }
-
-        if (!clazz.isPrimitive() && !clazz.isArray() && (clazz.getPackage() != null)) {
-            addIfNotPresent(classElement, clazz.getPackage().getAnnotations());
-        }
-        return classElement;
-    }
-
-    private void addIfNotPresent(JsonbAnnotatedElement<?> element, Annotation... annotations) {
-        for (Annotation annotation : annotations) {
-            if (element.getAnnotation(annotation.annotationType()) == null) {
-                element.putAnnotation(annotation);
-            }
-        }
-    }
 }

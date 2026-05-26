@@ -26,13 +26,9 @@ import org.eclipse.yasson.internal.Unmarshaller;
  */
 public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends AbstractContainerDeserializer<T> {
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link DeserializerBuilder} used to build this instance
-     */
-    protected AbstractJsonpDeserializer(DeserializerBuilder builder) {
-        super(builder);
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
     }
 
     @Override
@@ -42,12 +38,17 @@ public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends Abs
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
-    }
-
-    @Override
     public void appendResult(Object result) {
         throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
     }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link DeserializerBuilder} used to build this instance
+     */
+    protected AbstractJsonpDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

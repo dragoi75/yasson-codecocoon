@@ -31,42 +31,13 @@ public class JsonbPropertyInfo {
     private CurrentItem<?> wrapper;
 
     /**
-     * Gets context.
+     * Sets wrapper.
      *
-     * @return Context.
-     */
-    public JsonbRuntimeContext getContext() {
-        return context;
-    }
-
-    /**
-     * Sets context.
-     *
-     * @param context Context to set.
+     * @param wrapper Wrapper to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo setContext(JsonbRuntimeContext context) {
-        this.context = context;
-        return this;
-    }
-
-    /**
-     * Gets runtime type.
-     *
-     * @return Runtime type.
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
-
-    /**
-     * Sets runtime type.
-     *
-     * @param runtimeType Runtime type to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
+    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
         return this;
     }
 
@@ -77,6 +48,24 @@ public class JsonbPropertyInfo {
      */
     public ClassModel getClassModel() {
         return classModel;
+    }
+
+    /**
+     * Gets wrapper.
+     *
+     * @return Wrapper.
+     */
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Gets context.
+     *
+     * @return Context.
+     */
+    public JsonbRuntimeContext getContext() {
+        return context;
     }
 
     /**
@@ -91,22 +80,34 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets wrapper.
+     * Sets context.
      *
-     * @return Wrapper.
+     * @param context Context to set.
+     * @return Updated object.
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    public JsonbPropertyInfo setContext(JsonbRuntimeContext context) {
+        this.context = context;
+        return this;
     }
 
     /**
-     * Sets wrapper.
+     * Sets runtime type.
      *
-     * @param wrapper Wrapper to set.
+     * @param runtimeType Runtime type to set.
      * @return Updated object.
      */
-    public JsonbPropertyInfo withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
+    public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
+        this.runtimeType = runtimeType;
         return this;
     }
+
+    /**
+     * Gets runtime type.
+     *
+     * @return Runtime type.
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
 }

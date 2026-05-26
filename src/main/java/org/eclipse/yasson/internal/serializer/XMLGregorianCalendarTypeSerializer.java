@@ -27,6 +27,21 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializer<XMLGregorianCalendar> {
 
+    @Override
+    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
+        return toZonedDateTime(object);
+    }
+
+    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
+                                       object.toGregorianCalendar().getTimeZone().toZoneId());
+    }
+
+    @Override
+    protected Instant toInstant(XMLGregorianCalendar value) {
+        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,11 +49,6 @@ public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializ
      */
     public XMLGregorianCalendarTypeSerializer(Customization customization) {
         super(customization);
-    }
-
-    @Override
-    protected Instant toInstant(XMLGregorianCalendar value) {
-        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
     }
 
     @Override
@@ -50,13 +60,4 @@ public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializ
                 .format(toTemporalAccessor(value));
     }
 
-    @Override
-    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
-        return toZonedDateTime(object);
-    }
-
-    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
-                                       object.toGregorianCalendar().getTimeZone().toZoneId());
-    }
 }

@@ -31,23 +31,6 @@ class ConstructorPropertiesAnnotationIntrospector {
     private final JsonbRuntimeContext jsonbContext;
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
-        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
-    }
-
-    /**
-     * Only for testing and internal purposes.
-     * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonbRuntimeContext)}.
-     *
-     * @param context          {@link JsonbRuntimeContext}
-     * @param annotationFinder {@link AnnotationFinder}
-     */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonbRuntimeContext context, AnnotationFinder annotationFinder) {
-        this.jsonbContext = context;
-        this.constructorProperties = annotationFinder;
-    }
-
     public JsonbCreator getCreator(Constructor<?>[] constructors) {
         JsonbCreator jsonbCreator = null;
 
@@ -77,6 +60,11 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    }
+
     private JsonbCreator createJsonbCreator(Executable executable, String[] properties) {
         final Parameter[] parameters = executable.getParameters();
 
@@ -88,8 +76,21 @@ class ConstructorPropertiesAnnotationIntrospector {
         return new JsonbCreator(executable, creatorModels);
     }
 
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbRuntimeContext jsonbContext) {
+        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
+
+    /**
+     * Only for testing and internal purposes.
+     * <p>
+     * Please use static factory methods e.g. {@link #forContext(JsonbRuntimeContext)}.
+     *
+     * @param context          {@link JsonbRuntimeContext}
+     * @param annotationFinder {@link AnnotationFinder}
+     */
+    protected ConstructorPropertiesAnnotationIntrospector(JsonbRuntimeContext context, AnnotationFinder annotationFinder) {
+        this.jsonbContext = context;
+        this.constructorProperties = annotationFinder;
+    }
+
 }

@@ -53,16 +53,29 @@ public class JsonbDateFormatter {
     private final String locale;
 
     /**
-     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
+     * Locale to use with formatter.
      *
-     * @param dateTimeFormatter Reused time formatter.
-     * @param format            Format in string.
-     * @param locale            Locale in string.
+     * @return Locale.
      */
-    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
-        this.dateTimeFormatter = dateTimeFormatter;
-        this.format = format;
-        this.locale = locale;
+    public String getLocale() {
+        return locale;
+    }
+
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
+    }
+
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
     }
 
     /**
@@ -79,12 +92,16 @@ public class JsonbDateFormatter {
     }
 
     /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
-     * @return Formatter instance.
+     * @param dateTimeFormatter Reused time formatter.
+     * @param format            Format in string.
+     * @param locale            Locale in string.
      */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
+    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        this.format = format;
+        this.locale = locale;
     }
 
     /**
@@ -98,20 +115,4 @@ public class JsonbDateFormatter {
         return format;
     }
 
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
 }

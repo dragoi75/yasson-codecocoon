@@ -34,17 +34,41 @@ public class ClassCustomization extends CustomizationBase {
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Property visibility strategy for this class model.
      *
-     * @param builder not null
+     * @return visibility strategy
      */
-    ClassCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
-        this.creator = builder.getCreator();
-        this.propertyOrder = builder.getPropertyOrder();
-        this.numberFormatter = builder.getNumberFormatter();
-        this.dateTimeFormatter = builder.getDateFormatter();
-        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
     }
 
     /**
@@ -71,15 +95,6 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
-
-    /**
      * Sets sorted properties.
      *
      * @param propertyOrder sorted names of properties
@@ -89,32 +104,17 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Property visibility strategy for this class model.
+     * Copies properties from builder an creates immutable instance.
      *
-     * @return visibility strategy
+     * @param builder not null
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
+    ClassCustomization(ClassCustomizationBuilder builder) {
+        super(builder);
+        this.creator = builder.getCreator();
+        this.propertyOrder = builder.getPropertyOrder();
+        this.numberFormatter = builder.getNumberFormatter();
+        this.dateTimeFormatter = builder.getDateFormatter();
+        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
     }
 
 }

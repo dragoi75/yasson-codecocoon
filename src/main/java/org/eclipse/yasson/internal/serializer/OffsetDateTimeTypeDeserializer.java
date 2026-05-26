@@ -29,6 +29,16 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
 
     private static final Logger LOGGER = Logger.getLogger(OffsetDateTimeTypeDeserializer.class.getName());
 
+    @Override
+    protected OffsetDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return OffsetDateTime.parse(jsonValue, formatter);
+    }
+
+    @Override
+    protected OffsetDateTime parseDefault(String jsonValue, Locale locale) {
+        return OffsetDateTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale));
+    }
+
     /**
      * Creates an instance.
      *
@@ -48,13 +58,4 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
         return OffsetDateTime.ofInstant(instant, UTC);
     }
 
-    @Override
-    protected OffsetDateTime parseDefault(String jsonValue, Locale locale) {
-        return OffsetDateTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale));
-    }
-
-    @Override
-    protected OffsetDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return OffsetDateTime.parse(jsonValue, formatter);
-    }
 }
