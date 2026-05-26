@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.lang.reflect.Type;
@@ -18,12 +17,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import jakarta.json.bind.JsonbException;
 import jakarta.json.bind.serializer.SerializationContext;
 import jakarta.json.stream.JsonGenerationException;
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.properties.MessageKeys;
 import org.eclipse.yasson.internal.properties.Messages;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
@@ -42,8 +39,11 @@ public class DefaultSerializationContext extends ProcessingContext implements Se
     private final Set<Object> processingObjects = new HashSet<>();
 
     private final Type effectiveType;
+
     private String fieldName = null;
+
     private boolean containsNulls = true;
+
     private boolean isTopLevel = true;
 
     /**
@@ -137,10 +137,10 @@ public class DefaultSerializationContext extends ProcessingContext implements Se
             throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, jsonbException.getMessage()), jsonbException);
         } finally {
             try {
-                if (shouldClose) {
-                    generator.close();
-                } else {
+                if (!shouldClose) {
                     generator.flush();
+                } else {
+                    generator.close();
                 }
             } catch (JsonGenerationException jsonGenerationEx) {
                 SERIALIZATION_LOG.severe(jsonGenerationEx.getMessage());
@@ -198,10 +198,10 @@ public class DefaultSerializationContext extends ProcessingContext implements Se
     }
 
     private <T> Type resolveSerializationType(T isTopLevel) {
-        if (isRoot() && effectiveType != null) {
+        if (isRoot() && null != effectiveType) {
             return effectiveType;
         }
-        return isTopLevel == null ? Object.class : isTopLevel.getClass();
+        return null == isTopLevel ? Object.class : isTopLevel.getClass();
     }
 
     public ModelMarshaller getRootSerializer(Type resolvedType) {
@@ -227,6 +227,4 @@ public class DefaultSerializationContext extends ProcessingContext implements Se
     public boolean removeProcessedObject(Object value) {
         return processingObjects.remove(value);
     }
-
-
 }

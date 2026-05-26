@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.lang.reflect.Type;
@@ -17,9 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.model.customization.Customization;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
@@ -33,7 +30,9 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
     private final Customization customization;
 
     private final Map<Class<?>, ModelMarshaller> cache;
+
     private final List<Type> chain;
+
     private final boolean isKey;
 
     ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
@@ -52,7 +51,7 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
 
     @Override
     void serializeKey(Object key, JsonGenerator generator, DefaultSerializationContext context) {
-        if (key == null) {
+        if (null == key) {
             super.serializeKey(null, generator, context);
             return;
         }

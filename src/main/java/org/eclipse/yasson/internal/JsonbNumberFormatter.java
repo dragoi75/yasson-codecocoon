@@ -9,7 +9,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.util.Objects;
@@ -54,15 +53,14 @@ public class JsonbNumberFormatter {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
+        if (o == this) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (null == o || o.getClass() != getClass()) {
             return false;
         }
         JsonbNumberFormatter that = (JsonbNumberFormatter) o;
-        return Objects.equals(format, that.format)
-                && Objects.equals(locale, that.locale);
+        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale);
     }
 
     @Override
@@ -72,9 +70,6 @@ public class JsonbNumberFormatter {
 
     @Override
     public String toString() {
-        return "JsonbNumberFormatter{"
-                + "format='" + format + '\''
-                + ", locale='" + locale + '\''
-                + '}';
+        return "JsonbNumberFormatter{" + "format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
     }
 }

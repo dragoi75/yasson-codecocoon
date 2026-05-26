@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.util.OptionalDouble;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
@@ -33,10 +30,10 @@ class OptionalDoubleValueSerializer implements ModelMarshaller {
     @Override
     public void marshal(Object inputObject, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         OptionalDouble maybeDouble = (OptionalDouble) inputObject;
-        if (maybeDouble.isPresent()) {
-            modelMarshaller.marshal(maybeDouble.getAsDouble(), jsonWriter, serializationState);
-        } else {
+        if (!maybeDouble.isPresent()) {
             modelMarshaller.marshal(null, jsonWriter, serializationState);
+        } else {
+            modelMarshaller.marshal(maybeDouble.getAsDouble(), jsonWriter, serializationState);
         }
     }
 }

@@ -9,16 +9,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Locale;
 import java.util.Objects;
-
 import jakarta.json.bind.annotation.JsonbDateFormat;
-
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
@@ -28,27 +25,17 @@ import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
  */
 public class JsonbDateFormatter {
 
-    private static final JsonbDateFormatter DEFAULT = new JsonbDateFormatter(JsonbDateFormat.DEFAULT_FORMAT,
-                                                                             Locale.getDefault().toLanguageTag());
+    private static final JsonbDateFormatter DEFAULT = new JsonbDateFormatter(JsonbDateFormat.DEFAULT_FORMAT, Locale.getDefault().toLanguageTag());
 
     /**
      * Default I-JSON date time formatter.
      */
-    public static final DateTimeFormatter IJSON_DATE_FORMATTER = new DateTimeFormatterBuilder()
-            .parseCaseInsensitive()
-            .append(DateTimeFormatter.ISO_LOCAL_DATE)
-            .appendLiteral('T')
-            .appendValue(HOUR_OF_DAY, 2)
-            .appendLiteral(':')
-            .appendValue(MINUTE_OF_HOUR, 2)
-            .appendLiteral(':')
-            .appendValue(SECOND_OF_MINUTE, 2)
-            .appendLiteral('Z')
-            .appendOffset("+HH:MM", "+00:00")
-            .toFormatter();
+    public static final DateTimeFormatter IJSON_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive().append(DateTimeFormatter.ISO_LOCAL_DATE).appendLiteral('T').appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2).appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral('Z').appendOffset("+HH:MM", "+00:00").toFormatter();
 
     private final DateTimeFormatter dateTimeFormatter;
+
     private final String format;
+
     private final String locale;
 
     /**
@@ -116,16 +103,14 @@ public class JsonbDateFormatter {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
+        if (o == this) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (null == o || o.getClass() != getClass()) {
             return false;
         }
         JsonbDateFormatter that = (JsonbDateFormatter) o;
-        return Objects.equals(format, that.format)
-                && Objects.equals(locale, that.locale)
-                && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
+        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale) && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
     }
 
     @Override
@@ -135,10 +120,6 @@ public class JsonbDateFormatter {
 
     @Override
     public String toString() {
-        return "JsonbDateFormatter{"
-                + "dateTimeFormatter=" + dateTimeFormatter
-                + ", format='" + format + '\''
-                + ", locale='" + locale + '\''
-                + '}';
+        return "JsonbDateFormatter{" + "dateTimeFormatter=" + dateTimeFormatter + ", format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
     }
 }

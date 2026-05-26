@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer;
 
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.DefaultSerializationContext;
 
 /**
@@ -34,11 +32,10 @@ public class KeyWriter implements ModelMarshaller {
 
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
-        if (context.getKey() != null) {
+        if (null != context.getKey()) {
             generator.writeKey(context.getKey());
             context.setKey(null);
         }
         delegate.marshal(value, generator, context);
     }
-
 }

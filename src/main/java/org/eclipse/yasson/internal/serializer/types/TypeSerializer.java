@@ -9,11 +9,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
@@ -25,10 +23,10 @@ abstract class TypeSerializer<T> implements ModelMarshaller {
     private final ModelMarshaller serializer;
 
     TypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        if (serializerBuilder.isKey()) {
-            serializer = new KeySerializer();
-        } else {
+        if (!serializerBuilder.isKey()) {
             serializer = new ValueSerializer();
+        } else {
+            serializer = new KeySerializer();
         }
     }
 
@@ -50,7 +48,6 @@ abstract class TypeSerializer<T> implements ModelMarshaller {
         public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             serializeValue((T) value, generator, context);
         }
-
     }
 
     private final class KeySerializer implements ModelMarshaller {
@@ -60,6 +57,5 @@ abstract class TypeSerializer<T> implements ModelMarshaller {
         public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
             serializeKey((T) value, generator, context);
         }
-
     }
 }

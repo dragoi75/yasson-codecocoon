@@ -9,13 +9,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
  */
-
 package org.eclipse.yasson.internal.serializer.types;
 
 import java.util.OptionalInt;
-
 import jakarta.json.stream.JsonGenerator;
-
 import org.eclipse.yasson.internal.DefaultSerializationContext;
 import org.eclipse.yasson.internal.serializer.ModelMarshaller;
 
@@ -33,10 +30,10 @@ class OptionalIntValueSerializer implements ModelMarshaller {
     @Override
     public void marshal(Object inputObj, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         OptionalInt maybeInt = (OptionalInt) inputObj;
-        if (maybeInt.isPresent()) {
-            modelMarshaller.marshal(maybeInt.getAsInt(), jsonWriter, serializationState);
-        } else {
+        if (!maybeInt.isPresent()) {
             modelMarshaller.marshal(null, jsonWriter, serializationState);
+        } else {
+            modelMarshaller.marshal(maybeInt.getAsInt(), jsonWriter, serializationState);
         }
     }
 }
