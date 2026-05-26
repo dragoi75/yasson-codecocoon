@@ -31,6 +31,28 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
+    @Override
+    protected Date parseDefault(String jsonValue, Locale locale) {
+        final TemporalAccessor parsed = DEFAULT_FORMATTER.withLocale(locale).parse(jsonValue);
+        return new Date(getInstant(parsed).toEpochMilli());
+    }
+
+    private Instant getInstant(TemporalAccessor parsed) {
+        LocalDate local = LocalDate.from(parsed);
+        return local.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
+    }
+
+    @Override
+    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
+        return new Date(getInstant(parsed).toEpochMilli());
+    }
+
+    @Override
+    protected Date fromInstant(Instant instant) {
+        return new Date(instant.toEpochMilli());
+    }
+
     /**
      * Creates an instance.
      *
@@ -47,25 +69,4 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
         super(Date.class, null);
     }
 
-    @Override
-    protected Date fromInstant(Instant instant) {
-        return new Date(instant.toEpochMilli());
-    }
-
-    @Override
-    protected Date parseDefault(String jsonValue, Locale locale) {
-        final TemporalAccessor parsed = DEFAULT_FORMATTER.withLocale(locale).parse(jsonValue);
-        return new Date(getInstant(parsed).toEpochMilli());
-    }
-
-    @Override
-    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
-        return new Date(getInstant(parsed).toEpochMilli());
-    }
-
-    private Instant getInstant(TemporalAccessor parsed) {
-        LocalDate local = LocalDate.from(parsed);
-        return local.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
-    }
 }

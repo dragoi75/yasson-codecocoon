@@ -28,6 +28,70 @@ class AnnotationFinder {
     private final Class<? extends Annotation> annotationClass;
 
     /**
+     * Searches for annotation, collects processed, to avoid StackOverflow.
+     */
+    // "static" to use it in a hybrid procedural and object oriented manner.
+    @SuppressWarnings("unchecked")
+    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass, Set<Annotation> processed) {
+        for (Annotation candidate : declaredAnnotations) {
+            final Class<? extends Annotation> annType = candidate.annotationType();
+            if (annType.equals(annotationClass)) {
+                return (T) candidate;
+            }
+            processed.add(candidate);
+            final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
+            inheritedAnnotations.removeAll(processed);
+            if (0 < inheritedAnnotations.size()) {
+                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
+                if (null != inherited) {
+                    return inherited;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Object invocateValueMethod(Annotation annotation) {
+        if (null == annotation) {
+            return null;
+        }
+        try {
+            return annotation.annotationType().getMethod("value").invoke(annotation);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            String message = Messages.getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
+            LOGGER.finest(message);
+            return null;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationFinder [annotationClassName=" + annotationClassName + ", annotationClass=" + annotationClass + "]";
+    }
+
+    /**
+     * Looks for the annotation {@link #in(Annotation[])} <br>
+     * and executes the "value" Method of it dynamically.
+     *
+     * @param annotations - Array of {@link Annotation}n.
+     * @return {@link Object}
+     */
+    public Object valueIn(Annotation[] annotations) {
+        return invocateValueMethod(in(annotations));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classname) {
+        try {
+            return (Class<T>) Class.forName(classname);
+        } catch (ClassNotFoundException e) {
+            String message = Messages.getMessage(MessageKeys.ANNOTATION_NOT_AVAILABLE, classname);
+            LOGGER.finest(message);
+            return null;
+        }
+    }
+
+    /**
      * Gets the {@link AnnotationFinder} for the given Annotation-Type.
      *
      * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
@@ -35,6 +99,14 @@ class AnnotationFinder {
      */
     public static final AnnotationFinder findAnnotation(Class<?> annotation) {
         return findAnnotationByName(annotation.getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Annotation> T in(Annotation[] annotations) {
+        if (null == annotationClass) {
+            return null;
+        }
+        return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
     }
 
     /**
@@ -61,75 +133,4 @@ class AnnotationFinder {
         this.annotationClass = annotationClass;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> T in(Annotation[] annotations) {
-        if (null == annotationClass) {
-            return null;
-        }
-        return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
-    }
-
-    /**
-     * Looks for the annotation {@link #in(Annotation[])} <br>
-     * and executes the "value" Method of it dynamically.
-     *
-     * @param annotations - Array of {@link Annotation}n.
-     * @return {@link Object}
-     */
-    public Object valueIn(Annotation[] annotations) {
-        return invocateValueMethod(in(annotations));
-    }
-
-    private Object invocateValueMethod(Annotation annotation) {
-        if (null == annotation) {
-            return null;
-        }
-        try {
-            return annotation.annotationType().getMethod("value").invoke(annotation);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = Messages.getMessage(MessageKeys.MISSING_VALUE_PROPERTY_IN_ANNOTATION, annotation.annotationType().getName());
-            LOGGER.finest(message);
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classname) {
-        try {
-            return (Class<T>) Class.forName(classname);
-        } catch (ClassNotFoundException e) {
-            String message = Messages.getMessage(MessageKeys.ANNOTATION_NOT_AVAILABLE, classname);
-            LOGGER.finest(message);
-            return null;
-        }
-    }
-
-    /**
-     * Searches for annotation, collects processed, to avoid StackOverflow.
-     */
-    // "static" to use it in a hybrid procedural and object oriented manner.
-    @SuppressWarnings("unchecked")
-    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass, Set<Annotation> processed) {
-        for (Annotation candidate : declaredAnnotations) {
-            final Class<? extends Annotation> annType = candidate.annotationType();
-            if (annType.equals(annotationClass)) {
-                return (T) candidate;
-            }
-            processed.add(candidate);
-            final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
-            inheritedAnnotations.removeAll(processed);
-            if (0 < inheritedAnnotations.size()) {
-                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
-                if (null != inherited) {
-                    return inherited;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return "AnnotationFinder [annotationClassName=" + annotationClassName + ", annotationClass=" + annotationClass + "]";
-    }
 }

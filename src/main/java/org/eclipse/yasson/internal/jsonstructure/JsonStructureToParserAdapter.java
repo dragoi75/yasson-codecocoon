@@ -37,8 +37,52 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    @Override
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
+    }
+
+    private JsonNumber getJsonNumberValue() {
+        JsonStructureIterator iterator = iterators.peek();
+        JsonValue value = iterator.getValue();
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
+            throw iterator.createIncompatibleValueError();
+        }
+        return (JsonNumber) value;
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
+    }
+
     public JsonStructureToParserAdapter(JsonStructure structure) {
         this.rootStructure = structure;
+    }
+
+    @Override
+    public String getString() {
+        return iterators.peek().getString();
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
     }
 
     @Override
@@ -75,47 +119,4 @@ public class JsonStructureToParserAdapter implements JsonParser {
         return next;
     }
 
-    @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
-    }
-
-    private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
-            throw iterator.createIncompatibleValueError();
-        }
-        return (JsonNumber) value;
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

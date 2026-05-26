@@ -39,8 +39,28 @@ class MethodHandleValuePropagation extends PropertyValuePropagator {
     private MethodHandle setHandle;
 
 
-    MethodHandleValuePropagation(PropertyDescriptor property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        super(property, propertyVisibilityStrategy);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(Object object) {
+        try {
+            return getHandle.invoke(object);
+        } catch (Throwable throwable) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValue(Object object, Object value) {
+        try {
+            setHandle.invoke(object, value);
+        } catch (Throwable throwable) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
+        }
     }
 
     @Override
@@ -61,6 +81,10 @@ class MethodHandleValuePropagation extends PropertyValuePropagator {
         }
     }
 
+    MethodHandleValuePropagation(PropertyDescriptor property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        super(property, propertyVisibilityStrategy);
+    }
+
     @Override
     protected void registerField(Field field, OperationType mode) {
         try {
@@ -76,31 +100,6 @@ class MethodHandleValuePropagation extends PropertyValuePropagator {
             }
         } catch (IllegalAccessException e) {
             throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(Object object, Object value) {
-        try {
-            setHandle.invoke(object, value);
-        } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.SETTING_VALUE_WITH, setHandle), throwable);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object getValue(Object object) {
-        try {
-            return getHandle.invoke(object);
-        } catch (Throwable throwable) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
         }
     }
 

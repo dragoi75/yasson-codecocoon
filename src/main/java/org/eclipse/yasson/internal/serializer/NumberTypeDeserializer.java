@@ -26,6 +26,11 @@ import java.math.BigDecimal;
  */
 public class NumberTypeDeserializer extends AbstractValueTypeDeserializer<Number> {
 
+    @Override
+    protected Number deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return new BigDecimal(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class NumberTypeDeserializer extends AbstractValueTypeDeserializer<Number
         super(Number.class, customization);
     }
 
-    @Override
-    protected Number deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return new BigDecimal(jsonValue);
-    }
 }

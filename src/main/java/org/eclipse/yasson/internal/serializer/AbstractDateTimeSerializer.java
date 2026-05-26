@@ -36,6 +36,51 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
+    @Override
+    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
+        throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
+    }
+
+    /**
+     * Convert date object to {@link TemporalAccessor}
+     *
+     * Only for legacy dates.
+     *
+     * @param object date object
+     * @return converted {@link TemporalAccessor}
+     */
+    protected TemporalAccessor toTemporalAccessor(T object) {
+        return (TemporalAccessor) object;
+    }
+
+    /**
+     * Append UTC zone in case zone is not set on formatter.
+     *
+     * @param formatter formatter
+     * @return zoned formatter
+     */
+    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
+        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
+    }
+
+    /**
+     * Format date object with given formatter
+     * @param value date object to format
+     * @param formatter formatter to format with
+     * @return formatted result
+     */
+    protected String formatWithFormatter(T value, DateTimeFormatter formatter) {
+        return formatter.format(toTemporalAccessor(value));
+    }
+
+    /**
+     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
+     *
+     * @param value date object to convert
+     * @return instant
+     */
+    protected abstract Instant toInstant(T value);
+
     /**
      * Creates a new instance.
      *
@@ -43,13 +88,6 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      */
     public AbstractDateTimeSerializer(Customization customization) {
         super(customization);
-    }
-
-    @Override
-    public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        final JsonbBindingContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
-        final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
-        generator.write(toJson(obj, formatter, jsonbContext));
     }
 
     /**
@@ -79,42 +117,15 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
         return formatDefault(object, jsonbContext.getConfigProperties().getLocale(formatter.getLocale()));
     }
 
-    protected JsonbDateFormatter getJsonbDateFormatter(JsonbBindingContext context) {
-        if (null != customization && null != customization.getSerializeDateFormatter()) {
-            return customization.getSerializeDateFormatter();
-        }
-        return context.getConfigProperties().getConfigDateFormatter();
-    }
-
     /**
-     * Append UTC zone in case zone is not set on formatter.
+     * Format date object as strict IJson date format.
      *
-     * @param formatter formatter
-     * @return zoned formatter
+     * @param value value to format
+     * @return formatted result
      */
-    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
+    protected String formatStrictIJson(T value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
     }
-
-    /**
-     * Convert date object to {@link TemporalAccessor}
-     *
-     * Only for legacy dates.
-     *
-     * @param object date object
-     * @return converted {@link TemporalAccessor}
-     */
-    protected TemporalAccessor toTemporalAccessor(T object) {
-        return (TemporalAccessor) object;
-    }
-
-    /**
-     * Convert java.time object to epoch milliseconds instant. Discards zone offset and zone id information.
-     *
-     * @param value date object to convert
-     * @return instant
-     */
-    protected abstract Instant toInstant(T value);
 
     /**
      * Format with default formatter for a given {@link java.time} date object.
@@ -126,28 +137,18 @@ public abstract class AbstractDateTimeSerializer<T> extends AbstractValueTypeSer
      */
     protected abstract String formatDefault(T value, Locale locale);
 
-    /**
-     * Format date object with given formatter
-     * @param value date object to format
-     * @param formatter formatter to format with
-     * @return formatted result
-     */
-    protected String formatWithFormatter(T value, DateTimeFormatter formatter) {
-        return formatter.format(toTemporalAccessor(value));
-    }
-
-    /**
-     * Format date object as strict IJson date format.
-     *
-     * @param value value to format
-     * @return formatted result
-     */
-    protected String formatStrictIJson(T value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(toTemporalAccessor(value));
-    }
-
     @Override
-    protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
-        throw new UnsupportedOperationException("Not supported in DateTimeSerializer");
+    public void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
+        final JsonbBindingContext jsonbContext = ((Marshaller) ctx).getJsonbContext();
+        final JsonbDateFormatter formatter = getJsonbDateFormatter(jsonbContext);
+        generator.write(toJson(obj, formatter, jsonbContext));
     }
+
+    protected JsonbDateFormatter getJsonbDateFormatter(JsonbBindingContext context) {
+        if (null != customization && null != customization.getSerializeDateFormatter()) {
+            return customization.getSerializeDateFormatter();
+        }
+        return context.getConfigProperties().getConfigDateFormatter();
+    }
+
 }

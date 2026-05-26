@@ -44,34 +44,6 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     private PropertyVisibilityStrategy propertyVisibilityStrategy;
 
     /**
-     * Creates a customization for class properties.
-     *
-     * @return A new instance of {@link PropertyCustomization}
-     */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
-    }
-
-    /**
-     * Returns the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
-     *
-     * @return the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter
-     */
-    public JsonbNumberFormatter getNumberFormatter() {
-        return numberFormatter;
-    }
-
-    /**
-     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
-     *
-     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
-     *                        formatter.
-     */
-    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
-        this.numberFormatter = numberFormatter;
-    }
-
-    /**
      * Gets a date format for formatting dates.
      *
      * @return Date format.
@@ -90,12 +62,38 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
+     * Property visibility strategy for given class.
+     * @return
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    /**
      * Gets custom constructor or method for user instantiation.
      *
      * @return Custom creator.
      */
     public JsonbCreator getCreator() {
         return jsonbCreator;
+    }
+
+    /**
+     * Sets custom property visibility strategy.
+     * @param propertyVisibilityStrategy strategy
+     */
+    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+    }
+
+    /**
+     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
+     *
+     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
+     *                        formatter.
+     */
+    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
+        this.numberFormatter = numberFormatter;
     }
 
     /**
@@ -108,18 +106,21 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Property visibility strategy for given class.
-     * @return
+     * Returns the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
+     *
+     * @return the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
+    public JsonbNumberFormatter getNumberFormatter() {
+        return numberFormatter;
     }
 
     /**
-     * Sets custom property visibility strategy.
-     * @param propertyVisibilityStrategy strategy
+     * Creates a customization for class properties.
+     *
+     * @return A new instance of {@link PropertyCustomization}
      */
-    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+    public ClassCustomization buildClassCustomization() {
+        return new ClassCustomization(this);
     }
+
 }

@@ -34,17 +34,6 @@ public class JsonbCreator {
     private final CreatorModel[] params;
 
     /**
-     * Creates a new instance.
-     *
-     * @param executable Executable.
-     * @param creatorModels Parameters.
-     */
-    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
-        this.executable = executable;
-        this.params = creatorModels;
-    }
-
-    /**
      * Create instance by either constructor or factory method, with provided parameter values and a Class to call on.
      *
      * @param params parameters to be passed into constructor / factory method
@@ -63,16 +52,6 @@ public class JsonbCreator {
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new JsonbException(Messages.getMessage(MessageKeys.ERROR_CALLING_JSONB_CREATOR, on), e);
         }
-    }
-
-    /**
-     * True if param name is one of creator params.
-     *
-     * @param paramName Param name to check.
-     * @return True if found.
-     */
-    public boolean contains(String paramName) {
-        return null != findByName(paramName);
     }
 
     /**
@@ -98,4 +77,26 @@ public class JsonbCreator {
     public CreatorModel[] getParams() {
         return params;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param executable Executable.
+     * @param creatorModels Parameters.
+     */
+    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
+        this.executable = executable;
+        this.params = creatorModels;
+    }
+
+    /**
+     * True if param name is one of creator params.
+     *
+     * @param paramName Param name to check.
+     * @return True if found.
+     */
+    public boolean contains(String paramName) {
+        return null != findByName(paramName);
+    }
+
 }

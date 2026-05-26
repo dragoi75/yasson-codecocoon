@@ -25,8 +25,14 @@ public class ReflectionPropagation extends PropertyValuePropagator {
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
-        super(property, strategy);
+    @Override
+    void setValue(Object object, Object value) {
+        setValueCommand.setValue(object, value);
+    }
+
+    @Override
+    Object getValue(Object object) {
+        return getValueCommand.getValue(object);
     }
 
     /**
@@ -45,6 +51,10 @@ public class ReflectionPropagation extends PropertyValuePropagator {
         }
     }
 
+    public ReflectionPropagation(PropertyDescriptor property, PropertyVisibilityStrategy strategy) {
+        super(property, strategy);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -61,13 +71,4 @@ public class ReflectionPropagation extends PropertyValuePropagator {
         }
     }
 
-    @Override
-    void setValue(Object object, Object value) {
-        setValueCommand.setValue(object, value);
-    }
-
-    @Override
-    Object getValue(Object object) {
-        return getValueCommand.getValue(object);
-    }
 }

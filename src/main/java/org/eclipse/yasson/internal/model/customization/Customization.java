@@ -28,6 +28,31 @@ import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 public interface Customization {
 
     /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    boolean isNillable();
+
+    /**
+     * Date formatter for formatting date values during deserialization process. It could be the same formatter instance used for serialization
+     * (returned by {@link #getSerializeDateFormatter()}. If not set, defaulted to <code>javax.json.bind.annotation.JsonbDateFormat.DEFAULT_FORMAT.
+     * </code>
+     *
+     * @return date formatter
+     */
+    JsonbDateFormatter getDeserializeDateFormatter();
+
+    /**
+     * Date formatter for formatting date values during serialization process. It could be the same formatter instance used for deserialization
+     * (returned by {@link #getDeserializeDateFormatter()}. If not set, defaulted to <code>javax.json.bind.annotation.JsonbDateFormat.DEFAULT_FORMAT.
+     * </code>
+     *
+     * @return date formatter
+     */
+    JsonbDateFormatter getSerializeDateFormatter();
+
+    /**
      * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for deserialization
      * (returned by {@link #getDeserializeNumberFormatter()}
      *
@@ -42,30 +67,5 @@ public interface Customization {
      * @return number formatter
      */
     JsonbNumberFormatter getDeserializeNumberFormatter();
-
-    /**
-     * Date formatter for formatting date values during serialization process. It could be the same formatter instance used for deserialization
-     * (returned by {@link #getDeserializeDateFormatter()}. If not set, defaulted to <code>javax.json.bind.annotation.JsonbDateFormat.DEFAULT_FORMAT.
-     * </code>
-     *
-     * @return date formatter
-     */
-    JsonbDateFormatter getSerializeDateFormatter();
-
-    /**
-     * Date formatter for formatting date values during deserialization process. It could be the same formatter instance used for serialization
-     * (returned by {@link #getSerializeDateFormatter()}. If not set, defaulted to <code>javax.json.bind.annotation.JsonbDateFormat.DEFAULT_FORMAT.
-     * </code>
-     *
-     * @return date formatter
-     */
-    JsonbDateFormatter getDeserializeDateFormatter();
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    boolean isNillable();
 
 }

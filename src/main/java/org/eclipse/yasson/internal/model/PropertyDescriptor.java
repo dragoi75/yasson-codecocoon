@@ -38,63 +38,6 @@ public class PropertyDescriptor {
     private JsonbAnnotatedElement<Method> writeMethodElement;
 
     /**
-     * Create instance of property.
-     * @param identifier not null
-     * @param enclosingClassMeta Class model for a class declaring property.
-     */
-    public PropertyDescriptor(String identifier, JsonbAnnotatedElement<Class<?>> enclosingClassMeta) {
-        this.identifier = identifier;
-        this.enclosingClassMeta = enclosingClassMeta;
-    }
-
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return identifier;
-    }
-
-    /**
-     * {@link Field} representing property if any
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (null == backingFieldMeta) {
-            return null;
-        }
-        return backingFieldMeta.getElement();
-    }
-
-    /**
-     * @param backingMember field not null
-     */
-    public void setField(Field backingMember) {
-        this.backingFieldMeta = new JsonbAnnotatedElement<>(backingMember);
-    }
-
-    /**
-     * {@link Method} representing getter of a property if any.
-     *
-     * @return getter if present
-     */
-    public Method getGetter() {
-        if (null == readMethodElement) {
-            return null;
-        }
-        return readMethodElement.getElement();
-    }
-
-    /**
-     * @param readMethod not null
-     */
-    public void setGetter(Method readMethod) {
-        this.readMethodElement = new JsonbAnnotatedElement<>(readMethod);
-    }
-
-    /**
      * {@link Method} representing setter of a property if any.
      *
      * @return setter if present
@@ -107,19 +50,18 @@ public class PropertyDescriptor {
     }
 
     /**
-     * @param writeMethod setter not null
+     * Element with setter and its annotations.
+     * @return setter with annotations
      */
-    public void setSetter(Method writeMethod) {
-        this.writeMethodElement = new JsonbAnnotatedElement<>(writeMethod);
+    public JsonbAnnotatedElement<Method> getSetterElement() {
+        return writeMethodElement;
     }
 
-    /**
-     * Class element with annotation under construction for declaring class of this property.
-     * This ClassModel is not fully initialized yet.
-     * @return ClassModel
-     */
-    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
-        return enclosingClassMeta;
+    public Type getGetterType() {
+        if (null != getGetter()) {
+            return getGetter().getGenericReturnType();
+        }
+        return null;
     }
 
     /**
@@ -143,19 +85,16 @@ public class PropertyDescriptor {
         throw new JsonbException("Empty property: " + identifier);
     }
 
-    public Type getGetterType() {
-        if (null != getGetter()) {
-            return getGetter().getGenericReturnType();
+    /**
+     * {@link Field} representing property if any
+     *
+     * @return field if present
+     */
+    public Field getField() {
+        if (null == backingFieldMeta) {
+            return null;
         }
-        return null;
-    }
-
-    public Type getSetterType() {
-        Type[] typeParameters = getSetter().getGenericParameterTypes();
-        if (1 != typeParameters.length) {
-            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
-        }
-        return typeParameters[0];
+        return backingFieldMeta.getElement();
     }
 
     /**
@@ -167,6 +106,38 @@ public class PropertyDescriptor {
     }
 
     /**
+     * Class element with annotation under construction for declaring class of this property.
+     * This ClassModel is not fully initialized yet.
+     * @return ClassModel
+     */
+    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
+        return enclosingClassMeta;
+    }
+
+    /**
+     * @param backingMember field not null
+     */
+    public void setField(Field backingMember) {
+        this.backingFieldMeta = new JsonbAnnotatedElement<>(backingMember);
+    }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return identifier;
+    }
+
+    /**
+     * @param readMethod not null
+     */
+    public void setGetter(Method readMethod) {
+        this.readMethodElement = new JsonbAnnotatedElement<>(readMethod);
+    }
+
+    /**
      * Element with getter and its annotations.
      * @return getter with annotations
      */
@@ -175,10 +146,40 @@ public class PropertyDescriptor {
     }
 
     /**
-     * Element with setter and its annotations.
-     * @return setter with annotations
+     * {@link Method} representing getter of a property if any.
+     *
+     * @return getter if present
      */
-    public JsonbAnnotatedElement<Method> getSetterElement() {
-        return writeMethodElement;
+    public Method getGetter() {
+        if (null == readMethodElement) {
+            return null;
+        }
+        return readMethodElement.getElement();
     }
+
+    public Type getSetterType() {
+        Type[] typeParameters = getSetter().getGenericParameterTypes();
+        if (1 != typeParameters.length) {
+            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
+        }
+        return typeParameters[0];
+    }
+
+    /**
+     * Create instance of property.
+     * @param identifier not null
+     * @param enclosingClassMeta Class model for a class declaring property.
+     */
+    public PropertyDescriptor(String identifier, JsonbAnnotatedElement<Class<?>> enclosingClassMeta) {
+        this.identifier = identifier;
+        this.enclosingClassMeta = enclosingClassMeta;
+    }
+
+    /**
+     * @param writeMethod setter not null
+     */
+    public void setSetter(Method writeMethod) {
+        this.writeMethodElement = new JsonbAnnotatedElement<>(writeMethod);
+    }
+
 }

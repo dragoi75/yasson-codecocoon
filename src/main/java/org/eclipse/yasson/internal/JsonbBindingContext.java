@@ -53,42 +53,23 @@ public class JsonbBindingContext {
 
     private final InstanceCreator instanceFactory;
 
+
     /**
-     * Creates and initialize context.
-     *
-     * @param bindingConfig jsonb jsonbConfig not null
-     * @param jsonSource provider of JSONP
+     * Returns component for creating instances of non-parsed types.
+     * @return InstanceCreator
      */
-    public JsonbBindingContext(JsonbConfig bindingConfig, JsonProvider jsonSource) {
-        Objects.requireNonNull(bindingConfig);
-        this.bindingConfig = bindingConfig;
-        this.mapperContext = new MappingContext(this);
-        this.instanceFactory = new InstanceCreator();
-        this.componentFactory = initializeComponentInstanceCreator(instanceFactory);
-        this.componentFilter = new ComponentMatcher(this);
-        this.annotationInspector = new AnnotationIntrospector(this);
-        this.jsonSource = jsonSource;
-        this.configurationProperties = new JsonbConfigProperties(bindingConfig);
+    public InstanceCreator getInstanceCreator() {
+        return instanceFactory;
     }
 
     /**
-     * Gets {@link JsonbConfig}.
+     * Gets component for annotation parsing.
      *
-     * @return Configuration.
+     * @return Annotation introspector.
      */
-    public JsonbConfig getConfig() {
-        return bindingConfig;
+    public AnnotationIntrospector getAnnotationIntrospector() {
+        return annotationInspector;
     }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mapperContext;
-    }
-
 
     /**
      * Gets JSONP provider.
@@ -97,6 +78,19 @@ public class JsonbBindingContext {
      */
     public JsonProvider getJsonProvider() {
         return jsonSource;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentFilter;
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configurationProperties;
     }
 
     /**
@@ -109,35 +103,12 @@ public class JsonbBindingContext {
     }
 
     /**
-     * Component matcher for lookup of (de)serializers and adapters.
+     * Gets {@link JsonbConfig}.
      *
-     * @return Component matcher.
+     * @return Configuration.
      */
-    public ComponentMatcher getComponentMatcher() {
-        return componentFilter;
-    }
-
-    /**
-     * Gets component for annotation parsing.
-     *
-     * @return Annotation introspector.
-     */
-    public AnnotationIntrospector getAnnotationIntrospector() {
-        return annotationInspector;
-    }
-
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configurationProperties;
-    }
-
-
-    /**
-     * Returns component for creating instances of non-parsed types.
-     * @return InstanceCreator
-     */
-    public InstanceCreator getInstanceCreator() {
-        return instanceFactory;
+    public JsonbConfig getConfig() {
+        return bindingConfig;
     }
 
     private JsonbComponentInstanceCreator initializeComponentInstanceCreator(InstanceCreator instanceFactory) {
@@ -156,6 +127,33 @@ public class JsonbBindingContext {
         JsonbComponentInstanceCreator candidate = componentFactoryList.get(0);
         ERROR_RECORDER.finest("Component instance creator:" + candidate.getClass());
         return candidate;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mapperContext;
+    }
+
+    /**
+     * Creates and initialize context.
+     *
+     * @param bindingConfig jsonb jsonbConfig not null
+     * @param jsonSource provider of JSONP
+     */
+    public JsonbBindingContext(JsonbConfig bindingConfig, JsonProvider jsonSource) {
+        Objects.requireNonNull(bindingConfig);
+        this.bindingConfig = bindingConfig;
+        this.mapperContext = new MappingContext(this);
+        this.instanceFactory = new InstanceCreator();
+        this.componentFactory = initializeComponentInstanceCreator(instanceFactory);
+        this.componentFilter = new ComponentMatcher(this);
+        this.annotationInspector = new AnnotationIntrospector(this);
+        this.jsonSource = jsonSource;
+        this.configurationProperties = new JsonbConfigProperties(bindingConfig);
     }
 
 }

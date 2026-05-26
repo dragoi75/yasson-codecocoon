@@ -26,6 +26,11 @@ import java.time.Period;
  */
 public class PeriodTypeDeserializer extends AbstractValueTypeDeserializer<Period> {
 
+    @Override
+    protected Period deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return Period.parse(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class PeriodTypeDeserializer extends AbstractValueTypeDeserializer<Period
         super(Period.class, customization);
     }
 
-    @Override
-    protected Period deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return Period.parse(jsonValue);
-    }
 }

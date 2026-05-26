@@ -26,33 +26,6 @@ import java.util.Iterator;
 abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
 
     /**
-     * Get current {@link JsonValue}, that the parser is pointing on.
-     * @return JsonValue result.
-     */
-    abstract JsonValue getValue();
-
-    /**
-     * Creates an exception for throwing in case of current value type is not compatible with
-     * called getter return type.
-     *
-     * @return JsonbException with error description.
-     */
-    abstract JsonbException createIncompatibleValueError();
-
-    /**
-     * Check the type of current  {@link JsonValue} and return a string representing a value.
-     * @return String value for current JsonValue
-     */
-    String getString() {
-        JsonValue value = getValue();
-        if (!(value instanceof JsonString)) {
-            return value.toString();
-        } else {
-            return ((JsonString) value).getString();
-        }
-    }
-
-    /**
      * Convert {@link JsonValue} type to {@link JsonParser.Event}.
      * @param value JsonValue
      * @return JsonParser event
@@ -75,4 +48,32 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
                 throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "unknown json value: " + value.getValueType()));
         }
     }
+
+    /**
+     * Check the type of current  {@link JsonValue} and return a string representing a value.
+     * @return String value for current JsonValue
+     */
+    String getString() {
+        JsonValue value = getValue();
+        if (!(value instanceof JsonString)) {
+            return value.toString();
+        } else {
+            return ((JsonString) value).getString();
+        }
+    }
+
+    /**
+     * Creates an exception for throwing in case of current value type is not compatible with
+     * called getter return type.
+     *
+     * @return JsonbException with error description.
+     */
+    abstract JsonbException createIncompatibleValueError();
+
+    /**
+     * Get current {@link JsonValue}, that the parser is pointing on.
+     * @return JsonValue result.
+     */
+    abstract JsonValue getValue();
+
 }

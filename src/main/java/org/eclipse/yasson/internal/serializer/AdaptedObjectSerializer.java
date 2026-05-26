@@ -40,6 +40,25 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
 
     private final AdapterBinding adapterInfo;
 
+    @Override
+    public Type getRuntimeType() {
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonbSerializer<A> resolveSerializer(Marshaller ctx, A adapted) {
+        final ContainerSerializerProvider cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
+        if (null != cached) {
+            return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo().withWrapper(this).withRuntimeType(null == classModel ? null : classModel.getType()));
+        }
+        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext()).withObjectClass(adapted.getClass()).withCustomization(null == classModel ? null : classModel.getCustomization()).withWrapper(this).build();
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return null;
+    }
+
     /**
      * Creates AdapterObjectSerializer.
      *
@@ -49,6 +68,11 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
     public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
         this.classModel = classModel;
         this.adapterInfo = adapter;
+    }
+
+    @Override
+    public ClassModel getClassModel() {
+        return null;
     }
 
     @Override
@@ -75,27 +99,4 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private JsonbSerializer<A> resolveSerializer(Marshaller ctx, A adapted) {
-        final ContainerSerializerProvider cached = ctx.getMappingContext().getSerializerProvider(adapted.getClass());
-        if (null != cached) {
-            return (JsonbSerializer<A>) cached.provideSerializer(new JsonbPropertyInfo().withWrapper(this).withRuntimeType(null == classModel ? null : classModel.getType()));
-        }
-        return (JsonbSerializer<A>) new SerializerBuilder(ctx.getJsonbContext()).withObjectClass(adapted.getClass()).withCustomization(null == classModel ? null : classModel.getCustomization()).withWrapper(this).build();
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        return null;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return null;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return null;
-    }
 }

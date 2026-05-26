@@ -36,30 +36,12 @@ public abstract class CustomizationBuilder {
     private String[] propertyOrder;
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
+     * Gets a deserializer.
      *
-     * @return True if <i>nillable</i> customization is present.
+     * @return Deserializer.
      */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    /**
-     * Sets a presence of <i>nillable</i> customization.
-     *
-     * @param nillable Presence of <i>nillable</i> customization.
-     */
-    public void setNillable(boolean nillable) {
-        this.nillable = nillable;
-    }
-
-    /**
-     * Gets an components.
-     *
-     * @return Adapter.
-     */
-    public AdapterBinding getAdapterInfo() {
-        return adapterInfo;
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
     }
 
     /**
@@ -72,39 +54,12 @@ public abstract class CustomizationBuilder {
     }
 
     /**
-     * Gets meta info for user serializers.
+     * Sets a sorted list of property names.
      *
-     * @return Serializer info
+     * @param propertyOrder Array containing property names
      */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Sets serializer info.
-     *
-     * @param serializerBinding Serializer info to set.
-     */
-    public void setSerializerBinding(SerializerBinding serializerBinding) {
-        this.serializerBinding = serializerBinding;
-    }
-
-    /**
-     * Gets a deserializer.
-     *
-     * @return Deserializer.
-     */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
-    /**
-     * Sets a deserializer info.
-     *
-     * @param deserializerBinding Deserializer.
-     */
-    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
-        this.deserializerBinding = deserializerBinding;
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
     }
 
     /**
@@ -117,11 +72,57 @@ public abstract class CustomizationBuilder {
     }
 
     /**
-     * Sets a sorted list of property names.
+     * Sets a deserializer info.
      *
-     * @param propertyOrder Array containing property names
+     * @param deserializerBinding Deserializer.
      */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
+    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
+        this.deserializerBinding = deserializerBinding;
     }
+
+    /**
+     * Gets an components.
+     *
+     * @return Adapter.
+     */
+    public AdapterBinding getAdapterInfo() {
+        return adapterInfo;
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Gets meta info for user serializers.
+     *
+     * @return Serializer info
+     */
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinding;
+    }
+
+    /**
+     * Sets a presence of <i>nillable</i> customization.
+     *
+     * @param nillable Presence of <i>nillable</i> customization.
+     */
+    public void setNillable(boolean nillable) {
+        this.nillable = nillable;
+    }
+
+    /**
+     * Sets serializer info.
+     *
+     * @param serializerBinding Serializer info to set.
+     */
+    public void setSerializerBinding(SerializerBinding serializerBinding) {
+        this.serializerBinding = serializerBinding;
+    }
+
 }

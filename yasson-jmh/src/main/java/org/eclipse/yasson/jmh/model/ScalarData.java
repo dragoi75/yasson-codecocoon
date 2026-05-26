@@ -6,14 +6,17 @@ public class ScalarData {
 
     private Integer integerValue;
 
-    public ScalarData(String stringValue, Integer integerValue) {
-        this.stringValue = stringValue;
+    public Integer getIntegerValue() {
+        return integerValue;
+    }
+
+    public void setIntegerValue(Integer integerValue) {
         this.integerValue = integerValue;
     }
 
-    public ScalarData() {
-        this.stringValue = "Short string";
-        this.integerValue = 10;
+    public ScalarData(String stringValue, Integer integerValue) {
+        this.stringValue = stringValue;
+        this.integerValue = integerValue;
     }
 
     public String getStringValue() {
@@ -24,11 +27,9 @@ public class ScalarData {
         this.stringValue = stringValue;
     }
 
-    public Integer getIntegerValue() {
-        return integerValue;
+    public ScalarData() {
+        this.stringValue = "Short string";
+        this.integerValue = 10;
     }
 
-    public void setIntegerValue(Integer integerValue) {
-        this.integerValue = integerValue;
-    }
 }

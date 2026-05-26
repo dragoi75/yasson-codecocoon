@@ -38,6 +38,12 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     protected final ClassModel componentClassModel;
 
+    @Override
+    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
     protected AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);
         if (!(getRuntimeType() instanceof GenericArrayType)) {
@@ -52,6 +58,14 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         }
     }
 
+    protected abstract List<?> getItems();
+
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass).withCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).build();
+        appendResult(deserializer.deserialize(parser, context, componentClass));
+    }
+
     @Override
     public void appendResult(Object result) {
         appendCaptor(convertNullToOptionalEmpty(componentClass, result));
@@ -62,17 +76,4 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         ((List<X>) getItems()).add(value);
     }
 
-    @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).withType(componentClass).withCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).build();
-        appendResult(deserializer.deserialize(parser, context, componentClass));
-    }
-
-    protected abstract List<?> getItems();
-
-    @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

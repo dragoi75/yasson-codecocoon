@@ -34,44 +34,6 @@ import java.util.OptionalLong;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param builder Builder to initialize the instance.
-     */
-    public ObjectSerializer(SerializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param wrapper wrapped item
-     * @param runtimeType class type
-     * @param classModel model of the class
-     */
-    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        super(wrapper, runtimeType, classModel);
-    }
-
-    @Override
-    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
-        final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
-        for (PropertyModel model : allProperties) {
-            marshallProperty(object, generator, ctx, model);
-        }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
     @SuppressWarnings("unchecked")
     private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
         Marshaller marshaller = (Marshaller) ctx;
@@ -114,4 +76,43 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
         return false;
     }
+
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    @Override
+    protected void serializeInternal(T object, JsonGenerator generator, SerializationContext ctx) {
+        final PropertyModel[] allProperties = ((Marshaller) ctx).getMappingContext().getOrCreateClassModel(object.getClass()).getSortedProperties();
+        for (PropertyModel model : allProperties) {
+            marshallProperty(object, generator, ctx, model);
+        }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize the instance.
+     */
+    public ObjectSerializer(SerializerBuilder builder) {
+        super(builder);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper wrapped item
+     * @param runtimeType class type
+     * @param classModel model of the class
+     */
+    public ObjectSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
 }

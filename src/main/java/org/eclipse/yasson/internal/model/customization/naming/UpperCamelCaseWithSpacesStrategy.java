@@ -23,6 +23,10 @@ import java.nio.CharBuffer;
  */
 public class UpperCamelCaseWithSpacesStrategy extends UpperCamelCaseStrategy {
 
+    private boolean isLowerCaseCharacter(char character) {
+        return Character.isAlphabetic(character) && Character.isLowerCase(character);
+    }
+
     @Override
     public String translateName(String propertyName) {
         String upperCased = super.translateName(propertyName);
@@ -41,7 +45,4 @@ public class UpperCamelCaseWithSpacesStrategy extends UpperCamelCaseStrategy {
         return new String(buffer.array(), 0, buffer.position());
     }
 
-    private boolean isLowerCaseCharacter(char character) {
-        return Character.isAlphabetic(character) && Character.isLowerCase(character);
-    }
 }
