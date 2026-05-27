@@ -25,30 +25,6 @@ abstract class MapSerializer implements ModelMarshaller {
 
     private final ModelMarshaller valueSerializer;
 
-    MapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
-        this.keySerializer = keySerializer;
-        this.valueSerializer = valueSerializer;
-    }
-
-    ModelMarshaller getKeySerializer() {
-        return keySerializer;
-    }
-
-    ModelMarshaller getValueSerializer() {
-        return valueSerializer;
-    }
-
-    static MapSerializer create(Class<?> keyClass, ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
-        if (!TypeSerializers.isSupportedMapKey(keyClass)) {
-            if (Object.class.equals(keyClass)) {
-                return new DynamicMapSerializer(keySerializer, valueSerializer);
-            }
-        } else {
-            return new StringKeyMapSerializer(keySerializer, valueSerializer);
-        }
-        return new ObjectKeyMapSerializer(keySerializer, valueSerializer);
-    }
-
     private static final class DynamicMapSerializer extends MapSerializer {
 
         private final StringKeyMapSerializer stringMap;
@@ -56,12 +32,6 @@ abstract class MapSerializer implements ModelMarshaller {
         private final ObjectKeyMapSerializer objectMap;
 
         private MapSerializer serializer;
-
-        DynamicMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
-            super(keySerializer, valueSerializer);
-            stringMap = new StringKeyMapSerializer(keySerializer, valueSerializer);
-            objectMap = new ObjectKeyMapSerializer(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -90,13 +60,16 @@ abstract class MapSerializer implements ModelMarshaller {
             }
             serializer.marshal(value, generator, context);
         }
+
+        DynamicMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
+            super(keySerializer, valueSerializer);
+            stringMap = new StringKeyMapSerializer(keySerializer, valueSerializer);
+            objectMap = new ObjectKeyMapSerializer(keySerializer, valueSerializer);
+        }
+
     }
 
     private static final class StringKeyMapSerializer extends MapSerializer {
-
-        StringKeyMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
-            super(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -109,13 +82,14 @@ abstract class MapSerializer implements ModelMarshaller {
             });
             generator.writeEnd();
         }
+
+        StringKeyMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
+            super(keySerializer, valueSerializer);
+        }
+
     }
 
     private static final class ObjectKeyMapSerializer extends MapSerializer {
-
-        ObjectKeyMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
-            super(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -136,5 +110,35 @@ abstract class MapSerializer implements ModelMarshaller {
             });
             generator.writeEnd();
         }
+
+        ObjectKeyMapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
+            super(keySerializer, valueSerializer);
+        }
+
     }
+
+    static MapSerializer create(Class<?> keyClass, ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
+        if (!TypeSerializers.isSupportedMapKey(keyClass)) {
+            if (Object.class.equals(keyClass)) {
+                return new DynamicMapSerializer(keySerializer, valueSerializer);
+            }
+        } else {
+            return new StringKeyMapSerializer(keySerializer, valueSerializer);
+        }
+        return new ObjectKeyMapSerializer(keySerializer, valueSerializer);
+    }
+
+    MapSerializer(ModelMarshaller keySerializer, ModelMarshaller valueSerializer) {
+        this.keySerializer = keySerializer;
+        this.valueSerializer = valueSerializer;
+    }
+
+    ModelMarshaller getKeySerializer() {
+        return keySerializer;
+    }
+
+    ModelMarshaller getValueSerializer() {
+        return valueSerializer;
+    }
+
 }

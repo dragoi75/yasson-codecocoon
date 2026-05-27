@@ -23,10 +23,6 @@ class OptionalDoubleValueSerializer implements ModelMarshaller {
 
     private final ModelMarshaller modelMarshaller;
 
-    OptionalDoubleValueSerializer(ModelMarshaller modelMarshaller) {
-        this.modelMarshaller = modelMarshaller;
-    }
-
     @Override
     public void marshal(Object inputObject, JsonGenerator jsonWriter, DefaultSerializationContext serializationState) {
         OptionalDouble maybeDouble = (OptionalDouble) inputObject;
@@ -36,4 +32,9 @@ class OptionalDoubleValueSerializer implements ModelMarshaller {
             modelMarshaller.marshal(maybeDouble.getAsDouble(), jsonWriter, serializationState);
         }
     }
+
+    OptionalDoubleValueSerializer(ModelMarshaller modelMarshaller) {
+        this.modelMarshaller = modelMarshaller;
+    }
+
 }

@@ -90,6 +90,15 @@ public class JsonbConfigProperties {
     private final boolean forceMapArraySerializerForNullKeys;
 
     /**
+     * User type mapping for map interface to implementation classes.
+     *
+     * @return User type mapping.
+     */
+    public Map<Class<?>, Class<?>> getUserTypeMapping() {
+        return userTypeMapping;
+    }
+
+    /**
      * Creates new resolved JSONB config.
      *
      * @param jsonbConfig jsonb config
@@ -115,22 +124,6 @@ public class JsonbConfigProperties {
         this.dateInMillisecondsAsString = initDateInMillisecondsAsString();
     }
 
-    private Class<? extends Map> initDefaultMapImplType() {
-        //We need to get PropertyOrderStrategy again. This time, if was not set, use ANY to get proper map implementation.
-        //This is intentional!
-        String propertyOrder = getConfigProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY, String.class, PropertyOrderStrategy.ANY);
-        return PROPERTY_ORDER_STRATEGY_MAPS.getOrDefault(propertyOrder, HashMap.class);
-    }
-
-    private boolean initZeroTimeDefaultingForJavaTime() {
-        return getConfigProperty(YassonConfig.ZERO_TIME_PARSE_DEFAULTING, Boolean.class, false);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<Class<?>, Class<?>> initUserTypeMapping() {
-        return getConfigProperty(YassonConfig.USER_TYPE_MAPPING, Map.class, Collections.emptyMap());
-    }
-
     private JsonbDateFormatter initDateFormatter(Locale locale) {
         final String dateFormat = getGlobalConfigJsonbDateFormat();
         if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
@@ -145,32 +138,40 @@ public class JsonbConfigProperties {
         return new JsonbDateFormatter(builder.toFormatter(locale), dateFormat, locale.toLanguageTag());
     }
 
-    private String getGlobalConfigJsonbDateFormat() {
-        return getConfigProperty(JsonbConfig.DATE_FORMAT, String.class, JsonbDateFormat.DEFAULT_FORMAT);
+    /**
+     * If strict IJSON patterns should be used.
+     *
+     * @return if IJSON is enabled
+     */
+    public boolean isStrictIJson() {
+        return strictIJson;
     }
 
-    private Consumer<List<PropertyModel>> initOrderStrategy() {
-        return StrategiesProvider.getOrderingFunction(getPropertyOrderStrategy());
+    public Set<Class<?>> getEagerInitClasses() {
+        return eagerInitClasses;
     }
 
-    private String getPropertyOrderStrategy() {
-        return getConfigProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY, String.class, PropertyOrderStrategy.LEXICOGRAPHICAL);
+    /**
+     * Gets property ordering component.
+     *
+     * @return Component for ordering properties.
+     */
+    public PropertyOrdering getPropertyOrdering() {
+        return propertyOrdering;
     }
 
-    private PropertyNamingStrategy initPropertyNamingStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
-        if (property.isEmpty()) {
-            return StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
-        }
-        Object propertyNamingStrategy = property.get();
-        if (!(propertyNamingStrategy instanceof String)) {
-            if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
-            }
-        } else {
-            return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
-        }
-        return (PropertyNamingStrategy) property.get();
+    /**
+     * Whether the MapToEntriesArraySerializer is selected when a null key
+     * is detected in a map.
+     *
+     * @return false or true
+     */
+    public boolean isForceMapArraySerializerForNullKeys() {
+        return forceMapArraySerializerForNullKeys;
+    }
+
+    private boolean initConfigFailOnUnknownProperties() {
+        return getConfigProperty(YassonConfig.FAIL_ON_UNKNOWN_PROPERTIES, Boolean.class, false);
     }
 
     private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
@@ -189,71 +190,17 @@ public class JsonbConfigProperties {
         return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
     }
 
-    private String initBinaryDataStrategy() {
-        if (getConfigProperty(JsonbConfig.STRICT_IJSON, Boolean.class, false)) {
-            return BinaryDataStrategy.BASE_64_URL;
-        }
-        return getConfigProperty(JsonbConfig.BINARY_DATA_STRATEGY, String.class, BinaryDataStrategy.BYTE);
-    }
-
     private boolean initConfigNullable() {
         return getConfigProperty(JsonbConfig.NULL_VALUES, Boolean.class, false);
     }
 
-    private boolean initConfigFailOnUnknownProperties() {
-        return getConfigProperty(YassonConfig.FAIL_ON_UNKNOWN_PROPERTIES, Boolean.class, false);
-    }
-
-    private boolean initRequiredCreatorParameters() {
-        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED));
-        if (null != sysProp) {
-            return Boolean.parseBoolean(sysProp);
-        }
-        return getConfigProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED, Boolean.class, false);
-    }
-
-    private boolean initDateInMillisecondsAsString() {
-        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING));
-        if (null != sysProp) {
-            return Boolean.parseBoolean(sysProp);
-        }
-        return getConfigProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING, Boolean.class, false);
-    }
-
-    @SuppressWarnings("unchecked")
-    private JsonbSerializer<Object> initNullSerializer() {
-        return jsonbConfig.getProperty(YassonConfig.NULL_ROOT_SERIALIZER).map(o -> {
-            if (!(o instanceof JsonbSerializer)) {
-                throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class + "<Object>");
-            }
-            return (JsonbSerializer<Object>) o;
-        }).orElse(null);
-    }
-
-    private Set<Class<?>> initEagerInitClasses() {
-        Optional<Object> property = jsonbConfig.getProperty(YassonConfig.EAGER_PARSE_CLASSES);
-        if (property.isEmpty()) {
-            return Collections.emptySet();
-        }
-        Object eagerInitClasses = property.get();
-        if (!(eagerInitClasses instanceof Class<?>[])) {
-            throw new JsonbException("YassonConfig.EAGER_PARSE_CLASSES must be instance of Class<?>[]");
-        }
-        return new HashSet<>(Arrays.asList((Class<?>[]) eagerInitClasses));
-    }
-
-    private boolean initForceMapArraySerializerForNullKeys() {
-        return getConfigProperty(YassonConfig.FORCE_MAP_ARRAY_SERIALIZER_FOR_NULL_KEYS, Boolean.class, false);
-    }
-
     /**
-     * Gets nullable from {@link JsonbConfig}.
-     * If true null values are serialized to json.
+     * Gets property naming strategy.
      *
-     * @return Configured nullable
+     * @return Property naming strategy.
      */
-    public boolean getConfigNullable() {
-        return nullable;
+    public PropertyNamingStrategy getPropertyNamingStrategy() {
+        return propertyNamingStrategy;
     }
 
     /**
@@ -268,18 +215,13 @@ public class JsonbConfigProperties {
         return failOnUnknownProperties;
     }
 
-    private <T> T getConfigProperty(String propertyName, Class<T> propertyType, T defaultValue) {
-        Objects.requireNonNull(defaultValue, "Default value cannot be null");
-        return jsonbConfig.getProperty(propertyName).or(() -> Optional.of(defaultValue)).filter(propertyType::isInstance).map(propertyType::cast).orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, propertyType.getSimpleName())));
-    }
-
     /**
-     * Checks for binary data strategy to use.
+     * Gets instantiated shared config date formatter.
      *
-     * @return Binary data strategy.
+     * @return Date formatter.
      */
-    public String getBinaryDataStrategy() {
-        return binaryDataStrategy;
+    public JsonbDateFormatter getConfigDateFormatter() {
+        return dateFormatter;
     }
 
     /**
@@ -295,6 +237,43 @@ public class JsonbConfigProperties {
         return Locale.forLanguageTag(locale);
     }
 
+    private boolean initStrictJson() {
+        return getConfigProperty(JsonbConfig.STRICT_IJSON, Boolean.class, false);
+    }
+
+    public JsonbSerializer<Object> getNullSerializer() {
+        return nullSerializer;
+    }
+
+    public boolean hasRequiredCreatorParameters() {
+        return requiredCreatorParameters;
+    }
+
+    private boolean initForceMapArraySerializerForNullKeys() {
+        return getConfigProperty(YassonConfig.FORCE_MAP_ARRAY_SERIALIZER_FOR_NULL_KEYS, Boolean.class, false);
+    }
+
+    private boolean initDateInMillisecondsAsString() {
+        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING));
+        if (null != sysProp) {
+            return Boolean.parseBoolean(sysProp);
+        }
+        return getConfigProperty(YassonConfig.DATE_TIME_IN_MILLIS_AS_A_STRING, Boolean.class, false);
+    }
+
+    private boolean initRequiredCreatorParameters() {
+        String sysProp = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED));
+        if (null != sysProp) {
+            return Boolean.parseBoolean(sysProp);
+        }
+        return getConfigProperty(JsonbConfig.CREATOR_PARAMETERS_REQUIRED, Boolean.class, false);
+    }
+
+    private <T> T getConfigProperty(String propertyName, Class<T> propertyType, T defaultValue) {
+        Objects.requireNonNull(defaultValue, "Default value cannot be null");
+        return jsonbConfig.getProperty(propertyName).or(() -> Optional.of(defaultValue)).filter(propertyType::isInstance).map(propertyType::cast).orElseThrow(() -> new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, propertyType.getSimpleName())));
+    }
+
     /**
      * Gets locale from {@link JsonbConfig}.
      *
@@ -304,62 +283,33 @@ public class JsonbConfigProperties {
         return getConfigProperty(JsonbConfig.LOCALE, Locale.class, Locale.getDefault());
     }
 
-    private boolean initStrictJson() {
-        return getConfigProperty(JsonbConfig.STRICT_IJSON, Boolean.class, false);
+    public boolean isDateInMillisecondsAsString() {
+        return dateInMillisecondsAsString;
+    }
+
+    private PropertyNamingStrategy initPropertyNamingStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
+        if (property.isEmpty()) {
+            return StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
+        }
+        Object propertyNamingStrategy = property.get();
+        if (!(propertyNamingStrategy instanceof String)) {
+            if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
+            }
+        } else {
+            return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
+        }
+        return (PropertyNamingStrategy) property.get();
     }
 
     /**
-     * Gets property visibility strategy.
+     * Default {@link java.util.Map} implementation to use, based on order strategy.
      *
-     * @return Property visibility strategy.
+     * @return map impl type
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    /**
-     * Gets property naming strategy.
-     *
-     * @return Property naming strategy.
-     */
-    public PropertyNamingStrategy getPropertyNamingStrategy() {
-        return propertyNamingStrategy;
-    }
-
-    /**
-     * Gets instantiated shared config date formatter.
-     *
-     * @return Date formatter.
-     */
-    public JsonbDateFormatter getConfigDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
-     * Gets property ordering component.
-     *
-     * @return Component for ordering properties.
-     */
-    public PropertyOrdering getPropertyOrdering() {
-        return propertyOrdering;
-    }
-
-    /**
-     * If strict IJSON patterns should be used.
-     *
-     * @return if IJSON is enabled
-     */
-    public boolean isStrictIJson() {
-        return strictIJson;
-    }
-
-    /**
-     * User type mapping for map interface to implementation classes.
-     *
-     * @return User type mapping.
-     */
-    public Map<Class<?>, Class<?>> getUserTypeMapping() {
-        return userTypeMapping;
+    public Class<?> getDefaultMapImplType() {
+        return defaultMapImplType;
     }
 
     /**
@@ -377,38 +327,89 @@ public class JsonbConfigProperties {
         return zeroTimeDefaulting;
     }
 
-    /**
-     * Default {@link java.util.Map} implementation to use, based on order strategy.
-     *
-     * @return map impl type
-     */
-    public Class<?> getDefaultMapImplType() {
-        return defaultMapImplType;
+    private String getPropertyOrderStrategy() {
+        return getConfigProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY, String.class, PropertyOrderStrategy.LEXICOGRAPHICAL);
     }
 
-    public JsonbSerializer<Object> getNullSerializer() {
-        return nullSerializer;
+    private String getGlobalConfigJsonbDateFormat() {
+        return getConfigProperty(JsonbConfig.DATE_FORMAT, String.class, JsonbDateFormat.DEFAULT_FORMAT);
     }
 
-    public boolean hasRequiredCreatorParameters() {
-        return requiredCreatorParameters;
-    }
-
-    public Set<Class<?>> getEagerInitClasses() {
-        return eagerInitClasses;
+    private boolean initZeroTimeDefaultingForJavaTime() {
+        return getConfigProperty(YassonConfig.ZERO_TIME_PARSE_DEFAULTING, Boolean.class, false);
     }
 
     /**
-     * Whether the MapToEntriesArraySerializer is selected when a null key
-     * is detected in a map.
+     * Gets property visibility strategy.
      *
-     * @return false or true
+     * @return Property visibility strategy.
      */
-    public boolean isForceMapArraySerializerForNullKeys() {
-        return forceMapArraySerializerForNullKeys;
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
     }
 
-    public boolean isDateInMillisecondsAsString() {
-        return dateInMillisecondsAsString;
+    /**
+     * Checks for binary data strategy to use.
+     *
+     * @return Binary data strategy.
+     */
+    public String getBinaryDataStrategy() {
+        return binaryDataStrategy;
     }
+
+    private Set<Class<?>> initEagerInitClasses() {
+        Optional<Object> property = jsonbConfig.getProperty(YassonConfig.EAGER_PARSE_CLASSES);
+        if (property.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Object eagerInitClasses = property.get();
+        if (!(eagerInitClasses instanceof Class<?>[])) {
+            throw new JsonbException("YassonConfig.EAGER_PARSE_CLASSES must be instance of Class<?>[]");
+        }
+        return new HashSet<>(Arrays.asList((Class<?>[]) eagerInitClasses));
+    }
+
+    private String initBinaryDataStrategy() {
+        if (getConfigProperty(JsonbConfig.STRICT_IJSON, Boolean.class, false)) {
+            return BinaryDataStrategy.BASE_64_URL;
+        }
+        return getConfigProperty(JsonbConfig.BINARY_DATA_STRATEGY, String.class, BinaryDataStrategy.BYTE);
+    }
+
+    private Consumer<List<PropertyModel>> initOrderStrategy() {
+        return StrategiesProvider.getOrderingFunction(getPropertyOrderStrategy());
+    }
+
+    private Class<? extends Map> initDefaultMapImplType() {
+        //We need to get PropertyOrderStrategy again. This time, if was not set, use ANY to get proper map implementation.
+        //This is intentional!
+        String propertyOrder = getConfigProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY, String.class, PropertyOrderStrategy.ANY);
+        return PROPERTY_ORDER_STRATEGY_MAPS.getOrDefault(propertyOrder, HashMap.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Class<?>, Class<?>> initUserTypeMapping() {
+        return getConfigProperty(YassonConfig.USER_TYPE_MAPPING, Map.class, Collections.emptyMap());
+    }
+
+    /**
+     * Gets nullable from {@link JsonbConfig}.
+     * If true null values are serialized to json.
+     *
+     * @return Configured nullable
+     */
+    public boolean getConfigNullable() {
+        return nullable;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonbSerializer<Object> initNullSerializer() {
+        return jsonbConfig.getProperty(YassonConfig.NULL_ROOT_SERIALIZER).map(o -> {
+            if (!(o instanceof JsonbSerializer)) {
+                throw new JsonbException("YassonConfig.NULL_ROOT_SERIALIZER must be instance of " + JsonbSerializer.class + "<Object>");
+            }
+            return (JsonbSerializer<Object>) o;
+        }).orElse(null);
+    }
+
 }

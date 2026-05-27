@@ -23,13 +23,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class UriSerializer extends TypeSerializer<URI> {
 
-    UriSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(URI value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value.toString());
+    }
+
+    UriSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

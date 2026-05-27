@@ -22,8 +22,9 @@ import java.util.Locale;
  */
 class LocalDateDeserializer extends AbstractDateDeserializer<LocalDate> {
 
-    LocalDateDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
+    @Override
+    protected LocalDate parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return LocalDate.parse(jsonValue, formatter);
     }
 
     @Override
@@ -36,8 +37,8 @@ class LocalDateDeserializer extends AbstractDateDeserializer<LocalDate> {
         return LocalDate.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale));
     }
 
-    @Override
-    protected LocalDate parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return LocalDate.parse(jsonValue, formatter);
+    LocalDateDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
+
 }

@@ -49,17 +49,6 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
 
     private final boolean failOnUnknownProperties;
 
-    JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains, Map<String, ModelDeserializer<Object>> defaultCreatorValues, JsonbCreator creator, Class<?> clazz, Function<String, String> renamer, boolean failOnUnknownProperties, Set<String> ignoredProperties) {
-        this.propertyDeserializerChains = propertyDeserializerChains;
-        this.defaultCreatorValues = defaultCreatorValues;
-        this.creatorParams = Arrays.stream(creator.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
-        this.ignoredProperties = Set.copyOf(ignoredProperties);
-        this.creator = creator;
-        this.clazz = clazz;
-        this.renamer = renamer;
-        this.failOnUnknownProperties = failOnUnknownProperties;
-    }
-
     @Override
     public Object deserialize(JsonParser parser, DeserializationContextImpl context) {
         String key = null;
@@ -121,4 +110,16 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
     public String toString() {
         return "ObjectInstanceCreator{" + "parameters=" + creatorParams + ", clazz=" + clazz + '}';
     }
+
+    JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains, Map<String, ModelDeserializer<Object>> defaultCreatorValues, JsonbCreator creator, Class<?> clazz, Function<String, String> renamer, boolean failOnUnknownProperties, Set<String> ignoredProperties) {
+        this.propertyDeserializerChains = propertyDeserializerChains;
+        this.defaultCreatorValues = defaultCreatorValues;
+        this.creatorParams = Arrays.stream(creator.getParams()).map(CreatorModel::getName).collect(Collectors.toList());
+        this.ignoredProperties = Set.copyOf(ignoredProperties);
+        this.creator = creator;
+        this.clazz = clazz;
+        this.renamer = renamer;
+        this.failOnUnknownProperties = failOnUnknownProperties;
+    }
+
 }

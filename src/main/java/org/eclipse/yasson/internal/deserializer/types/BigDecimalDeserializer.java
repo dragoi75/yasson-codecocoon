@@ -19,12 +19,13 @@ import java.math.BigDecimal;
  */
 class BigDecimalDeserializer extends AbstractNumberDeserializer<BigDecimal> {
 
-    BigDecimalDeserializer(TypeDeserializerBuilder builder) {
-        super(builder, false);
-    }
-
     @Override
     BigDecimal parseNumberValue(String value) {
         return new BigDecimal(value);
     }
+
+    BigDecimalDeserializer(TypeDeserializerBuilder builder) {
+        super(builder, false);
+    }
+
 }

@@ -23,10 +23,6 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  */
 class UrlDeserializer extends TypeDeserializer {
 
-    UrlDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         URL url = null;
@@ -37,4 +33,9 @@ class UrlDeserializer extends TypeDeserializer {
         }
         return url;
     }
+
+    UrlDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

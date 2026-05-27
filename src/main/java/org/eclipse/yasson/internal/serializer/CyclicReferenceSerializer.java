@@ -25,10 +25,6 @@ class CyclicReferenceSerializer implements ModelMarshaller {
 
     private ModelMarshaller delegate;
 
-    CyclicReferenceSerializer(Type type) {
-        this.type = type;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (null == delegate) {
@@ -36,4 +32,9 @@ class CyclicReferenceSerializer implements ModelMarshaller {
         }
         delegate.marshal(value, generator, context);
     }
+
+    CyclicReferenceSerializer(Type type) {
+        this.type = type;
+    }
+
 }

@@ -26,29 +26,47 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     private final DeserializerBinding<?> deserializerBinding;
     private final boolean nillable;
 
-    /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
-     */
-    CustomizationBase(Builder<?, ?> builder) {
-        this.nillable = builder.nillable;
-        this.adapterBinding = builder.adapterBinding;
-        this.serializerBinding = builder.serializerBinding;
-        this.deserializerBinding = builder.deserializerBinding;
-    }
+    @SuppressWarnings("unchecked")
+    abstract static class Builder<T extends Builder<T, B>, B extends CustomizationBase> {
 
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
+        private AdapterBinding adapterBinding;
+        private SerializerBinding<?> serializerBinding;
+        private DeserializerBinding<?> deserializerBinding;
+        private boolean nillable;
 
-    public AdapterBinding getSerializeAdapterBinding() {
-        return adapterBinding;
+        public T nillable(boolean nillable) {
+            this.nillable = nillable;
+            return (T) this;
+        }
+
+        public T deserializerBinding(DeserializerBinding<?> deserializerBinding) {
+            this.deserializerBinding = deserializerBinding;
+            return (T) this;
+        }
+
+        public abstract B build();
+
+        public T adapterBinding(AdapterBinding adapterBinding) {
+            this.adapterBinding = adapterBinding;
+            return (T) this;
+        }
+
+        public T of(B customization) {
+            adapterBinding = customization.getDeserializeAdapterBinding();
+            serializerBinding = customization.getSerializerBinding();
+            deserializerBinding = customization.getDeserializerBinding();
+            nillable = customization.isNillable();
+            return (T) this;
+        }
+
+        Builder() {
+        }
+
+        public T serializerBinding(SerializerBinding<?> serializerBinding) {
+            this.serializerBinding = serializerBinding;
+            return (T) this;
+        }
+
     }
 
     @Override
@@ -66,6 +84,18 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     }
 
     /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    CustomizationBase(Builder<?, ?> builder) {
+        this.nillable = builder.nillable;
+        this.adapterBinding = builder.adapterBinding;
+        this.serializerBinding = builder.serializerBinding;
+        this.deserializerBinding = builder.deserializerBinding;
+    }
+
+    /**
      * Deserializer wrapper with resolved generic info.
      *
      * @return deserializer wrapper
@@ -74,47 +104,17 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         return deserializerBinding;
     }
 
-    @SuppressWarnings("unchecked")
-    abstract static class Builder<T extends Builder<T, B>, B extends CustomizationBase> {
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
 
-        private AdapterBinding adapterBinding;
-        private SerializerBinding<?> serializerBinding;
-        private DeserializerBinding<?> deserializerBinding;
-        private boolean nillable;
-
-        Builder() {
-        }
-
-        public T of(B customization) {
-            adapterBinding = customization.getDeserializeAdapterBinding();
-            serializerBinding = customization.getSerializerBinding();
-            deserializerBinding = customization.getDeserializerBinding();
-            nillable = customization.isNillable();
-            return (T) this;
-        }
-
-        public T adapterBinding(AdapterBinding adapterBinding) {
-            this.adapterBinding = adapterBinding;
-            return (T) this;
-        }
-
-        public T serializerBinding(SerializerBinding<?> serializerBinding) {
-            this.serializerBinding = serializerBinding;
-            return (T) this;
-        }
-
-        public T deserializerBinding(DeserializerBinding<?> deserializerBinding) {
-            this.deserializerBinding = deserializerBinding;
-            return (T) this;
-        }
-
-        public T nillable(boolean nillable) {
-            this.nillable = nillable;
-            return (T) this;
-        }
-
-        public abstract B build();
-
+    public AdapterBinding getSerializeAdapterBinding() {
+        return adapterBinding;
     }
 
 }

@@ -30,6 +30,82 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
 
     private final T element;
 
+    public static final class AnnotationWrapper<T extends Annotation> {
+
+        private final T annotation;
+
+        private final boolean inherited;
+
+        private final Class<?> definedType;
+
+        public Class<?> getDefinedType() {
+            return definedType;
+        }
+
+        @Override
+        public String toString() {
+            return definedType.getName();
+        }
+
+        public boolean isInherited() {
+            return inherited;
+        }
+
+        public AnnotationWrapper(T annotation, boolean inherited, Class<?> definedType) {
+            this.annotation = annotation;
+            this.inherited = inherited;
+            this.definedType = definedType;
+        }
+
+        public T getAnnotation() {
+            return annotation;
+        }
+
+    }
+
+    /**
+     * Get an annotation by type.
+     *
+     * @param <AT>            Type of annotation
+     * @param annotationClass Type of annotation
+     * @return Annotation by passed type
+     */
+    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationClass) {
+        return Optional.ofNullable(annotations.get(annotationClass)).map(LinkedList::getFirst).map(AnnotationWrapper::getAnnotation).map(annotationClass::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <AT extends Annotation> AnnotationWrapper<AT> getAnnotationWrapper(Class<AT> annotationClass) {
+        return (AnnotationWrapper<AT>) annotations.get(annotationClass).getFirst();
+    }
+
+    public void putAnnotationWrapper(AnnotationWrapper<?> annotationWrapper) {
+        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(annotationWrapper);
+    }
+
+    /**
+     * Adds annotation.
+     *
+     * @param annotation Annotation to add.
+     * @param definedType
+     */
+    public void putAnnotation(Annotation annotation, boolean inherited, Class<?> definedType) {
+        //        if (annotations.containsKey(annotation.annotationType())) {
+        //            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+        //                                                         "Annotation already present: " + annotation));
+        //        }
+        //        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
+        annotations.computeIfAbsent(annotation.annotationType(), aClass -> new LinkedList<>()).add(new AnnotationWrapper(annotation, inherited, definedType));
+    }
+
+    public <AT extends Annotation> LinkedList<AnnotationWrapper<?>> getAnnotations(Class<AT> annotationClass) {
+        return annotations.getOrDefault(annotationClass, new LinkedList<>());
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotations.values().stream().flatMap(Collection::stream).map(AnnotationWrapper::getAnnotation).toArray(Annotation[]::new);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -55,78 +131,4 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
         return element;
     }
 
-    /**
-     * Get an annotation by type.
-     *
-     * @param <AT>            Type of annotation
-     * @param annotationClass Type of annotation
-     * @return Annotation by passed type
-     */
-    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationClass) {
-        return Optional.ofNullable(annotations.get(annotationClass)).map(LinkedList::getFirst).map(AnnotationWrapper::getAnnotation).map(annotationClass::cast);
-    }
-
-    public <AT extends Annotation> LinkedList<AnnotationWrapper<?>> getAnnotations(Class<AT> annotationClass) {
-        return annotations.getOrDefault(annotationClass, new LinkedList<>());
-    }
-
-    @SuppressWarnings("unchecked")
-    public <AT extends Annotation> AnnotationWrapper<AT> getAnnotationWrapper(Class<AT> annotationClass) {
-        return (AnnotationWrapper<AT>) annotations.get(annotationClass).getFirst();
-    }
-
-    public Annotation[] getAnnotations() {
-        return annotations.values().stream().flatMap(Collection::stream).map(AnnotationWrapper::getAnnotation).toArray(Annotation[]::new);
-    }
-
-    /**
-     * Adds annotation.
-     *
-     * @param annotation Annotation to add.
-     * @param definedType
-     */
-    public void putAnnotation(Annotation annotation, boolean inherited, Class<?> definedType) {
-        //        if (annotations.containsKey(annotation.annotationType())) {
-        //            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-        //                                                         "Annotation already present: " + annotation));
-        //        }
-        //        annotations.put(annotation.annotationType(), new AnnotationWrapper(annotation, inherited));
-        annotations.computeIfAbsent(annotation.annotationType(), aClass -> new LinkedList<>()).add(new AnnotationWrapper(annotation, inherited, definedType));
-    }
-
-    public void putAnnotationWrapper(AnnotationWrapper<?> annotationWrapper) {
-        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(annotationWrapper);
-    }
-
-    public static final class AnnotationWrapper<T extends Annotation> {
-
-        private final T annotation;
-
-        private final boolean inherited;
-
-        private final Class<?> definedType;
-
-        public AnnotationWrapper(T annotation, boolean inherited, Class<?> definedType) {
-            this.annotation = annotation;
-            this.inherited = inherited;
-            this.definedType = definedType;
-        }
-
-        public T getAnnotation() {
-            return annotation;
-        }
-
-        public boolean isInherited() {
-            return inherited;
-        }
-
-        public Class<?> getDefinedType() {
-            return definedType;
-        }
-
-        @Override
-        public String toString() {
-            return definedType.getName();
-        }
-    }
 }

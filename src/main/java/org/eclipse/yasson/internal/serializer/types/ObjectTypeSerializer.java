@@ -35,18 +35,30 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
 
     private final boolean isKey;
 
+    /**
+     * Add serializer to the cache.
+     *
+     * @param clazz           class of the serializer
+     * @param modelSerializer model serializer bound to the class
+     */
+    public void addSpecificSerializer(Class<?> clazz, ModelMarshaller modelSerializer) {
+        cache.put(clazz, modelSerializer);
+    }
+
+    private void findSerializer(Object key, JsonGenerator generator, DefaultSerializationContext context) {
+        Class<?> clazz = key.getClass();
+        cache.computeIfAbsent(clazz, aClass -> {
+            SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
+            return serializationModelCreator.serializerChainRuntime(new LinkedList<>(chain), clazz, customization, false, isKey);
+        }).marshal(key, generator, context);
+    }
+
     ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
         super(serializerBuilder);
         this.customization = serializerBuilder.getCustomization();
         this.cache = new ConcurrentHashMap<>();
         this.chain = new LinkedList<>(serializerBuilder.getChain());
         this.isKey = serializerBuilder.isKey();
-    }
-
-    @Override
-    void serializeValue(Object value, JsonGenerator generator, DefaultSerializationContext context) {
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        findSerializer(value, generator, context);
     }
 
     @Override
@@ -59,21 +71,10 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         findSerializer(key, generator, context);
     }
 
-    private void findSerializer(Object key, JsonGenerator generator, DefaultSerializationContext context) {
-        Class<?> clazz = key.getClass();
-        cache.computeIfAbsent(clazz, aClass -> {
-            SerializationModelCreator serializationModelCreator = context.getJsonbContext().getSerializationModelCreator();
-            return serializationModelCreator.serializerChainRuntime(new LinkedList<>(chain), clazz, customization, false, isKey);
-        }).marshal(key, generator, context);
+    @Override
+    void serializeValue(Object value, JsonGenerator generator, DefaultSerializationContext context) {
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        findSerializer(value, generator, context);
     }
 
-    /**
-     * Add serializer to the cache.
-     *
-     * @param clazz           class of the serializer
-     * @param modelSerializer model serializer bound to the class
-     */
-    public void addSpecificSerializer(Class<?> clazz, ModelMarshaller modelSerializer) {
-        cache.put(clazz, modelSerializer);
-    }
 }

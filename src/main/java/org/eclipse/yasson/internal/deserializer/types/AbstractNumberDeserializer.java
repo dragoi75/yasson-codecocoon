@@ -35,10 +35,21 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
 
     private final boolean integerOnly;
 
-    AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
-        super(builder);
-        this.actualDeserializer = actualDeserializer(builder);
-        this.integerOnly = integerOnly;
+    private Function<String, String> createCompatibilityValueChanger(Locale locale) {
+        char beforeJdk13GroupSeparator = '\u00A0';
+        char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
+        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
+            //JDK-8225245
+            return value -> value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
+        }
+        return value -> value;
+    }
+
+    abstract T parseNumberValue(String value);
+
+    @Override
+    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
+        return actualDeserializer.deserialize(value, context);
     }
 
     private ModelDeserializer<String> actualDeserializer(TypeDeserializerBuilder builder) {
@@ -69,20 +80,10 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
         };
     }
 
-    private Function<String, String> createCompatibilityValueChanger(Locale locale) {
-        char beforeJdk13GroupSeparator = '\u00A0';
-        char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
-        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
-            //JDK-8225245
-            return value -> value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
-        }
-        return value -> value;
+    AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
+        super(builder);
+        this.actualDeserializer = actualDeserializer(builder);
+        this.integerOnly = integerOnly;
     }
 
-    abstract T parseNumberValue(String value);
-
-    @Override
-    Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
-        return actualDeserializer.deserialize(value, context);
-    }
 }

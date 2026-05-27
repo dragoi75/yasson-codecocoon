@@ -65,6 +65,82 @@ public class JsonbContext {
     private final JsonbConfigProperties configProperties;
 
     /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonProvider;
+    }
+
+    private JsonbComponentInstanceCreator initComponentInstanceCreator() {
+        ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
+                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
+                        .load(JsonbComponentInstanceCreator.class));
+        List<JsonbComponentInstanceCreator> creators = new ArrayList<>();
+        for (JsonbComponentInstanceCreator creator : loader) {
+            creators.add(creator);
+        }
+        if (creators.isEmpty()) {
+            // No service provider found - use the defaults
+            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator();
+        }
+        creators.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
+        JsonbComponentInstanceCreator creator = creators.get(0);
+        LOGGER.finest("Component instance creator:" + creator.getClass());
+        return creator;
+    }
+
+    /**
+     * Propagates properties from JsonbConfig to JSONP generator / parser factories.
+     *
+     * @param jsonbConfig jsonb config
+     * @return properties for JSONP generator / parser
+     */
+    protected Map<String, ?> createJsonpProperties(JsonbConfig jsonbConfig) {
+        //JSONP 1.0 actually ignores the value, just checks the key is present. Only set if JsonbConfig.FORMATTING is true.
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.FORMATTING);
+        final Map<String, Object> factoryProperties = new HashMap<>();
+        if (property.isPresent()) {
+            final Object value = property.get();
+            if (!(value instanceof Boolean)) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
+            }
+            if ((Boolean) value) {
+                factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
+            }
+            return factoryProperties;
+        }
+        return factoryProperties;
+    }
+
+    private JsonParserFactory initJsonParserFactory() {
+        return jsonProvider.createParserFactory(createJsonpProperties(jsonbConfig));
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configProperties;
+    }
+
+    /**
+     * Get serialization model creator.
+     *
+     * @return serialization model creator
+     */
+    public SerializationModelCreator getSerializationModelCreator() {
+        return serializationModelCreator;
+    }
+
+    /**
+     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
+     *
+     * @return Instance creator.
+     */
+    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
+        return componentInstanceCreator;
+    }
+
+    /**
      * Creates and initialize context.
      *
      * @param jsonbConfig  jsonb jsonbConfig not null
@@ -93,6 +169,10 @@ public class JsonbContext {
         return jsonbConfig;
     }
 
+    public JsonParserFactory getJsonParserFactory() {
+        return jsonParserFactory;
+    }
+
     /**
      * Gets mapping context.
      *
@@ -100,42 +180,6 @@ public class JsonbContext {
      */
     public MappingContext getMappingContext() {
         return mappingContext;
-    }
-
-    /**
-     * Get chain model creator.
-     *
-     * @return chain model creator
-     */
-    public DeserializationModelCreator getChainModelCreator() {
-        return deserializationModelCreator;
-    }
-
-    /**
-     * Get serialization model creator.
-     *
-     * @return serialization model creator
-     */
-    public SerializationModelCreator getSerializationModelCreator() {
-        return serializationModelCreator;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonProvider;
-    }
-
-    /**
-     * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
-     *
-     * @return Instance creator.
-     */
-    public JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        return componentInstanceCreator;
     }
 
     /**
@@ -148,65 +192,21 @@ public class JsonbContext {
     }
 
     /**
+     * Get chain model creator.
+     *
+     * @return chain model creator
+     */
+    public DeserializationModelCreator getChainModelCreator() {
+        return deserializationModelCreator;
+    }
+
+    /**
      * Gets component for annotation parsing.
      *
      * @return Annotation introspector.
      */
     public AnnotationIntrospector getAnnotationIntrospector() {
         return annotationIntrospector;
-    }
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
-    }
-
-    public JsonParserFactory getJsonParserFactory() {
-        return jsonParserFactory;
-    }
-
-    private JsonParserFactory initJsonParserFactory() {
-        return jsonProvider.createParserFactory(createJsonpProperties(jsonbConfig));
-    }
-
-    /**
-     * Propagates properties from JsonbConfig to JSONP generator / parser factories.
-     *
-     * @param jsonbConfig jsonb config
-     * @return properties for JSONP generator / parser
-     */
-    protected Map<String, ?> createJsonpProperties(JsonbConfig jsonbConfig) {
-        //JSONP 1.0 actually ignores the value, just checks the key is present. Only set if JsonbConfig.FORMATTING is true.
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.FORMATTING);
-        final Map<String, Object> factoryProperties = new HashMap<>();
-        if (property.isPresent()) {
-            final Object value = property.get();
-            if (!(value instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_FORMATTING_ILLEGAL_VALUE));
-            }
-            if ((Boolean) value) {
-                factoryProperties.put(JsonGenerator.PRETTY_PRINTING, Boolean.TRUE);
-            }
-            return factoryProperties;
-        }
-        return factoryProperties;
-    }
-
-    private JsonbComponentInstanceCreator initComponentInstanceCreator() {
-        ServiceLoader<JsonbComponentInstanceCreator> loader = AccessController
-                .doPrivileged((PrivilegedAction<ServiceLoader<JsonbComponentInstanceCreator>>) () -> ServiceLoader
-                        .load(JsonbComponentInstanceCreator.class));
-        List<JsonbComponentInstanceCreator> creators = new ArrayList<>();
-        for (JsonbComponentInstanceCreator creator : loader) {
-            creators.add(creator);
-        }
-        if (creators.isEmpty()) {
-            // No service provider found - use the defaults
-            return JsonbComponentInstanceCreatorFactory.getComponentInstanceCreator();
-        }
-        creators.sort(Comparator.comparingInt(JsonbComponentInstanceCreator::getPriority).reversed());
-        JsonbComponentInstanceCreator creator = creators.get(0);
-        LOGGER.finest("Component instance creator:" + creator.getClass());
-        return creator;
     }
 
 }

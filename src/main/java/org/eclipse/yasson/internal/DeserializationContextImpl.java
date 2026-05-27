@@ -37,49 +37,12 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
     private Object instance;
 
     /**
-     * Parent instance for marshaller and unmarshaller.
+     * Set last obtained {@link JsonParser.Event} event.
      *
-     * @param jsonbContext context of Jsonb
+     * @param lastValueEvent last obtained event
      */
-    public DeserializationContextImpl(JsonbContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    /**
-     * Create new instance based on previous context.
-     *
-     * @param context previous deserialization context
-     */
-    public DeserializationContextImpl(DeserializationContextImpl context) {
-        super(context.getJsonbContext());
-        this.lastValueEvent = context.lastValueEvent;
-    }
-
-    /**
-     * Return instance of currently deserialized type.
-     *
-     * @return null if instance has not been created yet
-     */
-    public Object getInstance() {
-        return instance;
-    }
-
-    /**
-     * Set currently deserialized type instance.
-     *
-     * @param instance deserialized type instance
-     */
-    public void setInstance(Object instance) {
-        this.instance = instance;
-    }
-
-    /**
-     * Return the list of deferred deserializers.
-     *
-     * @return list of deferred deserializers
-     */
-    public List<Runnable> getDeferredDeserializers() {
-        return delayedSetters;
+    public void setLastValueEvent(JsonParser.Event lastValueEvent) {
+        this.lastValueEvent = lastValueEvent;
     }
 
     /**
@@ -91,31 +54,10 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         return lastValueEvent;
     }
 
-    /**
-     * Set last obtained {@link JsonParser.Event} event.
-     *
-     * @param lastValueEvent last obtained event
-     */
-    public void setLastValueEvent(JsonParser.Event lastValueEvent) {
-        this.lastValueEvent = lastValueEvent;
-    }
-
-    /**
-     * Return customization used by currently processed user defined deserializer.
-     *
-     * @return currently used customization
-     */
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    /**
-     * Set customization used by currently processed user defined deserializer.
-     *
-     * @param customization currently used customization
-     */
-    public void setCustomization(Customization customization) {
-        this.customization = customization;
+    private void checkState() {
+        if (JsonParser.Event.KEY_NAME == lastValueEvent) {
+            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
+        }
     }
 
     @Override
@@ -144,9 +86,68 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         }
     }
 
-    private void checkState() {
-        if (JsonParser.Event.KEY_NAME == lastValueEvent) {
-            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
-        }
+    /**
+     * Return the list of deferred deserializers.
+     *
+     * @return list of deferred deserializers
+     */
+    public List<Runnable> getDeferredDeserializers() {
+        return delayedSetters;
     }
+
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param jsonbContext context of Jsonb
+     */
+    public DeserializationContextImpl(JsonbContext jsonbContext) {
+        super(jsonbContext);
+    }
+
+    /**
+     * Return instance of currently deserialized type.
+     *
+     * @return null if instance has not been created yet
+     */
+    public Object getInstance() {
+        return instance;
+    }
+
+    /**
+     * Return customization used by currently processed user defined deserializer.
+     *
+     * @return currently used customization
+     */
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
+     * Set customization used by currently processed user defined deserializer.
+     *
+     * @param customization currently used customization
+     */
+    public void setCustomization(Customization customization) {
+        this.customization = customization;
+    }
+
+    /**
+     * Create new instance based on previous context.
+     *
+     * @param context previous deserialization context
+     */
+    public DeserializationContextImpl(DeserializationContextImpl context) {
+        super(context.getJsonbContext());
+        this.lastValueEvent = context.lastValueEvent;
+    }
+
+    /**
+     * Set currently deserialized type instance.
+     *
+     * @param instance deserialized type instance
+     */
+    public void setInstance(Object instance) {
+        this.instance = instance;
+    }
+
 }

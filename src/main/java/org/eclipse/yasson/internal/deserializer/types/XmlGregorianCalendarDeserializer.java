@@ -41,6 +41,27 @@ class XmlGregorianCalendarDeserializer extends AbstractDateDeserializer<XMLGrego
 
     private final DatatypeFactory datatypeFactory;
 
+    @Override
+    protected XMLGregorianCalendar parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = formatter.parse(jsonValue);
+        LocalTime time = parsed.query(TemporalQueries.localTime());
+        ZoneId zone = parsed.query(TemporalQueries.zone());
+        if (null == zone) {
+            zone = UTC;
+        }
+        if (null == time) {
+            time = ZERO_LOCAL_TIME;
+        }
+        ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
+        return datatypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(result));
+    }
+
+    @Override
+    protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
+        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
+        return parseWithFormatter(jsonValue, formatter.withLocale(locale));
+    }
+
     XmlGregorianCalendarDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
         this.calendarTemplate = new GregorianCalendar();
@@ -60,24 +81,4 @@ class XmlGregorianCalendarDeserializer extends AbstractDateDeserializer<XMLGrego
         return datatypeFactory.newXMLGregorianCalendar(calendar);
     }
 
-    @Override
-    protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
-        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
-        return parseWithFormatter(jsonValue, formatter.withLocale(locale));
-    }
-
-    @Override
-    protected XMLGregorianCalendar parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = formatter.parse(jsonValue);
-        LocalTime time = parsed.query(TemporalQueries.localTime());
-        ZoneId zone = parsed.query(TemporalQueries.zone());
-        if (null == zone) {
-            zone = UTC;
-        }
-        if (null == time) {
-            time = ZERO_LOCAL_TIME;
-        }
-        ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
-        return datatypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(result));
-    }
 }

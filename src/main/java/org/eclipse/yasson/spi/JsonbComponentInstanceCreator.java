@@ -31,6 +31,13 @@ public interface JsonbComponentInstanceCreator extends Closeable {
     int DEFAULT_PRIORITY = 0;
 
     /**
+     * @return the priority of the component
+     */
+    default int getPriority() {
+        return DEFAULT_PRIORITY;
+    }
+
+    /**
      * Returns instance of JsonbComponent for desired class.
      *
      * @param <T>            Jsonb component type
@@ -39,10 +46,4 @@ public interface JsonbComponentInstanceCreator extends Closeable {
      */
     <T> T getOrCreateComponent(Class<T> componentClass);
 
-    /**
-     * @return the priority of the component
-     */
-    default int getPriority() {
-        return DEFAULT_PRIORITY;
-    }
 }

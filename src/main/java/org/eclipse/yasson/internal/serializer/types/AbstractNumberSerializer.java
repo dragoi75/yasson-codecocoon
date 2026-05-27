@@ -27,10 +27,7 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
 
     private final ModelMarshaller actualSerializer;
 
-    AbstractNumberSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-        actualSerializer = actualSerializer(builder.getCustomization(), builder.getJsonbContext());
-    }
+    abstract void writeValue(T value, JsonGenerator generator);
 
     @SuppressWarnings("unchecked")
     private ModelMarshaller actualSerializer(Customization customization, JsonbContext jsonbContext) {
@@ -48,5 +45,9 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
         actualSerializer.marshal(value, generator, context);
     }
 
-    abstract void writeValue(T value, JsonGenerator generator);
+    AbstractNumberSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+        actualSerializer = actualSerializer(builder.getCustomization(), builder.getJsonbContext());
+    }
+
 }

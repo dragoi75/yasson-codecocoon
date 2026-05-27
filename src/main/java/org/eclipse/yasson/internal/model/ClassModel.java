@@ -53,13 +53,66 @@ public class ClassModel {
     private final PropertyNamingStrategy propertyNamingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
+     * Sets parsed properties of the class.
      *
-     * @param name A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * @param parsedProperties class properties
      */
-    public PropertyModel getPropertyModel(String name) {
-        return properties.get(name);
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
+    }
+
+    /**
+     * Default no argument constructor of the class used for deserialization.
+     *
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
+        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
+        // Note: Null is a valid result and needs to be cached.
+        if (!isInitialized.get()) {
+            if (!ClassMultiReleaseExtension.isRecord(clazz)) {
+                defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
+            } else {
+                //No default constructor should be used in case of records
+                defaultConstructor = null;
+            }
+            isInitialized.set(true);
+        }
+        return defaultConstructor;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    @Override
+    public String toString() {
+        return "ClassModel{" + "clazz=" + clazz + '}';
+    }
+
+    /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return clazz;
     }
 
     /**
@@ -76,6 +129,21 @@ public class ClassModel {
         this.parentClassModel = parentClassModel;
         this.propertyNamingStrategy = propertyNamingStrategy;
         setProperties(new ArrayList<>());
+    }
+
+    /**
+     * Check if name is equal according to property strategy.
+     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
+        final String propertyReadName = propertyModel.getReadName();
+        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == propertyNamingStrategy) {
+            return jsonName.equalsIgnoreCase(propertyReadName);
+        }
+        return jsonName.equals(propertyReadName);
     }
 
     /**
@@ -106,27 +174,13 @@ public class ClassModel {
     }
 
     /**
-     * Check if name is equal according to property strategy.
-     * In case of {@link StrategiesProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
+     * Gets a property model by default (non customized) name.
      *
-     * @return True if names are equal.
+     * @param name A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
      */
-    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
-        final String propertyReadName = propertyModel.getReadName();
-        if (StrategiesProvider.CASE_INSENSITIVE_STRATEGY == propertyNamingStrategy) {
-            return jsonName.equalsIgnoreCase(propertyReadName);
-        }
-        return jsonName.equals(propertyReadName);
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return clazz;
+    public PropertyModel getPropertyModel(String name) {
+        return properties.get(name);
     }
 
     /**
@@ -147,57 +201,4 @@ public class ClassModel {
         return parentClassModel;
     }
 
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProperties class properties
-     */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     *
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
-        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
-        // Note: Null is a valid result and needs to be cached.
-        if (!isInitialized.get()) {
-            if (!ClassMultiReleaseExtension.isRecord(clazz)) {
-                defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
-            } else {
-                //No default constructor should be used in case of records
-                defaultConstructor = null;
-            }
-            isInitialized.set(true);
-        }
-        return defaultConstructor;
-    }
-
-    @Override
-    public String toString() {
-        return "ClassModel{" + "clazz=" + clazz + '}';
-    }
 }

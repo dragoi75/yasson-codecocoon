@@ -21,12 +21,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 class NumberSerializer extends AbstractNumberSerializer<Number> {
 
-    NumberSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     void writeValue(Number value, JsonGenerator generator) {
         generator.write(new BigDecimal(String.valueOf(value)));
     }
+
+    NumberSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
 }

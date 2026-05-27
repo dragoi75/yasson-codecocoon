@@ -36,6 +36,31 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    private JsonNumber getJsonNumberValue() {
+        JsonStructureIterator iterator = iterators.peek();
+        JsonValue value = iterator.getValue();
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
+            throw iterator.createIncompatibleValueError();
+        }
+        return (JsonNumber) value;
+    }
+
+    @Override
+    public JsonObject getObject() {
+        //        ((JsonObjectIterator) iterators.peek()).jsonObject
+        return iterators.peek().getValue().asJsonObject();
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
     /**
      * Creates new {@link JsonStructure} parser.
      *
@@ -43,6 +68,11 @@ public class JsonStructureToParserAdapter implements JsonParser {
      */
     public JsonStructureToParserAdapter(JsonStructure structure) {
         this.rootStructure = structure;
+    }
+
+    @Override
+    public void close() {
+        //noop
     }
 
     @Override
@@ -80,8 +110,8 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return iterators.peek().getString();
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
     }
 
     @Override
@@ -90,42 +120,13 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
     public long getLong() {
         return getJsonNumberValue().longValueExact();
     }
 
     @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
+    public String getString() {
+        return iterators.peek().getString();
     }
 
-    @Override
-    public JsonObject getObject() {
-        //        ((JsonObjectIterator) iterators.peek()).jsonObject
-        return iterators.peek().getValue().asJsonObject();
-    }
-
-    private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
-            throw iterator.createIncompatibleValueError();
-        }
-        return (JsonNumber) value;
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

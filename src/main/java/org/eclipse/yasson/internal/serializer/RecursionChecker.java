@@ -26,10 +26,6 @@ class RecursionChecker implements ModelMarshaller {
 
     private final ModelMarshaller delegate;
 
-    RecursionChecker(ModelMarshaller delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         if (!context.addProcessedObject(value)) {
@@ -37,6 +33,10 @@ class RecursionChecker implements ModelMarshaller {
         }
         delegate.marshal(value, generator, context);
         context.removeProcessedObject(value);
+    }
+
+    RecursionChecker(ModelMarshaller delegate) {
+        this.delegate = delegate;
     }
 
 }

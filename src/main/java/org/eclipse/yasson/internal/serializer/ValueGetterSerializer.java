@@ -27,11 +27,6 @@ class ValueGetterSerializer implements ModelMarshaller {
     private final MethodHandle valueGetter;
     private final ModelMarshaller delegate;
 
-    ValueGetterSerializer(MethodHandle valueGetter, ModelMarshaller delegate) {
-        this.valueGetter = valueGetter;
-        this.delegate = delegate;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, DefaultSerializationContext context) {
         Object object;
@@ -42,4 +37,10 @@ class ValueGetterSerializer implements ModelMarshaller {
         }
         delegate.marshal(object, generator, context);
     }
+
+    ValueGetterSerializer(MethodHandle valueGetter, ModelMarshaller delegate) {
+        this.valueGetter = valueGetter;
+        this.delegate = delegate;
+    }
+
 }

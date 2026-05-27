@@ -21,12 +21,13 @@ import org.eclipse.yasson.internal.DefaultSerializationContext;
  */
 class BooleanSerializer extends TypeSerializer<Boolean> {
 
-    BooleanSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Boolean value, JsonGenerator generator, DefaultSerializationContext context) {
         generator.write(value);
     }
+
+    BooleanSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
 }

@@ -27,16 +27,17 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class ClassMultiReleaseExtension {
 
-    private ClassMultiReleaseExtension() {
-        throw new IllegalStateException("This class cannot be instantiated");
+    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
+        if (clazz.isRecord()) {
+            if (1 < clazz.getDeclaredConstructors().length) {
+                return Optional.of(new JsonbException(Messages.getMessage(MessageKeys.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
+            }
+        }
+        return Optional.empty();
     }
 
-    static boolean shouldTransformToPropertyName(Method method) {
-        return !method.getDeclaringClass().isRecord();
-    }
-
-    static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
-        return isRecord(method.getDeclaringClass()) && 0 == method.getParameterCount() && !void.class.equals(method.getReturnType()) && classProperties.containsKey(method.getName());
+    public static boolean isRecord(Class<?> clazz) {
+        return clazz.isRecord();
     }
 
     static JsonbCreator findCreator(Class<?> clazz, Constructor<?>[] declaredConstructors, AnnotationIntrospector introspector) {
@@ -48,16 +49,16 @@ public class ClassMultiReleaseExtension {
         return null;
     }
 
-    public static boolean isRecord(Class<?> clazz) {
-        return clazz.isRecord();
+    static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
+        return isRecord(method.getDeclaringClass()) && 0 == method.getParameterCount() && !void.class.equals(method.getReturnType()) && classProperties.containsKey(method.getName());
     }
 
-    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
-        if (clazz.isRecord()) {
-            if (1 < clazz.getDeclaredConstructors().length) {
-                return Optional.of(new JsonbException(Messages.getMessage(MessageKeys.RECORD_MULTIPLE_CONSTRUCTORS, clazz)));
-            }
-        }
-        return Optional.empty();
+    static boolean shouldTransformToPropertyName(Method method) {
+        return !method.getDeclaringClass().isRecord();
     }
+
+    private ClassMultiReleaseExtension() {
+        throw new IllegalStateException("This class cannot be instantiated");
+    }
+
 }
