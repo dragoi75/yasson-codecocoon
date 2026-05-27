@@ -28,12 +28,21 @@ public class ComponentBindings {
     private final AdapterBinding adapterInfo;
 
     /**
-     * Construct empty bindings for a given type.
+     * Adapter info if any.
      *
-     * @param bindingType type components are bound to
+     * @return adapterInfo
      */
-    public ComponentBindings(Type bindingType) {
-        this(bindingType, null, null, null);
+    public AdapterBinding getAdapterInfo() {
+        return adapterInfo;
+    }
+
+    /**
+     * Deserializer if any.
+     *
+     * @return deserializer
+     */
+    public DeserializerBinding getDeserializer() {
+        return deserializer;
     }
 
     /**
@@ -73,21 +82,12 @@ public class ComponentBindings {
     }
 
     /**
-     * Deserializer if any.
+     * Construct empty bindings for a given type.
      *
-     * @return deserializer
+     * @param bindingType type components are bound to
      */
-    public DeserializerBinding getDeserializer() {
-        return deserializer;
-    }
-
-    /**
-     * Adapter info if any.
-     *
-     * @return adapterInfo
-     */
-    public AdapterBinding getAdapterInfo() {
-        return adapterInfo;
+    public ComponentBindings(Type bindingType) {
+        this(bindingType, null, null, null);
     }
 
 }

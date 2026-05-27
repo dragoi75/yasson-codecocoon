@@ -26,10 +26,6 @@ class ValueSetterDeserializer implements ModelDeserializer<Object> {
 
     private final MethodHandle valueSetter;
 
-    ValueSetterDeserializer(MethodHandle valueSetter) {
-        this.valueSetter = Objects.requireNonNull(valueSetter);
-    }
-
     @Override
     public Object deserialize(Object value, DeserializationContextImpl context) {
         Object object = context.getInstance();
@@ -39,6 +35,10 @@ class ValueSetterDeserializer implements ModelDeserializer<Object> {
         } catch (Throwable e) {
             throw new JsonbException("Error setting value on: " + object, e);
         }
+    }
+
+    ValueSetterDeserializer(MethodHandle valueSetter) {
+        this.valueSetter = Objects.requireNonNull(valueSetter);
     }
 
 }

@@ -27,6 +27,13 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
 
     private final ModelSerializer actualSerializer;
 
+    @Override
+    void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context) {
+        actualSerializer.serialize(value, generator, context);
+    }
+
+    abstract void writeValue(T value, JsonGenerator generator);
+
     AbstractNumberSerializer(TypeSerializerBuilder builder) {
         super(builder);
         actualSerializer = actualSerializer(builder.getCustomization(), builder.getJsonbContext());
@@ -43,10 +50,4 @@ abstract class AbstractNumberSerializer<T> extends TypeSerializer<T> {
         return (value, generator, context) -> generator.write(format.format(value));
     }
 
-    @Override
-    void serializeValue(T value, JsonGenerator generator, SerializationContextImpl context) {
-        actualSerializer.serialize(value, generator, context);
-    }
-
-    abstract void writeValue(T value, JsonGenerator generator);
 }

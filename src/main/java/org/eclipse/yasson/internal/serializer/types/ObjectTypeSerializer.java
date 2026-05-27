@@ -35,18 +35,14 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
 
     private final boolean isKey;
 
-    ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-        this.customization = serializerBuilder.getCustomization();
-        this.cache = new ConcurrentHashMap<>();
-        this.chain = new LinkedList<>(serializerBuilder.getChain());
-        this.isKey = serializerBuilder.isKey();
-    }
-
-    @Override
-    void serializeValue(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        findSerializer(value, generator, context);
+    /**
+     * Add serializer to the cache.
+     *
+     * @param clazz           class of the serializer
+     * @param modelSerializer model serializer bound to the class
+     */
+    public void addSpecificSerializer(Class<?> clazz, ModelSerializer modelSerializer) {
+        cache.put(clazz, modelSerializer);
     }
 
     @Override
@@ -59,6 +55,14 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         findSerializer(key, generator, context);
     }
 
+    ObjectTypeSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+        this.customization = serializerBuilder.getCustomization();
+        this.cache = new ConcurrentHashMap<>();
+        this.chain = new LinkedList<>(serializerBuilder.getChain());
+        this.isKey = serializerBuilder.isKey();
+    }
+
     private void findSerializer(Object key, JsonGenerator generator, SerializationContextImpl context) {
         Class<?> clazz = key.getClass();
         cache.computeIfAbsent(clazz, aClass -> {
@@ -67,13 +71,10 @@ public class ObjectTypeSerializer extends TypeSerializer<Object> {
         }).serialize(key, generator, context);
     }
 
-    /**
-     * Add serializer to the cache.
-     *
-     * @param clazz           class of the serializer
-     * @param modelSerializer model serializer bound to the class
-     */
-    public void addSpecificSerializer(Class<?> clazz, ModelSerializer modelSerializer) {
-        cache.put(clazz, modelSerializer);
+    @Override
+    void serializeValue(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        findSerializer(value, generator, context);
     }
+
 }

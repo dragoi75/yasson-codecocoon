@@ -24,13 +24,9 @@ class MonthDayTypeDeserializer extends AbstractDateDeserializer<MonthDay> {
 
     private static final DateTimeFormatter DEFAULT_FORMAT = DateTimeFormatter.ofPattern("--MM-dd").withZone(UTC);
 
-    MonthDayTypeDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
-    protected MonthDay fromInstant(Instant instant) {
-        return MonthDay.from(instant.atZone(UTC));
+    protected MonthDay parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return MonthDay.parse(jsonValue, formatter);
     }
 
     @Override
@@ -39,8 +35,12 @@ class MonthDayTypeDeserializer extends AbstractDateDeserializer<MonthDay> {
     }
 
     @Override
-    protected MonthDay parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return MonthDay.parse(jsonValue, formatter);
+    protected MonthDay fromInstant(Instant instant) {
+        return MonthDay.from(instant.atZone(UTC));
+    }
+
+    MonthDayTypeDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
 
 }

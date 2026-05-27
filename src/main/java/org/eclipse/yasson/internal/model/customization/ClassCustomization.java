@@ -33,63 +33,66 @@ public class ClassCustomization extends CustomizationBase {
     private final TypeInheritanceConfiguration typeInheritanceConfiguration;
 
     /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
+     * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
      */
-    private ClassCustomization(Builder builder) {
-        super(builder);
-        this.creator = builder.creator;
-        this.propertyOrder = builder.propertyOrder;
-        this.numberFormatter = builder.numberFormatter;
-        this.dateTimeFormatter = builder.dateTimeFormatter;
-        this.propertyVisibilityStrategy = builder.propertyVisibilityStrategy;
-        this.typeInheritanceConfiguration = builder.typeInheritanceConfiguration;
-    }
+    public static class Builder extends CustomizationBase.Builder<Builder, ClassCustomization> {
 
-    public static ClassCustomization empty() {
-        return EMPTY;
-    }
+        private JsonbCreator creator;
+        private String[] propertyOrder;
+        private JsonbNumberFormatter numberFormatter;
+        private JsonbDateFormatter dateTimeFormatter;
+        private PropertyVisibilityStrategy propertyVisibilityStrategy;
+        private TypeInheritanceConfiguration typeInheritanceConfiguration;
 
-    public static Builder builder() {
-        return new Builder();
-    }
+        public Builder creator(JsonbCreator creator) {
+            this.creator = creator;
+            return this;
+        }
 
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
-    }
+        public Builder propertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
+            this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+            return this;
+        }
 
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
+        @Override
+        public ClassCustomization build() {
+            return new ClassCustomization(this);
+        }
 
-    /**
-     * Property visibility strategy for this class model.
-     *
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
+        public Builder numberFormatter(JsonbNumberFormatter numberFormatter) {
+            this.numberFormatter = numberFormatter;
+            return this;
+        }
 
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
+        public Builder polymorphismConfig(TypeInheritanceConfiguration typeInheritanceConfiguration) {
+            this.typeInheritanceConfiguration = typeInheritanceConfiguration;
+            return this;
+        }
 
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
+        public Builder dateTimeFormatter(JsonbDateFormatter dateTimeFormatter) {
+            this.dateTimeFormatter = dateTimeFormatter;
+            return this;
+        }
+
+        public Builder propertyOrder(String[] propertyOrder) {
+            this.propertyOrder = propertyOrder;
+            return this;
+        }
+
+        @Override
+        public Builder of(ClassCustomization customization) {
+            super.of(customization);
+            creator(customization.creator);
+            propertyOrder(customization.propertyOrder);
+            numberFormatter(customization.numberFormatter);
+            dateTimeFormatter(customization.dateTimeFormatter);
+            propertyVisibilityStrategy(customization.propertyVisibilityStrategy);
+            return this;
+        }
+
+        private Builder() {
+        }
+
     }
 
     @Override
@@ -106,67 +109,64 @@ public class ClassCustomization extends CustomizationBase {
         return typeInheritanceConfiguration;
     }
 
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
     /**
-     * The customization builder that would be used to build an instance of {@link ClassCustomization} to ensure its immutability.
+     * Property visibility strategy for this class model.
+     *
+     * @return visibility strategy
      */
-    public static class Builder extends CustomizationBase.Builder<Builder, ClassCustomization> {
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
 
-        private JsonbCreator creator;
-        private String[] propertyOrder;
-        private JsonbNumberFormatter numberFormatter;
-        private JsonbDateFormatter dateTimeFormatter;
-        private PropertyVisibilityStrategy propertyVisibilityStrategy;
-        private TypeInheritanceConfiguration typeInheritanceConfiguration;
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return creator;
+    }
 
-        private Builder() {
-        }
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    private ClassCustomization(Builder builder) {
+        super(builder);
+        this.creator = builder.creator;
+        this.propertyOrder = builder.propertyOrder;
+        this.numberFormatter = builder.numberFormatter;
+        this.dateTimeFormatter = builder.dateTimeFormatter;
+        this.propertyVisibilityStrategy = builder.propertyVisibilityStrategy;
+        this.typeInheritanceConfiguration = builder.typeInheritanceConfiguration;
+    }
 
-        @Override
-        public Builder of(ClassCustomization customization) {
-            super.of(customization);
-            creator(customization.creator);
-            propertyOrder(customization.propertyOrder);
-            numberFormatter(customization.numberFormatter);
-            dateTimeFormatter(customization.dateTimeFormatter);
-            propertyVisibilityStrategy(customization.propertyVisibilityStrategy);
-            return this;
-        }
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
 
-        public Builder creator(JsonbCreator creator) {
-            this.creator = creator;
-            return this;
-        }
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
+    }
 
-        public Builder propertyOrder(String[] propertyOrder) {
-            this.propertyOrder = propertyOrder;
-            return this;
-        }
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        public Builder numberFormatter(JsonbNumberFormatter numberFormatter) {
-            this.numberFormatter = numberFormatter;
-            return this;
-        }
-
-        public Builder dateTimeFormatter(JsonbDateFormatter dateTimeFormatter) {
-            this.dateTimeFormatter = dateTimeFormatter;
-            return this;
-        }
-
-        public Builder propertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
-            this.propertyVisibilityStrategy = propertyVisibilityStrategy;
-            return this;
-        }
-
-        public Builder polymorphismConfig(TypeInheritanceConfiguration typeInheritanceConfiguration) {
-            this.typeInheritanceConfiguration = typeInheritanceConfiguration;
-            return this;
-        }
-
-        @Override
-        public ClassCustomization build() {
-            return new ClassCustomization(this);
-        }
-
+    public static ClassCustomization empty() {
+        return EMPTY;
     }
 
 }

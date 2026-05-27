@@ -27,6 +27,19 @@ public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
 
     private final ModelDeserializer<Object> nullDeserializer;
 
+    @Override
+    public String toString() {
+        return "Null value check";
+    }
+
+    @Override
+    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+        if (JsonParser.Event.VALUE_NULL != context.getLastValueEvent()) {
+            return nonNullDeserializer.deserialize(value, context);
+        }
+        return nullDeserializer.deserialize(null, context);
+    }
+
     /**
      * Create new instance.
      *
@@ -38,16 +51,4 @@ public class NullCheckDeserializer implements ModelDeserializer<JsonParser> {
         this.nullDeserializer = nullDeserializer;
     }
 
-    @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        if (JsonParser.Event.VALUE_NULL != context.getLastValueEvent()) {
-            return nonNullDeserializer.deserialize(value, context);
-        }
-        return nullDeserializer.deserialize(null, context);
-    }
-
-    @Override
-    public String toString() {
-        return "Null value check";
-    }
 }

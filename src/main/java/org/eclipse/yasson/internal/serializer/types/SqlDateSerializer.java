@@ -21,19 +21,17 @@ import java.util.Locale;
  */
 class SqlDateSerializer extends DateSerializer<Date> {
 
-    SqlDateSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
+    @Override
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+        if (!(value instanceof java.sql.Date)) {
+            return super.formatWithFormatter(value, formatter);
+        } else {
+            return ((java.sql.Date) value).toLocalDate().format(formatter);
+        }
     }
 
-    @Override
-    protected Instant toInstant(Date value) {
-        if (!(value instanceof java.sql.Date)) {
-            return super.toInstant(value);
-        } else {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(value.getTime());
-        }
+    SqlDateSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
     @Override
@@ -47,11 +45,14 @@ class SqlDateSerializer extends DateSerializer<Date> {
     }
 
     @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+    protected Instant toInstant(Date value) {
         if (!(value instanceof java.sql.Date)) {
-            return super.formatWithFormatter(value, formatter);
+            return super.toInstant(value);
         } else {
-            return ((java.sql.Date) value).toLocalDate().format(formatter);
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(value.getTime());
         }
     }
+
 }

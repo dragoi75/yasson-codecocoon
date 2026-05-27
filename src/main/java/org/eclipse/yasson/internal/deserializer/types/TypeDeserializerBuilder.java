@@ -27,6 +27,22 @@ class TypeDeserializerBuilder {
 
     private final ModelDeserializer<Object> delegate;
 
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    public ModelDeserializer<Object> getDelegate() {
+        return delegate;
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configProperties;
+    }
+
+    public Class<?> getClazz() {
+        return clazz;
+    }
+
     TypeDeserializerBuilder(Class<?> clazz, Customization customization, JsonbConfigProperties configProperties, ModelDeserializer<Object> delegate) {
         this.clazz = Objects.requireNonNull(clazz);
         this.customization = null == customization ? ClassCustomization.empty() : customization;
@@ -34,19 +50,4 @@ class TypeDeserializerBuilder {
         this.delegate = Objects.requireNonNull(delegate);
     }
 
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
-    public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
-    }
-
-    public ModelDeserializer<Object> getDelegate() {
-        return delegate;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
 }

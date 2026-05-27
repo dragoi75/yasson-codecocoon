@@ -25,10 +25,6 @@ class CollectionSerializer implements ModelSerializer {
 
     private final ModelSerializer delegate;
 
-    CollectionSerializer(ModelSerializer delegate) {
-        this.delegate = delegate;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -36,6 +32,10 @@ class CollectionSerializer implements ModelSerializer {
         generator.writeStartArray();
         collection.forEach(object -> delegate.serialize(object, generator, context));
         generator.writeEnd();
+    }
+
+    CollectionSerializer(ModelSerializer delegate) {
+        this.delegate = delegate;
     }
 
 }

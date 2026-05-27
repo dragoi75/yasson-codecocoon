@@ -29,14 +29,37 @@ public class JsonbCreator {
     private final CreatorModel[] params;
 
     /**
-     * Creates a new instance.
+     * Find creator parameter by name.
      *
-     * @param executable    Executable.
-     * @param creatorModels Parameters.
+     * @param paramName parameter name as it appear in json document.
+     * @return Creator parameter.
      */
-    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
-        this.executable = executable;
-        this.params = creatorModels;
+    public CreatorModel findByName(String paramName) {
+        for (CreatorModel param : params) {
+            if (param.getName().equals(paramName)) {
+                return param;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * True if param name is one of creator params.
+     *
+     * @param paramName Param name to check.
+     * @return True if found.
+     */
+    public boolean contains(String paramName) {
+        return null != findByName(paramName);
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorModel[] getParams() {
+        return params;
     }
 
     /**
@@ -61,36 +84,14 @@ public class JsonbCreator {
     }
 
     /**
-     * True if param name is one of creator params.
+     * Creates a new instance.
      *
-     * @param paramName Param name to check.
-     * @return True if found.
+     * @param executable    Executable.
+     * @param creatorModels Parameters.
      */
-    public boolean contains(String paramName) {
-        return null != findByName(paramName);
+    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
+        this.executable = executable;
+        this.params = creatorModels;
     }
 
-    /**
-     * Find creator parameter by name.
-     *
-     * @param paramName parameter name as it appear in json document.
-     * @return Creator parameter.
-     */
-    public CreatorModel findByName(String paramName) {
-        for (CreatorModel param : params) {
-            if (param.getName().equals(paramName)) {
-                return param;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorModel[] getParams() {
-        return params;
-    }
 }

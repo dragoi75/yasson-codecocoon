@@ -22,12 +22,13 @@ import org.eclipse.yasson.internal.DeserializationContextImpl;
  */
 class UuidDeserializer extends TypeDeserializer {
 
-    UuidDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         return UUID.fromString(value);
     }
+
+    UuidDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

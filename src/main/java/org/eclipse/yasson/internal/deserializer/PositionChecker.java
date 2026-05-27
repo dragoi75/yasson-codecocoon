@@ -38,6 +38,66 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
     private final Type rType;
 
     /**
+     * Grouped events according to whether it is container or value.
+     */
+    public enum Checker {
+
+        /**
+         * Value bound events.
+         */
+        VALUES(Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_NULL),
+        /**
+         * Container bound events.
+         */
+        CONTAINER(Event.START_OBJECT, Event.START_ARRAY);
+
+        private final Set<Event> events;
+
+        /**
+         * Return events bound to the event group.
+         *
+         * @return set of bound events
+         */
+        public Set<Event> getEvents() {
+            return events;
+        }
+
+        Checker(Event... events) {
+            this.events = Set.of(events);
+        }
+
+    }
+
+    @Override
+    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
+        Event original = context.getLastValueEvent();
+        Event startEvent = original;
+        if (!expectedEvents.contains(startEvent)) {
+            startEvent = value.next();
+            context.setLastValueEvent(startEvent);
+            if (!expectedEvents.contains(startEvent)) {
+                throw new JsonbException("Incorrect position for processing type: " + rType + ". " + "Received event: " + original + " " + "Allowed: " + expectedEvents);
+            }
+        }
+        Object o = delegate.deserialize(value, context);
+        if (CLOSING_EVENTS.containsKey(startEvent) && context.getLastValueEvent() != CLOSING_EVENTS.get(startEvent)) {
+            throw new JsonbException("Incorrect parser position after processing of the type: " + rType + ". " + "Start event: " + startEvent + " " + "After processing event: " + context.getLastValueEvent());
+        }
+        return o;
+    }
+
+    private PositionChecker(Set<Event> expectedEvents, ModelDeserializer<JsonParser> delegate, Type rType) {
+        this.expectedEvents = expectedEvents;
+        this.delegate = delegate;
+        this.rType = rType;
+    }
+
+    @Override
+    public String toString() {
+        return "PositionChecker{" + "expectedEvents=" + expectedEvents + ", runtimeType=" + rType + '}';
+    }
+
+    /**
      * Create new instance.
      *
      * @param delegate delegate which is call after the check
@@ -59,62 +119,4 @@ public class PositionChecker implements ModelDeserializer<JsonParser> {
         this(Set.copyOf(Arrays.asList(events)), delegate, rType);
     }
 
-    private PositionChecker(Set<Event> expectedEvents, ModelDeserializer<JsonParser> delegate, Type rType) {
-        this.expectedEvents = expectedEvents;
-        this.delegate = delegate;
-        this.rType = rType;
-    }
-
-    @Override
-    public Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        Event original = context.getLastValueEvent();
-        Event startEvent = original;
-        if (!expectedEvents.contains(startEvent)) {
-            startEvent = value.next();
-            context.setLastValueEvent(startEvent);
-            if (!expectedEvents.contains(startEvent)) {
-                throw new JsonbException("Incorrect position for processing type: " + rType + ". " + "Received event: " + original + " " + "Allowed: " + expectedEvents);
-            }
-        }
-        Object o = delegate.deserialize(value, context);
-        if (CLOSING_EVENTS.containsKey(startEvent) && context.getLastValueEvent() != CLOSING_EVENTS.get(startEvent)) {
-            throw new JsonbException("Incorrect parser position after processing of the type: " + rType + ". " + "Start event: " + startEvent + " " + "After processing event: " + context.getLastValueEvent());
-        }
-        return o;
-    }
-
-    @Override
-    public String toString() {
-        return "PositionChecker{" + "expectedEvents=" + expectedEvents + ", runtimeType=" + rType + '}';
-    }
-
-    /**
-     * Grouped events according to whether it is container or value.
-     */
-    public enum Checker {
-
-        /**
-         * Value bound events.
-         */
-        VALUES(Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_NULL),
-        /**
-         * Container bound events.
-         */
-        CONTAINER(Event.START_OBJECT, Event.START_ARRAY);
-
-        private final Set<Event> events;
-
-        Checker(Event... events) {
-            this.events = Set.of(events);
-        }
-
-        /**
-         * Return events bound to the event group.
-         *
-         * @return set of bound events
-         */
-        public Set<Event> getEvents() {
-            return events;
-        }
-    }
 }

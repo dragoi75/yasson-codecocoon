@@ -19,13 +19,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 class ByteSerializer extends AbstractNumberSerializer<Byte> {
 
-    ByteSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     void writeValue(Byte value, JsonGenerator generator) {
         generator.write(value);
+    }
+
+    ByteSerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
 }

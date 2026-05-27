@@ -21,13 +21,13 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  */
 class CharSerializer extends TypeSerializer<Character> {
 
-    CharSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(Character value, JsonGenerator generator, SerializationContextImpl context) {
         generator.write(String.valueOf(value));
+    }
+
+    CharSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

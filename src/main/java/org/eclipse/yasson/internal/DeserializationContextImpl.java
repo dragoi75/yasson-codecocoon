@@ -37,43 +37,6 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
     private Object instance;
 
     /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param jsonbContext context of Jsonb
-     */
-    public DeserializationContextImpl(JsonbContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    /**
-     * Create new instance based on previous context.
-     *
-     * @param context previous deserialization context
-     */
-    public DeserializationContextImpl(DeserializationContextImpl context) {
-        super(context.getJsonbContext());
-        this.lastValueEvent = context.lastValueEvent;
-    }
-
-    /**
-     * Return instance of currently deserialized type.
-     *
-     * @return null if instance has not been created yet
-     */
-    public Object getInstance() {
-        return instance;
-    }
-
-    /**
-     * Set currently deserialized type instance.
-     *
-     * @param instance deserialized type instance
-     */
-    public void setInstance(Object instance) {
-        this.instance = instance;
-    }
-
-    /**
      * Return the list of deferred deserializers.
      *
      * @return list of deferred deserializers
@@ -82,13 +45,9 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         return delayedSetters;
     }
 
-    /**
-     * Return last obtained {@link JsonParser.Event} event.
-     *
-     * @return last obtained event
-     */
-    public JsonParser.Event getLastValueEvent() {
-        return lastValueEvent;
+    @Override
+    public <T> T deserialize(Type type, JsonParser parser) {
+        return deserializeItem(type, parser);
     }
 
     /**
@@ -123,9 +82,56 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         return deserializeItem(clazz, parser);
     }
 
-    @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
+    /**
+     * Set currently deserialized type instance.
+     *
+     * @param instance deserialized type instance
+     */
+    public void setInstance(Object instance) {
+        this.instance = instance;
+    }
+
+    private void checkState() {
+        if (JsonParser.Event.KEY_NAME == lastValueEvent) {
+            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
+        }
+    }
+
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param jsonbContext context of Jsonb
+     */
+    public DeserializationContextImpl(JsonbContext jsonbContext) {
+        super(jsonbContext);
+    }
+
+    /**
+     * Create new instance based on previous context.
+     *
+     * @param context previous deserialization context
+     */
+    public DeserializationContextImpl(DeserializationContextImpl context) {
+        super(context.getJsonbContext());
+        this.lastValueEvent = context.lastValueEvent;
+    }
+
+    /**
+     * Return last obtained {@link JsonParser.Event} event.
+     *
+     * @return last obtained event
+     */
+    public JsonParser.Event getLastValueEvent() {
+        return lastValueEvent;
+    }
+
+    /**
+     * Return instance of currently deserialized type.
+     *
+     * @return null if instance has not been created yet
+     */
+    public Object getInstance() {
+        return instance;
     }
 
     @SuppressWarnings("unchecked")
@@ -144,9 +150,4 @@ public class DeserializationContextImpl extends ProcessingContext implements Des
         }
     }
 
-    private void checkState() {
-        if (JsonParser.Event.KEY_NAME == lastValueEvent) {
-            throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
-        }
-    }
 }

@@ -34,6 +34,28 @@ public class CreatorModel {
     private final CreatorCustomization creatorCustomization;
 
     /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return type;
+    }
+
+    public CreatorCustomization getCustomization() {
+        return creatorCustomization;
+    }
+
+    /**
+     * Gets parameter name.
+     *
+     * @return Parameter name.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Creates a new instance.
      *  @param name      Parameter name
      * @param parameter constructor parameter
@@ -56,25 +78,4 @@ public class CreatorModel {
         this.creatorCustomization = CreatorCustomization.builder().adapterBinding(adapterBinding).deserializerBinding(deserializerBinding).serializerBinding(annotationIntrospector.getSerializerBinding(clsElement)).numberFormatter(constructorNumberFormatter).dateFormatter(constructorDateFormatter).required(required).build();
     }
 
-    /**
-     * Gets parameter name.
-     *
-     * @return Parameter name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    public CreatorCustomization getCustomization() {
-        return creatorCustomization;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return type;
-    }
 }

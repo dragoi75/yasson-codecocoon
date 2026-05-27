@@ -29,6 +29,73 @@ public class TypeInheritanceConfiguration {
     private final Class<?> definedType;
     private final TypeInheritanceConfiguration parentConfig;
 
+    public static final class Builder {
+
+        private Map<Class<?>, String> aliases = new HashMap<>();
+        private String fieldName = JsonbTypeInfo.DEFAULT_KEY_NAME;
+        private boolean inherited = false;
+        private Class<?> definedType;
+        private TypeInheritanceConfiguration parentConfig;
+
+        public Builder parentConfig(TypeInheritanceConfiguration parentConfig) {
+            this.parentConfig = parentConfig;
+            return this;
+        }
+
+        public TypeInheritanceConfiguration build() {
+            return new TypeInheritanceConfiguration(this);
+        }
+
+        public Builder of(TypeInheritanceConfiguration typeInheritanceConfiguration) {
+            this.fieldName = typeInheritanceConfiguration.fieldName;
+            this.aliases = new HashMap<>(typeInheritanceConfiguration.aliases);
+            this.inherited = typeInheritanceConfiguration.inherited;
+            this.parentConfig = typeInheritanceConfiguration.parentConfig;
+            this.definedType = typeInheritanceConfiguration.definedType;
+            return this;
+        }
+
+        public Builder alias(Class<?> clazz, String alias) {
+            this.aliases.put(clazz, alias);
+            return this;
+        }
+
+        private Builder() {
+        }
+
+        public Builder inherited(boolean inherited) {
+            this.inherited = inherited;
+            return this;
+        }
+
+        public Builder definedType(Class<?> definedType) {
+            this.definedType = definedType;
+            return this;
+        }
+
+        public Builder fieldName(String fieldName) {
+            this.fieldName = Objects.requireNonNull(fieldName);
+            return this;
+        }
+
+    }
+
+    public Map<Class<?>, String> getAliases() {
+        return aliases;
+    }
+
+    public TypeInheritanceConfiguration getParentConfig() {
+        return parentConfig;
+    }
+
+    public Class<?> getDefinedType() {
+        return definedType;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
     private TypeInheritanceConfiguration(Builder builder) {
         this.fieldName = builder.fieldName;
         this.inherited = builder.inherited;
@@ -41,74 +108,8 @@ public class TypeInheritanceConfiguration {
         return new Builder();
     }
 
-    public String getFieldName() {
-        return fieldName;
-    }
-
     public boolean isInherited() {
         return inherited;
-    }
-
-    public Map<Class<?>, String> getAliases() {
-        return aliases;
-    }
-
-    public Class<?> getDefinedType() {
-        return definedType;
-    }
-
-    public TypeInheritanceConfiguration getParentConfig() {
-        return parentConfig;
-    }
-
-    public static final class Builder {
-
-        private Map<Class<?>, String> aliases = new HashMap<>();
-        private String fieldName = JsonbTypeInfo.DEFAULT_KEY_NAME;
-        private boolean inherited = false;
-        private Class<?> definedType;
-        private TypeInheritanceConfiguration parentConfig;
-
-        private Builder() {
-        }
-
-        public Builder inherited(boolean inherited) {
-            this.inherited = inherited;
-            return this;
-        }
-
-        public Builder fieldName(String fieldName) {
-            this.fieldName = Objects.requireNonNull(fieldName);
-            return this;
-        }
-
-        public Builder alias(Class<?> clazz, String alias) {
-            this.aliases.put(clazz, alias);
-            return this;
-        }
-
-        public Builder parentConfig(TypeInheritanceConfiguration parentConfig) {
-            this.parentConfig = parentConfig;
-            return this;
-        }
-
-        public Builder definedType(Class<?> definedType) {
-            this.definedType = definedType;
-            return this;
-        }
-
-        public Builder of(TypeInheritanceConfiguration typeInheritanceConfiguration) {
-            this.fieldName = typeInheritanceConfiguration.fieldName;
-            this.aliases = new HashMap<>(typeInheritanceConfiguration.aliases);
-            this.inherited = typeInheritanceConfiguration.inherited;
-            this.parentConfig = typeInheritanceConfiguration.parentConfig;
-            this.definedType = typeInheritanceConfiguration.definedType;
-            return this;
-        }
-
-        public TypeInheritanceConfiguration build() {
-            return new TypeInheritanceConfiguration(this);
-        }
     }
 
 }

@@ -30,10 +30,6 @@ import org.eclipse.yasson.internal.properties.MessageKeysEnum;
  */
 class TimeZoneDeserializer extends TypeDeserializer {
 
-    TimeZoneDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType) {
         try {
@@ -44,4 +40,9 @@ class TimeZoneDeserializer extends TypeDeserializer {
             throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.ZONE_PARSE_ERROR, value), e);
         }
     }
+
+    TimeZoneDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

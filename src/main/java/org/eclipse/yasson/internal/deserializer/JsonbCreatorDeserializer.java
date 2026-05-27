@@ -49,6 +49,11 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
 
     private final boolean failOnUnknownProperties;
 
+    @Override
+    public String toString() {
+        return "ObjectInstanceCreator{" + "parameters=" + creatorParams + ", clazz=" + clazz + '}';
+    }
+
     JsonbCreatorDeserializer(Map<String, ModelDeserializer<JsonParser>> propertyDeserializerChains, Map<String, ModelDeserializer<Object>> defaultCreatorValues, JsonbCreator creator, Class<?> clazz, Function<String, String> renamer, boolean failOnUnknownProperties, Set<String> ignoredProperties) {
         this.propertyDeserializerChains = propertyDeserializerChains;
         this.defaultCreatorValues = defaultCreatorValues;
@@ -117,8 +122,4 @@ class JsonbCreatorDeserializer implements ModelDeserializer<JsonParser> {
         return context.getInstance();
     }
 
-    @Override
-    public String toString() {
-        return "ObjectInstanceCreator{" + "parameters=" + creatorParams + ", clazz=" + clazz + '}';
-    }
 }

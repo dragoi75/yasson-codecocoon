@@ -22,6 +22,37 @@ public class JsonbNumberFormatter {
 
     private final String locale;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(format, locale);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (null == o || o.getClass() != getClass()) {
+            return false;
+        }
+        JsonbNumberFormatter that = (JsonbNumberFormatter) o;
+        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale);
+    }
+
+    @Override
+    public String toString() {
+        return "JsonbNumberFormatter{" + "format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
+    }
+
+    /**
+     * Locale to use with formatter.
+     *
+     * @return locale
+     */
+    public String getLocale() {
+        return locale;
+    }
+
     /**
      * Construct with format string and locale.
      *
@@ -42,34 +73,4 @@ public class JsonbNumberFormatter {
         return format;
     }
 
-    /**
-     * Locale to use with formatter.
-     *
-     * @return locale
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (null == o || o.getClass() != getClass()) {
-            return false;
-        }
-        JsonbNumberFormatter that = (JsonbNumberFormatter) o;
-        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(format, locale);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonbNumberFormatter{" + "format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
-    }
 }

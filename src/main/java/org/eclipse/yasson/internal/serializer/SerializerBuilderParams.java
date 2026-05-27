@@ -32,43 +32,6 @@ class SerializerBuilderParams {
     private final boolean resolveRootAdapter;
     private final ModelSerializer objectBaseSerializer;
 
-    private SerializerBuilderParams(Builder builder) {
-        this.type = builder.type;
-        this.customization = builder.customization;
-        this.root = builder.root;
-        this.key = builder.key;
-        this.resolveRootAdapter = builder.resolveRootAdapter;
-        this.objectBaseSerializer = builder.objectBaseSerializer;
-    }
-
-    public static Builder builder(Type type) {
-        return new Builder(type);
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    public boolean isRoot() {
-        return root;
-    }
-
-    public boolean isKey() {
-        return key;
-    }
-
-    public boolean isResolveRootAdapter() {
-        return resolveRootAdapter;
-    }
-
-    public ModelSerializer getObjectBaseSerializer() {
-        return objectBaseSerializer;
-    }
-
     static final class Builder {
 
         private Type type;
@@ -78,15 +41,8 @@ class SerializerBuilderParams {
         private boolean resolveRootAdapter;
         private ModelSerializer objectBaseSerializer;
 
-        private Builder(Type type) {
-            this.type = Objects.requireNonNull(type);
-            this.customization = ClassCustomization.empty();
-            this.root = true;
-            this.key = false;
-        }
-
-        public Builder type(Type type) {
-            this.type = Objects.requireNonNull(type);
+        public Builder key(boolean key) {
+            this.key = key;
             return this;
         }
 
@@ -95,13 +51,22 @@ class SerializerBuilderParams {
             return this;
         }
 
+        public SerializerBuilderParams build() {
+            return new SerializerBuilderParams(this);
+        }
+
+        public Builder objectBaseSerializer(ModelSerializer objectBaseSerializer) {
+            this.objectBaseSerializer = objectBaseSerializer;
+            return this;
+        }
+
         public Builder root(boolean root) {
             this.root = root;
             return this;
         }
 
-        public Builder key(boolean key) {
-            this.key = key;
+        public Builder type(Type type) {
+            this.type = Objects.requireNonNull(type);
             return this;
         }
 
@@ -110,15 +75,50 @@ class SerializerBuilderParams {
             return this;
         }
 
-        public Builder objectBaseSerializer(ModelSerializer objectBaseSerializer) {
-            this.objectBaseSerializer = objectBaseSerializer;
-            return this;
+        private Builder(Type type) {
+            this.type = Objects.requireNonNull(type);
+            this.customization = ClassCustomization.empty();
+            this.root = true;
+            this.key = false;
         }
 
-        public SerializerBuilderParams build() {
-            return new SerializerBuilderParams(this);
-        }
+    }
 
+    public boolean isKey() {
+        return key;
+    }
+
+    public boolean isRoot() {
+        return root;
+    }
+
+    public ModelSerializer getObjectBaseSerializer() {
+        return objectBaseSerializer;
+    }
+
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    public boolean isResolveRootAdapter() {
+        return resolveRootAdapter;
+    }
+
+    private SerializerBuilderParams(Builder builder) {
+        this.type = builder.type;
+        this.customization = builder.customization;
+        this.root = builder.root;
+        this.key = builder.key;
+        this.resolveRootAdapter = builder.resolveRootAdapter;
+        this.objectBaseSerializer = builder.objectBaseSerializer;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public static Builder builder(Type type) {
+        return new Builder(type);
     }
 
 }

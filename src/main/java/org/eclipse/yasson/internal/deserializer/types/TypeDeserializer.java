@@ -27,28 +27,8 @@ public abstract class TypeDeserializer implements ModelDeserializer<String> {
     private final ModelDeserializer<Object> delegate;
     private final Class<?> clazz;
 
-    TypeDeserializer(TypeDeserializerBuilder builder) {
-        this.delegate = builder.getDelegate();
-        this.clazz = builder.getClazz();
-    }
-
-    @Override
-    public final Object deserialize(String value, DeserializationContextImpl context) {
-        return delegate.deserialize(deserializeStringValue(value, context, clazz), context);
-    }
-
     public final Object deserialize(boolean value, DeserializationContextImpl context) {
         return delegate.deserialize(deserializeBooleanValue(value, context, clazz), context);
-    }
-
-    public final Object deserialize(JsonParser value, DeserializationContextImpl context) {
-        return delegate.deserialize(deserializeNumberValue(value, context, clazz), context);
-    }
-
-    abstract Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType);
-
-    Object deserializeBooleanValue(boolean value, DeserializationContextImpl context, Type rType) {
-        return deserializeStringValue(String.valueOf(value), context, rType);
     }
 
     Object deserializeNumberValue(JsonParser value, DeserializationContextImpl context, Type rType) {
@@ -57,6 +37,26 @@ public abstract class TypeDeserializer implements ModelDeserializer<String> {
 
     Class<?> getType() {
         return clazz;
+    }
+
+    Object deserializeBooleanValue(boolean value, DeserializationContextImpl context, Type rType) {
+        return deserializeStringValue(String.valueOf(value), context, rType);
+    }
+
+    TypeDeserializer(TypeDeserializerBuilder builder) {
+        this.delegate = builder.getDelegate();
+        this.clazz = builder.getClazz();
+    }
+
+    abstract Object deserializeStringValue(String value, DeserializationContextImpl context, Type rType);
+
+    @Override
+    public final Object deserialize(String value, DeserializationContextImpl context) {
+        return delegate.deserialize(deserializeStringValue(value, context, clazz), context);
+    }
+
+    public final Object deserialize(JsonParser value, DeserializationContextImpl context) {
+        return delegate.deserialize(deserializeNumberValue(value, context, clazz), context);
     }
 
 }

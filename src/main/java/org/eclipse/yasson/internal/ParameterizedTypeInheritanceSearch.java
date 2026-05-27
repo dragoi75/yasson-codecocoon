@@ -27,6 +27,45 @@ class ParameterizedTypeInheritanceSearch {
 
     private final Deque<ParameterizedType> genericSubtypeDeque = new ArrayDeque<>();
 
+    private Type verifySubclassRuntimeInfo(TypeVariable genericTypeParam) {
+        if (0 == genericSubtypeDeque.size()) {
+            return genericTypeParam;
+        }
+        ParameterizedType subclassParamType = genericSubtypeDeque.pop();
+        return findRuntimeTypeArgument(subclassParamType, genericTypeParam);
+    }
+
+    private static ParameterizedType locateParameterizedSuperclass(Type candidateType) {
+        if (null == candidateType || candidateType instanceof ParameterizedType) {
+            return (ParameterizedType) candidateType;
+        }
+        if (!(candidateType instanceof Class)) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RESOLVE_PARAMETRIZED_TYPE, candidateType));
+        }
+        return locateParameterizedSuperclass(((Class) candidateType).getGenericSuperclass());
+    }
+
+    private Type findRuntimeTypeArgument(ParameterizedType runtimeParamType, TypeVariable<?> genericTypeParam) {
+        if (genericTypeParam.getGenericDeclaration() != ReflectiveTypeResolver.getRawType(runtimeParamType)) {
+            return null;
+        }
+        TypeVariable[] typeBounds = genericTypeParam.getGenericDeclaration().getTypeParameters();
+        int index = 0;
+        while (typeBounds.length > index) {
+            if (typeBounds[index].equals(genericTypeParam)) {
+                Type matchedType = runtimeParamType.getActualTypeArguments()[index];
+                //Propagated generic types to another generic classes
+                if (matchedType instanceof TypeVariable<?>) {
+                    return verifySubclassRuntimeInfo((TypeVariable) matchedType);
+                }
+                //found runtime matchedGenericType
+                return matchedType;
+            }
+            index += 1;
+        }
+        return null;
+    }
+
     /**
      * Searches the hierarchy of classes to resolve a type variable. If typevar resolved value is another typevar redirection
      * (propagated from wrapping class),
@@ -79,42 +118,4 @@ class ParameterizedTypeInheritanceSearch {
         return findParametrizedType(((Class) paramTypeInstance.getRawType()).getGenericSuperclass(), genericTypeParam);
     }
 
-    private Type verifySubclassRuntimeInfo(TypeVariable genericTypeParam) {
-        if (0 == genericSubtypeDeque.size()) {
-            return genericTypeParam;
-        }
-        ParameterizedType subclassParamType = genericSubtypeDeque.pop();
-        return findRuntimeTypeArgument(subclassParamType, genericTypeParam);
-    }
-
-    private Type findRuntimeTypeArgument(ParameterizedType runtimeParamType, TypeVariable<?> genericTypeParam) {
-        if (genericTypeParam.getGenericDeclaration() != ReflectiveTypeResolver.getRawType(runtimeParamType)) {
-            return null;
-        }
-        TypeVariable[] typeBounds = genericTypeParam.getGenericDeclaration().getTypeParameters();
-        int index = 0;
-        while (typeBounds.length > index) {
-            if (typeBounds[index].equals(genericTypeParam)) {
-                Type matchedType = runtimeParamType.getActualTypeArguments()[index];
-                //Propagated generic types to another generic classes
-                if (matchedType instanceof TypeVariable<?>) {
-                    return verifySubclassRuntimeInfo((TypeVariable) matchedType);
-                }
-                //found runtime matchedGenericType
-                return matchedType;
-            }
-            index += 1;
-        }
-        return null;
-    }
-
-    private static ParameterizedType locateParameterizedSuperclass(Type candidateType) {
-        if (null == candidateType || candidateType instanceof ParameterizedType) {
-            return (ParameterizedType) candidateType;
-        }
-        if (!(candidateType instanceof Class)) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKeysEnum.RESOLVE_PARAMETRIZED_TYPE, candidateType));
-        }
-        return locateParameterizedSuperclass(((Class) candidateType).getGenericSuperclass());
-    }
 }
