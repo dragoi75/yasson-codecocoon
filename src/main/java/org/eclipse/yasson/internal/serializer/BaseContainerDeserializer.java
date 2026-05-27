@@ -38,29 +38,17 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
 
     protected JsonbRiEventParser.LevelParseContext parserContext;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
-     */
-    protected BaseContainerDeserializer(JsonDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
+    protected JsonDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext jsonUnmarshaller) {
+        return new JsonDeserializerBuilder(jsonUnmarshaller).setWrapper(this).setJsonValueType(parserContext.getLastEvent());
     }
 
     /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
+     * Move to first event for current deserializer structure.
      *
-     * @param tokenStream JSON parser.
-     * @param deserializationState Deseriaization context.
-     * @param runtimeType Runtime type.
-     * @return Instance of a type for this item.
+     * @param tokenStream Json parser.
+     * @return First event.
      */
-    @Override
-    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationState, Type runtimeType) {
-        JsonUnmarshaller jsonUnmarshaller = (JsonUnmarshaller) deserializationState;
-        deserializeContents((JsonbNavigator) tokenStream, jsonUnmarshaller);
-        return getInstance((JsonUnmarshaller) deserializationState);
-    }
+    protected abstract JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator tokenStream);
 
     /**
      * Creates and initializes an instance of deserializing item.
@@ -69,6 +57,27 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
      * @return An instance of deserializing item.
      */
     protected abstract T getInstance(JsonUnmarshaller converter);
+
+    /**
+     * After object is transitively deserialized from JSON, "append" it to its wrapper.
+     * In case of a field set value to field, in case of collections
+     * or other embedded objects use methods provided.
+     *
+     * @param outputObject An instance result of an item.
+     */
+    public abstract void addResult(Object outputObject);
+
+    protected JsonbDeserializer<?> createCollectionOrMapItem(Type elementType, JsonbRuntimeContext jsonUnmarshaller) {
+        //TODO needs performance optimization on not to create deserializer each time
+        //TODO In contrast to serialization value type cannot change here
+        Type resolvedValueType = ReflectionTypeUtils.resolveGenericType(this, elementType);
+        JsonDeserializerBuilder deserializerFactory = createUnmarshallerItemBuilder(jsonUnmarshaller).setType(resolvedValueType);
+        if (!DefaultSerializers.getInstance().isKnownType(ReflectionTypeUtils.getRawType(resolvedValueType))) {
+            ClassModel typeModel = jsonUnmarshaller.getMappingContext().getOrCreateClassModel(ReflectionTypeUtils.getRawType(resolvedValueType));
+            deserializerFactory.setCustomization(null == typeModel ? null : typeModel.getCustomization());
+        }
+        return deserializerFactory.buildDeserializer();
+    }
 
     protected void deserializeContents(JsonbNavigator tokenStream, JsonUnmarshaller deserializationState) {
         parserContext = moveToStart(tokenStream);
@@ -114,27 +123,12 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
     protected abstract void deserializeElement(JsonParser tokenStream, JsonUnmarshaller deserializationState);
 
     /**
-     * Move to first event for current deserializer structure.
+     * Create instance of current item with its builder.
      *
-     * @param tokenStream Json parser.
-     * @return First event.
+     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
      */
-    protected abstract JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator tokenStream);
-
-    protected JsonDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext jsonUnmarshaller) {
-        return new JsonDeserializerBuilder(jsonUnmarshaller).setWrapper(this).setJsonValueType(parserContext.getLastEvent());
-    }
-
-    protected JsonbDeserializer<?> createCollectionOrMapItem(Type elementType, JsonbRuntimeContext jsonUnmarshaller) {
-        //TODO needs performance optimization on not to create deserializer each time
-        //TODO In contrast to serialization value type cannot change here
-        Type resolvedValueType = ReflectionTypeUtils.resolveGenericType(this, elementType);
-        JsonDeserializerBuilder deserializerFactory = createUnmarshallerItemBuilder(jsonUnmarshaller).setType(resolvedValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectionTypeUtils.getRawType(resolvedValueType))) {
-            ClassModel typeModel = jsonUnmarshaller.getMappingContext().getOrCreateClassModel(ReflectionTypeUtils.getRawType(resolvedValueType));
-            deserializerFactory.setCustomization(null == typeModel ? null : typeModel.getCustomization());
-        }
-        return deserializerFactory.buildDeserializer();
+    protected BaseContainerDeserializer(JsonDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
     }
 
     /**
@@ -173,11 +167,18 @@ public abstract class BaseContainerDeserializer<T> extends AbstractModelItem<T> 
     }
 
     /**
-     * After object is transitively deserialized from JSON, "append" it to its wrapper.
-     * In case of a field set value to field, in case of collections
-     * or other embedded objects use methods provided.
+     * Drives JSONP {@link JsonParser} to deserialize json document.
      *
-     * @param outputObject An instance result of an item.
+     * @param tokenStream JSON parser.
+     * @param deserializationState Deseriaization context.
+     * @param runtimeType Runtime type.
+     * @return Instance of a type for this item.
      */
-    public abstract void addResult(Object outputObject);
+    @Override
+    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationState, Type runtimeType) {
+        JsonUnmarshaller jsonUnmarshaller = (JsonUnmarshaller) deserializationState;
+        deserializeContents((JsonbNavigator) tokenStream, jsonUnmarshaller);
+        return getInstance((JsonUnmarshaller) deserializationState);
+    }
+
 }

@@ -41,50 +41,6 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
 
     private Class implementationClass;
 
-    /**
-     * Creates a customization for class properties.
-     *
-     * @return A new instance of {@link PropertyCustomization}
-     */
-    public PropertyCustomization buildPropertyCustomization() {
-        return new PropertyCustomization(this);
-    }
-
-    /**
-     * Gets number formatter for formatting numbers during serialization process.
-     *
-     * @return Number formatter for formatting numbers during serialization process.
-     */
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return serializeNumberFormatter;
-    }
-
-    /**
-     * Sets number formatter for formatting numbers during serialization process.
-     *
-     * @param serializeNumberFormatter Number formatter for formatting numbers during serialization process.
-     */
-    public void setSerializeNumberFormatter(JsonbNumberFormatter serializeNumberFormatter) {
-        this.serializeNumberFormatter = serializeNumberFormatter;
-    }
-
-    /**
-     * Gets number formatter for formatting numbers during deserialization process.
-     *
-     * @return Number formatter for formatting numbers during deserialization process.
-     */
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    /**
-     * Sets number formatter for formatting numbers during deserialization process.
-     *
-     * @param deserializeNumberFormatter Number formatter for formatting numbers during deserialization process.
-     */
-    public void setDeserializeNumberFormatter(JsonbNumberFormatter deserializeNumberFormatter) {
-        this.deserializeNumberFormatter = deserializeNumberFormatter;
-    }
 
     /**
      * Gets date formatter for formatting dates during serialization process.
@@ -93,33 +49,6 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
      */
     public JsonbDateFormatter getSerializeDateFormatter() {
         return serializeDateFormatter;
-    }
-
-    /**
-     * Sets date formatter for formatting dates during serialization process.
-     *
-     * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
-     */
-    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
-        this.serializeDateFormatter = serializeDateFormatter;
-    }
-
-    /**
-     * Gets date formatter for formatting dates during deserialization process.
-     *
-     * @return Date formatter for formatting dates during deserialization process.
-     */
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
-    }
-
-    /**
-     * Sets date formatter for formatting dates during deserialization process.
-     *
-     * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
-     */
-    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
-        this.deserializeDateFormatter = deserializeDateFormatter;
     }
 
     /**
@@ -132,12 +61,30 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Sets a JSON property name used to read a property value from on deserialization.
+     * Returns true if <i>write transient</i> customization is present.
      *
-     * @param jsonReadName JSON property name
+     * @return True if <i>write transient</i> customization is present.
      */
-    public void setJsonReadName(String jsonReadName) {
-        this.jsonReadName = jsonReadName;
+    public boolean isWriteTransient() {
+        return writeTransient;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @return class implementing property interface
+     */
+    public Class getImplementationClass() {
+        return implementationClass;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @param implementationClass implementing property interface
+     */
+    public void setImplementationClass(Class implementationClass) {
+        this.implementationClass = implementationClass;
     }
 
     /**
@@ -159,12 +106,57 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Returns true if <i>read transient</i> customization is present.
+     * Sets date formatter for formatting dates during serialization process.
      *
-     * @return True if <i>read transient</i> customization is present.
+     * @param serializeDateFormatter Date formatter for formatting dates during serialization process.
      */
-    public boolean isReadTransient() {
-        return readTransient;
+    public void setSerializeDateFormatter(JsonbDateFormatter serializeDateFormatter) {
+        this.serializeDateFormatter = serializeDateFormatter;
+    }
+
+    /**
+     * Gets number formatter for formatting numbers during serialization process.
+     *
+     * @return Number formatter for formatting numbers during serialization process.
+     */
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return serializeNumberFormatter;
+    }
+
+    /**
+     * Gets date formatter for formatting dates during deserialization process.
+     *
+     * @return Date formatter for formatting dates during deserialization process.
+     */
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
+    }
+
+    /**
+     * Sets a JSON property name used to read a property value from on deserialization.
+     *
+     * @param jsonReadName JSON property name
+     */
+    public void setJsonReadName(String jsonReadName) {
+        this.jsonReadName = jsonReadName;
+    }
+
+    /**
+     * Sets number formatter for formatting numbers during deserialization process.
+     *
+     * @param deserializeNumberFormatter Number formatter for formatting numbers during deserialization process.
+     */
+    public void setDeserializeNumberFormatter(JsonbNumberFormatter deserializeNumberFormatter) {
+        this.deserializeNumberFormatter = deserializeNumberFormatter;
+    }
+
+    /**
+     * Sets a presence of <i>write transient</i> customization.
+     *
+     * @param writeTransient Presence of <i>write transient</i> customization.
+     */
+    public void setWriteTransient(boolean writeTransient) {
+        this.writeTransient = writeTransient;
     }
 
     /**
@@ -177,39 +169,48 @@ public class PropertyCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Returns true if <i>write transient</i> customization is present.
+     * Gets number formatter for formatting numbers during deserialization process.
      *
-     * @return True if <i>write transient</i> customization is present.
+     * @return Number formatter for formatting numbers during deserialization process.
      */
-    public boolean isWriteTransient() {
-        return writeTransient;
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
     }
 
     /**
-     * Sets a presence of <i>write transient</i> customization.
+     * Creates a customization for class properties.
      *
-     * @param writeTransient Presence of <i>write transient</i> customization.
+     * @return A new instance of {@link PropertyCustomization}
      */
-    public void setWriteTransient(boolean writeTransient) {
-        this.writeTransient = writeTransient;
-    }
-
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class getImplementationClass() {
-        return implementationClass;
+    public PropertyCustomization buildPropertyCustomization() {
+        return new PropertyCustomization(this);
     }
 
     /**
-     * Implementation class if property is interface type.
+     * Returns true if <i>read transient</i> customization is present.
      *
-     * @param implementationClass implementing property interface
+     * @return True if <i>read transient</i> customization is present.
      */
-    public void setImplementationClass(Class implementationClass) {
-        this.implementationClass = implementationClass;
+    public boolean isReadTransient() {
+        return readTransient;
     }
+
+    /**
+     * Sets date formatter for formatting dates during deserialization process.
+     *
+     * @param deserializeDateFormatter Date formatter for formatting dates during deserialization process.
+     */
+    public void setDeserializeDateFormatter(JsonbDateFormatter deserializeDateFormatter) {
+        this.deserializeDateFormatter = deserializeDateFormatter;
+    }
+
+    /**
+     * Sets number formatter for formatting numbers during serialization process.
+     *
+     * @param serializeNumberFormatter Number formatter for formatting numbers during serialization process.
+     */
+    public void setSerializeNumberFormatter(JsonbNumberFormatter serializeNumberFormatter) {
+        this.serializeNumberFormatter = serializeNumberFormatter;
+    }
+
 }

@@ -34,6 +34,59 @@ import java.util.OptionalLong;
  */
 public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
 
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
+    private boolean isEmptyOptional(Object object) {
+        if (!(object instanceof Optional)) {
+            if (!(object instanceof OptionalInt)) {
+                if (!(object instanceof OptionalLong)) {
+                    if (object instanceof OptionalDouble) {
+                        return !((OptionalDouble) object).isPresent();
+                    }
+                } else {
+                    return !((OptionalLong) object).isPresent();
+                }
+            } else {
+                return !((OptionalInt) object).isPresent();
+            }
+        } else {
+            return !((Optional) object).isPresent();
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
+        Marshaller marshaller = (Marshaller) ctx;
+        if (propertyModel.isReadable()) {
+            final Object propertyValue = propertyModel.getValue(object);
+            if (null == propertyValue || isEmptyOptional(propertyValue)) {
+                if (propertyModel.getCustomization().isNillable()) {
+                    generator.writeNull(propertyModel.getWriteName());
+                }
+                return;
+            }
+            generator.writeKey(propertyModel.getWriteName());
+            final JsonbSerializer<?> propertyCachedSerializer = propertyModel.getPropertySerializer();
+            if (null != propertyCachedSerializer) {
+                serializerCaptor(propertyCachedSerializer, propertyValue, generator, ctx);
+                return;
+            }
+            Optional<Type> runtimeTypeOptional = ReflectionTypeUtils.tryResolveType(this, propertyModel.getPropertyType());
+            Type genericType = runtimeTypeOptional.orElse(null);
+            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext()).setWrapper(this).withObjectClass(propertyValue.getClass()).setCustomization(propertyModel.getCustomization()).setType(genericType).build();
+            serializerCaptor(serializer, propertyValue, generator, ctx);
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -62,56 +115,4 @@ public class ObjectSerializer<T> extends AbstractContainerSerializer<T> {
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void marshallProperty(T object, JsonGenerator generator, SerializationContext ctx, PropertyModel propertyModel) {
-        Marshaller marshaller = (Marshaller) ctx;
-        if (propertyModel.isReadable()) {
-            final Object propertyValue = propertyModel.getValue(object);
-            if (null == propertyValue || isEmptyOptional(propertyValue)) {
-                if (propertyModel.getCustomization().isNillable()) {
-                    generator.writeNull(propertyModel.getWriteName());
-                }
-                return;
-            }
-            generator.writeKey(propertyModel.getWriteName());
-            final JsonbSerializer<?> propertyCachedSerializer = propertyModel.getPropertySerializer();
-            if (null != propertyCachedSerializer) {
-                serializerCaptor(propertyCachedSerializer, propertyValue, generator, ctx);
-                return;
-            }
-            Optional<Type> runtimeTypeOptional = ReflectionTypeUtils.tryResolveType(this, propertyModel.getPropertyType());
-            Type genericType = runtimeTypeOptional.orElse(null);
-            final JsonbSerializer<?> serializer = new SerializerBuilder(marshaller.getJsonbContext()).setWrapper(this).withObjectClass(propertyValue.getClass()).setCustomization(propertyModel.getCustomization()).setType(genericType).build();
-            serializerCaptor(serializer, propertyValue, generator, ctx);
-        }
-    }
-
-    private boolean isEmptyOptional(Object object) {
-        if (!(object instanceof Optional)) {
-            if (!(object instanceof OptionalInt)) {
-                if (!(object instanceof OptionalLong)) {
-                    if (object instanceof OptionalDouble) {
-                        return !((OptionalDouble) object).isPresent();
-                    }
-                } else {
-                    return !((OptionalLong) object).isPresent();
-                }
-            } else {
-                return !((OptionalInt) object).isPresent();
-            }
-        } else {
-            return !((Optional) object).isPresent();
-        }
-        return false;
-    }
 }

@@ -35,13 +35,100 @@ public class UserDeserializerParser implements JsonbNavigator {
      */
     private final JsonbRiEventParser.LevelParseContext level;
 
+
+    @Override
+    public String getString() {
+        return jsonbParser.getString();
+    }
+
+    @Override
+    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
+        return jsonbParser.getObjectStream();
+    }
+
     /**
-     * Constructs an instance with parser and context.
-     * @param parser jsonb parser to decorate
+     * Moves parser cursor to any JSON value.
      */
-    public UserDeserializerParser(JsonbNavigator parser) {
-        this.jsonbParser = parser;
-        level = jsonbParser.getCurrentLevel();
+    @Override
+    public Event moveToValue() {
+        return jsonbParser.moveToValue();
+    }
+
+    /**
+     * Skips a value or a structure.
+     * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
+     */
+    @Override
+    public void skipJsonStructure() {
+        jsonbParser.skipJsonStructure();
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return jsonbParser.getBigDecimal();
+    }
+
+    @Override
+    public Stream<JsonValue> getValueStream() {
+        return jsonbParser.getValueStream();
+    }
+
+    /**
+     * Current level of JsonbRiParser.
+     *
+     * @return current level
+     */
+    @Override
+    public JsonbRiEventParser.LevelParseContext getCurrentLevel() {
+        return jsonbParser.getCurrentLevel();
+    }
+
+    @Override
+    public Event next() {
+        if (level.isParsed()) {
+            throw new IllegalStateException("Parser level data inconsistent.");
+        }
+        return jsonbParser.next();
+    }
+
+    @Override
+    public long getLong() {
+        return jsonbParser.getLong();
+    }
+
+    @Override
+    public JsonObject getObject() {
+        return jsonbParser.getObject();
+    }
+
+    @Override
+    public void skipObject() {
+        jsonbParser.skipObject();
+    }
+
+    @Override
+    public JsonArray getArray() {
+        return jsonbParser.getArray();
+    }
+
+    @Override
+    public void skipArray() {
+        jsonbParser.skipArray();
+    }
+
+    @Override
+    public JsonValue getValue() {
+        return jsonbParser.getValue();
+    }
+
+    /**
+     * Moves parser to required event, if current event is equal to required does nothing.
+     *
+     * @param event required event
+     */
+    @Override
+    public void moveTo(Event event) {
+        jsonbParser.moveTo(event);
     }
 
     /**
@@ -60,41 +147,17 @@ public class UserDeserializerParser implements JsonbNavigator {
     }
 
     @Override
-    public Event next() {
-        if (level.isParsed()) {
-            throw new IllegalStateException("Parser level data inconsistent.");
-        }
-        return jsonbParser.next();
-    }
-
-    @Override
-    public String getString() {
-        return jsonbParser.getString();
-    }
-
-    @Override
     public boolean isIntegralNumber() {
         return jsonbParser.isIntegralNumber();
     }
 
-    @Override
-    public int getInt() {
-        return jsonbParser.getInt();
-    }
-
-    @Override
-    public long getLong() {
-        return jsonbParser.getLong();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return jsonbParser.getBigDecimal();
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        return jsonbParser.getLocation();
+    /**
+     * Constructs an instance with parser and context.
+     * @param parser jsonb parser to decorate
+     */
+    public UserDeserializerParser(JsonbNavigator parser) {
+        this.jsonbParser = parser;
+        level = jsonbParser.getCurrentLevel();
     }
 
     @Override
@@ -102,22 +165,9 @@ public class UserDeserializerParser implements JsonbNavigator {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Moves parser to required event, if current event is equal to required does nothing.
-     *
-     * @param event required event
-     */
     @Override
-    public void moveTo(Event event) {
-        jsonbParser.moveTo(event);
-    }
-
-    /**
-     * Moves parser cursor to any JSON value.
-     */
-    @Override
-    public Event moveToValue() {
-        return jsonbParser.moveToValue();
+    public Stream<JsonValue> getArrayStream() {
+        return jsonbParser.getArrayStream();
     }
 
     /**
@@ -128,63 +178,14 @@ public class UserDeserializerParser implements JsonbNavigator {
         return jsonbParser.moveToStartStructure();
     }
 
-    /**
-     * Current level of JsonbRiParser.
-     *
-     * @return current level
-     */
     @Override
-    public JsonbRiEventParser.LevelParseContext getCurrentLevel() {
-        return jsonbParser.getCurrentLevel();
-    }
-
-    /**
-     * Skips a value or a structure.
-     * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
-     */
-    @Override
-    public void skipJsonStructure() {
-        jsonbParser.skipJsonStructure();
-    }
-
-
-    @Override
-    public JsonObject getObject() {
-        return jsonbParser.getObject();
+    public JsonLocation getLocation() {
+        return jsonbParser.getLocation();
     }
 
     @Override
-    public JsonValue getValue() {
-        return jsonbParser.getValue();
+    public int getInt() {
+        return jsonbParser.getInt();
     }
 
-    @Override
-    public JsonArray getArray() {
-        return jsonbParser.getArray();
-    }
-
-    @Override
-    public Stream<JsonValue> getArrayStream() {
-        return jsonbParser.getArrayStream();
-    }
-
-    @Override
-    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
-        return jsonbParser.getObjectStream();
-    }
-
-    @Override
-    public Stream<JsonValue> getValueStream() {
-        return jsonbParser.getValueStream();
-    }
-
-    @Override
-    public void skipArray() {
-        jsonbParser.skipArray();
-    }
-
-    @Override
-    public void skipObject() {
-        jsonbParser.skipObject();
-    }
 }

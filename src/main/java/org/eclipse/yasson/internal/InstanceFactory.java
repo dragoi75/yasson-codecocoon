@@ -41,27 +41,18 @@ public class InstanceFactory {
 
         private final Constructor<?> instantiator;
 
-        public InstanceCreator(Constructor<?> instantiator) {
-            this.instantiator = instantiator;
-        }
-
         @Override
         public Object newInstance() {
             return ReflectionTypeUtils.instantiateNoArgConstructor(instantiator);
         }
+
+        public InstanceCreator(Constructor<?> instantiator) {
+            this.instantiator = instantiator;
+        }
+
     }
 
     private final Map<Class, Creator> factoryMap;
-
-    public InstanceFactory() {
-        factoryMap = new HashMap<>();
-        factoryMap.put(ArrayList.class, ArrayList::new);
-        factoryMap.put(LinkedList.class, LinkedList::new);
-        factoryMap.put(HashSet.class, HashSet::new);
-        factoryMap.put(TreeSet.class, TreeSet::new);
-        factoryMap.put(HashMap.class, HashMap::new);
-        factoryMap.put(TreeMap.class, TreeMap::new);
-    }
 
     /**
      * Create an instance of the given class with its default constructor.
@@ -79,4 +70,15 @@ public class InstanceFactory {
         }
         return (T) factory.newInstance();
     }
+
+    public InstanceFactory() {
+        factoryMap = new HashMap<>();
+        factoryMap.put(ArrayList.class, ArrayList::new);
+        factoryMap.put(LinkedList.class, LinkedList::new);
+        factoryMap.put(HashSet.class, HashSet::new);
+        factoryMap.put(TreeSet.class, TreeSet::new);
+        factoryMap.put(HashMap.class, HashMap::new);
+        factoryMap.put(TreeMap.class, TreeMap::new);
+    }
+
 }

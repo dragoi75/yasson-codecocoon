@@ -47,11 +47,6 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
 
         private final PropertyModel propertyModel;
 
-        public LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
-            this.jsonKeyName = jsonKeyName;
-            this.propertyModel = propertyModel;
-        }
-
         public String getJsonKeyName() {
             return jsonKeyName;
         }
@@ -59,6 +54,12 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
         public PropertyModel getPropertyModel() {
             return propertyModel;
         }
+
+        public LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
+            this.jsonKeyName = jsonKeyName;
+            this.propertyModel = propertyModel;
+        }
+
     }
 
     private static final Logger log = Logger.getLogger(ObjectDeserializer.class.getName());
@@ -69,12 +70,79 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
 
     private LastPropertyModel lastPropertyModel;
 
-    /**
-     * Creates instance of an item.
-     * @param builder builder to build from
-     */
-    protected ObjectDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
+    private static class ValueWrapper {
+
+        private final CreatorModel creatorModel;
+
+        private final PropertyModel propertyModel;
+
+        private final Object value;
+
+        public PropertyModel getPropertyModel() {
+            return propertyModel;
+        }
+
+        public CreatorModel getCreatorModel() {
+            return creatorModel;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public ValueWrapper(CreatorModel creator, Object value) {
+            this.creatorModel = creator;
+            this.value = value;
+            propertyModel = null;
+        }
+
+        public ValueWrapper(PropertyModel propertyModel, Object value) {
+            this.propertyModel = propertyModel;
+            this.value = value;
+            creatorModel = null;
+        }
+
+    }
+
+    @Override
+    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
+    protected PropertyModel getModel() {
+        final String lastKeyName = parserContext.getLastKeyName();
+        if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
+            return lastPropertyModel.getPropertyModel();
+        }
+        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByJsonReadName(lastKeyName));
+        return lastPropertyModel.getPropertyModel();
+    }
+
+    @Override
+    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
+        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
+        //first check jsonb creator param, since it can be different from property name
+        if (null != creator) {
+            final CreatorModel param = creator.findByName(parserContext.getLastKeyName());
+            if (null != param) {
+                final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(param.getType()).setCustomization(param.getCustomization()).buildDeserializer();
+                Object result = deserializer.deserialize(parser, context, param.getType());
+                values.put(param.getName(), new ValueWrapper(param, result));
+                return;
+            }
+        }
+        //identify field model of currently processed class model
+        PropertyModel newPropertyModel = getModel();
+        if (null != newPropertyModel && newPropertyModel.isWritable()) {
+            //create current item instance of identified object field
+            final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setCustomization(newPropertyModel.getCustomization()).setType(newPropertyModel.getPropertyDeserializationType()).buildDeserializer();
+            Type resolvedType = ReflectionTypeUtils.resolveGenericType(this, newPropertyModel.getPropertyDeserializationType());
+            Object result = deserializer.deserialize(parser, context, resolvedType);
+            values.put(newPropertyModel.getPropertyName(), new ValueWrapper(newPropertyModel, result));
+            return;
+        }
+        skipJsonProperty((JsonbNavigator) parser, context.getJsonbContext());
     }
 
     /**
@@ -106,6 +174,16 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     }
 
     /**
+     * Rise an exception, or ignore JSON property, which is missing in class model.
+     */
+    private void skipJsonProperty(JsonbNavigator parser, JsonbRuntimeContext jsonbContext) {
+        if (jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
+        }
+        parser.skipJsonStructure();
+    }
+
+    /**
      * Creates instance with custom jsonb creator (parameterized constructor or factory method)
      */
     private T createInstance(Class<T> rawType, JsonbCreator creator) {
@@ -124,6 +202,14 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
     }
 
     /**
+     * Creates instance of an item.
+     * @param builder builder to build from
+     */
+    protected ObjectDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
+    /**
      * Set populated instance of current object to its unfinished wrapper values map.
      *
      * @param result An instance result of an item.
@@ -138,87 +224,4 @@ class ObjectDeserializer<T> extends BaseContainerDeserializer<T> {
         values.put(model.getReadName(), new ValueWrapper(model, convertNullToEmptyOptional(model.getPropertyType(), result)));
     }
 
-    @Override
-    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
-        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
-        //first check jsonb creator param, since it can be different from property name
-        if (null != creator) {
-            final CreatorModel param = creator.findByName(parserContext.getLastKeyName());
-            if (null != param) {
-                final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(param.getType()).setCustomization(param.getCustomization()).buildDeserializer();
-                Object result = deserializer.deserialize(parser, context, param.getType());
-                values.put(param.getName(), new ValueWrapper(param, result));
-                return;
-            }
-        }
-        //identify field model of currently processed class model
-        PropertyModel newPropertyModel = getModel();
-        if (null != newPropertyModel && newPropertyModel.isWritable()) {
-            //create current item instance of identified object field
-            final JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setCustomization(newPropertyModel.getCustomization()).setType(newPropertyModel.getPropertyDeserializationType()).buildDeserializer();
-            Type resolvedType = ReflectionTypeUtils.resolveGenericType(this, newPropertyModel.getPropertyDeserializationType());
-            Object result = deserializer.deserialize(parser, context, resolvedType);
-            values.put(newPropertyModel.getPropertyName(), new ValueWrapper(newPropertyModel, result));
-            return;
-        }
-        skipJsonProperty((JsonbNavigator) parser, context.getJsonbContext());
-    }
-
-    /**
-     * Rise an exception, or ignore JSON property, which is missing in class model.
-     */
-    private void skipJsonProperty(JsonbNavigator parser, JsonbRuntimeContext jsonbContext) {
-        if (jsonbContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
-        }
-        parser.skipJsonStructure();
-    }
-
-    @Override
-    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
-
-    protected PropertyModel getModel() {
-        final String lastKeyName = parserContext.getLastKeyName();
-        if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
-            return lastPropertyModel.getPropertyModel();
-        }
-        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByJsonReadName(lastKeyName));
-        return lastPropertyModel.getPropertyModel();
-    }
-
-    private static class ValueWrapper {
-
-        private final CreatorModel creatorModel;
-
-        private final PropertyModel propertyModel;
-
-        private final Object value;
-
-        public ValueWrapper(CreatorModel creator, Object value) {
-            this.creatorModel = creator;
-            this.value = value;
-            propertyModel = null;
-        }
-
-        public ValueWrapper(PropertyModel propertyModel, Object value) {
-            this.propertyModel = propertyModel;
-            this.value = value;
-            creatorModel = null;
-        }
-
-        public CreatorModel getCreatorModel() {
-            return creatorModel;
-        }
-
-        public PropertyModel getPropertyModel() {
-            return propertyModel;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-    }
 }

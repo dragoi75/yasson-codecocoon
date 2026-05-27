@@ -27,10 +27,6 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
 
     private final List<Double> items = new ArrayList<>();
 
-    protected DoubleArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +43,9 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
         }
         return doubleArray;
     }
+
+    protected DoubleArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

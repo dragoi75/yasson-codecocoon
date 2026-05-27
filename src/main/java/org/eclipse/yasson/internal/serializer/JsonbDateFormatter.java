@@ -48,17 +48,21 @@ public class JsonbDateFormatter {
 
     private final String locale;
 
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
     /**
-     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
+     * Locale to use with formatter.
      *
-     * @param dateTimeFormatter Reused time formatter.
-     * @param format Format in string.
-     * @param locale Locale in string.
+     * @return Locale.
      */
-    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
-        this.dateTimeFormatter = dateTimeFormatter;
-        this.format = format;
-        this.locale = locale;
+    public String getLocale() {
+        return locale;
+    }
+
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
     }
 
     /**
@@ -84,6 +88,19 @@ public class JsonbDateFormatter {
     }
 
     /**
+     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
+     *
+     * @param dateTimeFormatter Reused time formatter.
+     * @param format Format in string.
+     * @param locale Locale in string.
+     */
+    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        this.format = format;
+        this.locale = locale;
+    }
+
+    /**
      * Format string to be used either by formatter.
      * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
      * which is not threadsafe.
@@ -94,20 +111,4 @@ public class JsonbDateFormatter {
         return format;
     }
 
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
-    }
-
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
 }

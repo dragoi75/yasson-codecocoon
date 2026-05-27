@@ -27,6 +27,23 @@ import java.util.Locale;
  */
 public abstract class AbstractDateTypeSerializer<T extends Date> extends AbstractDateTimeSerializer<T> {
 
+    protected abstract DateTimeFormatter getDefaultFormatter();
+
+    @Override
+    protected String formatDefault(Date value, Locale locale) {
+        DateTimeFormatter formatter = getDefaultFormatter();
+        //in case field is of property is java.util.Date type with java.sql.Date instance
+        if (value instanceof java.sql.Date) {
+            formatter = SqlDateTypeSerializer.DEFAULT_FORMATTER;
+        }
+        return formatter.withLocale(locale).format(toInstant(value));
+    }
+
+    @Override
+    protected TemporalAccessor toTemporalAccessor(Date object) {
+        return toInstant(object);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -42,13 +59,8 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
     }
 
     @Override
-    protected String formatDefault(Date value, Locale locale) {
-        DateTimeFormatter formatter = getDefaultFormatter();
-        //in case field is of property is java.util.Date type with java.sql.Date instance
-        if (value instanceof java.sql.Date) {
-            formatter = SqlDateTypeSerializer.DEFAULT_FORMATTER;
-        }
-        return formatter.withLocale(locale).format(toInstant(value));
+    protected String formatStrictIJson(Date value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
     }
 
     @Override
@@ -56,15 +68,4 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
         return getZonedFormatter(formatter).format(toTemporalAccessor(value));
     }
 
-    @Override
-    protected String formatStrictIJson(Date value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Date object) {
-        return toInstant(object);
-    }
-
-    protected abstract DateTimeFormatter getDefaultFormatter();
 }

@@ -17,16 +17,41 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
 
     private final boolean nillable;
 
+
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Adapter wrapper class with resolved generic information.
      *
-     * @param builder not null
+     * @return components wrapper
      */
-    public CustomizationBase(CustomizationBuilder builder) {
-        this.nillable = builder.isNillable();
-        this.adapterBinding = builder.getAdapterInfo();
-        this.serializerBinding = builder.getSerializerBinding();
-        this.deserializerBinding = builder.getDeserializerBinding();
+    public AdapterBinding getAdapterBinding() {
+        return adapterBinding;
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
+    /**
+     * Serializer wrapper with resolved generic info.
+     *
+     * @return serializer wrapper
+     */
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinding;
     }
 
     /**
@@ -42,40 +67,15 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     }
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
+     * Copies properties from builder an creates immutable instance.
      *
-     * @return True if <i>nillable</i> customization is present.
+     * @param builder not null
      */
-    public boolean isNillable() {
-        return nillable;
+    public CustomizationBase(CustomizationBuilder builder) {
+        this.nillable = builder.isNillable();
+        this.adapterBinding = builder.getAdapterInfo();
+        this.serializerBinding = builder.getSerializerBinding();
+        this.deserializerBinding = builder.getDeserializerBinding();
     }
-
-    /**
-     * Adapter wrapper class with resolved generic information.
-     *
-     * @return components wrapper
-     */
-    public AdapterBinding getAdapterBinding() {
-        return adapterBinding;
-    }
-
-    /**
-     * Serializer wrapper with resolved generic info.
-     *
-     * @return serializer wrapper
-     */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
 
 }

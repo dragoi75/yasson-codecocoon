@@ -35,20 +35,6 @@ public class JsonUnmarshaller extends ObjectProcessingContext implements Deseria
 
     private static final Logger JSONB_UNMARSHALLER_LOG = Logger.getLogger(JsonUnmarshaller.class.getName());
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param runtimeContext context to use
-     */
-    public JsonUnmarshaller(JsonbRuntimeContext runtimeContext) {
-        super(runtimeContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return unmarshalItem(targetClass, jsonReader);
-    }
-
     @Override
     public <T> T deserialize(Type targetType, JsonParser jsonReader) {
         return unmarshalItem(targetType, jsonReader);
@@ -86,4 +72,19 @@ public class JsonUnmarshaller extends ObjectProcessingContext implements Deseria
         final JsonParser.Event terminalEvent = levelContext.getLastEvent();
         return JsonParser.Event.KEY_NAME == terminalEvent ? jsonReader.next() : terminalEvent;
     }
+
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return unmarshalItem(targetClass, jsonReader);
+    }
+
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param runtimeContext context to use
+     */
+    public JsonUnmarshaller(JsonbRuntimeContext runtimeContext) {
+        super(runtimeContext);
+    }
+
 }

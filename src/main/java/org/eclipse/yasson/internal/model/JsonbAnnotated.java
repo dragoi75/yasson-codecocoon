@@ -33,6 +33,29 @@ public class JsonbAnnotated implements AnnotatedElement {
     protected final Map<Class<? extends Annotation>, Annotation> annotations;
 
     /**
+     * Adds annotation.
+     *
+     * @param annotation Annotation to add.
+     */
+    public void putAnnotation(Annotation annotation) {
+        if (annotations.containsKey(annotation.annotationType())) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Annotation already present: " + annotation));
+        }
+        annotations.put(annotation.annotationType(), annotation);
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return annotationClass.cast(annotations.get(annotationClass));
+    }
+
+    @Override
+    public Annotation[] getAnnotations() {
+        final Collection<Annotation> values = annotations.values();
+        return values.toArray(new Annotation[values.size()]);
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param initialAnnotations Annotations to initialize from.
@@ -49,30 +72,8 @@ public class JsonbAnnotated implements AnnotatedElement {
     }
 
     @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return annotationClass.cast(annotations.get(annotationClass));
-    }
-
-    @Override
-    public Annotation[] getAnnotations() {
-        final Collection<Annotation> values = annotations.values();
-        return values.toArray(new Annotation[values.size()]);
-    }
-
-    @Override
     public Annotation[] getDeclaredAnnotations() {
         throw new UnsupportedOperationException("Jsonb elements don't track declared annotations");
     }
 
-    /**
-     * Adds annotation.
-     *
-     * @param annotation Annotation to add.
-     */
-    public void putAnnotation(Annotation annotation) {
-        if (annotations.containsKey(annotation.annotationType())) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Annotation already present: " + annotation));
-        }
-        annotations.put(annotation.annotationType(), annotation);
-    }
 }

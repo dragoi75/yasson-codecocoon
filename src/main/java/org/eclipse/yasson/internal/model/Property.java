@@ -38,63 +38,6 @@ public class Property {
     private JsonbAnnotatedElement<Method> setterElement;
 
     /**
-     * Create instance of property.
-     * @param name not null
-     * @param declaringClassModel Class model for a class declaring property.
-     */
-    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
-        this.name = name;
-        this.declaringClassElement = declaringClassModel;
-    }
-
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * {@link Field} representing property if any
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (null == fieldElement) {
-            return null;
-        }
-        return fieldElement.getElement();
-    }
-
-    /**
-     * @param field field not null
-     */
-    public void setField(Field field) {
-        this.fieldElement = new JsonbAnnotatedElement<>(field);
-    }
-
-    /**
-     * {@link Method} representing getter of a property if any.
-     *
-     * @return getter if present
-     */
-    public Method getGetter() {
-        if (null == getterElement) {
-            return null;
-        }
-        return getterElement.getElement();
-    }
-
-    /**
-     * @param getter not null
-     */
-    public void setGetter(Method getter) {
-        this.getterElement = new JsonbAnnotatedElement<>(getter);
-    }
-
-    /**
      * {@link Method} representing setter of a property if any.
      *
      * @return setter if present
@@ -106,20 +49,11 @@ public class Property {
         return setterElement.getElement();
     }
 
-    /**
-     * @param setter setter not null
-     */
-    public void setSetter(Method setter) {
-        this.setterElement = new JsonbAnnotatedElement<>(setter);
-    }
-
-    /**
-     * Class element with annotation under construction for declaring class of this property.
-     * This ClassModel is not fully initialized yet.
-     * @return ClassModel
-     */
-    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
-        return declaringClassElement;
+    public Type getGetterType() {
+        if (null != getGetter()) {
+            return getGetter().getGenericReturnType();
+        }
+        return null;
     }
 
     /**
@@ -143,11 +77,40 @@ public class Property {
         throw new JsonbException("Empty property: " + name);
     }
 
-    public Type getGetterType() {
-        if (null != getGetter()) {
-            return getGetter().getGenericReturnType();
+    /**
+     * Class element with annotation under construction for declaring class of this property.
+     * This ClassModel is not fully initialized yet.
+     * @return ClassModel
+     */
+    public JsonbAnnotatedElement<Class<?>> getDeclaringClassElement() {
+        return declaringClassElement;
+    }
+
+    /**
+     * {@link Field} representing property if any
+     *
+     * @return field if present
+     */
+    public Field getField() {
+        if (null == fieldElement) {
+            return null;
         }
-        return null;
+        return fieldElement.getElement();
+    }
+
+    /**
+     * @param field field not null
+     */
+    public void setField(Field field) {
+        this.fieldElement = new JsonbAnnotatedElement<>(field);
+    }
+
+    /**
+     * Element with field and its annotations.
+     * @return field with annotations
+     */
+    public JsonbAnnotatedElement<Field> getFieldElement() {
+        return fieldElement;
     }
 
     public Type getSetterType() {
@@ -159,11 +122,35 @@ public class Property {
     }
 
     /**
-     * Element with field and its annotations.
-     * @return field with annotations
+     * Element with setter and its annotations.
+     * @return setter with annotations
      */
-    public JsonbAnnotatedElement<Field> getFieldElement() {
-        return fieldElement;
+    public JsonbAnnotatedElement<Method> getSetterElement() {
+        return setterElement;
+    }
+
+    /**
+     * Create instance of property.
+     * @param name not null
+     * @param declaringClassModel Class model for a class declaring property.
+     */
+    public Property(String name, JsonbAnnotatedElement<Class<?>> declaringClassModel) {
+        this.name = name;
+        this.declaringClassElement = declaringClassModel;
+    }
+
+    /**
+     * @param getter not null
+     */
+    public void setGetter(Method getter) {
+        this.getterElement = new JsonbAnnotatedElement<>(getter);
+    }
+
+    /**
+     * @param setter setter not null
+     */
+    public void setSetter(Method setter) {
+        this.setterElement = new JsonbAnnotatedElement<>(setter);
     }
 
     /**
@@ -175,10 +162,24 @@ public class Property {
     }
 
     /**
-     * Element with setter and its annotations.
-     * @return setter with annotations
+     * {@link Method} representing getter of a property if any.
+     *
+     * @return getter if present
      */
-    public JsonbAnnotatedElement<Method> getSetterElement() {
-        return setterElement;
+    public Method getGetter() {
+        if (null == getterElement) {
+            return null;
+        }
+        return getterElement.getElement();
     }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
 }

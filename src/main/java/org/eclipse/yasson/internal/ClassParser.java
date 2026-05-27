@@ -53,50 +53,73 @@ class ClassParser {
 
     private final JsonbRuntimeContext jsonbContext;
 
-    ClassParser(JsonbRuntimeContext jsonbContext) {
-        this.jsonbContext = jsonbContext;
+    private Property registerMethod(String propertyName, Method method, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        Property property = classProperties.computeIfAbsent(propertyName, n -> new Property(n, classElement));
+        if (!isSetter(method)) {
+            property.setGetter(method);
+        } else {
+            property.setSetter(method);
+        }
+        return property;
     }
 
     /**
-     * Parse class fields and getters setters. Merge to java bean like properties.
+     * Merges current class properties with parent class properties.
+     * If javabean property is declared in more than one inheritance levels,
+     * merge field, getters and setters of that property.
+     * <p>
+     * For example BaseClass contains field foo and getter getFoo. In BaseExtensions there is a setter setFoo.
+     * All three will be merged for BaseExtension.
+     * <p>
+     * Such property is sorted based on where its getter or field is located.
      */
-    public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
-        final Map<String, Property> classProperties = new HashMap<>();
-        parseFields(classElement, classProperties);
-        parseClassAndInterfaceMethods(classElement, classProperties);
-        //add sorted properties from parent, if they are not overridden in current class
-        //parent properties are by default first by alphabet, than properties from a subclass
-        final List<PropertyModel> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
-        List<PropertyModel> classPropertyModels = classProperties.values().stream().map(property -> new PropertyModel(classModel, property, jsonbContext)).collect(Collectors.toList());
-        //check for collision on same property read name
-        List<PropertyModel> unsortedMerged = new ArrayList<>();
-        unsortedMerged.addAll(sortedParentProperties);
-        unsortedMerged.addAll(classPropertyModels);
-        checkPropertyNameClash(unsortedMerged, classModel.getType());
-        List<PropertyModel> sortedPropertyModels = new ArrayList<>();
-        sortedPropertyModels.addAll(sortedParentProperties);
-        sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering().orderProperties(classPropertyModels, classModel));
-        //reference property to creator parameter by name to merge configuration in runtime
-        JsonbCreator creator = classModel.getClassCustomization().getCreator();
-        if (null != creator) {
-            sortedPropertyModels.forEach((propertyModel -> {
-                for (CreatorModel creatorModel : creator.getParams()) {
-                    if (creatorModel.getName().equals(propertyModel.getPropertyName())) {
-                        CreatorCustomization customization = (CreatorCustomization) creatorModel.getCustomization();
-                        customization.setPropertyModel(propertyModel);
+    private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        List<PropertyModel> sortedProperties = new ArrayList<>();
+        //Pull properties from parent
+        if (null != classModel.getParentClassModel()) {
+            for (PropertyModel parentProp : classModel.getParentClassModel().getSortedProperties()) {
+                final Property current = classProperties.get(parentProp.getPropertyName());
+                //don't replace overridden properties
+                if (null != current) {
+                    //merge
+                    final Property merged = mergeProperty(current, parentProp, classElement);
+                    ReflectionPropagation propagation = new ReflectionPropagation(current, classModel.getClassCustomization().getPropertyVisibilityStrategy());
+                    if (!propagation.isReadable()) {
+                        sortedProperties.add(new PropertyModel(classModel, merged, jsonbContext));
+                        classProperties.remove(current.getName());
+                    } else {
+                        classProperties.replace(current.getName(), merged);
                     }
+                } else {
+                    sortedProperties.add(parentProp);
                 }
-            }));
+            }
         }
-        classModel.setProperties(sortedPropertyModels);
+        return sortedProperties;
     }
 
-    private void parseClassAndInterfaceMethods(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        Class<?> concreteClass = classElement.getElement();
-        parseMethods(concreteClass, classElement, classProperties);
-        for (Class<?> ifc : jsonbContext.getAnnotationIntrospector().collectInterfaces(concreteClass)) {
-            parseIfaceMethodAnnotations(ifc, classElement, classProperties);
+    private void checkPropertyNameClash(List<PropertyModel> collectedProperties, Class cls) {
+        final List<PropertyModel> checkedProperties = new ArrayList<>();
+        for (PropertyModel collectedPropertyModel : collectedProperties) {
+            for (PropertyModel checkedPropertyModel : checkedProperties) {
+                if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName()) && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) || (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName())) && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
+                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(), cls.getName()));
+                }
+            }
+            checkedProperties.add(collectedPropertyModel);
         }
+    }
+
+    private boolean isSetter(Method m) {
+        return m.getName().startsWith(SET_PREFIX) && 1 == m.getParameterCount();
+    }
+
+    private boolean isPropertyMethod(Method m) {
+        return isGetter(m) || isSetter(m);
+    }
+
+    private boolean isGetter(Method m) {
+        return (m.getName().startsWith(GET_PREFIX) || m.getName().startsWith(IS_PREFIX)) && 0 == m.getParameterCount();
     }
 
     private void parseIfaceMethodAnnotations(Class<?> ifc, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
@@ -140,117 +163,21 @@ class ClassParser {
         }
     }
 
-    private Property registerMethod(String propertyName, Method method, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        Property property = classProperties.computeIfAbsent(propertyName, n -> new Property(n, classElement));
-        if (!isSetter(method)) {
-            property.setGetter(method);
-        } else {
-            property.setSetter(method);
+    private Property mergeProperty(Property current, PropertyModel parentProp, JsonbAnnotatedElement<Class<?>> classElement) {
+        Field field = null != current.getField() ? current.getField() : parentProp.getPropagation().getField();
+        Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(), parentProp.getPropagation().getGetter());
+        Method setter = selectMostSpecificNonDefaultMethod(current.getSetter(), parentProp.getPropagation().getSetter());
+        Property merged = new Property(parentProp.getPropertyName(), classElement);
+        if (null != field) {
+            merged.setField(field);
         }
-        return property;
-    }
-
-    private void parseMethods(Class<?> clazz, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        Method[] declaredMethods = AccessController.doPrivileged((PrivilegedAction<Method[]>) clazz::getDeclaredMethods);
-        for (Method method : declaredMethods) {
-            String name = method.getName();
-            //isBridge method filters out methods inherited from interfaces
-            if (!isPropertyMethod(method) || method.isBridge()) {
-                continue;
-            }
-            final String propertyName = toPropertyMethod(name);
-            Property property = registerMethod(propertyName, method, classElement, classProperties);
+        if (null != getter) {
+            merged.setGetter(getter);
         }
-    }
-
-    private boolean isGetter(Method m) {
-        return (m.getName().startsWith(GET_PREFIX) || m.getName().startsWith(IS_PREFIX)) && 0 == m.getParameterCount();
-    }
-
-    private boolean isSetter(Method m) {
-        return m.getName().startsWith(SET_PREFIX) && 1 == m.getParameterCount();
-    }
-
-    private String toPropertyMethod(String name) {
-        return lowerFirstLetter(name.substring(name.startsWith(IS_PREFIX) ? 2 : 3, name.length()));
-    }
-
-    private String lowerFirstLetter(String name) {
-        Objects.requireNonNull(name);
-        if (0 == name.length()) {
-            //methods named get() or set()
-            return name;
+        if (null != setter) {
+            merged.setSetter(setter);
         }
-        if (1 < name.length() && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(name.charAt(0))) {
-            return name;
-        }
-        char[] chars = name.toCharArray();
-        chars[0] = Character.toLowerCase(chars[0]);
-        return new String(chars);
-    }
-
-    private boolean isPropertyMethod(Method m) {
-        return isGetter(m) || isSetter(m);
-    }
-
-    private void parseFields(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        Field[] declaredFields = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> classElement.getElement().getDeclaredFields());
-        for (Field field : declaredFields) {
-            final String name = field.getName();
-            if (field.isSynthetic()) {
-                continue;
-            }
-            final Property property = new Property(name, classElement);
-            property.setField(field);
-            classProperties.put(name, property);
-        }
-    }
-
-    private void checkPropertyNameClash(List<PropertyModel> collectedProperties, Class cls) {
-        final List<PropertyModel> checkedProperties = new ArrayList<>();
-        for (PropertyModel collectedPropertyModel : collectedProperties) {
-            for (PropertyModel checkedPropertyModel : checkedProperties) {
-                if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName()) && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) || (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName())) && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH, checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(), cls.getName()));
-                }
-            }
-            checkedProperties.add(collectedPropertyModel);
-        }
-    }
-
-    /**
-     * Merges current class properties with parent class properties.
-     * If javabean property is declared in more than one inheritance levels,
-     * merge field, getters and setters of that property.
-     * <p>
-     * For example BaseClass contains field foo and getter getFoo. In BaseExtensions there is a setter setFoo.
-     * All three will be merged for BaseExtension.
-     * <p>
-     * Such property is sorted based on where its getter or field is located.
-     */
-    private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
-        List<PropertyModel> sortedProperties = new ArrayList<>();
-        //Pull properties from parent
-        if (null != classModel.getParentClassModel()) {
-            for (PropertyModel parentProp : classModel.getParentClassModel().getSortedProperties()) {
-                final Property current = classProperties.get(parentProp.getPropertyName());
-                //don't replace overridden properties
-                if (null != current) {
-                    //merge
-                    final Property merged = mergeProperty(current, parentProp, classElement);
-                    ReflectionPropagation propagation = new ReflectionPropagation(current, classModel.getClassCustomization().getPropertyVisibilityStrategy());
-                    if (!propagation.isReadable()) {
-                        sortedProperties.add(new PropertyModel(classModel, merged, jsonbContext));
-                        classProperties.remove(current.getName());
-                    } else {
-                        classProperties.replace(current.getName(), merged);
-                    }
-                } else {
-                    sortedProperties.add(parentProp);
-                }
-            }
-        }
-        return sortedProperties;
+        return merged;
     }
 
     /**
@@ -277,20 +204,94 @@ class ClassParser {
         return (null != current ? (null != parent && current.isDefault() && !parent.isDefault() ? parent : current) : parent);
     }
 
-    private Property mergeProperty(Property current, PropertyModel parentProp, JsonbAnnotatedElement<Class<?>> classElement) {
-        Field field = null != current.getField() ? current.getField() : parentProp.getPropagation().getField();
-        Method getter = selectMostSpecificNonDefaultMethod(current.getGetter(), parentProp.getPropagation().getGetter());
-        Method setter = selectMostSpecificNonDefaultMethod(current.getSetter(), parentProp.getPropagation().getSetter());
-        Property merged = new Property(parentProp.getPropertyName(), classElement);
-        if (null != field) {
-            merged.setField(field);
+    private void parseFields(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        Field[] declaredFields = AccessController.doPrivileged((PrivilegedAction<Field[]>) () -> classElement.getElement().getDeclaredFields());
+        for (Field field : declaredFields) {
+            final String name = field.getName();
+            if (field.isSynthetic()) {
+                continue;
+            }
+            final Property property = new Property(name, classElement);
+            property.setField(field);
+            classProperties.put(name, property);
         }
-        if (null != getter) {
-            merged.setGetter(getter);
-        }
-        if (null != setter) {
-            merged.setSetter(setter);
-        }
-        return merged;
     }
+
+    private String toPropertyMethod(String name) {
+        return lowerFirstLetter(name.substring(name.startsWith(IS_PREFIX) ? 2 : 3, name.length()));
+    }
+
+    ClassParser(JsonbRuntimeContext jsonbContext) {
+        this.jsonbContext = jsonbContext;
+    }
+
+    private void parseMethods(Class<?> clazz, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        Method[] declaredMethods = AccessController.doPrivileged((PrivilegedAction<Method[]>) clazz::getDeclaredMethods);
+        for (Method method : declaredMethods) {
+            String name = method.getName();
+            //isBridge method filters out methods inherited from interfaces
+            if (!isPropertyMethod(method) || method.isBridge()) {
+                continue;
+            }
+            final String propertyName = toPropertyMethod(name);
+            Property property = registerMethod(propertyName, method, classElement, classProperties);
+        }
+    }
+
+    private void parseClassAndInterfaceMethods(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+        Class<?> concreteClass = classElement.getElement();
+        parseMethods(concreteClass, classElement, classProperties);
+        for (Class<?> ifc : jsonbContext.getAnnotationIntrospector().collectInterfaces(concreteClass)) {
+            parseIfaceMethodAnnotations(ifc, classElement, classProperties);
+        }
+    }
+
+    /**
+     * Parse class fields and getters setters. Merge to java bean like properties.
+     */
+    public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
+        final Map<String, Property> classProperties = new HashMap<>();
+        parseFields(classElement, classProperties);
+        parseClassAndInterfaceMethods(classElement, classProperties);
+        //add sorted properties from parent, if they are not overridden in current class
+        //parent properties are by default first by alphabet, than properties from a subclass
+        final List<PropertyModel> sortedParentProperties = getSortedParentProperties(classModel, classElement, classProperties);
+        List<PropertyModel> classPropertyModels = classProperties.values().stream().map(property -> new PropertyModel(classModel, property, jsonbContext)).collect(Collectors.toList());
+        //check for collision on same property read name
+        List<PropertyModel> unsortedMerged = new ArrayList<>();
+        unsortedMerged.addAll(sortedParentProperties);
+        unsortedMerged.addAll(classPropertyModels);
+        checkPropertyNameClash(unsortedMerged, classModel.getType());
+        List<PropertyModel> sortedPropertyModels = new ArrayList<>();
+        sortedPropertyModels.addAll(sortedParentProperties);
+        sortedPropertyModels.addAll(jsonbContext.getConfigProperties().getPropertyOrdering().orderProperties(classPropertyModels, classModel));
+        //reference property to creator parameter by name to merge configuration in runtime
+        JsonbCreator creator = classModel.getClassCustomization().getCreator();
+        if (null != creator) {
+            sortedPropertyModels.forEach((propertyModel -> {
+                for (CreatorModel creatorModel : creator.getParams()) {
+                    if (creatorModel.getName().equals(propertyModel.getPropertyName())) {
+                        CreatorCustomization customization = (CreatorCustomization) creatorModel.getCustomization();
+                        customization.setPropertyModel(propertyModel);
+                    }
+                }
+            }));
+        }
+        classModel.setProperties(sortedPropertyModels);
+    }
+
+    private String lowerFirstLetter(String name) {
+        Objects.requireNonNull(name);
+        if (0 == name.length()) {
+            //methods named get() or set()
+            return name;
+        }
+        if (1 < name.length() && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(name.charAt(0))) {
+            return name;
+        }
+        char[] chars = name.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
+        return new String(chars);
+    }
+
 }

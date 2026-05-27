@@ -34,14 +34,27 @@ public class JsonbCreator {
     private final CreatorModel[] params;
 
     /**
-     * Creates a new instance.
+     * Find creator parameter by name.
      *
-     * @param executable Executable.
-     * @param creatorModels Parameters.
+     * @param paramName parameter name as it appear in json document.
+     * @return Creator parameter.
      */
-    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
-        this.executable = executable;
-        this.params = creatorModels;
+    public CreatorModel findByName(String paramName) {
+        for (CreatorModel param : params) {
+            if (param.getName().equals(paramName)) {
+                return param;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorModel[] getParams() {
+        return params;
     }
 
     /**
@@ -76,26 +89,14 @@ public class JsonbCreator {
     }
 
     /**
-     * Find creator parameter by name.
+     * Creates a new instance.
      *
-     * @param paramName parameter name as it appear in json document.
-     * @return Creator parameter.
+     * @param executable Executable.
+     * @param creatorModels Parameters.
      */
-    public CreatorModel findByName(String paramName) {
-        for (CreatorModel param : params) {
-            if (param.getName().equals(paramName)) {
-                return param;
-            }
-        }
-        return null;
+    public JsonbCreator(Executable executable, CreatorModel[] creatorModels) {
+        this.executable = executable;
+        this.params = creatorModels;
     }
 
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorModel[] getParams() {
-        return params;
-    }
 }

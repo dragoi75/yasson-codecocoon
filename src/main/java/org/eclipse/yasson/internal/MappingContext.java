@@ -44,12 +44,6 @@ public class MappingContext {
 
         private JsonbRuntimeContext jsonbContext;
 
-        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbRuntimeContext jsonbContext) {
-            this.parentClassModel = parentClassModel;
-            this.classParser = classParser;
-            this.jsonbContext = jsonbContext;
-        }
-
         @Override
         public ClassModel apply(Class aClass) {
             final JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
@@ -58,6 +52,13 @@ public class MappingContext {
             classParser.parseProperties(newClassModel, clsElement);
             return newClassModel;
         }
+
+        public ParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbRuntimeContext jsonbContext) {
+            this.parentClassModel = parentClassModel;
+            this.classParser = classParser;
+            this.jsonbContext = jsonbContext;
+        }
+
     }
 
     private final JsonbRuntimeContext jsonbContext;
@@ -67,6 +68,52 @@ public class MappingContext {
     private final ConcurrentHashMap<Class<?>, ContainerSerializerProvider> serializers = new ConcurrentHashMap<>();
 
     private final ClassParser classParser;
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
+     * Provided class class model is returned first by iterator.
+     * Following class models are sorted by hierarchy from provided class up to the Object.class.
+     *
+     * @param clazz class to start iteration of class models from
+     * @return iterator of class models
+     */
+    public Iterator<ClassModel> classModelIterator(final Class<?> clazz) {
+        return new Iterator<ClassModel>() {
+
+            private Class<?> next = clazz;
+
+            @Override
+            public boolean hasNext() {
+                return Object.class != next;
+            }
+
+            @Override
+            public ClassModel next() {
+                final ClassModel result = classes.get(next);
+                next = next.getSuperclass();
+                return result;
+            }
+        };
+    }
 
     /**
      * Create mapping context which is scoped to jsonb runtime.
@@ -113,32 +160,6 @@ public class MappingContext {
     }
 
     /**
-     * Provided class class model is returned first by iterator.
-     * Following class models are sorted by hierarchy from provided class up to the Object.class.
-     *
-     * @param clazz class to start iteration of class models from
-     * @return iterator of class models
-     */
-    public Iterator<ClassModel> classModelIterator(final Class<?> clazz) {
-        return new Iterator<ClassModel>() {
-
-            private Class<?> next = clazz;
-
-            @Override
-            public boolean hasNext() {
-                return Object.class != next;
-            }
-
-            @Override
-            public ClassModel next() {
-                final ClassModel result = classes.get(next);
-                next = next.getSuperclass();
-                return result;
-            }
-        };
-    }
-
-    /**
      * Search for class model, without parsing if not found.
      *
      * @param clazz Class to search by or parse, not null.
@@ -148,23 +169,4 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

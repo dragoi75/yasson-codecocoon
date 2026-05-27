@@ -36,69 +36,6 @@ public class ClassCustomization extends CustomizationBase {
 
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
-    /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
-     */
-    ClassCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
-        this.creator = builder.getCreator();
-        this.propertyOrder = builder.getPropertyOrder();
-        this.numberFormatter = builder.getNumberFormatter();
-        this.dateTimeFormatter = builder.getDateFormatter();
-        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
-    }
-
-    /**
-     * Copy constructor.
-     *
-     * @param other other customization instance
-     */
-    public ClassCustomization(ClassCustomization other) {
-        super(other);
-        this.creator = other.getCreator();
-        this.propertyOrder = other.getPropertyOrder();
-        this.numberFormatter = other.getSerializeNumberFormatter();
-        this.dateTimeFormatter = other.getSerializeDateFormatter();
-        this.propertyVisibilityStrategy = other.getPropertyVisibilityStrategy();
-    }
-
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
-
-    /**
-     * Sets sorted properties.
-     *
-     * @param propertyOrder sorted names of properties
-     */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
-    }
-
-    /**
-     * Property visibility strategy for this class model.
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
     @Override
     public JsonbNumberFormatter getSerializeNumberFormatter() {
         return numberFormatter;
@@ -114,9 +51,72 @@ public class ClassCustomization extends CustomizationBase {
         return dateTimeFormatter;
     }
 
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
+    }
+
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return creator;
+    }
+
     @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
         return dateTimeFormatter;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    ClassCustomization(ClassCustomizationBuilder builder) {
+        super(builder);
+        this.creator = builder.getCreator();
+        this.propertyOrder = builder.getPropertyOrder();
+        this.numberFormatter = builder.getNumberFormatter();
+        this.dateTimeFormatter = builder.getDateFormatter();
+        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
+    }
+
+    /**
+     * Property visibility strategy for this class model.
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    /**
+     * Sets sorted properties.
+     *
+     * @param propertyOrder sorted names of properties
+     */
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other other customization instance
+     */
+    public ClassCustomization(ClassCustomization other) {
+        super(other);
+        this.creator = other.getCreator();
+        this.propertyOrder = other.getPropertyOrder();
+        this.numberFormatter = other.getSerializeNumberFormatter();
+        this.dateTimeFormatter = other.getSerializeDateFormatter();
+        this.propertyVisibilityStrategy = other.getPropertyVisibilityStrategy();
     }
 
 }

@@ -30,6 +30,15 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T[] getInstance(JsonUnmarshaller unmarshaller) {
+        if (null == arrayInstance || items.size() != arrayInstance.length) {
+            arrayInstance = (T[]) Array.newInstance(componentClass, items.size());
+        }
+        return items.toArray(arrayInstance);
+    }
+
     protected ObjectArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
     }
@@ -39,12 +48,4 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
         return items;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public T[] getInstance(JsonUnmarshaller unmarshaller) {
-        if (null == arrayInstance || items.size() != arrayInstance.length) {
-            arrayInstance = (T[]) Array.newInstance(componentClass, items.size());
-        }
-        return items.toArray(arrayInstance);
-    }
 }

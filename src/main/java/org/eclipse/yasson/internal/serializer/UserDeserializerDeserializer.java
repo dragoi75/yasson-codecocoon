@@ -33,6 +33,19 @@ public class UserDeserializerDeserializer<T> extends BaseContainerDeserializer<T
     private T deserializerResult;
 
     /**
+     * Don't move anywhere in case of user deserializer.
+     */
+    @Override
+    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
+        return parser.getCurrentLevel();
+    }
+
+    @Override
+    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
+    }
+
+    /**
      * Create instance of current item with its builder.
      * Contains user provided component for custom deserialization.
      * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
@@ -44,17 +57,6 @@ public class UserDeserializerDeserializer<T> extends BaseContainerDeserializer<T
     protected UserDeserializerDeserializer(JsonDeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
         super(builder);
         this.deserializerBinding = deserializerBinding;
-    }
-
-    @Override
-    public void addResult(Object result) {
-        //ignore internal deserialize() call in custom deserializer
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return deserializerResult;
     }
 
     @SuppressWarnings("unchecked")
@@ -72,15 +74,14 @@ public class UserDeserializerDeserializer<T> extends BaseContainerDeserializer<T
     }
 
     @Override
-    protected void deserializeElement(JsonParser parser, JsonUnmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
+    @SuppressWarnings("unchecked")
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return deserializerResult;
     }
 
-    /**
-     * Don't move anywhere in case of user deserializer.
-     */
     @Override
-    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator parser) {
-        return parser.getCurrentLevel();
+    public void addResult(Object result) {
+        //ignore internal deserialize() call in custom deserializer
     }
+
 }

@@ -38,6 +38,33 @@ class CollectionInstanceDeserializer<T extends Collection<?>> extends BaseContai
 
     private T elementValue;
 
+    @Override
+    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator jsonReader) {
+        jsonReader.moveTo(JsonParser.Event.START_ARRAY);
+        return jsonReader.getCurrentLevel();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void addElement(T newElement) {
+        ((Collection<T>) elementValue).add(newElement);
+    }
+
+    @Override
+    protected void deserializeElement(JsonParser jsonReader, JsonUnmarshaller unmarshalEnv) {
+        final JsonbDeserializer<?> elementHandler = createCollectionOrMapItem(elementType, unmarshalEnv.getJsonbContext());
+        addResult(elementHandler.deserialize(jsonReader, unmarshalEnv, elementType));
+    }
+
+    @Override
+    public void addResult(Object outcome) {
+        addElement(convertNullToEmptyOptional(elementType, outcome));
+    }
+
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return elementValue;
+    }
+
     /**
      * @param deserializerFactory {@link JsonDeserializerBuilder ) used to build this instance
      */
@@ -81,30 +108,4 @@ class CollectionInstanceDeserializer<T extends Collection<?>> extends BaseContai
         return null;
     }
 
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return elementValue;
-    }
-
-    @Override
-    public void addResult(Object outcome) {
-        addElement(convertNullToEmptyOptional(elementType, outcome));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void addElement(T newElement) {
-        ((Collection<T>) elementValue).add(newElement);
-    }
-
-    @Override
-    protected void deserializeElement(JsonParser jsonReader, JsonUnmarshaller unmarshalEnv) {
-        final JsonbDeserializer<?> elementHandler = createCollectionOrMapItem(elementType, unmarshalEnv.getJsonbContext());
-        addResult(elementHandler.deserialize(jsonReader, unmarshalEnv, elementType));
-    }
-
-    @Override
-    protected JsonbRiEventParser.LevelParseContext moveToStart(JsonbNavigator jsonReader) {
-        jsonReader.moveTo(JsonParser.Event.START_ARRAY);
-        return jsonReader.getCurrentLevel();
-    }
 }

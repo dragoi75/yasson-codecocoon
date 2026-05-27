@@ -44,28 +44,6 @@ public class MapDeserializer<T extends Map<?,?>> extends BaseContainerDeserializ
 
     private final T instance;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link JsonDeserializerBuilder} used to build this instance
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected MapDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ?
-                ReflectionTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
-                : Object.class;
-
-        this.instance = createInstance(builder);
-    }
-
-    @SuppressWarnings("unchecked")
-    private T createInstance(JsonDeserializerBuilder builder) {
-        Class<?> rawType = ReflectionTypeUtils.getRawType(getRuntimeType());
-        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
-                : (T) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(rawType);
-    }
-
     private Map getMapImpl(Class ifcType, JsonDeserializerBuilder builder) {
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
@@ -75,16 +53,6 @@ public class MapDeserializer<T extends Map<?,?>> extends BaseContainerDeserializ
                     new TreeMap<>();
         }
         return new HashMap<>();
-    }
-
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void addResult(Object result) {
-        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -103,4 +71,37 @@ public class MapDeserializer<T extends Map<?,?>> extends BaseContainerDeserializ
         parser.moveTo(JsonParser.Event.START_OBJECT);
         return parser.getCurrentLevel();
     }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link JsonDeserializerBuilder} used to build this instance
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    protected MapDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+        mapValueRuntimeType = getRuntimeType() instanceof ParameterizedType ?
+                ReflectionTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[1])
+                : Object.class;
+
+        this.instance = createInstance(builder);
+    }
+
+    @Override
+    public void addResult(Object result) {
+        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
+    }
+
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return instance;
+    }
+
+    @SuppressWarnings("unchecked")
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<?> rawType = ReflectionTypeUtils.getRawType(getRuntimeType());
+        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
+                : (T) builder.getJsonbContext().getInstanceCreator().getOrCreateInstance(rawType);
+    }
+
 }

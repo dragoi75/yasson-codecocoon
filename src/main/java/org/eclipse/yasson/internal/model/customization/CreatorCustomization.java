@@ -15,15 +15,9 @@ public class CreatorCustomization extends CustomizationBase {
 
     private PropertyModel propertyModel;
 
-    public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
-        super(customization);
-        this.numberFormatter = numberFormatter;
-        this.dateFormatter = dateFormatter;
-    }
-
     @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
     }
 
     @Override
@@ -39,11 +33,6 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
     public JsonbDateFormatter getDeserializeDateFormatter() {
         if (null == dateFormatter) {
             if (null != propertyModel) {
@@ -56,8 +45,8 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     /**
@@ -67,4 +56,16 @@ public class CreatorCustomization extends CustomizationBase {
     public void setPropertyModel(PropertyModel propertyModel) {
         this.propertyModel = propertyModel;
     }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
+        super(customization);
+        this.numberFormatter = numberFormatter;
+        this.dateFormatter = dateFormatter;
+    }
+
 }

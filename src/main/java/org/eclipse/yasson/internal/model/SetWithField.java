@@ -13,6 +13,11 @@ public class SetWithField extends SetValueCommand {
 
     private final Field field;
 
+    @Override
+    public void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException {
+        field.set(object, value);
+    }
+
     /**
      * Create instance.
      *
@@ -23,8 +28,4 @@ public class SetWithField extends SetValueCommand {
         this.field = field;
     }
 
-    @Override
-    public void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException {
-        field.set(object, value);
-    }
 }

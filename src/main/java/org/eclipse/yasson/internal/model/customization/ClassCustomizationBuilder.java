@@ -45,6 +45,23 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     private PropertyVisibilityStrategy propertyVisibilityStrategy;
 
     /**
+     * Gets custom constructor or method for user instantiation.
+     *
+     * @return Custom creator.
+     */
+    public JsonbCreator getCreator() {
+        return jsonbCreator;
+    }
+
+    /**
+     * Sets custom property visibility strategy.
+     * @param propertyVisibilityStrategy strategy
+     */
+    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+    }
+
+    /**
      * Creates a customization for class properties.
      *
      * @return A new instance of {@link PropertyCustomization}
@@ -60,43 +77,6 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      */
     public JsonbNumberFormatter getNumberFormatter() {
         return numberFormatter;
-    }
-
-    /**
-     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
-     *
-     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
-     *                        formatter.
-     */
-    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
-        this.numberFormatter = numberFormatter;
-    }
-
-    /**
-     * Gets a date format for formatting dates.
-     *
-     * @return Date format.
-     */
-    public JsonbDateFormatter getDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
-     * Sets date format for formatting dates.
-     *
-     * @param dateFormatter Date format.
-     */
-    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
-        this.dateFormatter = dateFormatter;
-    }
-
-    /**
-     * Gets custom constructor or method for user instantiation.
-     *
-     * @return Custom creator.
-     */
-    public JsonbCreator getCreator() {
-        return jsonbCreator;
     }
 
     /**
@@ -117,10 +97,31 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Sets custom property visibility strategy.
-     * @param propertyVisibilityStrategy strategy
+     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
+     *
+     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
+     *                        formatter.
      */
-    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
+        this.numberFormatter = numberFormatter;
     }
+
+    /**
+     * Sets date format for formatting dates.
+     *
+     * @param dateFormatter Date format.
+     */
+    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
+        this.dateFormatter = dateFormatter;
+    }
+
+    /**
+     * Gets a date format for formatting dates.
+     *
+     * @return Date format.
+     */
+    public JsonbDateFormatter getDateFormatter() {
+        return dateFormatter;
+    }
+
 }

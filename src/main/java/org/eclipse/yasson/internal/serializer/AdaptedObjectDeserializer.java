@@ -40,33 +40,9 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
 
     private final BaseContainerDeserializer<?> wrapperItem;
 
-    /**
-     * Creates decoration instance wrapping real adapted object item.
-     *
-     * @param adapterInfo components type info
-     * @param wrapperItem wrapper item to get instance from
-     */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, BaseContainerDeserializer<?> wrapperItem) {
-        this.adapterInfo = adapterInfo;
-        this.wrapperItem = wrapperItem;
-    }
-
     @Override
     public ClassModel getClassModel() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapperItem;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        if (adaptedTypeDeserializer instanceof BaseContainerDeserializer) {
-            return ((BaseContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
-        }
-        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }
 
     /**
@@ -89,4 +65,29 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItem<T>, JsonbDes
             throw new JsonbException(Messages.getMessage(MessageKeys.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         }
     }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapperItem;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        if (adaptedTypeDeserializer instanceof BaseContainerDeserializer) {
+            return ((BaseContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
+        }
+        throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
+    }
+
+    /**
+     * Creates decoration instance wrapping real adapted object item.
+     *
+     * @param adapterInfo components type info
+     * @param wrapperItem wrapper item to get instance from
+     */
+    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, BaseContainerDeserializer<?> wrapperItem) {
+        this.adapterInfo = adapterInfo;
+        this.wrapperItem = wrapperItem;
+    }
+
 }

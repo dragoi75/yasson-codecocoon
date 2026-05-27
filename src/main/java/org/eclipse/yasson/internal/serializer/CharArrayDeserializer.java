@@ -27,15 +27,6 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
 
     private final List<Character> items = new ArrayList<>();
 
-    protected CharArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public char[] getInstance(JsonUnmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +38,14 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
         }
         return charArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    protected CharArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }
