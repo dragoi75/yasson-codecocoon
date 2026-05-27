@@ -37,89 +37,11 @@ public class Marshaller extends ProcessingContext implements SerializationContex
 
     private final Type runtimeType;
 
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext    Current context.
-     * @param rootRuntimeType Type of root object.
-     */
-    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
-        super(jsonbContext);
-        this.runtimeType = rootRuntimeType;
-    }
-
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbContext Current context.
-     */
-    public Marshaller(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
-        this.runtimeType = null;
-    }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
-     * @param close         if generator should be closed
-     */
-    public void marshall(Object object, JsonGenerator jsonGenerator, boolean close) {
-        try {
-            serializeRoot(object, jsonGenerator);
-        } catch (JsonbException e) {
-            LOGGER.severe(e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
-        } finally {
-            try {
-                if (!close) {
-                    jsonGenerator.flush();
-                } else {
-                    jsonGenerator.close();
-                }
-            } catch (JsonGenerationException jge) {
-                LOGGER.severe(jge.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Closes the generator on completion.
-     *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
-     */
-    public void marshall(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, true);
-    }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Leaves generator open for further interaction after completion.
-     *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
-     */
-    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, false);
-    }
-
     @Override
     public <T> void serialize(String key, T object, JsonGenerator generator) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(object);
         generator.writeKey(key);
-        serializeRoot(object, generator);
-    }
-
-    @Override
-    public <T> void serialize(T object, JsonGenerator generator) {
-        Objects.requireNonNull(object);
         serializeRoot(object, generator);
     }
 
@@ -153,4 +75,83 @@ public class Marshaller extends ProcessingContext implements SerializationContex
         serializerBuilder.withCustomization(classModel.getClassCustomization());
         return serializerBuilder.build();
     }
+
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbContext    Current context.
+     * @param rootRuntimeType Type of root object.
+     */
+    public Marshaller(JsonbRuntimeContext jsonbContext, Type rootRuntimeType) {
+        super(jsonbContext);
+        this.runtimeType = rootRuntimeType;
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     * @param close         if generator should be closed
+     */
+    public void marshall(Object object, JsonGenerator jsonGenerator, boolean close) {
+        try {
+            serializeRoot(object, jsonGenerator);
+        } catch (JsonbException e) {
+            LOGGER.severe(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR, e.getMessage()), e);
+        } finally {
+            try {
+                if (!close) {
+                    jsonGenerator.flush();
+                } else {
+                    jsonGenerator.close();
+                }
+            } catch (JsonGenerationException jge) {
+                LOGGER.severe(jge.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public <T> void serialize(T object, JsonGenerator generator) {
+        Objects.requireNonNull(object);
+        serializeRoot(object, generator);
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Leaves generator open for further interaction after completion.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     */
+    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, false);
+    }
+
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbContext Current context.
+     */
+    public Marshaller(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
+        this.runtimeType = null;
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Closes the generator on completion.
+     *
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
+     */
+    public void marshall(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, true);
+    }
+
 }

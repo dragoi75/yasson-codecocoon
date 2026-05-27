@@ -57,13 +57,102 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     private final JsonbRuntimeContext jsonbContext;
 
     /**
-     * Crates a builder.
+     * Runtime type for this item.
      *
-     * @param jsonbContext Not null.
+     * @param runtimeType runtime type
+     * @return Builder instance for call chaining.
      */
-    public AbstractSerializerBuilder(JsonbRuntimeContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
+    @SuppressWarnings("unchecked")
+    public T withRuntimeType(Type runtimeType) {
+        this.runtimeType = runtimeType;
+        return (T) this;
+    }
+
+    /**
+     * Class model for this item.
+     *
+     * @param classModel class model
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T withClassModel(ClassModel classModel) {
+        this.classModel = classModel;
+        return (T) this;
+    }
+
+    /**
+     * Type customization.
+     *
+     * @return customization
+     */
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
+     * Generic type of the item.
+     *
+     * @return generic type
+     */
+    public Type getGenericType() {
+        return genericType;
+    }
+
+    /**
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     *
+     * @param type type of instance not null
+     * @return builder instance for call chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T withType(Type type) {
+        this.genericType = type;
+        return (T) this;
+    }
+
+    /**
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or
+     * {@link java.lang.reflect.WildcardType}.
+     * Otherwise provided type in type field, or type of field model.
+     *
+     * @return runtime type
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    /**
+     * Model of a class representing current item and instance (if any).
+     * Known collection classes doesn't need such a model.
+     *
+     * @return model of a class
+     */
+    public ClassModel getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Gets or load class model for a class an its superclasses.
+     *
+     * @param rawType Class to get model for.
+     * @return Class model.
+     */
+    protected ClassModel getClassModel(Class<?> rawType) {
+        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
+        if (null == classModel) {
+            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
+        }
+        return classModel;
     }
 
     /**
@@ -91,41 +180,13 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Class model for this item.
+     * Crates a builder.
      *
-     * @param classModel class model
-     * @return Builder instance for call chaining.
+     * @param jsonbContext Not null.
      */
-    @SuppressWarnings("unchecked")
-    public T withClassModel(ClassModel classModel) {
-        this.classModel = classModel;
-        return (T) this;
-    }
-
-    /**
-     * Runtime type for this item.
-     *
-     * @param runtimeType runtime type
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
-        return (T) this;
-    }
-
-    /**
-     * Gets or load class model for a class an its superclasses.
-     *
-     * @param rawType Class to get model for.
-     * @return Class model.
-     */
-    protected ClassModel getClassModel(Class<?> rawType) {
-        ClassModel classModel = jsonbContext.getMappingContext().getClassModel(rawType);
-        if (null == classModel) {
-            classModel = jsonbContext.getMappingContext().getOrCreateClassModel(rawType);
-        }
-        return classModel;
+    public AbstractSerializerBuilder(JsonbRuntimeContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
     }
 
     /**
@@ -137,64 +198,4 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
         return wrapper;
     }
 
-    /**
-     * Model of a class representing current item and instance (if any).
-     * Known collection classes doesn't need such a model.
-     *
-     * @return model of a class
-     */
-    public ClassModel getClassModel() {
-        return classModel;
-    }
-
-    /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or
-     * {@link java.lang.reflect.WildcardType}.
-     * Otherwise provided type in type field, or type of field model.
-     *
-     * @return runtime type
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
-
-    /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
-     *
-     * @param type type of instance not null
-     * @return builder instance for call chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T withType(Type type) {
-        this.genericType = type;
-        return (T) this;
-    }
-
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    /**
-     * Type customization.
-     *
-     * @return customization
-     */
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    /**
-     * Generic type of the item.
-     *
-     * @return generic type
-     */
-    public Type getGenericType() {
-        return genericType;
-    }
 }

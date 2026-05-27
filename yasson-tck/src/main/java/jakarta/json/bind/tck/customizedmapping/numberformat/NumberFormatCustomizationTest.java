@@ -46,14 +46,63 @@ import jakarta.json.bind.tck.customizedmapping.numberformat.model.customized.Pac
 @RunWith(Arquillian.class)
 public class NumberFormatCustomizationTest {
 
-    @Deployment
-    public static WebArchive createTestArchive() {
-        return ShrinkWrap.create(WebArchive.class).addPackages(true, MethodHandles.lookup().lookupClass().getPackage().getName());
-    }
-
     private static final String FRENCH_NUMBER = "\"123\\u00a0456,789\"";
 
     private final Jsonb jsonb = JsonbBuilder.create();
+
+    /*
+     * @testName: testNumberFormatPackageTypeOverride
+     *
+     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
+     *
+     * @test_Strategy: Assert that package annotation with JsonbNumberFormat is
+     * correctly overridden by type annotation with JsonbNumberFormat
+     */
+    @Test
+    public void testNumberFormatPackageTypeOverride() {
+        String jsonString = jsonb.toJson(new PackageCustomizedTypeOverriddenDoubleContainer() {
+
+            {
+                setInstance(123456.789);
+            }
+        });
+        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123,456.79\"\\s*\\}")) {
+            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during marshalling using JsonbNumberFormat annotation on type.");
+        }
+        PackageCustomizedTypeOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123,456.789\" }", PackageCustomizedTypeOverriddenDoubleContainer.class);
+        if (123456.789 != unmarshalledObject.getInstance()) {
+            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during unmarshalling using JsonbNumberFormat annotation on type.");
+        }
+        // passed
+        return;
+    }
+
+    /*
+     * @testName: testNumberFormatTypeFieldOverride
+     *
+     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
+     *
+     * @test_Strategy: Assert that type annotation with JsonbNumberFormat is
+     * correctly overridden by field annotation with JsonbNumberFormat
+     */
+    @Test
+    public void testNumberFormatTypeFieldOverride() {
+        String jsonString = jsonb.toJson(new TypeCustomizedFieldOverriddenDoubleContainer() {
+
+            {
+                setInstance(123456.789);
+            }
+        });
+        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123,456.8\"\\s*\\}")) {
+            fail("Failed to correctly customize number format during marshalling using JsonbNumberFormat annotation on type.");
+        }
+        TypeCustomizedFieldOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123,456.789\" }", TypeCustomizedFieldOverriddenDoubleContainer.class);
+        if (123456.789 != unmarshalledObject.getInstance()) {
+            fail("Failed to correctly customize number format during unmarshalling using JsonbNumberFormat annotation on type.");
+        }
+        // passed
+        return;
+    }
 
     /*
      * @testName: testNumberFormatPackage
@@ -107,6 +156,39 @@ public class NumberFormatCustomizationTest {
         }
         // passed
         return;
+    }
+
+    /*
+     * @testName: testNumberFormatPackageTypeOverrideFieldOverride
+     *
+     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
+     *
+     * @test_Strategy: Assert that package and type annotation with
+     * JsonbNumberFormat is correctly overridden by field annotation with
+     * JsonbNumberFormat
+     */
+    @Test
+    public void testNumberFormatPackageTypeOverrideFieldOverride() {
+        String jsonString = jsonb.toJson(new PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer() {
+
+            {
+                setInstance(123456.789);
+            }
+        });
+        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123.456,789\"\\s*\\}")) {
+            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during marshalling using JsonbNumberFormat annotation on type.");
+        }
+        PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123.456,789\" }", PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer.class);
+        if (123456.789 != unmarshalledObject.getInstance()) {
+            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during unmarshalling using JsonbNumberFormat annotation on type.");
+        }
+        // passed
+        return;
+    }
+
+    @Deployment
+    public static WebArchive createTestArchive() {
+        return ShrinkWrap.create(WebArchive.class).addPackages(true, MethodHandles.lookup().lookupClass().getPackage().getName());
     }
 
     /*
@@ -165,85 +247,4 @@ public class NumberFormatCustomizationTest {
         return;
     }
 
-    /*
-     * @testName: testNumberFormatPackageTypeOverride
-     *
-     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
-     *
-     * @test_Strategy: Assert that package annotation with JsonbNumberFormat is
-     * correctly overridden by type annotation with JsonbNumberFormat
-     */
-    @Test
-    public void testNumberFormatPackageTypeOverride() {
-        String jsonString = jsonb.toJson(new PackageCustomizedTypeOverriddenDoubleContainer() {
-
-            {
-                setInstance(123456.789);
-            }
-        });
-        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123,456.79\"\\s*\\}")) {
-            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during marshalling using JsonbNumberFormat annotation on type.");
-        }
-        PackageCustomizedTypeOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123,456.789\" }", PackageCustomizedTypeOverriddenDoubleContainer.class);
-        if (123456.789 != unmarshalledObject.getInstance()) {
-            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during unmarshalling using JsonbNumberFormat annotation on type.");
-        }
-        // passed
-        return;
-    }
-
-    /*
-     * @testName: testNumberFormatTypeFieldOverride
-     *
-     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
-     *
-     * @test_Strategy: Assert that type annotation with JsonbNumberFormat is
-     * correctly overridden by field annotation with JsonbNumberFormat
-     */
-    @Test
-    public void testNumberFormatTypeFieldOverride() {
-        String jsonString = jsonb.toJson(new TypeCustomizedFieldOverriddenDoubleContainer() {
-
-            {
-                setInstance(123456.789);
-            }
-        });
-        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123,456.8\"\\s*\\}")) {
-            fail("Failed to correctly customize number format during marshalling using JsonbNumberFormat annotation on type.");
-        }
-        TypeCustomizedFieldOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123,456.789\" }", TypeCustomizedFieldOverriddenDoubleContainer.class);
-        if (123456.789 != unmarshalledObject.getInstance()) {
-            fail("Failed to correctly customize number format during unmarshalling using JsonbNumberFormat annotation on type.");
-        }
-        // passed
-        return;
-    }
-
-    /*
-     * @testName: testNumberFormatPackageTypeOverrideFieldOverride
-     *
-     * @assertion_ids: JSONB:SPEC:JSB-4.9-1; JSONB:SPEC:JSB-4.9-2
-     *
-     * @test_Strategy: Assert that package and type annotation with
-     * JsonbNumberFormat is correctly overridden by field annotation with
-     * JsonbNumberFormat
-     */
-    @Test
-    public void testNumberFormatPackageTypeOverrideFieldOverride() {
-        String jsonString = jsonb.toJson(new PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer() {
-
-            {
-                setInstance(123456.789);
-            }
-        });
-        if (!jsonString.matches("\\{\\s*\"instance\"\\s*:\\s*\"123.456,789\"\\s*\\}")) {
-            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during marshalling using JsonbNumberFormat annotation on type.");
-        }
-        PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer unmarshalledObject = jsonb.fromJson("{ \"instance\" : \"123.456,789\" }", PackageCustomizedTypeOverriddenFieldOverriddenDoubleContainer.class);
-        if (123456.789 != unmarshalledObject.getInstance()) {
-            fail("Failed to correctly override number format customization using JsonbNumberFormat annotation on package during unmarshalling using JsonbNumberFormat annotation on type.");
-        }
-        // passed
-        return;
-    }
 }

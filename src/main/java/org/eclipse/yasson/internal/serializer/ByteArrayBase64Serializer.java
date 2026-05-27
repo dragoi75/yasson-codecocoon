@@ -28,15 +28,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Customization model.
-     */
-    public ByteArrayBase64Serializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serialize(byte[] obj, JsonGenerator generator, Marshaller marshaller) {
         generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy())
@@ -54,4 +45,14 @@ public class ByteArrayBase64Serializer extends AbstractValueTypeSerializer<byte[
                                                          "Invalid strategy: " + strategy));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Customization model.
+     */
+    public ByteArrayBase64Serializer(Customization customization) {
+        super(customization);
+    }
+
 }

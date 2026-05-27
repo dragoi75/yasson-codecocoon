@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class CharArraySerializer extends AbstractArraySerializer<char[]> {
 
+    @Override
+    protected void serializeInternal(char[] obj, JsonGenerator generator, SerializationContext ctx) {
+        for (char c : obj) {
+            generator.write(Character.valueOf(c).toString());
+        }
+    }
+
     /**
      * Creates new instance of char array serializer.
      *
@@ -27,13 +34,6 @@ public class CharArraySerializer extends AbstractArraySerializer<char[]> {
      */
     protected CharArraySerializer(SerializerBuilder builder) {
         super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(char[] obj, JsonGenerator generator, SerializationContext ctx) {
-        for (char c : obj) {
-            generator.write(Character.valueOf(c).toString());
-        }
     }
 
 }

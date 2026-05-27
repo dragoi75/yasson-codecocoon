@@ -30,48 +30,6 @@ abstract class CustomizationBase implements Customization, ComponentSerializatio
     private final boolean nillable;
 
     /**
-     * Copies properties from builder an creates immutable instance.
-     *
-     * @param builder not null
-     */
-    CustomizationBase(CustomizationBuilder builder) {
-        this.nillable = builder.isNillable();
-        this.adapterBinding = builder.getAdapterInfo();
-        this.serializerBinding = builder.getSerializerBinding();
-        this.deserializerBinding = builder.getDeserializerBinding();
-    }
-
-    /**
-     * Copy constructor.
-     *
-     * @param other other customization instance
-     */
-    CustomizationBase(CustomizationBase other) {
-        this.nillable = other.isNillable();
-        this.adapterBinding = other.getSerializeAdapterBinding();
-        this.serializerBinding = other.getSerializerBinding();
-        this.deserializerBinding = other.getDeserializerBinding();
-    }
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    public AdapterBindingEntry getSerializeAdapterBinding() {
-        return adapterBinding;
-    }
-
-    @Override
-    public AdapterBindingEntry getDeserializeAdapterBinding() {
-        return adapterBinding;
-    }
-
-    /**
      * Serializer wrapper with resolved generic info.
      *
      * @return serializer wrapper
@@ -87,6 +45,48 @@ abstract class CustomizationBase implements Customization, ComponentSerializatio
      */
     public JsonbDeserializerBinding getDeserializerBinding() {
         return deserializerBinding;
+    }
+
+    @Override
+    public AdapterBindingEntry getDeserializeAdapterBinding() {
+        return adapterBinding;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other other customization instance
+     */
+    CustomizationBase(CustomizationBase other) {
+        this.nillable = other.isNillable();
+        this.adapterBinding = other.getSerializeAdapterBinding();
+        this.serializerBinding = other.getSerializerBinding();
+        this.deserializerBinding = other.getDeserializerBinding();
+    }
+
+    public AdapterBindingEntry getSerializeAdapterBinding() {
+        return adapterBinding;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    CustomizationBase(CustomizationBuilder builder) {
+        this.nillable = builder.isNillable();
+        this.adapterBinding = builder.getAdapterInfo();
+        this.serializerBinding = builder.getSerializerBinding();
+        this.deserializerBinding = builder.getDeserializerBinding();
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
     }
 
 }

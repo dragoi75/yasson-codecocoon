@@ -34,6 +34,27 @@ public class CalendarTypeDeserializer extends AbstractDateTimeDeserializer<Calen
 
     private final Calendar calendarTemplate;
 
+    @Override
+    protected Calendar parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = formatter.parse(jsonValue);
+        LocalTime time = parsed.query(TemporalQueries.localTime());
+        ZoneId zone = parsed.query(TemporalQueries.zone());
+        if (null == zone) {
+            zone = UTC;
+        }
+        if (null == time) {
+            time = ZERO_LOCAL_TIME;
+        }
+        ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
+        return GregorianCalendar.from(result);
+    }
+
+    @Override
+    protected Calendar parseDefault(String jsonValue, Locale locale) {
+        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
+        return parseWithFormatter(jsonValue, formatter.withLocale(locale));
+    }
+
     /**
      * Creates an instance.
      *
@@ -53,24 +74,4 @@ public class CalendarTypeDeserializer extends AbstractDateTimeDeserializer<Calen
         return calendar;
     }
 
-    @Override
-    protected Calendar parseDefault(String jsonValue, Locale locale) {
-        DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
-        return parseWithFormatter(jsonValue, formatter.withLocale(locale));
-    }
-
-    @Override
-    protected Calendar parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = formatter.parse(jsonValue);
-        LocalTime time = parsed.query(TemporalQueries.localTime());
-        ZoneId zone = parsed.query(TemporalQueries.zone());
-        if (null == zone) {
-            zone = UTC;
-        }
-        if (null == time) {
-            time = ZERO_LOCAL_TIME;
-        }
-        ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
-        return GregorianCalendar.from(result);
-    }
 }

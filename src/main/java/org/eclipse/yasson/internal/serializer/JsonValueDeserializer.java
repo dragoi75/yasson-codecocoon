@@ -30,6 +30,11 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonValue> {
 
+    @Override
+    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -57,8 +62,4 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
         }
     }
 
-    @Override
-    protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        throw new UnsupportedOperationException();
-    }
 }

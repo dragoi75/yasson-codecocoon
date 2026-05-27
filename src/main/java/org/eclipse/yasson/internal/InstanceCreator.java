@@ -29,10 +29,6 @@ public class InstanceCreator {
 
     private static final InstanceCreator INSTANCE = new InstanceCreator();
 
-    static InstanceCreator getSingleton() {
-        return INSTANCE;
-    }
-
     private static final Map<Class, Supplier> CREATORS = new HashMap<>();
 
     static {
@@ -68,4 +64,9 @@ public class InstanceCreator {
         }
         return creator.get();
     }
+
+    static InstanceCreator getSingleton() {
+        return INSTANCE;
+    }
+
 }

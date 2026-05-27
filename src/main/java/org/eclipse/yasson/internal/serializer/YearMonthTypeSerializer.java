@@ -26,6 +26,11 @@ public class YearMonthTypeSerializer extends AbstractDateTimeSerializer<YearMont
 
     private static final DateTimeFormatter DEFAULT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM").withZone(UTC);
 
+    @Override
+    protected String formatDefault(YearMonth value, Locale locale) {
+        return DEFAULT_FORMAT.withLocale(locale).format(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,11 +43,6 @@ public class YearMonthTypeSerializer extends AbstractDateTimeSerializer<YearMont
     @Override
     protected Instant toInstant(YearMonth value) {
         return value.atDay(1).atStartOfDay(UTC).toInstant();
-    }
-
-    @Override
-    protected String formatDefault(YearMonth value, Locale locale) {
-        return DEFAULT_FORMAT.withLocale(locale).format(value);
     }
 
 }

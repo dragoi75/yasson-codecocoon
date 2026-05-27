@@ -22,20 +22,6 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
 
     private final List<Double> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of double array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public double[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class DoubleArrayDeserializer extends AbstractArrayDeserializer<double[]>
         }
         return doubleArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new instance of double array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected DoubleArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

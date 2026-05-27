@@ -45,6 +45,60 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      */
     private JsonParser.Event jsonEvent;
 
+    private boolean isCharArray(Class<?> rawType) {
+        return rawType.isArray() && Character.TYPE == rawType.getComponentType();
+    }
+
+    private Type resolveRuntimeType() {
+        Type result = ReflectiveTypeResolver.resolveTypeDefault(getWrapper(), null != getGenericType() ? getGenericType() : getRuntimeType());
+        //Try to infer best from JSON event.
+        if (Object.class == result) {
+            switch(jsonEvent) {
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    return Boolean.class;
+                case VALUE_NUMBER:
+                    return BigDecimal.class;
+                case VALUE_STRING:
+                    return String.class;
+                case START_ARRAY:
+                    return ArrayList.class;
+                case START_OBJECT:
+                    return getJsonbContext().getConfigProperties().getDefaultMapImplType();
+                case VALUE_NULL:
+                    return Object.class;
+                default:
+                    throw new IllegalStateException("Can't infer deserialization type type: " + jsonEvent);
+            }
+        }
+        return result;
+    }
+
+    private Class<?> getInterfaceMappedType(Class<?> interfaceType) {
+        if (interfaceType.isInterface()) {
+            Class<?> implementationClass = null;
+            //annotation
+            if (getCustomization() instanceof PropertyCustomization) {
+                implementationClass = ((PropertyCustomization) getCustomization()).getImplementationClass();
+            }
+            //JsonbConfig
+            if (null == implementationClass) {
+                implementationClass = getJsonbContext().getConfigProperties().getUserTypeMapping().get(interfaceType);
+            }
+            if (null != implementationClass) {
+                if (!interfaceType.isAssignableFrom(implementationClass)) {
+                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
+                }
+                return implementationClass;
+            }
+        }
+        return null;
+    }
+
+    private boolean isByteArray(Class<?> rawType) {
+        return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
+    }
+
     /**
      * Creates a new builder.
      *
@@ -52,17 +106,6 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
      */
     public DeserializerBuilder(JsonbRuntimeContext jsonbContext) {
         super(jsonbContext);
-    }
-
-    /**
-     * Sets value type.
-     *
-     * @param event last json event for constructed deserializer.
-     * @return Updated object.
-     */
-    public DeserializerBuilder withJsonValueType(JsonParser.Event event) {
-        this.jsonEvent = event;
-        return this;
     }
 
     /**
@@ -175,6 +218,25 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
     }
 
     /**
+     * Sets value type.
+     *
+     * @param event last json event for constructed deserializer.
+     * @return Updated object.
+     */
+    public DeserializerBuilder withJsonValueType(JsonParser.Event event) {
+        this.jsonEvent = event;
+        return this;
+    }
+
+    private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> rawType) {
+        final Optional<? extends SerializerProviderWrapper> supportedTypeDeserializerOptional = DefaultSerializers.findValueSerializerProvider(rawType);
+        if (supportedTypeDeserializerOptional.isPresent()) {
+            return Optional.of(supportedTypeDeserializerOptional.get().getDeserializerProvider().provideDeserializer(getCustomization()));
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Checks if event is a value event.
      *
      * @param event JSON event to check.
@@ -191,73 +253,6 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
             default:
                 return false;
         }
-    }
-
-    private Optional<AbstractValueTypeDeserializer<?>> getSupportedTypeDeserializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeDeserializerOptional = DefaultSerializers.findValueSerializerProvider(rawType);
-        if (supportedTypeDeserializerOptional.isPresent()) {
-            return Optional.of(supportedTypeDeserializerOptional.get().getDeserializerProvider().provideDeserializer(getCustomization()));
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    private JsonbDeserializer<?> wrapAdapted(Optional<AdapterBindingEntry> adapterInfoOptional, JsonbDeserializer<?> item) {
-        final Optional<JsonbDeserializer<?>> adaptedDeserializerOptional = adapterInfoOptional.map(adapterInfo -> {
-            setAdaptedItemCaptor((AdaptedObjectDeserializer) getWrapper(), item);
-            return (JsonbDeserializer<?>) getWrapper();
-        });
-        return adaptedDeserializerOptional.orElse(item);
-    }
-
-    private <T, A> void setAdaptedItemCaptor(AdaptedObjectDeserializer<T, A> decoratorItem, JsonbDeserializer<T> adaptedItem) {
-        decoratorItem.setAdaptedTypeDeserializer(adaptedItem);
-    }
-
-    private Type resolveRuntimeType() {
-        Type result = ReflectiveTypeResolver.resolveTypeDefault(getWrapper(), null != getGenericType() ? getGenericType() : getRuntimeType());
-        //Try to infer best from JSON event.
-        if (Object.class == result) {
-            switch(jsonEvent) {
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                    return Boolean.class;
-                case VALUE_NUMBER:
-                    return BigDecimal.class;
-                case VALUE_STRING:
-                    return String.class;
-                case START_ARRAY:
-                    return ArrayList.class;
-                case START_OBJECT:
-                    return getJsonbContext().getConfigProperties().getDefaultMapImplType();
-                case VALUE_NULL:
-                    return Object.class;
-                default:
-                    throw new IllegalStateException("Can't infer deserialization type type: " + jsonEvent);
-            }
-        }
-        return result;
-    }
-
-    private Class<?> getInterfaceMappedType(Class<?> interfaceType) {
-        if (interfaceType.isInterface()) {
-            Class<?> implementationClass = null;
-            //annotation
-            if (getCustomization() instanceof PropertyCustomization) {
-                implementationClass = ((PropertyCustomization) getCustomization()).getImplementationClass();
-            }
-            //JsonbConfig
-            if (null == implementationClass) {
-                implementationClass = getJsonbContext().getConfigProperties().getUserTypeMapping().get(interfaceType);
-            }
-            if (null != implementationClass) {
-                if (!interfaceType.isAssignableFrom(implementationClass)) {
-                    throw new JsonbException(Messages.getMessage(MessageKeys.IMPL_CLASS_INCOMPATIBLE, implementationClass, interfaceType));
-                }
-                return implementationClass;
-            }
-        }
-        return null;
     }
 
     /**
@@ -296,11 +291,17 @@ public class DeserializerBuilder extends AbstractSerializerBuilder<DeserializerB
         }
     }
 
-    private boolean isByteArray(Class<?> rawType) {
-        return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
+    @SuppressWarnings("unchecked")
+    private JsonbDeserializer<?> wrapAdapted(Optional<AdapterBindingEntry> adapterInfoOptional, JsonbDeserializer<?> item) {
+        final Optional<JsonbDeserializer<?>> adaptedDeserializerOptional = adapterInfoOptional.map(adapterInfo -> {
+            setAdaptedItemCaptor((AdaptedObjectDeserializer) getWrapper(), item);
+            return (JsonbDeserializer<?>) getWrapper();
+        });
+        return adaptedDeserializerOptional.orElse(item);
     }
 
-    private boolean isCharArray(Class<?> rawType) {
-        return rawType.isArray() && Character.TYPE == rawType.getComponentType();
+    private <T, A> void setAdaptedItemCaptor(AdaptedObjectDeserializer<T, A> decoratorItem, JsonbDeserializer<T> adaptedItem) {
+        decoratorItem.setAdaptedTypeDeserializer(adaptedItem);
     }
+
 }

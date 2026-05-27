@@ -24,14 +24,13 @@ public class RuntimeTypeContainer implements RuntimeTypeInfo {
     private final Type resolvedType;
 
     /**
-     * Creates a new instance.
+     * Runtime type of this item.
      *
-     * @param typeInfo     runtime info about class
-     * @param resolvedType class type
+     * @return runtime type
      */
-    public RuntimeTypeContainer(RuntimeTypeInfo typeInfo, Type resolvedType) {
-        this.typeInfo = typeInfo;
-        this.resolvedType = resolvedType;
+    @Override
+    public Type getRuntimeType() {
+        return resolvedType;
     }
 
     /**
@@ -45,12 +44,14 @@ public class RuntimeTypeContainer implements RuntimeTypeInfo {
     }
 
     /**
-     * Runtime type of this item.
+     * Creates a new instance.
      *
-     * @return runtime type
+     * @param typeInfo     runtime info about class
+     * @param resolvedType class type
      */
-    @Override
-    public Type getRuntimeType() {
-        return resolvedType;
+    public RuntimeTypeContainer(RuntimeTypeInfo typeInfo, Type resolvedType) {
+        this.typeInfo = typeInfo;
+        this.resolvedType = resolvedType;
     }
+
 }

@@ -29,6 +29,11 @@ public class MonthDayTypeSerializer extends AbstractDateTimeSerializer<MonthDay>
 
     private static final DateTimeFormatter DEFAULT_FORMAT = DateTimeFormatter.ofPattern("--MM-dd").withZone(UTC);
 
+    @Override
+    protected String formatDefault(MonthDay value, Locale locale) {
+        return DEFAULT_FORMAT.withLocale(locale).format(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -41,11 +46,6 @@ public class MonthDayTypeSerializer extends AbstractDateTimeSerializer<MonthDay>
     @Override
     protected Instant toInstant(MonthDay value) {
         return value.atYear(YEAR_NUMBER).atStartOfDay(UTC).toInstant();
-    }
-
-    @Override
-    protected String formatDefault(MonthDay value, Locale locale) {
-        return DEFAULT_FORMAT.withLocale(locale).format(value);
     }
 
 }

@@ -27,23 +27,12 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
     private final JsonbNumberFormatter formatter;
 
     /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public AbstractNumberSerializer(Customization customization) {
-        super(customization);
-        formatter = null != customization ? customization.getSerializeNumberFormatter() : null;
-    }
-
-    /**
      * Serialize raw number when NumberFormat is not present.
      *
      * @param obj       number
      * @param generator generator to use
-     * @param key       json key
      */
-    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
+    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
 
     @Override
     protected void serialize(T obj, JsonGenerator generator, Marshaller marshaller) {
@@ -61,6 +50,18 @@ public abstract class AbstractNumberSerializer<T extends Number> extends Abstrac
      *
      * @param obj       number
      * @param generator generator to use
+     * @param key       json key
      */
-    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator);
+    protected abstract void serializeNonFormatted(T obj, JsonGenerator generator, String key);
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public AbstractNumberSerializer(Customization customization) {
+        super(customization);
+        formatter = null != customization ? customization.getSerializeNumberFormatter() : null;
+    }
+
 }

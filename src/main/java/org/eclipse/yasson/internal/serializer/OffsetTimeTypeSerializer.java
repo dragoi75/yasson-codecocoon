@@ -28,6 +28,11 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class OffsetTimeTypeSerializer extends AbstractDateTimeSerializer<OffsetTime> {
 
+    @Override
+    protected String formatDefault(OffsetTime value, Locale locale) {
+        return DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -42,8 +47,4 @@ public class OffsetTimeTypeSerializer extends AbstractDateTimeSerializer<OffsetT
         throw new JsonbException(Messages.getMessage(MessageKeys.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
     }
 
-    @Override
-    protected String formatDefault(OffsetTime value, Locale locale) {
-        return DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format(value);
-    }
 }

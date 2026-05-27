@@ -32,48 +32,12 @@ public abstract class CustomizationBuilder {
     private String[] propertyOrder;
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
+     * Sets a sorted list of property names.
      *
-     * @return True if <i>nillable</i> customization is present.
+     * @param propertyOrder Array containing property names
      */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    /**
-     * Sets a presence of <i>nillable</i> customization.
-     *
-     * @param nillable Presence of <i>nillable</i> customization.
-     */
-    public void setNillable(boolean nillable) {
-        this.nillable = nillable;
-    }
-
-    /**
-     * Gets an components.
-     *
-     * @return Adapter.
-     */
-    public AdapterBindingEntry getAdapterInfo() {
-        return adapterInfo;
-    }
-
-    /**
-     * Sets an components.
-     *
-     * @param adapterInfo Adapter.
-     */
-    public void setAdapterInfo(AdapterBindingEntry adapterInfo) {
-        this.adapterInfo = adapterInfo;
-    }
-
-    /**
-     * Gets meta info for user serializers.
-     *
-     * @return Serializer info
-     */
-    public SerializerBindingEntry getSerializerBinding() {
-        return serializerBinding;
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
     }
 
     /**
@@ -95,15 +59,6 @@ public abstract class CustomizationBuilder {
     }
 
     /**
-     * Sets a deserializer info.
-     *
-     * @param deserializerBinding Deserializer.
-     */
-    public void setDeserializerBinding(JsonbDeserializerBinding deserializerBinding) {
-        this.deserializerBinding = deserializerBinding;
-    }
-
-    /**
      * Gets ordered list of property names.
      *
      * @return Sorted names of properties.
@@ -113,11 +68,57 @@ public abstract class CustomizationBuilder {
     }
 
     /**
-     * Sets a sorted list of property names.
+     * Returns true if <i>nillable</i> customization is present.
      *
-     * @param propertyOrder Array containing property names
+     * @return True if <i>nillable</i> customization is present.
      */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
+    public boolean isNillable() {
+        return nillable;
     }
+
+    /**
+     * Sets a deserializer info.
+     *
+     * @param deserializerBinding Deserializer.
+     */
+    public void setDeserializerBinding(JsonbDeserializerBinding deserializerBinding) {
+        this.deserializerBinding = deserializerBinding;
+    }
+
+    /**
+     * Sets an components.
+     *
+     * @param adapterInfo Adapter.
+     */
+    public void setAdapterInfo(AdapterBindingEntry adapterInfo) {
+        this.adapterInfo = adapterInfo;
+    }
+
+    /**
+     * Sets a presence of <i>nillable</i> customization.
+     *
+     * @param nillable Presence of <i>nillable</i> customization.
+     */
+    public void setNillable(boolean nillable) {
+        this.nillable = nillable;
+    }
+
+    /**
+     * Gets an components.
+     *
+     * @return Adapter.
+     */
+    public AdapterBindingEntry getAdapterInfo() {
+        return adapterInfo;
+    }
+
+    /**
+     * Gets meta info for user serializers.
+     *
+     * @return Serializer info
+     */
+    public SerializerBindingEntry getSerializerBinding() {
+        return serializerBinding;
+    }
+
 }

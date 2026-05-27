@@ -43,31 +43,6 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
 
     private T instance;
 
-    /**
-     * @param builder {@link DeserializerBuilder) used to build this instance
-     */
-    protected CollectionDeserializer(DeserializerBuilder builder) {
-        super(builder);
-        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectiveTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
-        instance = createInstance(builder);
-    }
-
-    @SuppressWarnings("unchecked")
-    private T createInstance(DeserializerBuilder builder) {
-        Class<T> rawType = (Class<T>) ReflectiveTypeResolver.getRawType(getRuntimeType());
-        if (!rawType.isInterface()) {
-            if (EnumSet.class.isAssignableFrom(rawType)) {
-                return (T) EnumSet.noneOf((Class<Enum>) collectionValueType);
-            }
-        } else {
-            final T x = createInterfaceInstance(rawType);
-            if (null != x) {
-                return x;
-            }
-        }
-        return builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
-    }
-
     @SuppressWarnings("unchecked")
     private T createInterfaceInstance(Class<?> ifcType) {
         if (List.class.isAssignableFrom(ifcType)) {
@@ -92,18 +67,8 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
     }
 
     @Override
-    public T getInstance(Unmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
     public void appendResult(Object result) {
         appendCaptor(convertNullToOptionalEmpty(collectionValueType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void appendCaptor(T object) {
-        ((Collection<T>) instance).add(object);
     }
 
     @Override
@@ -117,4 +82,40 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
         parser.moveTo(JsonParser.Event.START_ARRAY);
         return parser.getCurrentLevel();
     }
+
+    /**
+     * @param builder {@link DeserializerBuilder) used to build this instance
+     */
+    protected CollectionDeserializer(DeserializerBuilder builder) {
+        super(builder);
+        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectiveTypeResolver.resolveTypeDefault(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
+        instance = createInstance(builder);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void appendCaptor(T object) {
+        ((Collection<T>) instance).add(object);
+    }
+
+    @SuppressWarnings("unchecked")
+    private T createInstance(DeserializerBuilder builder) {
+        Class<T> rawType = (Class<T>) ReflectiveTypeResolver.getRawType(getRuntimeType());
+        if (!rawType.isInterface()) {
+            if (EnumSet.class.isAssignableFrom(rawType)) {
+                return (T) EnumSet.noneOf((Class<Enum>) collectionValueType);
+            }
+        } else {
+            final T x = createInterfaceInstance(rawType);
+            if (null != x) {
+                return x;
+            }
+        }
+        return builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
+    }
+
+    @Override
+    public T getInstance(Unmarshaller unmarshaller) {
+        return instance;
+    }
+
 }

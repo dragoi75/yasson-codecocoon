@@ -29,15 +29,6 @@ public class SqlTimestampTypeSerializer extends AbstractDateTimeSerializer<Times
      */
     public static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlTimestampTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected Instant toInstant(Timestamp value) {
         return value.toInstant();
@@ -47,4 +38,14 @@ public class SqlTimestampTypeSerializer extends AbstractDateTimeSerializer<Times
     protected String formatDefault(Timestamp value, Locale locale) {
         return DEFAULT_FORMATTER.withLocale(locale).format(toInstant(value));
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlTimestampTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

@@ -44,12 +44,69 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     private PropertyVisibilityStrategy propertyVisibilityStrategy;
 
     /**
-     * Creates a customization for class properties.
+     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated
+     * number formatter.
      *
-     * @return A new instance of {@link PropertyCustomization}
+     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't
+     *                        have a dedicated number
+     *                        formatter.
      */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
+    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
+        this.numberFormatter = numberFormatter;
+    }
+
+    /**
+     * Sets custom property visibility strategy.
+     *
+     * @param propertyVisibilityStrategy strategy
+     */
+    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
+    }
+
+    /**
+     * Sets custom constructor or method for user instantiation.
+     *
+     * @param jsonbCreator Creator to set.
+     */
+    public void setCreator(JsonbCreator jsonbCreator) {
+        this.jsonbCreator = jsonbCreator;
+    }
+
+    /**
+     * Gets a date format for formatting dates.
+     *
+     * @return Date format.
+     */
+    public JsonbDateFormatter getDateFormatter() {
+        return dateFormatter;
+    }
+
+    /**
+     * Gets custom constructor or method for user instantiation.
+     *
+     * @return Custom creator.
+     */
+    public JsonbCreator getCreator() {
+        return jsonbCreator;
+    }
+
+    /**
+     * Property visibility strategy for given class.
+     *
+     * @return property visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    /**
+     * Sets date format for formatting dates.
+     *
+     * @param dateFormatter Date format.
+     */
+    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
+        this.dateFormatter = dateFormatter;
     }
 
     /**
@@ -64,68 +121,12 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
-     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated
-     * number formatter.
+     * Creates a customization for class properties.
      *
-     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't
-     *                        have a dedicated number
-     *                        formatter.
+     * @return A new instance of {@link PropertyCustomization}
      */
-    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
-        this.numberFormatter = numberFormatter;
+    public ClassCustomization buildClassCustomization() {
+        return new ClassCustomization(this);
     }
 
-    /**
-     * Gets a date format for formatting dates.
-     *
-     * @return Date format.
-     */
-    public JsonbDateFormatter getDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
-     * Sets date format for formatting dates.
-     *
-     * @param dateFormatter Date format.
-     */
-    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
-        this.dateFormatter = dateFormatter;
-    }
-
-    /**
-     * Gets custom constructor or method for user instantiation.
-     *
-     * @return Custom creator.
-     */
-    public JsonbCreator getCreator() {
-        return jsonbCreator;
-    }
-
-    /**
-     * Sets custom constructor or method for user instantiation.
-     *
-     * @param jsonbCreator Creator to set.
-     */
-    public void setCreator(JsonbCreator jsonbCreator) {
-        this.jsonbCreator = jsonbCreator;
-    }
-
-    /**
-     * Property visibility strategy for given class.
-     *
-     * @return property visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    /**
-     * Sets custom property visibility strategy.
-     *
-     * @param propertyVisibilityStrategy strategy
-     */
-    public void setPropertyVisibilityStrategy(PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        this.propertyVisibilityStrategy = propertyVisibilityStrategy;
-    }
 }

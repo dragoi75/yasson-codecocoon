@@ -57,6 +57,46 @@ public class DefaultSerializers {
 
     private static final SerializerProviderWrapper ENUM_PROVIDER = new SerializerProviderWrapper(EnumTypeSerializer::new, EnumTypeDeserializer::new);
 
+    private static boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param clazz class to check
+     * @return true if supported
+     */
+    public static boolean isKnownType(Class<?> clazz) {
+        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
+        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
+    }
+
+    private static <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
+        if (!Enum.class.isAssignableFrom(clazz)) {
+            if (!JsonString.class.isAssignableFrom(clazz)) {
+                if (!JsonNumber.class.isAssignableFrom(clazz)) {
+                    if (JsonValue.class.isAssignableFrom(clazz) && !(JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
+                        return Optional.of(SERIALIZERS.get(JsonValue.class));
+                    }
+                } else {
+                    return Optional.of(SERIALIZERS.get(JsonNumber.class));
+                }
+            } else {
+                return Optional.of(SERIALIZERS.get(JsonString.class));
+            }
+        } else {
+            return Optional.of(ENUM_PROVIDER);
+        }
+        return Optional.empty();
+    }
+
     private DefaultSerializers() {
     }
 
@@ -140,43 +180,4 @@ public class DefaultSerializers {
         return findByCondition(clazz);
     }
 
-    private static <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
-        if (!Enum.class.isAssignableFrom(clazz)) {
-            if (!JsonString.class.isAssignableFrom(clazz)) {
-                if (!JsonNumber.class.isAssignableFrom(clazz)) {
-                    if (JsonValue.class.isAssignableFrom(clazz) && !(JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
-                        return Optional.of(SERIALIZERS.get(JsonValue.class));
-                    }
-                } else {
-                    return Optional.of(SERIALIZERS.get(JsonNumber.class));
-                }
-            } else {
-                return Optional.of(SERIALIZERS.get(JsonString.class));
-            }
-        } else {
-            return Optional.of(ENUM_PROVIDER);
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param clazz class to check
-     * @return true if supported
-     */
-    public static boolean isKnownType(Class<?> clazz) {
-        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
-        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
-    }
-
-    private static boolean isClassAvailable(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
-    }
 }

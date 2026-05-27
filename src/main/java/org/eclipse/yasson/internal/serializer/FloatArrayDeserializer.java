@@ -22,20 +22,6 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
 
     private final List<Float> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of float array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected FloatArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public float[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
         }
         return floatArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new instance of float array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected FloatArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

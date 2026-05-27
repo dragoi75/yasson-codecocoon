@@ -22,16 +22,6 @@ import org.eclipse.yasson.internal.components.SerializerBindingEntry;
 public interface ComponentSerializationBindingProvider {
 
     /**
-     * @return Adapter wrapper class with resolved generic information.
-     */
-    AdapterBindingEntry getSerializeAdapterBinding();
-
-    /**
-     * @return Adapter wrapper class with resolved generic information.
-     */
-    AdapterBindingEntry getDeserializeAdapterBinding();
-
-    /**
      * Serializer wrapper with resolved generic info.
      *
      * @return serializer wrapper
@@ -44,4 +34,15 @@ public interface ComponentSerializationBindingProvider {
      * @return deserializer wrapper
      */
     JsonbDeserializerBinding getDeserializerBinding();
+
+    /**
+     * @return Adapter wrapper class with resolved generic information.
+     */
+    AdapterBindingEntry getSerializeAdapterBinding();
+
+    /**
+     * @return Adapter wrapper class with resolved generic information.
+     */
+    AdapterBindingEntry getDeserializeAdapterBinding();
+
 }

@@ -31,21 +31,6 @@ import org.eclipse.yasson.internal.model.ClassModel;
  */
 class ContainerDeserializerUtils {
 
-    private ContainerDeserializerUtils() {
-        throw new IllegalStateException("Util classes cannot be instantiated!");
-    }
-
-    /**
-     * Resolve {@code Map} key type.
-     *
-     * @param item    item containing wrapper class of a type field, shall not be {@code null}
-     * @param mapType type to resolve, typically field type or generic bound, shall not be {@code null}
-     * @return resolved {@code Map} key type
-     */
-    public static Type mapKeyType(RuntimeTypeInfo item, Type mapType) {
-        return mapType instanceof ParameterizedType ? ReflectiveTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0]) : Object.class;
-    }
-
     /**
      * Resolve {@code Map} value type.
      *
@@ -55,29 +40,6 @@ class ContainerDeserializerUtils {
      */
     public static Type mapValueType(RuntimeTypeInfo item, Type mapType) {
         return mapType instanceof ParameterizedType ? ReflectiveTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[1]) : Object.class;
-    }
-
-    /**
-     * Creates an instance of {@code Map} being de-serialized.
-     *
-     * @param <T>     type of {@code Map} instance to be returned
-     * @param builder de-serializer builder
-     * @param mapType type of returned {@code Map} instance
-     * @return created {@code Map} instance
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends Map<?, ?>> T createMapInstance(DeserializerBuilder builder, Type mapType) {
-        Class<?> rawType = ReflectiveTypeResolver.getRawType(mapType);
-        if (!rawType.isInterface()) {
-            return (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
-        } else {
-            if (!SortedMap.class.isAssignableFrom(rawType)) {
-                return (T) new HashMap<>();
-            } else {
-                Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
-                return SortedMap.class.isAssignableFrom(defaultMapImplType) ? (T) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType) : (T) new TreeMap<>();
-            }
-        }
     }
 
     /**
@@ -112,4 +74,43 @@ class ContainerDeserializerUtils {
     public static DeserializerBuilder newUnmarshallerItemBuilder(CurrentItem<?> wrapper, JsonbRuntimeContext ctx, JsonParser.Event event) {
         return new DeserializerBuilder(ctx).withWrapper(wrapper).withJsonValueType(event);
     }
+
+    /**
+     * Creates an instance of {@code Map} being de-serialized.
+     *
+     * @param <T>     type of {@code Map} instance to be returned
+     * @param builder de-serializer builder
+     * @param mapType type of returned {@code Map} instance
+     * @return created {@code Map} instance
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Map<?, ?>> T createMapInstance(DeserializerBuilder builder, Type mapType) {
+        Class<?> rawType = ReflectiveTypeResolver.getRawType(mapType);
+        if (!rawType.isInterface()) {
+            return (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
+        } else {
+            if (!SortedMap.class.isAssignableFrom(rawType)) {
+                return (T) new HashMap<>();
+            } else {
+                Class<?> defaultMapImplType = builder.getJsonbContext().getConfigProperties().getDefaultMapImplType();
+                return SortedMap.class.isAssignableFrom(defaultMapImplType) ? (T) builder.getJsonbContext().getInstanceCreator().createInstance(defaultMapImplType) : (T) new TreeMap<>();
+            }
+        }
+    }
+
+    private ContainerDeserializerUtils() {
+        throw new IllegalStateException("Util classes cannot be instantiated!");
+    }
+
+    /**
+     * Resolve {@code Map} key type.
+     *
+     * @param item    item containing wrapper class of a type field, shall not be {@code null}
+     * @param mapType type to resolve, typically field type or generic bound, shall not be {@code null}
+     * @return resolved {@code Map} key type
+     */
+    public static Type mapKeyType(RuntimeTypeInfo item, Type mapType) {
+        return mapType instanceof ParameterizedType ? ReflectiveTypeResolver.resolveTypeDefault(item, ((ParameterizedType) mapType).getActualTypeArguments()[0]) : Object.class;
+    }
+
 }

@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
 
+    @Override
+    protected void serialize(Period obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class PeriodTypeSerializer extends AbstractValueTypeSerializer<Period> {
         super(customization);
     }
 
-    @Override
-    protected void serialize(Period obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

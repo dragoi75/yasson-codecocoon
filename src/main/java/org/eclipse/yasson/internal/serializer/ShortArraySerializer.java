@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class ShortArraySerializer extends AbstractArraySerializer<short[]> {
 
+    @Override
+    protected void serializeInternal(short[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (short obj : arr) {
+            generator.write(obj);
+        }
+    }
+
     /**
      * Creates new short array serializer.
      *
@@ -29,10 +36,4 @@ public class ShortArraySerializer extends AbstractArraySerializer<short[]> {
         super(builder);
     }
 
-    @Override
-    protected void serializeInternal(short[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (short obj : arr) {
-            generator.write(obj);
-        }
-    }
 }

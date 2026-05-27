@@ -28,33 +28,6 @@ public class ComponentBindingInfo {
     private final AdapterBindingEntry converterEntry;
 
     /**
-     * Construct empty bindings for a given type.
-     *
-     * @param boundType type components are bound to
-     */
-    public ComponentBindingInfo(Type boundType) {
-        this(boundType, null, null, null);
-    }
-
-    /**
-     * Creates an instance and populates it with bindings for a given type.
-     *
-     * @param boundType  Type components are bound to.
-     * @param writerEntry   Serializer.
-     * @param readerBinding Deserializer.
-     * @param converter      Adapter.
-     */
-    public ComponentBindingInfo(Type boundType,
-                                SerializerBindingEntry writerEntry,
-                                JsonbDeserializerBinding readerBinding,
-                                AdapterBindingEntry converter) {
-        this.boundType = boundType;
-        this.writerEntry = writerEntry;
-        this.readerBinding = readerBinding;
-        this.converterEntry = converter;
-    }
-
-    /**
      * Type to which components are bound.
      *
      * @return Bound type.
@@ -88,6 +61,33 @@ public class ComponentBindingInfo {
      */
     public AdapterBindingEntry getAdapterInfo() {
         return converterEntry;
+    }
+
+    /**
+     * Creates an instance and populates it with bindings for a given type.
+     *
+     * @param boundType  Type components are bound to.
+     * @param writerEntry   Serializer.
+     * @param readerBinding Deserializer.
+     * @param converter      Adapter.
+     */
+    public ComponentBindingInfo(Type boundType,
+                                SerializerBindingEntry writerEntry,
+                                JsonbDeserializerBinding readerBinding,
+                                AdapterBindingEntry converter) {
+        this.boundType = boundType;
+        this.writerEntry = writerEntry;
+        this.readerBinding = readerBinding;
+        this.converterEntry = converter;
+    }
+
+    /**
+     * Construct empty bindings for a given type.
+     *
+     * @param boundType type components are bound to
+     */
+    public ComponentBindingInfo(Type boundType) {
+        this(boundType, null, null, null);
     }
 
 }

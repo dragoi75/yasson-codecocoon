@@ -23,13 +23,22 @@ import org.eclipse.yasson.internal.serializer.JsonbNumberFormatter;
 public interface Customization {
 
     /**
-     * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for
-     * deserialization
-     * (returned by {@link #getDeserializeNumberFormatter()}
+     * Date formatter for formatting date values during deserialization process. It could be the same formatter instance used
+     * for serialization
+     * (returned by {@link #getSerializeDateFormatter()}. If not set, defaulted to <code>jakarta.json.bind.annotation
+     * .JsonbDateFormat.DEFAULT_FORMAT.
+     * </code>
      *
-     * @return number formatter
+     * @return date formatter
      */
-    JsonbNumberFormatter getSerializeNumberFormatter();
+    JsonbDateFormatter getDeserializeDateFormatter();
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    boolean isNillable();
 
     /**
      * Number formatter for formatting numbers during deserialization process. It could be the same formatter instance used for
@@ -52,21 +61,12 @@ public interface Customization {
     JsonbDateFormatter getSerializeDateFormatter();
 
     /**
-     * Date formatter for formatting date values during deserialization process. It could be the same formatter instance used
-     * for serialization
-     * (returned by {@link #getSerializeDateFormatter()}. If not set, defaulted to <code>jakarta.json.bind.annotation
-     * .JsonbDateFormat.DEFAULT_FORMAT.
-     * </code>
+     * Number formatter for formatting numbers during serialization process. It could be the same formatter instance used for
+     * deserialization
+     * (returned by {@link #getDeserializeNumberFormatter()}
      *
-     * @return date formatter
+     * @return number formatter
      */
-    JsonbDateFormatter getDeserializeDateFormatter();
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    boolean isNillable();
+    JsonbNumberFormatter getSerializeNumberFormatter();
 
 }

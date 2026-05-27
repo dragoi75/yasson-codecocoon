@@ -82,6 +82,106 @@ public class JsonbConfigProperties {
     
     private final Set<Class<?>> eagerInitClasses;
 
+    private Class<?> initDefaultMapImplType() {
+        Optional<String> os = getPropertyOrderStrategy();
+        if (os.isPresent()) {
+            switch (os.get()) {
+            case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                return TreeMap.class;
+            case PropertyOrderStrategy.REVERSE:
+                return ReverseTreeMap.class;
+            default:
+                return HashMap.class;
+            }
+        }
+        return HashMap.class;
+    }
+
+    private boolean initZeroTimeDefaultingForJavaTime() {
+        return getBooleanConfigProperty(YassonConfig.ZERO_TIME_PARSE_DEFAULTING, false);
+    }
+
+    public JsonbSerializer<Object> getNullSerializer() {
+        return nullSerializer;
+    }
+
+    private boolean initConfigNullable() {
+        return getBooleanConfigProperty(JsonbConfig.NULL_VALUES, false);
+    }
+
+    /**
+     * User type mapping for map interface to implementation classes.
+     *
+     * @return User type mapping.
+     */
+    public Map<Class<?>, Class<?>> getUserTypeMapping() {
+        return userTypeMapping;
+    }
+
+    /**
+     * Default {@link java.util.Map} implementation to use, based on order strategy.
+     *
+     * @return map impl type
+     */
+    public Class<?> getDefaultMapImplType() {
+        return defaultMapImplType;
+    }
+
+    /**
+     * Gets instantiated shared config date formatter.
+     *
+     * @return Date formatter.
+     */
+    public JsonbDateFormatter getConfigDateFormatter() {
+        return dateFormatter;
+    }
+
+    /**
+     * <p>Makes parsing dates defaulting to zero hour, minute and second.
+     * This will made available to parse patterns like yyyy.MM.dd to
+     * {@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant} {@link java.time.LocalDate}
+     * or even {@link java.time.ZonedDateTime}.
+     * <p>If time zone is not set in the pattern than UTC time zone is used.
+     * So for example json value 2018.01.01 becomes 2018.01.01 00:00:00 UTC when parsed
+     * to instant {@link java.time.Instant}.
+     *
+     * @return true if time should be defaulted to zero.
+     */
+    public boolean isZeroTimeDefaulting() {
+        return zeroTimeDefaulting;
+    }
+
+    /**
+     * Gets nullable from {@link JsonbConfig}.
+     * If true null values are serialized to json.
+     *
+     * @return Configured nullable
+     */
+    public boolean getConfigNullable() {
+        return nullable;
+    }
+
+    /**
+     * Gets locale from {@link JsonbConfig}.
+     *
+     * @return Configured locale.
+     */
+    private Locale initConfigLocale() {
+        final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
+        return localeProperty.map(loc -> {
+            if (!(loc instanceof Locale)) {
+                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
+                                                             JsonbConfig.LOCALE,
+                                                             Locale.class.getSimpleName()));
+            }
+            return (Locale) loc;
+        }).orElseGet(Locale::getDefault);
+    }
+
+    private boolean initConfigFailOnUnknownProperties() {
+        return getBooleanConfigProperty(YassonConfig.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
     /**
      * Creates new resolved JSONB config.
      *
@@ -105,23 +205,71 @@ public class JsonbConfigProperties {
         this.eagerInitClasses = initEagerInitClasses();
     }
 
-    private Class<?> initDefaultMapImplType() {
-        Optional<String> os = getPropertyOrderStrategy();
-        if (os.isPresent()) {
-            switch (os.get()) {
-            case PropertyOrderStrategy.LEXICOGRAPHICAL:
-                return TreeMap.class;
-            case PropertyOrderStrategy.REVERSE:
-                return ReverseTreeMap.class;
-            default:
-                return HashMap.class;
-            }
+    private JsonbDateFormatter initDateFormatter(Locale locale) {
+        final String dateFormat = getGlobalConfigJsonbDateFormat();
+        if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
+            return new JsonbDateFormatter(dateFormat, locale.toLanguageTag());
         }
-        return HashMap.class;
+        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
+        builder.appendPattern(dateFormat);
+        if (isZeroTimeDefaulting()) {
+            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
+            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
+            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
+        }
+        DateTimeFormatter dateTimeFormatter = builder.toFormatter(locale);
+        return new JsonbDateFormatter(dateTimeFormatter, dateFormat, locale.toLanguageTag());
     }
 
-    private boolean initZeroTimeDefaultingForJavaTime() {
-        return getBooleanConfigProperty(YassonConfig.ZERO_TIME_PARSE_DEFAULTING, false);
+    /**
+     * If strict IJSON patterns should be used.
+     *
+     * @return if IJSON is enabled
+     */
+    public boolean isStrictIJson() {
+        return strictIJson;
+    }
+
+    private Set<Class<?>> initEagerInitClasses() {
+        Optional<Object> property = jsonbConfig.getProperty(YassonConfig.EAGER_PARSE_CLASSES);
+        if (!property.isPresent()) {
+            return Collections.emptySet();
+        }
+        Object eagerInitClasses = property.get();
+        if (!(eagerInitClasses instanceof Class<?>[])) {
+            throw new JsonbException("YassonConfig.EAGER_PARSE_CLASSES must be instance of Class<?>[]");
+        }
+        return new HashSet<Class<?>>(Arrays.asList((Class<?>[]) eagerInitClasses));
+    }
+
+    /**
+     * Gets property visibility strategy.
+     *
+     * @return Property visibility strategy.
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    private boolean initStrictJson() {
+        return getBooleanConfigProperty(JsonbConfig.STRICT_IJSON, false);
+    }
+
+    /**
+     * Converts string locale to {@link Locale}.
+     *
+     * @param locale Locale to convert.
+     * @return {@link Locale} instance.
+     */
+    public Locale getLocale(String locale) {
+        if (locale.equals(JsonbDateFormat.DEFAULT_LOCALE)) {
+            return this.locale;
+        }
+        return Locale.forLanguageTag(locale);
+    }
+
+    public Set<Class<?>> getEagerInitClasses() {
+        return eagerInitClasses;
     }
 
     @SuppressWarnings("unchecked")
@@ -139,20 +287,13 @@ public class JsonbConfigProperties {
         return (Map<Class<?>, Class<?>>) result;
     }
 
-    private JsonbDateFormatter initDateFormatter(Locale locale) {
-        final String dateFormat = getGlobalConfigJsonbDateFormat();
-        if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
-            return new JsonbDateFormatter(dateFormat, locale.toLanguageTag());
-        }
-        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-        builder.appendPattern(dateFormat);
-        if (isZeroTimeDefaulting()) {
-            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
-            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
-            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
-        }
-        DateTimeFormatter dateTimeFormatter = builder.toFormatter(locale);
-        return new JsonbDateFormatter(dateTimeFormatter, dateFormat, locale.toLanguageTag());
+    /**
+     * Gets property ordering component.
+     *
+     * @return Component for ordering properties.
+     */
+    public PropertyOrdering getPropertyOrdering() {
+        return propertyOrdering;
     }
 
     private String getGlobalConfigJsonbDateFormat() {
@@ -167,12 +308,28 @@ public class JsonbConfigProperties {
         }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
     }
 
-    private Consumer<List<PropertyModel>> initOrderStrategy() {
-        Optional<String> strategy = getPropertyOrderStrategy();
+    private String initBinaryDataStrategy() {
+        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj -> (Boolean) obj));
+        if (iJson.isPresent() && iJson.get()) {
+            return BinaryDataStrategy.BASE_64_URL;
+        }
+        final Optional<String> strategy = jsonbConfig.getProperty(JsonbConfig.BINARY_DATA_STRATEGY).map((obj) -> (String) obj);
+        return strategy.orElse(BinaryDataStrategy.BYTE);
+    }
 
-        return strategy.map(StrategiesProvider::getOrderingFunction)
-                .orElseGet(() -> StrategiesProvider
-                        .getOrderingFunction(PropertyOrderStrategy.LEXICOGRAPHICAL));  //default by spec
+    private PropertyNamingStrategy initPropertyNamingStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
+        if (!property.isPresent()) {
+            return StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
+        }
+        Object propertyNamingStrategy = property.get();
+        if (propertyNamingStrategy instanceof String) {
+            return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
+        }
+        if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
+        }
+        return (PropertyNamingStrategy) property.get();
     }
 
     private Optional<String> getPropertyOrderStrategy() {
@@ -194,48 +351,13 @@ public class JsonbConfigProperties {
         return Optional.empty();
     }
 
-    private PropertyNamingStrategy initPropertyNamingStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
-        if (!property.isPresent()) {
-            return StrategiesProvider.getPropertyNamingStrategy(PropertyNamingStrategy.IDENTITY);
-        }
-        Object propertyNamingStrategy = property.get();
-        if (propertyNamingStrategy instanceof String) {
-            return StrategiesProvider.getPropertyNamingStrategy((String) propertyNamingStrategy);
-        }
-        if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAMING_STRATEGY_INVALID));
-        }
-        return (PropertyNamingStrategy) property.get();
-    }
-
-    private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_VISIBILITY_STRATEGY);
-        if (!property.isPresent()) {
-            return null;
-        }
-        final Object propertyVisibilityStrategy = property.get();
-        if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
-            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
-        }
-        return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
-    }
-
-    private String initBinaryDataStrategy() {
-        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj -> (Boolean) obj));
-        if (iJson.isPresent() && iJson.get()) {
-            return BinaryDataStrategy.BASE_64_URL;
-        }
-        final Optional<String> strategy = jsonbConfig.getProperty(JsonbConfig.BINARY_DATA_STRATEGY).map((obj) -> (String) obj);
-        return strategy.orElse(BinaryDataStrategy.BYTE);
-    }
-
-    private boolean initConfigNullable() {
-        return getBooleanConfigProperty(JsonbConfig.NULL_VALUES, false);
-    }
-
-    private boolean initConfigFailOnUnknownProperties() {
-        return getBooleanConfigProperty(YassonConfig.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    /**
+     * Gets property naming strategy.
+     *
+     * @return Property naming strategy.
+     */
+    public PropertyNamingStrategy getPropertyNamingStrategy() {
+        return propertyNamingStrategy;
     }
 
     @SuppressWarnings("unchecked")
@@ -250,28 +372,6 @@ public class JsonbConfigProperties {
                                              + "<Object>");
         }
         return (JsonbSerializer<Object>) nullSerializer;
-    }
-    
-    private Set<Class<?>> initEagerInitClasses() {
-        Optional<Object> property = jsonbConfig.getProperty(YassonConfig.EAGER_PARSE_CLASSES);
-        if (!property.isPresent()) {
-            return Collections.emptySet();
-        }
-        Object eagerInitClasses = property.get();
-        if (!(eagerInitClasses instanceof Class<?>[])) {
-            throw new JsonbException("YassonConfig.EAGER_PARSE_CLASSES must be instance of Class<?>[]");
-        }
-        return new HashSet<Class<?>>(Arrays.asList((Class<?>[]) eagerInitClasses));
-    }
-
-    /**
-     * Gets nullable from {@link JsonbConfig}.
-     * If true null values are serialized to json.
-     *
-     * @return Configured nullable
-     */
-    public boolean getConfigNullable() {
-        return nullable;
     }
 
     /**
@@ -300,6 +400,18 @@ public class JsonbConfigProperties {
         return defaultValue;
     }
 
+    private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_VISIBILITY_STRATEGY);
+        if (!property.isPresent()) {
+            return null;
+        }
+        final Object propertyVisibilityStrategy = property.get();
+        if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
+            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
+        }
+        return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
+    }
+
     /**
      * Checks for binary data strategy to use.
      *
@@ -309,123 +421,12 @@ public class JsonbConfigProperties {
         return binaryDataStrategy;
     }
 
-    /**
-     * Converts string locale to {@link Locale}.
-     *
-     * @param locale Locale to convert.
-     * @return {@link Locale} instance.
-     */
-    public Locale getLocale(String locale) {
-        if (locale.equals(JsonbDateFormat.DEFAULT_LOCALE)) {
-            return this.locale;
-        }
-        return Locale.forLanguageTag(locale);
+    private Consumer<List<PropertyModel>> initOrderStrategy() {
+        Optional<String> strategy = getPropertyOrderStrategy();
+
+        return strategy.map(StrategiesProvider::getOrderingFunction)
+                .orElseGet(() -> StrategiesProvider
+                        .getOrderingFunction(PropertyOrderStrategy.LEXICOGRAPHICAL));  //default by spec
     }
 
-    /**
-     * Gets locale from {@link JsonbConfig}.
-     *
-     * @return Configured locale.
-     */
-    private Locale initConfigLocale() {
-        final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
-        return localeProperty.map(loc -> {
-            if (!(loc instanceof Locale)) {
-                throw new JsonbException(Messages.getMessage(MessageKeys.JSONB_CONFIG_PROPERTY_INVALID_TYPE,
-                                                             JsonbConfig.LOCALE,
-                                                             Locale.class.getSimpleName()));
-            }
-            return (Locale) loc;
-        }).orElseGet(Locale::getDefault);
-    }
-
-    private boolean initStrictJson() {
-        return getBooleanConfigProperty(JsonbConfig.STRICT_IJSON, false);
-    }
-
-    /**
-     * Gets property visibility strategy.
-     *
-     * @return Property visibility strategy.
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    /**
-     * Gets property naming strategy.
-     *
-     * @return Property naming strategy.
-     */
-    public PropertyNamingStrategy getPropertyNamingStrategy() {
-        return propertyNamingStrategy;
-    }
-
-    /**
-     * Gets instantiated shared config date formatter.
-     *
-     * @return Date formatter.
-     */
-    public JsonbDateFormatter getConfigDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
-     * Gets property ordering component.
-     *
-     * @return Component for ordering properties.
-     */
-    public PropertyOrdering getPropertyOrdering() {
-        return propertyOrdering;
-    }
-
-    /**
-     * If strict IJSON patterns should be used.
-     *
-     * @return if IJSON is enabled
-     */
-    public boolean isStrictIJson() {
-        return strictIJson;
-    }
-
-    /**
-     * User type mapping for map interface to implementation classes.
-     *
-     * @return User type mapping.
-     */
-    public Map<Class<?>, Class<?>> getUserTypeMapping() {
-        return userTypeMapping;
-    }
-
-    /**
-     * <p>Makes parsing dates defaulting to zero hour, minute and second.
-     * This will made available to parse patterns like yyyy.MM.dd to
-     * {@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant} {@link java.time.LocalDate}
-     * or even {@link java.time.ZonedDateTime}.
-     * <p>If time zone is not set in the pattern than UTC time zone is used.
-     * So for example json value 2018.01.01 becomes 2018.01.01 00:00:00 UTC when parsed
-     * to instant {@link java.time.Instant}.
-     *
-     * @return true if time should be defaulted to zero.
-     */
-    public boolean isZeroTimeDefaulting() {
-        return zeroTimeDefaulting;
-    }
-
-    /**
-     * Default {@link java.util.Map} implementation to use, based on order strategy.
-     *
-     * @return map impl type
-     */
-    public Class<?> getDefaultMapImplType() {
-        return defaultMapImplType;
-    }
-
-    public JsonbSerializer<Object> getNullSerializer() {
-        return nullSerializer;
-    }
-    
-    public Set<Class<?>> getEagerInitClasses() {
-        return eagerInitClasses;
-    }
 }

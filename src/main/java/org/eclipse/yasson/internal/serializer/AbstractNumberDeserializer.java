@@ -30,14 +30,14 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public abstract class AbstractNumberDeserializer<T extends Number> extends AbstractValueTypeDeserializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param clazz         Class to work with.
-     * @param customization Model customization.
-     */
-    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
-        super(clazz, customization);
+    private String compatibilityChanger(String value, Locale locale) {
+        char beforeJdk13GroupSeparator = '\u00A0';
+        char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
+        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
+            //JDK-8225245
+            return value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
+        }
+        return value;
     }
 
     /**
@@ -65,13 +65,14 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
         }
     }
 
-    private String compatibilityChanger(String value, Locale locale) {
-        char beforeJdk13GroupSeparator = '\u00A0';
-        char frenchGroupingSeparator = DecimalFormatSymbols.getInstance(Locale.FRENCH).getGroupingSeparator();
-        if (locale.getLanguage().equals(Locale.FRENCH.getLanguage()) && frenchGroupingSeparator != beforeJdk13GroupSeparator) {
-            //JDK-8225245
-            return value.replace(beforeJdk13GroupSeparator, frenchGroupingSeparator);
-        }
-        return value;
+    /**
+     * Creates a new instance.
+     *
+     * @param clazz         Class to work with.
+     * @param customization Model customization.
+     */
+    public AbstractNumberDeserializer(Class<T> clazz, Customization customization) {
+        super(clazz, customization);
     }
+
 }

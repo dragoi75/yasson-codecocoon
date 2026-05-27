@@ -27,6 +27,15 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T[] getInstance(Unmarshaller unmarshaller) {
+        if (null == arrayInstance || items.size() != arrayInstance.length) {
+            arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
+        }
+        return items.toArray(arrayInstance);
+    }
+
     /**
      * Creates new instance of object array deserializer.
      *
@@ -41,12 +50,4 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
         return items;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public T[] getInstance(Unmarshaller unmarshaller) {
-        if (null == arrayInstance || items.size() != arrayInstance.length) {
-            arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
-        }
-        return items.toArray(arrayInstance);
-    }
 }

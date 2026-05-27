@@ -29,13 +29,9 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public StringTypeSerializer(Customization customization) {
-        super(customization);
+    @Override
+    protected void serialize(String obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(toJson(obj, marshaller.getJsonbContext()));
     }
 
     private String toJson(String object, JsonbRuntimeContext jsonbContext) {
@@ -52,8 +48,13 @@ public class StringTypeSerializer extends AbstractValueTypeSerializer<String> {
         return object;
     }
 
-    @Override
-    protected void serialize(String obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(toJson(obj, marshaller.getJsonbContext()));
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public StringTypeSerializer(Customization customization) {
+        super(customization);
     }
+
 }
