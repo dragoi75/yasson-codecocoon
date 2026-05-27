@@ -25,13 +25,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 class XmlGregorianCalendarSerializer extends AbstractDateSerializer<XMLGregorianCalendar> {
 
-    XmlGregorianCalendarSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
-    protected Instant toInstant(XMLGregorianCalendar value) {
-        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
+    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
+                                       object.toGregorianCalendar().getTimeZone().toZoneId());
     }
 
     @Override
@@ -43,10 +40,13 @@ class XmlGregorianCalendarSerializer extends AbstractDateSerializer<XMLGregorian
                 .format(toTemporalAccessor(value));
     }
 
+    XmlGregorianCalendarSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
     @Override
-    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
-                                       object.toGregorianCalendar().getTimeZone().toZoneId());
+    protected Instant toInstant(XMLGregorianCalendar value) {
+        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
     }
 
 }

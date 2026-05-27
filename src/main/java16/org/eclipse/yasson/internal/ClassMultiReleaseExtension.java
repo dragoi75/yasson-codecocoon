@@ -28,27 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 public class ClassMultiReleaseExtension {
 
-    private ClassMultiReleaseExtension() {
-        throw new IllegalStateException("This class cannot be instantiated");
-    }
-
-    static boolean shouldTransformToPropertyName(Method method) {
-        return !method.getDeclaringClass().isRecord();
-    }
-
-    static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
-        return isRecord(method.getDeclaringClass()) && 0 == method.getParameterCount() && !void.class.equals(method.getReturnType()) && classProperties.containsKey(method.getName());
-    }
-
-    static JsonbCreator findCreator(Class<?> clazz, Constructor<?>[] declaredConstructors, AnnotationIntrospector introspector, PropertyNamingStrategy propertyNamingStrategy) {
-        if (clazz.isRecord()) {
-            if (1 == declaredConstructors.length) {
-                return introspector.createJsonbCreator(declaredConstructors[0], null, clazz, propertyNamingStrategy);
-            }
-        }
-        return null;
-    }
-
     public static boolean isRecord(Class<?> clazz) {
         return clazz.isRecord();
     }
@@ -61,4 +40,26 @@ public class ClassMultiReleaseExtension {
         }
         return Optional.empty();
     }
+
+    private ClassMultiReleaseExtension() {
+        throw new IllegalStateException("This class cannot be instantiated");
+    }
+
+    static boolean shouldTransformToPropertyName(Method method) {
+        return !method.getDeclaringClass().isRecord();
+    }
+
+    static JsonbCreator findCreator(Class<?> clazz, Constructor<?>[] declaredConstructors, AnnotationIntrospector introspector, PropertyNamingStrategy propertyNamingStrategy) {
+        if (clazz.isRecord()) {
+            if (1 == declaredConstructors.length) {
+                return introspector.createJsonbCreator(declaredConstructors[0], null, clazz, propertyNamingStrategy);
+            }
+        }
+        return null;
+    }
+
+    static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
+        return isRecord(method.getDeclaringClass()) && 0 == method.getParameterCount() && !void.class.equals(method.getReturnType()) && classProperties.containsKey(method.getName());
+    }
+
 }

@@ -27,8 +27,15 @@ class SqlTimestampDeserializer extends AbstractDateDeserializer<Timestamp> {
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    SqlTimestampDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
+    @Override
+    protected Timestamp parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
+        return Timestamp.from(getInstant(parsed));
+    }
+
+    private Instant getInstant(TemporalAccessor parsed) {
+        LocalDateTime local = LocalDateTime.from(parsed);
+        return local.atZone(ZoneId.of("UTC")).toInstant();
     }
 
     @Override
@@ -42,15 +49,8 @@ class SqlTimestampDeserializer extends AbstractDateDeserializer<Timestamp> {
         return Timestamp.from(getInstant(parsed));
     }
 
-    @Override
-    protected Timestamp parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
-        return Timestamp.from(getInstant(parsed));
-    }
-
-    private Instant getInstant(TemporalAccessor parsed) {
-        LocalDateTime local = LocalDateTime.from(parsed);
-        return local.atZone(ZoneId.of("UTC")).toInstant();
+    SqlTimestampDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
 
 }

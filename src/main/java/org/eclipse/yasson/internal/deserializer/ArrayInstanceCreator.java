@@ -36,35 +36,7 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> delegate;
 
-    private ArrayInstanceCreator(ModelUnmarshaller<JsonParser> delegate) {
-        this.delegate = delegate;
-    }
-
-    static ArrayInstanceCreator create(Class<?> arrayType, Class<?> componentClass, ModelUnmarshaller<JsonParser> delegate) {
-        if (CACHE.containsKey(arrayType)) {
-            return CACHE.get(arrayType).apply(delegate);
-        }
-        return new ObjectArrayCreator(delegate, componentClass);
-    }
-
-    static ModelUnmarshaller<JsonParser> createBase64Deserializer(String strategy, ModelUnmarshaller<JsonParser> delegate) {
-        return new Base64ByteArray(strategy, delegate);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        Collection<Object> collection = (Collection<Object>) delegate.unmarshal(value, context);
-        return resolveArrayInstance(collection);
-    }
-
-    protected abstract Object resolveArrayInstance(Collection<Object> collection);
-
     private static final class IntegerArrayCreator extends ArrayInstanceCreator {
-
-        private IntegerArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -76,13 +48,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return intArray;
         }
+
+        private IntegerArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class ByteArrayCreator extends ArrayInstanceCreator {
-
-        private ByteArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -94,13 +67,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return byteArray;
         }
+
+        private ByteArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class ShortArrayCreator extends ArrayInstanceCreator {
-
-        private ShortArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -112,13 +86,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return shortArray;
         }
+
+        private ShortArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class LongArrayCreator extends ArrayInstanceCreator {
-
-        private LongArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -130,13 +105,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return longArray;
         }
+
+        private LongArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class FloatArrayCreator extends ArrayInstanceCreator {
-
-        private FloatArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -148,13 +124,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return floatArray;
         }
+
+        private FloatArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class DoubleArrayCreator extends ArrayInstanceCreator {
-
-        private DoubleArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -166,13 +143,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return doubleArray;
         }
+
+        private DoubleArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class BooleanArrayCreator extends ArrayInstanceCreator {
-
-        private BooleanArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -184,13 +162,14 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return booleanArray;
         }
+
+        private BooleanArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class CharArrayCreator extends ArrayInstanceCreator {
-
-        private CharArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
-            super(delegate);
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -202,16 +181,16 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return charArray;
         }
+
+        private CharArrayCreator(ModelUnmarshaller<JsonParser> delegate) {
+            super(delegate);
+        }
+
     }
 
     private static final class ObjectArrayCreator extends ArrayInstanceCreator {
 
         private final Class<?> componentClass;
-
-        private ObjectArrayCreator(ModelUnmarshaller<JsonParser> delegate, Class<?> componentClass) {
-            super(delegate);
-            this.componentClass = componentClass;
-        }
 
         @Override
         protected Object resolveArrayInstance(Collection<Object> collection) {
@@ -223,6 +202,12 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
             return objectArray;
         }
+
+        private ObjectArrayCreator(ModelUnmarshaller<JsonParser> delegate, Class<?> componentClass) {
+            super(delegate);
+            this.componentClass = componentClass;
+        }
+
     }
 
     private static final class Base64ByteArray implements ModelUnmarshaller<JsonParser> {
@@ -231,9 +216,9 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
         private final ModelUnmarshaller<JsonParser> delegate;
 
-        private Base64ByteArray(String strategy, ModelUnmarshaller<JsonParser> delegate) {
-            this.decoder = getDecoder(strategy);
-            this.delegate = delegate;
+        @Override
+        public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+            return decoder.decode((String) delegate.unmarshal(value, context));
         }
 
         public Base64.Decoder getDecoder(String strategy) {
@@ -247,9 +232,35 @@ abstract class ArrayInstanceCreator implements ModelUnmarshaller<JsonParser> {
             }
         }
 
-        @Override
-        public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-            return decoder.decode((String) delegate.unmarshal(value, context));
+        private Base64ByteArray(String strategy, ModelUnmarshaller<JsonParser> delegate) {
+            this.decoder = getDecoder(strategy);
+            this.delegate = delegate;
         }
+
     }
+
+    static ModelUnmarshaller<JsonParser> createBase64Deserializer(String strategy, ModelUnmarshaller<JsonParser> delegate) {
+        return new Base64ByteArray(strategy, delegate);
+    }
+
+    protected abstract Object resolveArrayInstance(Collection<Object> collection);
+
+    static ArrayInstanceCreator create(Class<?> arrayType, Class<?> componentClass, ModelUnmarshaller<JsonParser> delegate) {
+        if (CACHE.containsKey(arrayType)) {
+            return CACHE.get(arrayType).apply(delegate);
+        }
+        return new ObjectArrayCreator(delegate, componentClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+        Collection<Object> collection = (Collection<Object>) delegate.unmarshal(value, context);
+        return resolveArrayInstance(collection);
+    }
+
+    private ArrayInstanceCreator(ModelUnmarshaller<JsonParser> delegate) {
+        this.delegate = delegate;
+    }
+
 }

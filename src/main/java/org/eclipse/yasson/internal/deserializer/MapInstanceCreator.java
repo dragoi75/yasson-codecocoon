@@ -35,19 +35,6 @@ class MapInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final Class<?> clazz;
 
-    MapInstanceCreator(MapDeserializer delegate, JsonbConfigProperties configProperties, Class<?> clazz) {
-        this.delegate = delegate;
-        this.configProperties = configProperties;
-        this.clazz = clazz;
-    }
-
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
-        Map<?, ?> map = createInstance(clazz);
-        context.setInstance(map);
-        return delegate.unmarshal(value, context);
-    }
-
     private Map<?, ?> createInstance(Class<?> clazz) {
         return clazz.isInterface() ? getMapImpl(clazz) : (Map<?, ?>) InstanceCreator.createInstance(clazz);
     }
@@ -67,4 +54,18 @@ class MapInstanceCreator implements ModelUnmarshaller<JsonParser> {
         }
         return new HashMap<>();
     }
+
+    MapInstanceCreator(MapDeserializer delegate, JsonbConfigProperties configProperties, Class<?> clazz) {
+        this.delegate = delegate;
+        this.configProperties = configProperties;
+        this.clazz = clazz;
+    }
+
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextImplementation context) {
+        Map<?, ?> map = createInstance(clazz);
+        context.setInstance(map);
+        return delegate.unmarshal(value, context);
+    }
+
 }

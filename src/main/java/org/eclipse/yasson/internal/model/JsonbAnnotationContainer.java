@@ -30,53 +30,37 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
 
     private final T value;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param value Element.
-     */
-    public JsonbAnnotationContainer(T value) {
-        for (Annotation marker : value.getAnnotations()) {
-            if (!(value instanceof Class)) {
-                addAnnotation(marker, false, null);
-            } else {
-                addAnnotation(marker, false, (Class<?>) value);
-            }
+    public static final class AnnotationMetadata<T extends Annotation> {
+
+        private final T marker;
+
+        private final boolean fromSuperclass;
+
+        private final Class<?> concreteType;
+
+        @Override
+        public String toString() {
+            return concreteType.getName();
         }
-        this.value = value;
-    }
 
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return value;
-    }
+        public boolean isInherited() {
+            return fromSuperclass;
+        }
 
-    /**
-     * Get an annotation by type.
-     *
-     * @param <AT>            Type of annotation
-     * @param annotationType Type of annotation
-     * @return Annotation by passed type
-     */
-    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationType) {
-        return Optional.ofNullable(annotationMap.get(annotationType)).map(LinkedList::getFirst).map(AnnotationMetadata::getAnnotation).map(annotationType::cast);
-    }
+        public Class<?> getDefinedType() {
+            return concreteType;
+        }
 
-    public <AT extends Annotation> LinkedList<AnnotationMetadata<?>> getAnnotations(Class<AT> annotationType) {
-        return annotationMap.getOrDefault(annotationType, new LinkedList<>());
-    }
+        public T getAnnotation() {
+            return marker;
+        }
 
-    @SuppressWarnings("unchecked")
-    public <AT extends Annotation> JsonbAnnotationContainer.AnnotationMetadata<AT> getAnnotationWrapper(Class<AT> annotationType) {
-        return (AnnotationMetadata<AT>) annotationMap.get(annotationType).getFirst();
-    }
+        public AnnotationMetadata(T marker, boolean fromSuperclass, Class<?> concreteType) {
+            this.marker = marker;
+            this.fromSuperclass = fromSuperclass;
+            this.concreteType = concreteType;
+        }
 
-    public Annotation[] getAnnotations() {
-        return annotationMap.values().stream().flatMap(Collection::stream).map(AnnotationMetadata::getAnnotation).toArray(Annotation[]::new);
     }
 
     /**
@@ -98,35 +82,53 @@ public class JsonbAnnotationContainer<T extends AnnotatedElement> {
         annotationMap.computeIfAbsent(metadata.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(metadata);
     }
 
-    public static final class AnnotationMetadata<T extends Annotation> {
-
-        private final T marker;
-
-        private final boolean fromSuperclass;
-
-        private final Class<?> concreteType;
-
-        public AnnotationMetadata(T marker, boolean fromSuperclass, Class<?> concreteType) {
-            this.marker = marker;
-            this.fromSuperclass = fromSuperclass;
-            this.concreteType = concreteType;
-        }
-
-        public T getAnnotation() {
-            return marker;
-        }
-
-        public boolean isInherited() {
-            return fromSuperclass;
-        }
-
-        public Class<?> getDefinedType() {
-            return concreteType;
-        }
-
-        @Override
-        public String toString() {
-            return concreteType.getName();
-        }
+    public Annotation[] getAnnotations() {
+        return annotationMap.values().stream().flatMap(Collection::stream).map(AnnotationMetadata::getAnnotation).toArray(Annotation[]::new);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param value Element.
+     */
+    public JsonbAnnotationContainer(T value) {
+        for (Annotation marker : value.getAnnotations()) {
+            if (!(value instanceof Class)) {
+                addAnnotation(marker, false, null);
+            } else {
+                addAnnotation(marker, false, (Class<?>) value);
+            }
+        }
+        this.value = value;
+    }
+
+    /**
+     * Get an annotation by type.
+     *
+     * @param <AT>            Type of annotation
+     * @param annotationType Type of annotation
+     * @return Annotation by passed type
+     */
+    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationType) {
+        return Optional.ofNullable(annotationMap.get(annotationType)).map(LinkedList::getFirst).map(AnnotationMetadata::getAnnotation).map(annotationType::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <AT extends Annotation> JsonbAnnotationContainer.AnnotationMetadata<AT> getAnnotationWrapper(Class<AT> annotationType) {
+        return (AnnotationMetadata<AT>) annotationMap.get(annotationType).getFirst();
+    }
+
+    /**
+     * Gets element.
+     *
+     * @return Element.
+     */
+    public T getElement() {
+        return value;
+    }
+
+    public <AT extends Annotation> LinkedList<AnnotationMetadata<?>> getAnnotations(Class<AT> annotationType) {
+        return annotationMap.getOrDefault(annotationType, new LinkedList<>());
+    }
+
 }

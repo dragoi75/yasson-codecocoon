@@ -25,30 +25,6 @@ abstract class MapSerializer implements ModelSerializer {
 
     private final ModelSerializer valueSerializer;
 
-    MapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-        this.keySerializer = keySerializer;
-        this.valueSerializer = valueSerializer;
-    }
-
-    ModelSerializer getKeySerializer() {
-        return keySerializer;
-    }
-
-    ModelSerializer getValueSerializer() {
-        return valueSerializer;
-    }
-
-    static MapSerializer create(Class<?> keyClass, ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-        if (!TypeSerializers.isSupportedMapKey(keyClass)) {
-            if (Object.class.equals(keyClass)) {
-                return new DynamicMapSerializer(keySerializer, valueSerializer);
-            }
-        } else {
-            return new StringKeyMapSerializer(keySerializer, valueSerializer);
-        }
-        return new ObjectKeyMapSerializer(keySerializer, valueSerializer);
-    }
-
     private static final class DynamicMapSerializer extends MapSerializer {
 
         private final StringKeyMapSerializer stringMap;
@@ -56,12 +32,6 @@ abstract class MapSerializer implements ModelSerializer {
         private final ObjectKeyMapSerializer objectMap;
 
         private MapSerializer serializer;
-
-        DynamicMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-            super(keySerializer, valueSerializer);
-            stringMap = new StringKeyMapSerializer(keySerializer, valueSerializer);
-            objectMap = new ObjectKeyMapSerializer(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -90,13 +60,16 @@ abstract class MapSerializer implements ModelSerializer {
             }
             serializer.serialize(value, generator, context);
         }
+
+        DynamicMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
+            super(keySerializer, valueSerializer);
+            stringMap = new StringKeyMapSerializer(keySerializer, valueSerializer);
+            objectMap = new ObjectKeyMapSerializer(keySerializer, valueSerializer);
+        }
+
     }
 
     private static final class StringKeyMapSerializer extends MapSerializer {
-
-        StringKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-            super(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -109,13 +82,14 @@ abstract class MapSerializer implements ModelSerializer {
             });
             generator.writeEnd();
         }
+
+        StringKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
+            super(keySerializer, valueSerializer);
+        }
+
     }
 
     private static final class ObjectKeyMapSerializer extends MapSerializer {
-
-        ObjectKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
-            super(keySerializer, valueSerializer);
-        }
 
         @SuppressWarnings("unchecked")
         @Override
@@ -136,5 +110,35 @@ abstract class MapSerializer implements ModelSerializer {
             });
             generator.writeEnd();
         }
+
+        ObjectKeyMapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
+            super(keySerializer, valueSerializer);
+        }
+
     }
+
+    ModelSerializer getValueSerializer() {
+        return valueSerializer;
+    }
+
+    static MapSerializer create(Class<?> keyClass, ModelSerializer keySerializer, ModelSerializer valueSerializer) {
+        if (!TypeSerializers.isSupportedMapKey(keyClass)) {
+            if (Object.class.equals(keyClass)) {
+                return new DynamicMapSerializer(keySerializer, valueSerializer);
+            }
+        } else {
+            return new StringKeyMapSerializer(keySerializer, valueSerializer);
+        }
+        return new ObjectKeyMapSerializer(keySerializer, valueSerializer);
+    }
+
+    ModelSerializer getKeySerializer() {
+        return keySerializer;
+    }
+
+    MapSerializer(ModelSerializer keySerializer, ModelSerializer valueSerializer) {
+        this.keySerializer = keySerializer;
+        this.valueSerializer = valueSerializer;
+    }
+
 }

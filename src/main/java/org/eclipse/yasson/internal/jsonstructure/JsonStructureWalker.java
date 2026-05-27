@@ -25,21 +25,6 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
 abstract class JsonStructureWalker implements Iterator<JsonParser.Event> {
 
     /**
-     * Get current {@link JsonValue}, that the parser is pointing on.
-     *
-     * @return JsonValue result.
-     */
-    abstract JsonValue getValue();
-
-    /**
-     * Creates an exception for throwing in case of current value type is not compatible with
-     * called getter return type.
-     *
-     * @return JsonbException with error description.
-     */
-    abstract JsonbException createIncompatibleValueException();
-
-    /**
      * Check the type of current  {@link JsonValue} and return a string representing a value.
      *
      * @return String value for current JsonValue
@@ -77,4 +62,20 @@ abstract class JsonStructureWalker implements Iterator<JsonParser.Event> {
                 throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.INTERNAL_ERROR, "unknown json value: " + stringElement.getValueType()));
         }
     }
+
+    /**
+     * Get current {@link JsonValue}, that the parser is pointing on.
+     *
+     * @return JsonValue result.
+     */
+    abstract JsonValue getValue();
+
+    /**
+     * Creates an exception for throwing in case of current value type is not compatible with
+     * called getter return type.
+     *
+     * @return JsonbException with error description.
+     */
+    abstract JsonbException createIncompatibleValueException();
+
 }

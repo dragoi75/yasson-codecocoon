@@ -35,6 +35,13 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
 
     private final boolean integerOnly;
 
+    @Override
+    Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
+        return actualDeserializer.unmarshal(value, context);
+    }
+
+    abstract T parseNumberValue(String value);
+
     AbstractNumberDeserializer(TypeDeserializerBuilder builder, boolean integerOnly) {
         super(builder);
         this.actualDeserializer = actualDeserializer(builder);
@@ -79,10 +86,4 @@ abstract class AbstractNumberDeserializer<T extends Number> extends TypeDeserial
         return value -> value;
     }
 
-    abstract T parseNumberValue(String value);
-
-    @Override
-    Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
-        return actualDeserializer.unmarshal(value, context);
-    }
 }

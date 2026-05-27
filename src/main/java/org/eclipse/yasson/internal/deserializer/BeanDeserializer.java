@@ -47,14 +47,6 @@ class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final Set<String> excludedFields;
 
-    BeanDeserializer(Map<String, ModelUnmarshaller<JsonParser>> fieldDeserializers, Function<String, String> nameTransformer, Class<?> targetClass, boolean rejectUnknownProperties, Set<String> excludedFields) {
-        this.fieldDeserializers = Map.copyOf(fieldDeserializers);
-        this.nameTransformer = nameTransformer;
-        this.targetClass = targetClass;
-        this.rejectUnknownProperties = rejectUnknownProperties;
-        this.excludedFields = Set.copyOf(excludedFields);
-    }
-
     @Override
     public Object unmarshal(JsonParser jsonInput, DeserializationContextImplementation deserState) {
         String propertyName = null;
@@ -97,4 +89,13 @@ class BeanDeserializer implements ModelUnmarshaller<JsonParser> {
         }
         return deserState.getInstance();
     }
+
+    BeanDeserializer(Map<String, ModelUnmarshaller<JsonParser>> fieldDeserializers, Function<String, String> nameTransformer, Class<?> targetClass, boolean rejectUnknownProperties, Set<String> excludedFields) {
+        this.fieldDeserializers = Map.copyOf(fieldDeserializers);
+        this.nameTransformer = nameTransformer;
+        this.targetClass = targetClass;
+        this.rejectUnknownProperties = rejectUnknownProperties;
+        this.excludedFields = Set.copyOf(excludedFields);
+    }
+
 }

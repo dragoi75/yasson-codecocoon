@@ -23,18 +23,14 @@ import org.eclipse.yasson.internal.JsonbDateFormatter;
  */
 class InstantSerializer extends AbstractDateSerializer<Instant> {
 
-    InstantSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     protected Instant toInstant(Instant value) {
         return value;
     }
 
     @Override
-    protected String formatDefault(Instant value, Locale locale) {
-        return DateTimeFormatter.ISO_INSTANT.withLocale(locale).format(value);
+    protected String formatStrictIJson(Instant value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(value);
     }
 
     @Override
@@ -42,8 +38,13 @@ class InstantSerializer extends AbstractDateSerializer<Instant> {
         return formatter.withZone(UTC).format(value);
     }
 
-    @Override
-    protected String formatStrictIJson(Instant value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(value);
+    InstantSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
+
+    @Override
+    protected String formatDefault(Instant value, Locale locale) {
+        return DateTimeFormatter.ISO_INSTANT.withLocale(locale).format(value);
+    }
+
 }

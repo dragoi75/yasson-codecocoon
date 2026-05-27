@@ -27,13 +27,9 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 class LocalTimeDeserializer extends AbstractDateDeserializer<LocalTime> {
 
-    LocalTimeDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
-    protected LocalTime fromInstant(Instant instant) {
-        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
+    protected LocalTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return LocalTime.parse(jsonValue, formatter);
     }
 
     @Override
@@ -42,7 +38,12 @@ class LocalTimeDeserializer extends AbstractDateDeserializer<LocalTime> {
     }
 
     @Override
-    protected LocalTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return LocalTime.parse(jsonValue, formatter);
+    protected LocalTime fromInstant(Instant instant) {
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
+
+    LocalTimeDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

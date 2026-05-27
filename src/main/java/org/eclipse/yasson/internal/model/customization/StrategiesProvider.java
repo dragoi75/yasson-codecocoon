@@ -37,32 +37,36 @@ import static jakarta.json.bind.config.PropertyOrderStrategy.REVERSE;
  */
 public final class StrategiesProvider {
 
-    private StrategiesProvider() {
-    }
-
     /**
      * Case insensitive naming strategy.
      */
     public static final PropertyNamingStrategy CASE_INSENSITIVE_STRATEGY = Objects::requireNonNull;
 
-    /**
-     * Returns an ordering strategy which corresponds to the ordering strategy name.
-     *
-     * @param strategy ordering strategy name
-     * @return ordering strategy
-     */
-    public static Consumer<List<PropertyModel>> getOrderingFunction(String strategy) {
-        switch(strategy) {
-            case LEXICOGRAPHICAL:
-                return props -> props.sort(comparing(PropertyModel::getWriteName));
-            case ANY:
-                return props -> {
-                };
-            case REVERSE:
-                return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
-            default:
-                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
-        }
+    private static PropertyNamingStrategy createUpperCamelCaseStrategy() {
+        return propertyName -> {
+            Objects.requireNonNull(propertyName);
+            char first = Character.toUpperCase(propertyName.charAt(0));
+            return first + propertyName.substring(1);
+        };
+    }
+
+    private static PropertyNamingStrategy createLowerCaseStrategyWithSeparator(char separator) {
+        return propertyName -> {
+            Objects.requireNonNull(propertyName);
+            CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
+            char last = Character.MIN_VALUE;
+            int i = 0;
+            while (propertyName.length() > i) {
+                char current = propertyName.charAt(i);
+                if (0 < i && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
+                    charBuffer.append(separator);
+                }
+                last = current;
+                charBuffer.append(Character.toLowerCase(current));
+                ++i;
+            }
+            return new String(charBuffer.array(), 0, charBuffer.position());
+        };
     }
 
     /**
@@ -90,14 +94,6 @@ public final class StrategiesProvider {
         }
     }
 
-    private static PropertyNamingStrategy createUpperCamelCaseStrategy() {
-        return propertyName -> {
-            Objects.requireNonNull(propertyName);
-            char first = Character.toUpperCase(propertyName.charAt(0));
-            return first + propertyName.substring(1);
-        };
-    }
-
     private static PropertyNamingStrategy createUpperCamelCaseWithSpaceStrategy() {
         return propertyName -> {
             String upperCased = createUpperCamelCaseStrategy().translateName(propertyName);
@@ -117,26 +113,31 @@ public final class StrategiesProvider {
         };
     }
 
-    private static PropertyNamingStrategy createLowerCaseStrategyWithSeparator(char separator) {
-        return propertyName -> {
-            Objects.requireNonNull(propertyName);
-            CharBuffer charBuffer = CharBuffer.allocate(propertyName.length() * 2);
-            char last = Character.MIN_VALUE;
-            int i = 0;
-            while (propertyName.length() > i) {
-                char current = propertyName.charAt(i);
-                if (0 < i && Character.isUpperCase(current) && isLowerCaseCharacter(last)) {
-                    charBuffer.append(separator);
-                }
-                last = current;
-                charBuffer.append(Character.toLowerCase(current));
-                ++i;
-            }
-            return new String(charBuffer.array(), 0, charBuffer.position());
-        };
-    }
-
     private static boolean isLowerCaseCharacter(char character) {
         return Character.isAlphabetic(character) && Character.isLowerCase(character);
     }
+
+    /**
+     * Returns an ordering strategy which corresponds to the ordering strategy name.
+     *
+     * @param strategy ordering strategy name
+     * @return ordering strategy
+     */
+    public static Consumer<List<PropertyModel>> getOrderingFunction(String strategy) {
+        switch(strategy) {
+            case LEXICOGRAPHICAL:
+                return props -> props.sort(comparing(PropertyModel::getWriteName));
+            case ANY:
+                return props -> {
+                };
+            case REVERSE:
+                return props -> props.sort(comparing(PropertyModel::getWriteName).reversed());
+            default:
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
+        }
+    }
+
+    private StrategiesProvider() {
+    }
+
 }

@@ -29,14 +29,6 @@ class AdapterDeserializer implements ModelUnmarshaller<Object> {
     private final AdapterBinding adapterBinding;
     private final ModelUnmarshaller<Object> delegate;
 
-    @SuppressWarnings("unchecked")
-    AdapterDeserializer(AdapterBinding adapterBinding,
-                        ModelUnmarshaller<Object> delegate) {
-        this.adapterBinding = adapterBinding;
-        this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
-        this.delegate = delegate;
-    }
-
     @Override
     public Object unmarshal(Object value, DeserializationContextImplementation context) {
         try {
@@ -47,6 +39,14 @@ class AdapterDeserializer implements ModelUnmarshaller<Object> {
                                                          adapterBinding.getToType(),
                                                          adapterBinding.getAdapter().getClass()), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    AdapterDeserializer(AdapterBinding adapterBinding,
+                        ModelUnmarshaller<Object> delegate) {
+        this.adapterBinding = adapterBinding;
+        this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
+        this.delegate = delegate;
     }
 
 }

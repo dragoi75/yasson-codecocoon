@@ -65,86 +65,12 @@ public class JsonbContext {
     private final JsonbConfigProperties configProperties;
 
     /**
-     * Creates and initialize context.
-     *
-     * @param jsonbConfig  jsonb jsonbConfig not null
-     * @param jsonProvider provider of JSONP
-     */
-    public JsonbContext(JsonbConfig jsonbConfig, JsonProvider jsonProvider) {
-        Objects.requireNonNull(jsonbConfig);
-        this.jsonbConfig = jsonbConfig;
-        this.mappingContext = new MappingContext(this);
-        this.componentInstanceCreator = initComponentInstanceCreator();
-        this.componentMatcher = new ComponentMatcher(this);
-        this.annotationIntrospector = new AnnotationIntrospector(this);
-        this.jsonProvider = jsonProvider;
-        this.jsonParserFactory = initJsonParserFactory();
-        this.configProperties = new JsonbConfigProperties(jsonbConfig);
-        this.deserializationModelCreator = new DeserializationModelCreator(this);
-        this.serializationModelCreator = new SerializationModelCreator(this);
-    }
-
-    /**
-     * Gets {@link JsonbConfig}.
-     *
-     * @return Configuration.
-     */
-    public JsonbConfig getConfig() {
-        return jsonbConfig;
-    }
-
-    /**
-     * Gets mapping context.
-     *
-     * @return Mapping context.
-     */
-    public MappingContext getMappingContext() {
-        return mappingContext;
-    }
-
-    /**
-     * Get chain model creator.
-     *
-     * @return chain model creator
-     */
-    public DeserializationModelCreator getChainModelCreator() {
-        return deserializationModelCreator;
-    }
-
-    /**
-     * Get serialization model creator.
-     *
-     * @return serialization model creator
-     */
-    public SerializationModelCreator getSerializationModelCreator() {
-        return serializationModelCreator;
-    }
-
-    /**
-     * Gets JSONP provider.
-     *
-     * @return JSONP provider.
-     */
-    public JsonProvider getJsonProvider() {
-        return jsonProvider;
-    }
-
-    /**
      * Implementation creating instances of user components used by JSONB, such as adapters and strategies.
      *
      * @return Instance creator.
      */
     public JsonbComponentInstanceCreator getComponentInstanceCreator() {
         return componentInstanceCreator;
-    }
-
-    /**
-     * Component matcher for lookup of (de)serializers and adapters.
-     *
-     * @return Component matcher.
-     */
-    public ComponentMatcher getComponentMatcher() {
-        return componentMatcher;
     }
 
     /**
@@ -156,16 +82,21 @@ public class JsonbContext {
         return annotationIntrospector;
     }
 
-    public JsonbConfigProperties getConfigProperties() {
-        return configProperties;
-    }
-
     public JsonParserFactory getJsonParserFactory() {
         return jsonParserFactory;
     }
 
     private JsonParserFactory initJsonParserFactory() {
         return jsonProvider.createParserFactory(createJsonpProperties(jsonbConfig));
+    }
+
+    /**
+     * Get chain model creator.
+     *
+     * @return chain model creator
+     */
+    public DeserializationModelCreator getChainModelCreator() {
+        return deserializationModelCreator;
     }
 
     /**
@@ -207,6 +138,75 @@ public class JsonbContext {
         JsonbComponentInstanceCreator creator = creators.get(0);
         LOGGER.finest("Component instance creator:" + creator.getClass());
         return creator;
+    }
+
+    /**
+     * Gets {@link JsonbConfig}.
+     *
+     * @return Configuration.
+     */
+    public JsonbConfig getConfig() {
+        return jsonbConfig;
+    }
+
+    /**
+     * Get serialization model creator.
+     *
+     * @return serialization model creator
+     */
+    public SerializationModelCreator getSerializationModelCreator() {
+        return serializationModelCreator;
+    }
+
+    /**
+     * Gets JSONP provider.
+     *
+     * @return JSONP provider.
+     */
+    public JsonProvider getJsonProvider() {
+        return jsonProvider;
+    }
+
+    /**
+     * Creates and initialize context.
+     *
+     * @param jsonbConfig  jsonb jsonbConfig not null
+     * @param jsonProvider provider of JSONP
+     */
+    public JsonbContext(JsonbConfig jsonbConfig, JsonProvider jsonProvider) {
+        Objects.requireNonNull(jsonbConfig);
+        this.jsonbConfig = jsonbConfig;
+        this.mappingContext = new MappingContext(this);
+        this.componentInstanceCreator = initComponentInstanceCreator();
+        this.componentMatcher = new ComponentMatcher(this);
+        this.annotationIntrospector = new AnnotationIntrospector(this);
+        this.jsonProvider = jsonProvider;
+        this.jsonParserFactory = initJsonParserFactory();
+        this.configProperties = new JsonbConfigProperties(jsonbConfig);
+        this.deserializationModelCreator = new DeserializationModelCreator(this);
+        this.serializationModelCreator = new SerializationModelCreator(this);
+    }
+
+    public JsonbConfigProperties getConfigProperties() {
+        return configProperties;
+    }
+
+    /**
+     * Gets mapping context.
+     *
+     * @return Mapping context.
+     */
+    public MappingContext getMappingContext() {
+        return mappingContext;
+    }
+
+    /**
+     * Component matcher for lookup of (de)serializers and adapters.
+     *
+     * @return Component matcher.
+     */
+    public ComponentMatcher getComponentMatcher() {
+        return componentMatcher;
     }
 
 }

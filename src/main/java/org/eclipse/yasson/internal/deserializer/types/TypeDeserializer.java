@@ -27,9 +27,16 @@ public abstract class TypeDeserializer implements ModelUnmarshaller<String> {
     private final ModelUnmarshaller<Object> delegate;
     private final Class<?> clazz;
 
-    TypeDeserializer(TypeDeserializerBuilder builder) {
-        this.delegate = builder.getDelegate();
-        this.clazz = builder.getClazz();
+    Object deserializeBooleanValue(boolean value, DeserializationContextImplementation context, Type rType) {
+        return deserializeStringValue(String.valueOf(value), context, rType);
+    }
+
+    Object deserializeNumberValue(JsonParser value, DeserializationContextImplementation context, Type rType) {
+        return deserializeStringValue(value.getString(), context, rType);
+    }
+
+    Class<?> getType() {
+        return clazz;
     }
 
     @Override
@@ -41,22 +48,15 @@ public abstract class TypeDeserializer implements ModelUnmarshaller<String> {
         return delegate.unmarshal(deserializeBooleanValue(value, context, clazz), context);
     }
 
-    public final Object deserialize(JsonParser value, DeserializationContextImplementation context) {
-        return delegate.unmarshal(deserializeNumberValue(value, context, clazz), context);
+    TypeDeserializer(TypeDeserializerBuilder builder) {
+        this.delegate = builder.getDelegate();
+        this.clazz = builder.getClazz();
     }
 
     abstract Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType);
 
-    Object deserializeBooleanValue(boolean value, DeserializationContextImplementation context, Type rType) {
-        return deserializeStringValue(String.valueOf(value), context, rType);
-    }
-
-    Object deserializeNumberValue(JsonParser value, DeserializationContextImplementation context, Type rType) {
-        return deserializeStringValue(value.getString(), context, rType);
-    }
-
-    Class<?> getType() {
-        return clazz;
+    public final Object deserialize(JsonParser value, DeserializationContextImplementation context) {
+        return delegate.unmarshal(deserializeNumberValue(value, context, clazz), context);
     }
 
 }

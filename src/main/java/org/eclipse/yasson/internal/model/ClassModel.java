@@ -53,56 +53,12 @@ public class ClassModel {
     private final PropertyNamingStrategy propertyNamingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
+     * Introspected customization for a class.
      *
-     * @param name A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * @return Immutable class customization.
      */
-    public PropertyModel getPropertyModel(String name) {
-        return properties.get(name);
-    }
-
-    /**
-     * Create instance of class model.
-     *
-     * @param clazz                  Class to model.
-     * @param customization          Customization of the class parsed from annotations.
-     * @param parentClassModel       Class model of parent class.
-     * @param propertyNamingStrategy Property naming strategy.
-     */
-    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
-        this.clazz = clazz;
-        this.classCustomization = customization;
-        this.parentClassModel = parentClassModel;
-        this.propertyNamingStrategy = propertyNamingStrategy;
-        setProperties(new ArrayList<>());
-    }
-
-    /**
-     * Search for field in this class model and superclasses of its class.
-     *
-     * @param jsonReadName name as it appears in JSON during reading.
-     * @return PropertyModel if found.
-     */
-    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
-        Objects.requireNonNull(jsonReadName);
-        return searchProperty(this, jsonReadName);
-    }
-
-    private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
-        //Standard javabean properties without overridden name (most of the cases)
-        final PropertyModel result = classModel.getPropertyModel(jsonReadName);
-        if (null != result && result.getPropertyName().equals(result.getReadName())) {
-            return result;
-        }
-        //Search for overridden name on setter with @JsonbProperty annotation
-        for (PropertyModel propertyModel : properties.values()) {
-            if (equalsReadName(jsonReadName, propertyModel)) {
-                return propertyModel;
-            }
-        }
-        //property not found
-        return null;
+    public ClassCustomization getClassCustomization() {
+        return classCustomization;
     }
 
     /**
@@ -121,21 +77,13 @@ public class ClassModel {
     }
 
     /**
-     * Gets type.
+     * Sets parsed properties of the class.
      *
-     * @return Type.
+     * @param parsedProperties class properties
      */
-    public Class<?> getType() {
-        return clazz;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassCustomization getClassCustomization() {
-        return classCustomization;
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
     }
 
     /**
@@ -147,32 +95,9 @@ public class ClassModel {
         return parentClassModel;
     }
 
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProperties class properties
-     */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
+    @Override
+    public String toString() {
+        return "ClassModel{" + "clazz=" + clazz + '}';
     }
 
     /**
@@ -196,8 +121,84 @@ public class ClassModel {
         return defaultConstructor;
     }
 
-    @Override
-    public String toString() {
-        return "ClassModel{" + "clazz=" + clazz + '}';
+    /**
+     * Search for field in this class model and superclasses of its class.
+     *
+     * @param jsonReadName name as it appears in JSON during reading.
+     * @return PropertyModel if found.
+     */
+    public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
+        Objects.requireNonNull(jsonReadName);
+        return searchProperty(this, jsonReadName);
     }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param name A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public PropertyModel getPropertyModel(String name) {
+        return properties.get(name);
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
+    }
+
+    /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return clazz;
+    }
+
+    /**
+     * Create instance of class model.
+     *
+     * @param clazz                  Class to model.
+     * @param customization          Customization of the class parsed from annotations.
+     * @param parentClassModel       Class model of parent class.
+     * @param propertyNamingStrategy Property naming strategy.
+     */
+    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
+        this.clazz = clazz;
+        this.classCustomization = customization;
+        this.parentClassModel = parentClassModel;
+        this.propertyNamingStrategy = propertyNamingStrategy;
+        setProperties(new ArrayList<>());
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
+        //Standard javabean properties without overridden name (most of the cases)
+        final PropertyModel result = classModel.getPropertyModel(jsonReadName);
+        if (null != result && result.getPropertyName().equals(result.getReadName())) {
+            return result;
+        }
+        //Search for overridden name on setter with @JsonbProperty annotation
+        for (PropertyModel propertyModel : properties.values()) {
+            if (equalsReadName(jsonReadName, propertyModel)) {
+                return propertyModel;
+            }
+        }
+        //property not found
+        return null;
+    }
+
 }

@@ -27,6 +27,16 @@ import org.eclipse.yasson.internal.properties.MessageBundle;
  */
 class StringDeserializer extends TypeDeserializer {
 
+    private String checkIJson(String value, JsonbConfigProperties config) {
+        if (config.isStrictIJson()) {
+            String newString = new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+            if (!newString.equals(value)) {
+                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
+            }
+        }
+        return value;
+    }
+
     StringDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
     }
@@ -37,13 +47,4 @@ class StringDeserializer extends TypeDeserializer {
         return checkIJson(value, config);
     }
 
-    private String checkIJson(String value, JsonbConfigProperties config) {
-        if (config.isStrictIJson()) {
-            String newString = new String(value.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-            if (!newString.equals(value)) {
-                throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.UNPAIRED_SURROGATE));
-            }
-        }
-        return value;
-    }
 }

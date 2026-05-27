@@ -27,13 +27,9 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 class OffsetTimeDeserializer extends AbstractDateDeserializer<OffsetTime> {
 
-    OffsetTimeDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
-    protected OffsetTime fromInstant(Instant instant) {
-        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return OffsetTime.parse(jsonValue, formatter);
     }
 
     @Override
@@ -42,7 +38,12 @@ class OffsetTimeDeserializer extends AbstractDateDeserializer<OffsetTime> {
     }
 
     @Override
-    protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return OffsetTime.parse(jsonValue, formatter);
+    protected OffsetTime fromInstant(Instant instant) {
+        throw new JsonbException(MessageBundle.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
     }
+
+    OffsetTimeDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

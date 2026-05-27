@@ -32,6 +32,22 @@ public class SqlDateDeserializer extends AbstractDateDeserializer<Date> implemen
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
+    @Override
+    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return Date.valueOf(LocalDate.parse(jsonValue, formatter));
+    }
+
+    @Override
+    protected Date parseDefault(String jsonValue, Locale locale) {
+        return Date.valueOf(LocalDate.parse(jsonValue, DEFAULT_FORMATTER.withLocale(locale)));
+    }
+
+    @Override
+    public Date deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
+        DeserializationContextImplementation context = (DeserializationContextImplementation) ctx;
+        return (Date) unmarshal(parser.getString(), context);
+    }
+
     SqlDateDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
     }
@@ -48,19 +64,4 @@ public class SqlDateDeserializer extends AbstractDateDeserializer<Date> implemen
         return new Date(instant.toEpochMilli());
     }
 
-    @Override
-    protected Date parseDefault(String jsonValue, Locale locale) {
-        return Date.valueOf(LocalDate.parse(jsonValue, DEFAULT_FORMATTER.withLocale(locale)));
-    }
-
-    @Override
-    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return Date.valueOf(LocalDate.parse(jsonValue, formatter));
-    }
-
-    @Override
-    public Date deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        DeserializationContextImplementation context = (DeserializationContextImplementation) ctx;
-        return (Date) unmarshal(parser.getString(), context);
-    }
 }

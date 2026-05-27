@@ -36,20 +36,6 @@ public class JsonStructureToStreamingParserAdapter implements JsonParser {
 
     private final JsonStructure rootNode;
 
-    /**
-     * Creates new {@link JsonStructure} parser.
-     *
-     * @param inputNode json structure
-     */
-    public JsonStructureToStreamingParserAdapter(JsonStructure inputNode) {
-        this.rootNode = inputNode;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return structureWalkers.peek().hasNext();
-    }
-
     @Override
     public Event next() {
         if (structureWalkers.isEmpty()) {
@@ -80,34 +66,19 @@ public class JsonStructureToStreamingParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return structureWalkers.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
+    public void close() {
+        //noop
     }
 
     @Override
     public JsonObject getObject() {
         //        ((JsonObjectIterator) iterators.peek()).jsonObject
         return structureWalkers.peek().getValue().asJsonObject();
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
     }
 
     private JsonNumber getJsonNumberValue() {
@@ -120,12 +91,42 @@ public class JsonStructureToStreamingParserAdapter implements JsonParser {
     }
 
     @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
     }
 
     @Override
-    public void close() {
-        //noop
+    public boolean hasNext() {
+        return structureWalkers.peek().hasNext();
     }
+
+    @Override
+    public String getString() {
+        return structureWalkers.peek().getString();
+    }
+
+    /**
+     * Creates new {@link JsonStructure} parser.
+     *
+     * @param inputNode json structure
+     */
+    public JsonStructureToStreamingParserAdapter(JsonStructure inputNode) {
+        this.rootNode = inputNode;
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
 }

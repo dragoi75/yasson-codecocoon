@@ -22,12 +22,13 @@ import org.eclipse.yasson.internal.DeserializationContextImplementation;
  */
 class ZoneIdDeserializer extends TypeDeserializer {
 
-    ZoneIdDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Object deserializeStringValue(String value, DeserializationContextImplementation context, Type rType) {
         return ZoneId.of(value);
     }
+
+    ZoneIdDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

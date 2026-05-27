@@ -25,9 +25,29 @@ class MapDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelUnmarshaller<JsonParser> keyDelegate, ModelUnmarshaller<JsonParser> valueDelegate) {
-        this.keyDelegate = keyDelegate;
-        this.valueDelegate = valueDelegate;
+    private enum Mode {
+
+        NONE, NORMAL, OBJECT
+    }
+
+    private enum State {
+
+        NEXT, VALUE, KEY, DONE
+    }
+
+    private void validateKeyName(String keyName, State state) {
+        if (State.KEY != state || keyName.equals("key")) {
+            if (State.VALUE == state && !keyName.equals("value")) {
+                throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
+            }
+        } else {
+            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
+        }
+    }
+
+    private Object deserializeValue(JsonParser parser, DeserializationContextImplementation context, ModelUnmarshaller<JsonParser> deserializer) {
+        DeserializationContextImplementation keyContext = new DeserializationContextImplementation(context);
+        return deserializer.unmarshal(parser, keyContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -96,28 +116,9 @@ class MapDeserializer implements ModelUnmarshaller<JsonParser> {
         return map;
     }
 
-    private void validateKeyName(String keyName, State state) {
-        if (State.KEY != state || keyName.equals("key")) {
-            if (State.VALUE == state && !keyName.equals("value")) {
-                throw new JsonbException("Attribute name has to be 'value' when representing map entry value. Got: " + keyName);
-            }
-        } else {
-            throw new JsonbException("Attribute name has to be 'key' when representing map entry key. Got: " + keyName);
-        }
+    MapDeserializer(ModelUnmarshaller<JsonParser> keyDelegate, ModelUnmarshaller<JsonParser> valueDelegate) {
+        this.keyDelegate = keyDelegate;
+        this.valueDelegate = valueDelegate;
     }
 
-    private Object deserializeValue(JsonParser parser, DeserializationContextImplementation context, ModelUnmarshaller<JsonParser> deserializer) {
-        DeserializationContextImplementation keyContext = new DeserializationContextImplementation(context);
-        return deserializer.unmarshal(parser, keyContext);
-    }
-
-    private enum Mode {
-
-        NONE, NORMAL, OBJECT
-    }
-
-    private enum State {
-
-        NEXT, VALUE, KEY, DONE
-    }
 }

@@ -102,8 +102,26 @@ public class BuiltInTypes {
         BUILD_IN_SUPPORT = Set.copyOf(buildInTypes);
     }
 
-    private BuiltInTypes() {
-        throw new IllegalStateException("Util class cannot be instantiated");
+    private static boolean findIfClassIsSupported(Class<?> clazz) {
+        Class<?> current = clazz;
+        do {
+            if (BUILD_IN_SUPPORT.contains(current)) {
+                return true;
+            }
+            current = current.getSuperclass();
+        } while (null != current);
+        return false;
+    }
+
+    /**
+     * Whether the type is a supported type by default.
+     *
+     * @param clazz type to check
+     * @return whether is supported
+     */
+    public static boolean isKnownType(Class<?> clazz) {
+        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
+        return knownContainerValueType || findIfClassIsSupported(clazz);
     }
 
     /**
@@ -121,25 +139,8 @@ public class BuiltInTypes {
         }
     }
 
-    /**
-     * Whether the type is a supported type by default.
-     *
-     * @param clazz type to check
-     * @return whether is supported
-     */
-    public static boolean isKnownType(Class<?> clazz) {
-        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
-        return knownContainerValueType || findIfClassIsSupported(clazz);
+    private BuiltInTypes() {
+        throw new IllegalStateException("Util class cannot be instantiated");
     }
 
-    private static boolean findIfClassIsSupported(Class<?> clazz) {
-        Class<?> current = clazz;
-        do {
-            if (BUILD_IN_SUPPORT.contains(current)) {
-                return true;
-            }
-            current = current.getSuperclass();
-        } while (null != current);
-        return false;
-    }
 }

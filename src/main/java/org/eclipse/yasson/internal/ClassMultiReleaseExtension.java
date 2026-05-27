@@ -29,12 +29,20 @@ import org.eclipse.yasson.internal.model.Property;
  */
 public class ClassMultiReleaseExtension {
 
-    private ClassMultiReleaseExtension() {
-        throw new IllegalStateException("This class cannot be instantiated");
+    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
+        return Optional.empty();
+    }
+
+    public static boolean isRecord(Class<?> clazz) {
+        return false;
     }
 
     static boolean shouldTransformToPropertyName(Method method) {
         return true;
+    }
+
+    private ClassMultiReleaseExtension() {
+        throw new IllegalStateException("This class cannot be instantiated");
     }
 
     static boolean isSpecialAccessorMethod(Method method, Map<String, Property> classProperties) {
@@ -46,14 +54,6 @@ public class ClassMultiReleaseExtension {
                                     AnnotationIntrospector introspector,
                                     PropertyNamingStrategy propertyNamingStrategy) {
         return null;
-    }
-
-    public static boolean isRecord(Class<?> clazz) {
-        return false;
-    }
-
-    public static Optional<JsonbException> exceptionToThrow(Class<?> clazz) {
-        return Optional.empty();
     }
 
 }

@@ -32,13 +32,17 @@ public class JsonArrayValueIterator extends JsonStructureWalker {
 
     private JsonValue currentElement;
 
-    /**
-     * Creates new array iterator.
-     *
-     * @param arrayNode json array
-     */
-    public JsonArrayValueIterator(JsonArray arrayNode) {
-        this.elementIterator = arrayNode.iterator();
+    @Override
+    String getString() {
+        if (currentElement instanceof JsonString) {
+            return ((JsonString) currentElement).getString();
+        }
+        return currentElement.toString();
+    }
+
+    @Override
+    JsonValue getValue() {
+        return currentElement;
     }
 
     /**
@@ -52,6 +56,21 @@ public class JsonArrayValueIterator extends JsonStructureWalker {
     }
 
     @Override
+    JsonbException createIncompatibleValueException() {
+        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
+                                                      getValue().getValueType()));
+    }
+
+    /**
+     * Creates new array iterator.
+     *
+     * @param arrayNode json array
+     */
+    public JsonArrayValueIterator(JsonArray arrayNode) {
+        this.elementIterator = arrayNode.iterator();
+    }
+
+    @Override
     public JsonParser.Event next() {
         if (elementIterator.hasNext()) {
             currentElement = elementIterator.next();
@@ -60,22 +79,4 @@ public class JsonArrayValueIterator extends JsonStructureWalker {
         return JsonParser.Event.END_ARRAY;
     }
 
-    @Override
-    JsonValue getValue() {
-        return currentElement;
-    }
-
-    @Override
-    JsonbException createIncompatibleValueException() {
-        return new JsonbException(MessageBundle.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
-                                                      getValue().getValueType()));
-    }
-
-    @Override
-    String getString() {
-        if (currentElement instanceof JsonString) {
-            return ((JsonString) currentElement).getString();
-        }
-        return currentElement.toString();
-    }
 }
