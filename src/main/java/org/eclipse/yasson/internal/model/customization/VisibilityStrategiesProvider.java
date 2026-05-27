@@ -32,25 +32,6 @@ public class VisibilityStrategiesProvider {
     private static final PropertyVisibilityStrategy PUBLIC_FIELDS = new PublicFieldsVisibilityStrategy();
     private static final PropertyVisibilityStrategy ALL_FIELDS_AND_METHODS = new AllFieldsVisibilityStrategy();
 
-    private VisibilityStrategiesProvider() {
-        throw new IllegalStateException("This class cannot be instantiated");
-    }
-
-    public static PropertyVisibilityStrategy getStrategy(String strategy) {
-        switch (strategy) {
-        case "PUBLIC_PROPERTY":
-            return PUBLIC_PROPERTY;
-        case "PUBLIC_ACCESSOR_METHODS":
-            return PUBLIC_ACCESSOR_METHODS;
-        case "PUBLIC_FIELDS":
-            return PUBLIC_FIELDS;
-        case "ALL_FIELD_AND_ACCESSORS":
-            return ALL_FIELDS_AND_METHODS;
-        default:
-            throw new JsonbException(MessageProvider.getMessage(MessageConstants.UNKNOWN_VISIBILITY_STRATEGY, strategy));
-        }
-    }
-
     private static final class PublicPropertyVisibilityStrategy implements PropertyVisibilityStrategy {
         @Override
         public boolean isVisible(Field field) {
@@ -101,6 +82,25 @@ public class VisibilityStrategiesProvider {
         public boolean isVisible(Method method) {
             return true;
         }
+    }
+
+    public static PropertyVisibilityStrategy getStrategy(String strategy) {
+        switch (strategy) {
+        case "PUBLIC_PROPERTY":
+            return PUBLIC_PROPERTY;
+        case "PUBLIC_ACCESSOR_METHODS":
+            return PUBLIC_ACCESSOR_METHODS;
+        case "PUBLIC_FIELDS":
+            return PUBLIC_FIELDS;
+        case "ALL_FIELD_AND_ACCESSORS":
+            return ALL_FIELDS_AND_METHODS;
+        default:
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.UNKNOWN_VISIBILITY_STRATEGY, strategy));
+        }
+    }
+
+    private VisibilityStrategiesProvider() {
+        throw new IllegalStateException("This class cannot be instantiated");
     }
 
 }

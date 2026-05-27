@@ -28,10 +28,6 @@ class ObjectMarshaller implements ModelMarshaller {
 
     private final LinkedHashMap<String, ModelMarshaller> fieldMarshallers;
 
-    ObjectMarshaller(LinkedHashMap<String, ModelMarshaller> fieldMarshallers) {
-        this.fieldMarshallers = fieldMarshallers;
-    }
-
     @Override
     public void marshal(Object inputObj, JsonGenerator jsonWriter, SerializationContextImpl serializationSession) {
         jsonWriter.writeStartObject();
@@ -46,4 +42,9 @@ class ObjectMarshaller implements ModelMarshaller {
         });
         jsonWriter.writeEnd();
     }
+
+    ObjectMarshaller(LinkedHashMap<String, ModelMarshaller> fieldMarshallers) {
+        this.fieldMarshallers = fieldMarshallers;
+    }
+
 }

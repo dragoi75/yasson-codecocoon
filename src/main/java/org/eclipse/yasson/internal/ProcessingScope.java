@@ -30,6 +30,16 @@ public abstract class ProcessingScope {
     private final Set<Object> processedObjects = new HashSet<>();
 
     /**
+     * Adds currently processed object to the {@link Set}.
+     *
+     * @param item processed object
+     * @return if object was added
+     */
+    public boolean addProcessedObject(Object item) {
+        return this.processedObjects.add(item);
+    }
+
+    /**
      * Parent for marshaller and unmarshaller.
      *
      * @param jsonBindingContext context of Jsonb
@@ -39,12 +49,13 @@ public abstract class ProcessingScope {
     }
 
     /**
-     * Jsonb context.
+     * Removes processed object from the {@link Set}.
      *
-     * @return jsonb context
+     * @param item processed object
+     * @return if object was removed
      */
-    public JsonBindingContext getJsonbContext() {
-        return jsonBindingContext;
+    public boolean removeProcessedObject(Object item) {
+        return processedObjects.remove(item);
     }
 
     /**
@@ -57,23 +68,12 @@ public abstract class ProcessingScope {
     }
 
     /**
-     * Adds currently processed object to the {@link Set}.
+     * Jsonb context.
      *
-     * @param item processed object
-     * @return if object was added
+     * @return jsonb context
      */
-    public boolean addProcessedObject(Object item) {
-        return this.processedObjects.add(item);
-    }
-
-    /**
-     * Removes processed object from the {@link Set}.
-     *
-     * @param item processed object
-     * @return if object was removed
-     */
-    public boolean removeProcessedObject(Object item) {
-        return processedObjects.remove(item);
+    public JsonBindingContext getJsonbContext() {
+        return jsonBindingContext;
     }
 
 }

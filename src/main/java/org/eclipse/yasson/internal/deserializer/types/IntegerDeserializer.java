@@ -23,8 +23,9 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
  */
 class IntegerDeserializer extends AbstractNumberDeserializer<Integer> {
 
-    IntegerDeserializer(TypeDeserializerBuilder builder) {
-        super(builder, true);
+    @Override
+    Object deserializeNumberValue(JsonParser value, DefaultDeserializationContext context, Type rType) {
+        return value.getInt();
     }
 
     @Override
@@ -32,8 +33,8 @@ class IntegerDeserializer extends AbstractNumberDeserializer<Integer> {
         return Integer.parseInt(value);
     }
 
-    @Override
-    Object deserializeNumberValue(JsonParser value, DefaultDeserializationContext context, Type rType) {
-        return value.getInt();
+    IntegerDeserializer(TypeDeserializerBuilder builder) {
+        super(builder, true);
     }
+
 }

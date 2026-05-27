@@ -28,16 +28,6 @@ class JsonValueDeserializer implements ModelParser<JsonParser> {
 
     private final ModelParser<Object> delegate;
 
-    JsonValueDeserializer(TypeDeserializerBuilder builder) {
-        delegate = builder.getDelegate();
-    }
-
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        JsonParser.Event last = context.getLastValueEvent();
-        return delegate.deserializeModel(deserializeValue(last, value), context);
-    }
-
     private JsonValue deserializeValue(JsonParser.Event last, JsonParser parser) {
         switch (last) {
         case VALUE_TRUE:
@@ -57,4 +47,15 @@ class JsonValueDeserializer implements ModelParser<JsonParser> {
             throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, "Unknown JSON value: " + last));
         }
     }
+
+    JsonValueDeserializer(TypeDeserializerBuilder builder) {
+        delegate = builder.getDelegate();
+    }
+
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        JsonParser.Event last = context.getLastValueEvent();
+        return delegate.deserializeModel(deserializeValue(last, value), context);
+    }
+
 }

@@ -89,6 +89,36 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
 
     private final Type setterParamType;
 
+    private static final class DefaultVisibilityPolicy implements PropertyVisibilityStrategy {
+
+        private final Method methodRef;
+
+        @Override
+        public boolean isVisible(Method methodRef) {
+            return Modifier.isPublic(methodRef.getModifiers());
+        }
+
+        @Override
+        public boolean isVisible(Field backingField) {
+            //don't check field if getter is not visible (forced by spec)
+            return (null == methodRef || isVisible(methodRef)) && Modifier.isPublic(backingField.getModifiers());
+        }
+
+        DefaultVisibilityPolicy(Method methodRef) {
+            this.methodRef = methodRef;
+        }
+
+    }
+
+    /**
+     * Field of a javabean property.
+     *
+     * @return {@link Field field}
+     */
+    public Field getField() {
+        return backingField;
+    }
+
     /**
      * Create a new PropertyModel that merges two existing PropertyModel that have identical read/write names.
      * The input PropertyModel objects MUST be equal (a.equals(b) == true)
@@ -128,57 +158,97 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
         this.setterHandle = createPropertyWriteHandle(backingField, writeMethod, isMethodVisible(writeMethod, visibilityStrategy), visibilityStrategy);
     }
 
-    /**
-     * Creates an instance.
-     *
-     * @param beanDescriptor   Class model of declaring class.
-     * @param prop     Property.
-     * @param jsonbCtx Context.
-     */
-    public BeanPropertyDescriptor(ClassDescriptor beanDescriptor, Property prop, JsonBindingContext jsonbCtx) {
-        this.beanDescriptor = beanDescriptor;
-        this.prop = prop;
-        this.propName = prop.getName();
-        this.propType = prop.getPropertyType();
-        this.backingField = prop.getField();
-        this.readMethod = prop.getGetter();
-        this.writeMethod = prop.getSetter();
-        PropertyVisibilityStrategy visibilityStrategy = beanDescriptor.getClassCustomization().getPropertyVisibilityStrategy();
-        boolean isGetterVisible = isMethodVisible(readMethod, visibilityStrategy);
-        boolean isSetterVisible = isMethodVisible(writeMethod, visibilityStrategy);
-        this.valueHandle = createPropertyReadHandle(backingField, readMethod, isGetterVisible, visibilityStrategy);
-        this.setterHandle = createPropertyWriteHandle(backingField, writeMethod, isSetterVisible, visibilityStrategy);
-        this.getterReturnType = isGetterVisible ? prop.getGetterType() : null;
-        this.setterParamType = isSetterVisible ? prop.getSetterType() : null;
-        this.propertyCustomizer = derivePropertyCustomization(prop, jsonbCtx);
-        this.getterName = computeReadWriteName(propertyCustomizer.getJsonReadName(), propName, jsonbCtx.getConfigProperties().getPropertyNamingStrategy());
-        this.setterName = computeReadWriteName(propertyCustomizer.getJsonWriteName(), propName, jsonbCtx.getConfigProperties().getPropertyNamingStrategy());
+    public MethodHandle getSetValueHandle() {
+        return setterHandle;
     }
 
-    /**
-     * Returns which type should be used to deserialization.
-     *
-     * @return deserialization type
-     */
-    public Type getPropertyDeserializationType() {
-        return null == setterParamType ? propType : setterParamType;
-    }
-
-    /**
-     * Returns which type should be used to serialization.
-     *
-     * @return serialization type
-     */
-    public Type getPropertySerializationType() {
-        return null == getterReturnType ? propType : getterReturnType;
-    }
-
-    private JsonbSerializerBinding<?> getUserSerializerBinding(Property prop, JsonBindingContext jsonbCtx) {
-        final JsonbSerializerBinding<?> userSerializer = jsonbCtx.getAnnotationIntrospector().getSerializerBinding(prop);
-        if (null != userSerializer) {
-            return userSerializer;
+    private static boolean isMethodVisible(Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
+        if (null == methodRef || Modifier.isStatic(methodRef.getModifiers())) {
+            return false;
         }
-        return jsonbCtx.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
+        boolean accessPermitted = isVisible(policyCandidate -> policyCandidate.isVisible(methodRef), methodRef, visibilityStrategy);
+        //overridden by strategy, anonymous class, or lambda
+        if (accessPermitted && (!Modifier.isPublic(methodRef.getModifiers()) || methodRef.getDeclaringClass().isAnonymousClass() || methodRef.getDeclaringClass().isSynthetic())) {
+            setAccessiblePrivileged(methodRef);
+        }
+        return accessPermitted;
+    }
+
+    private static MethodHandle createPropertyWriteHandle(Field backingField, Method writeMethod, boolean isSetterVisible, PropertyVisibilityStrategy visibilityStrategy) {
+        boolean isFieldWritable = null == backingField || 0 == (backingField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
+        if (isFieldWritable) {
+            if (null != writeMethod && isSetterVisible && !writeMethod.getDeclaringClass().isAnonymousClass()) {
+                try {
+                    return GLOBAL_RESOLVER.unreflect(writeMethod);
+                } catch (IllegalAccessException throwable) {
+                    throw new JsonbException("Error accessing setter '" + writeMethod.getName() + "' declared in '" + writeMethod.getDeclaringClass() + "'", throwable);
+                }
+            }
+            if (isFieldVisible(backingField, writeMethod, visibilityStrategy) && !backingField.getDeclaringClass().isAnonymousClass()) {
+                try {
+                    return GLOBAL_RESOLVER.unreflectSetter(backingField);
+                } catch (IllegalAccessException throwable) {
+                    throw new JsonbException("Error accessing field '" + backingField.getName() + "' declared in '" + backingField.getDeclaringClass() + "'", throwable);
+                }
+            }
+        }
+        return null;
+    }
+
+    public MethodHandle getGetValueHandle() {
+        return valueHandle;
+    }
+
+    /**
+     * Setter of a javabean property.
+     *
+     * @return {@link Method getter}
+     */
+    public Method getGetter() {
+        return readMethod;
+    }
+
+    private static MethodHandle createPropertyReadHandle(Field backingField, Method readMethod, boolean isGetterVisible, PropertyVisibilityStrategy visibilityStrategy) {
+        boolean isFieldReadable = null == backingField || 0 == (backingField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC));
+        if (isFieldReadable) {
+            if (null != readMethod && isGetterVisible) {
+                try {
+                    return GLOBAL_RESOLVER.unreflect(readMethod);
+                } catch (Throwable throwable) {
+                    throw new JsonbException("Error accessing getter '" + readMethod.getName() + "' declared in '" + readMethod.getDeclaringClass() + "'", throwable);
+                }
+            }
+            if (isFieldVisible(backingField, readMethod, visibilityStrategy)) {
+                try {
+                    return GLOBAL_RESOLVER.unreflectGetter(backingField);
+                } catch (IllegalAccessException throwable) {
+                    throw new JsonbException("Error accessing field '" + backingField.getName() + "' declared in '" + backingField.getDeclaringClass() + "'", throwable);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * If customized by JsonbPropertyAnnotation, than is used, otherwise use strategy to translate.
+     * Since this is cached for performance reasons strategy has to be consistent
+     * with calculated values for same input.
+     */
+    private static String computeReadWriteName(String readWriteKey, String propName, PropertyNamingStrategy visibilityStrategy) {
+        return null != readWriteKey ? readWriteKey : visibilityStrategy.translateName(propName);
+    }
+
+    private static boolean isNotPublicAndNonNested(Class<?> ownerType) {
+        return !ownerType.isMemberClass() && !Modifier.isPublic(ownerType.getModifiers());
+    }
+
+    /**
+     * Gets a name of JSON document property to read this property from.
+     *
+     * @return Name of JSON document property.
+     */
+    public String getReadName() {
+        return getterName;
     }
 
     private PropertyCustomization derivePropertyCustomization(Property prop, JsonBindingContext jsonbCtx) {
@@ -229,6 +299,52 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
         return customizationBuilder.build();
     }
 
+    /**
+     * Default property name according to Field / Getter / Setter method names.
+     * This name is use for identifying properties, for JSON serialization is used customized name
+     * which may be derived from default name.
+     *
+     * @return default name
+     */
+    public String getPropertyName() {
+        return propName;
+    }
+
+    private static boolean isFieldVisible(Field backingField, Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
+        if (null == backingField) {
+            return false;
+        }
+        boolean accessPermitted = isVisible(policyCandidate -> policyCandidate.isVisible(backingField), methodRef, visibilityStrategy);
+        //overridden by strategy, or anonymous class (readable by spec)
+        if (accessPermitted && (!Modifier.isPublic(backingField.getModifiers()) || backingField.getDeclaringClass().isAnonymousClass() || isNotPublicAndNonNested(backingField.getDeclaringClass()))) {
+            setAccessiblePrivileged(backingField);
+        }
+        return accessPermitted;
+    }
+
+    /**
+     * Property is writable. Based on access policy and java field modifiers.
+     *
+     * @return true if can be deserialized from JSON
+     */
+    public boolean isWritable() {
+        return !propertyCustomizer.isWriteTransient() && null != this.setterHandle;
+    }
+
+    /**
+     * Getter of a javabean property.
+     *
+     * @return {@link Method setter}
+     */
+    public Method getSetter() {
+        return writeMethod;
+    }
+
+    // Used in ClassParser
+    public static boolean isPropertyReadable(Field backingField, Method readMethod, PropertyVisibilityStrategy visibilityStrategy) {
+        return null != createPropertyReadHandle(backingField, readMethod, isMethodVisible(readMethod, visibilityStrategy), visibilityStrategy);
+    }
+
     private static void deriveDateFormatter(Property prop, AnnotationIntrospector annotationIntrospector, PropertyCustomization.Builder customizationBuilder, JsonBindingContext jsonbCtx) {
         /*
          * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
@@ -249,21 +365,125 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
         }
     }
 
-    private static void deriveNumberFormatter(Property prop, AnnotationIntrospector annotationIntrospector, PropertyCustomization.Builder customizationBuilder) {
-        /*
-         * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
-         * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
-         * If @JsonbNumberFormat is placed on field implementation must use this format on serialization and deserialization.
-         *
-         * Priority from high to low is getter / setter > field > class > package > global configuration
-         */
-        Map<AnnotationTarget, JsonbNumberFormatter> numberFormatMap = annotationIntrospector.getJsonNumberFormatter(prop);
-        if (!customizationBuilder.readTransient()) {
-            customizationBuilder.serializeNumberFormatter(getTargetForMostPreciseScope(numberFormatMap, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+    /**
+     * Property is readable. Based on access policy and java field modifiers.
+     *
+     * @return true if can be serialized to JSON
+     */
+    public boolean isReadable() {
+        return !propertyCustomizer.isReadTransient() && null != this.valueHandle;
+    }
+
+    @Override
+    public boolean equals(Object otherDescriptor) {
+        if (otherDescriptor == this) {
+            return true;
         }
-        if (!customizationBuilder.writeTransient()) {
-            customizationBuilder.deserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatMap, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        if (null == otherDescriptor || otherDescriptor.getClass() != getClass()) {
+            return false;
         }
+        BeanPropertyDescriptor comparedDescriptor = (BeanPropertyDescriptor) otherDescriptor;
+        return Objects.equals(getterName, comparedDescriptor.getterName) && Objects.equals(setterName, comparedDescriptor.setterName);
+    }
+
+    private JsonbSerializerBinding<?> getUserSerializerBinding(Property prop, JsonBindingContext jsonbCtx) {
+        final JsonbSerializerBinding<?> userSerializer = jsonbCtx.getAnnotationIntrospector().getSerializerBinding(prop);
+        if (null != userSerializer) {
+            return userSerializer;
+        }
+        return jsonbCtx.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
+    }
+
+    /**
+     * Model of declaring class of this property.
+     *
+     * @return class model
+     */
+    public ClassDescriptor getClassModel() {
+        return beanDescriptor;
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param beanDescriptor   Class model of declaring class.
+     * @param prop     Property.
+     * @param jsonbCtx Context.
+     */
+    public BeanPropertyDescriptor(ClassDescriptor beanDescriptor, Property prop, JsonBindingContext jsonbCtx) {
+        this.beanDescriptor = beanDescriptor;
+        this.prop = prop;
+        this.propName = prop.getName();
+        this.propType = prop.getPropertyType();
+        this.backingField = prop.getField();
+        this.readMethod = prop.getGetter();
+        this.writeMethod = prop.getSetter();
+        PropertyVisibilityStrategy visibilityStrategy = beanDescriptor.getClassCustomization().getPropertyVisibilityStrategy();
+        boolean isGetterVisible = isMethodVisible(readMethod, visibilityStrategy);
+        boolean isSetterVisible = isMethodVisible(writeMethod, visibilityStrategy);
+        this.valueHandle = createPropertyReadHandle(backingField, readMethod, isGetterVisible, visibilityStrategy);
+        this.setterHandle = createPropertyWriteHandle(backingField, writeMethod, isSetterVisible, visibilityStrategy);
+        this.getterReturnType = isGetterVisible ? prop.getGetterType() : null;
+        this.setterParamType = isSetterVisible ? prop.getSetterType() : null;
+        this.propertyCustomizer = derivePropertyCustomization(prop, jsonbCtx);
+        this.getterName = computeReadWriteName(propertyCustomizer.getJsonReadName(), propName, jsonbCtx.getConfigProperties().getPropertyNamingStrategy());
+        this.setterName = computeReadWriteName(propertyCustomizer.getJsonWriteName(), propName, jsonbCtx.getConfigProperties().getPropertyNamingStrategy());
+    }
+
+    @Override
+    public int compareTo(BeanPropertyDescriptor otherDescriptor) {
+        int comparison = getterName.compareTo(otherDescriptor.getterName);
+        return 0 == comparison ? setterName.compareTo(otherDescriptor.setterName) : comparison;
+    }
+
+    private static void setAccessiblePrivileged(AccessibleObject reflectiveObj) {
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            reflectiveObj.setAccessible(true);
+            return null;
+        });
+    }
+
+    /**
+     * Look up class and package level @JsonbVisibility, or global config PropertyVisibilityStrategy.
+     * If any is found it is used for resolving visibility by calling provided visibilityCheckFunction.
+     *
+     * @param visibilityPredicate function declaring visibility check
+     * @return Optional with result of visibility check, or empty optional if no strategy is found
+     */
+    private static boolean isVisible(Predicate<PropertyVisibilityStrategy> visibilityPredicate, Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
+        return null != visibilityStrategy ? visibilityPredicate.test(visibilityStrategy) : visibilityPredicate.test(new DefaultVisibilityPolicy(methodRef));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getterName, setterName);
+    }
+
+    /**
+     * Gets property's value.
+     *
+     * @param instance object to read property from
+     * @return property's value
+     */
+    public Object getValue(Object instance) {
+        try {
+            return valueHandle.invoke(instance);
+        } catch (Throwable throwable) {
+            throw new JsonbException("Error getting value on: " + instance, throwable);
+        }
+    }
+
+    public String getWriteName() {
+        return setterName;
+    }
+
+    /**
+     * Returns which type should be used to serialization.
+     *
+     * @return serialization type
+     */
+    public Type getPropertySerializationType() {
+        return null == getterReturnType ? propType : getterReturnType;
     }
 
     /**
@@ -283,17 +503,38 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
     }
 
     /**
-     * Gets property's value.
+     * Returns which type should be used to deserialization.
      *
-     * @param instance object to read property from
-     * @return property's value
+     * @return deserialization type
      */
-    public Object getValue(Object instance) {
-        try {
-            return valueHandle.invoke(instance);
-        } catch (Throwable throwable) {
-            throw new JsonbException("Error getting value on: " + instance, throwable);
+    public Type getPropertyDeserializationType() {
+        return null == setterParamType ? propType : setterParamType;
+    }
+
+    private static void deriveNumberFormatter(Property prop, AnnotationIntrospector annotationIntrospector, PropertyCustomization.Builder customizationBuilder) {
+        /*
+         * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
+         * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
+         * If @JsonbNumberFormat is placed on field implementation must use this format on serialization and deserialization.
+         *
+         * Priority from high to low is getter / setter > field > class > package > global configuration
+         */
+        Map<AnnotationTarget, JsonbNumberFormatter> numberFormatMap = annotationIntrospector.getJsonNumberFormatter(prop);
+        if (!customizationBuilder.readTransient()) {
+            customizationBuilder.serializeNumberFormatter(getTargetForMostPreciseScope(numberFormatMap, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
         }
+        if (!customizationBuilder.writeTransient()) {
+            customizationBuilder.deserializeNumberFormatter(getTargetForMostPreciseScope(numberFormatMap, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        }
+    }
+
+    /**
+     * Introspected customization of a property.
+     *
+     * @return immutable property customization
+     */
+    public PropertyCustomization getCustomization() {
+        return propertyCustomizer;
     }
 
     /**
@@ -315,243 +556,4 @@ public final class BeanPropertyDescriptor implements Comparable<BeanPropertyDesc
         }
     }
 
-    /**
-     * Property is readable. Based on access policy and java field modifiers.
-     *
-     * @return true if can be serialized to JSON
-     */
-    public boolean isReadable() {
-        return !propertyCustomizer.isReadTransient() && null != this.valueHandle;
-    }
-
-    /**
-     * Property is writable. Based on access policy and java field modifiers.
-     *
-     * @return true if can be deserialized from JSON
-     */
-    public boolean isWritable() {
-        return !propertyCustomizer.isWriteTransient() && null != this.setterHandle;
-    }
-
-    /**
-     * Default property name according to Field / Getter / Setter method names.
-     * This name is use for identifying properties, for JSON serialization is used customized name
-     * which may be derived from default name.
-     *
-     * @return default name
-     */
-    public String getPropertyName() {
-        return propName;
-    }
-
-    /**
-     * Model of declaring class of this property.
-     *
-     * @return class model
-     */
-    public ClassDescriptor getClassModel() {
-        return beanDescriptor;
-    }
-
-    /**
-     * Introspected customization of a property.
-     *
-     * @return immutable property customization
-     */
-    public PropertyCustomization getCustomization() {
-        return propertyCustomizer;
-    }
-
-    @Override
-    public int compareTo(BeanPropertyDescriptor otherDescriptor) {
-        int comparison = getterName.compareTo(otherDescriptor.getterName);
-        return 0 == comparison ? setterName.compareTo(otherDescriptor.setterName) : comparison;
-    }
-
-    @Override
-    public boolean equals(Object otherDescriptor) {
-        if (otherDescriptor == this) {
-            return true;
-        }
-        if (null == otherDescriptor || otherDescriptor.getClass() != getClass()) {
-            return false;
-        }
-        BeanPropertyDescriptor comparedDescriptor = (BeanPropertyDescriptor) otherDescriptor;
-        return Objects.equals(getterName, comparedDescriptor.getterName) && Objects.equals(setterName, comparedDescriptor.setterName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getterName, setterName);
-    }
-
-    /**
-     * Gets a name of JSON document property to read this property from.
-     *
-     * @return Name of JSON document property.
-     */
-    public String getReadName() {
-        return getterName;
-    }
-
-    public String getWriteName() {
-        return setterName;
-    }
-
-    /**
-     * If customized by JsonbPropertyAnnotation, than is used, otherwise use strategy to translate.
-     * Since this is cached for performance reasons strategy has to be consistent
-     * with calculated values for same input.
-     */
-    private static String computeReadWriteName(String readWriteKey, String propName, PropertyNamingStrategy visibilityStrategy) {
-        return null != readWriteKey ? readWriteKey : visibilityStrategy.translateName(propName);
-    }
-
-    /**
-     * Field of a javabean property.
-     *
-     * @return {@link Field field}
-     */
-    public Field getField() {
-        return backingField;
-    }
-
-    /**
-     * Setter of a javabean property.
-     *
-     * @return {@link Method getter}
-     */
-    public Method getGetter() {
-        return readMethod;
-    }
-
-    /**
-     * Getter of a javabean property.
-     *
-     * @return {@link Method setter}
-     */
-    public Method getSetter() {
-        return writeMethod;
-    }
-
-    // Used in ClassParser
-    public static boolean isPropertyReadable(Field backingField, Method readMethod, PropertyVisibilityStrategy visibilityStrategy) {
-        return null != createPropertyReadHandle(backingField, readMethod, isMethodVisible(readMethod, visibilityStrategy), visibilityStrategy);
-    }
-
-    private static MethodHandle createPropertyReadHandle(Field backingField, Method readMethod, boolean isGetterVisible, PropertyVisibilityStrategy visibilityStrategy) {
-        boolean isFieldReadable = null == backingField || 0 == (backingField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC));
-        if (isFieldReadable) {
-            if (null != readMethod && isGetterVisible) {
-                try {
-                    return GLOBAL_RESOLVER.unreflect(readMethod);
-                } catch (Throwable throwable) {
-                    throw new JsonbException("Error accessing getter '" + readMethod.getName() + "' declared in '" + readMethod.getDeclaringClass() + "'", throwable);
-                }
-            }
-            if (isFieldVisible(backingField, readMethod, visibilityStrategy)) {
-                try {
-                    return GLOBAL_RESOLVER.unreflectGetter(backingField);
-                } catch (IllegalAccessException throwable) {
-                    throw new JsonbException("Error accessing field '" + backingField.getName() + "' declared in '" + backingField.getDeclaringClass() + "'", throwable);
-                }
-            }
-        }
-        return null;
-    }
-
-    private static MethodHandle createPropertyWriteHandle(Field backingField, Method writeMethod, boolean isSetterVisible, PropertyVisibilityStrategy visibilityStrategy) {
-        boolean isFieldWritable = null == backingField || 0 == (backingField.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
-        if (isFieldWritable) {
-            if (null != writeMethod && isSetterVisible && !writeMethod.getDeclaringClass().isAnonymousClass()) {
-                try {
-                    return GLOBAL_RESOLVER.unreflect(writeMethod);
-                } catch (IllegalAccessException throwable) {
-                    throw new JsonbException("Error accessing setter '" + writeMethod.getName() + "' declared in '" + writeMethod.getDeclaringClass() + "'", throwable);
-                }
-            }
-            if (isFieldVisible(backingField, writeMethod, visibilityStrategy) && !backingField.getDeclaringClass().isAnonymousClass()) {
-                try {
-                    return GLOBAL_RESOLVER.unreflectSetter(backingField);
-                } catch (IllegalAccessException throwable) {
-                    throw new JsonbException("Error accessing field '" + backingField.getName() + "' declared in '" + backingField.getDeclaringClass() + "'", throwable);
-                }
-            }
-        }
-        return null;
-    }
-
-    private static boolean isFieldVisible(Field backingField, Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
-        if (null == backingField) {
-            return false;
-        }
-        boolean accessPermitted = isVisible(policyCandidate -> policyCandidate.isVisible(backingField), methodRef, visibilityStrategy);
-        //overridden by strategy, or anonymous class (readable by spec)
-        if (accessPermitted && (!Modifier.isPublic(backingField.getModifiers()) || backingField.getDeclaringClass().isAnonymousClass() || isNotPublicAndNonNested(backingField.getDeclaringClass()))) {
-            setAccessiblePrivileged(backingField);
-        }
-        return accessPermitted;
-    }
-
-    private static boolean isNotPublicAndNonNested(Class<?> ownerType) {
-        return !ownerType.isMemberClass() && !Modifier.isPublic(ownerType.getModifiers());
-    }
-
-    private static boolean isMethodVisible(Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
-        if (null == methodRef || Modifier.isStatic(methodRef.getModifiers())) {
-            return false;
-        }
-        boolean accessPermitted = isVisible(policyCandidate -> policyCandidate.isVisible(methodRef), methodRef, visibilityStrategy);
-        //overridden by strategy, anonymous class, or lambda
-        if (accessPermitted && (!Modifier.isPublic(methodRef.getModifiers()) || methodRef.getDeclaringClass().isAnonymousClass() || methodRef.getDeclaringClass().isSynthetic())) {
-            setAccessiblePrivileged(methodRef);
-        }
-        return accessPermitted;
-    }
-
-    private static void setAccessiblePrivileged(AccessibleObject reflectiveObj) {
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-            reflectiveObj.setAccessible(true);
-            return null;
-        });
-    }
-
-    /**
-     * Look up class and package level @JsonbVisibility, or global config PropertyVisibilityStrategy.
-     * If any is found it is used for resolving visibility by calling provided visibilityCheckFunction.
-     *
-     * @param visibilityPredicate function declaring visibility check
-     * @return Optional with result of visibility check, or empty optional if no strategy is found
-     */
-    private static boolean isVisible(Predicate<PropertyVisibilityStrategy> visibilityPredicate, Method methodRef, PropertyVisibilityStrategy visibilityStrategy) {
-        return null != visibilityStrategy ? visibilityPredicate.test(visibilityStrategy) : visibilityPredicate.test(new DefaultVisibilityPolicy(methodRef));
-    }
-
-    private static final class DefaultVisibilityPolicy implements PropertyVisibilityStrategy {
-
-        private final Method methodRef;
-
-        DefaultVisibilityPolicy(Method methodRef) {
-            this.methodRef = methodRef;
-        }
-
-        @Override
-        public boolean isVisible(Field backingField) {
-            //don't check field if getter is not visible (forced by spec)
-            return (null == methodRef || isVisible(methodRef)) && Modifier.isPublic(backingField.getModifiers());
-        }
-
-        @Override
-        public boolean isVisible(Method methodRef) {
-            return Modifier.isPublic(methodRef.getModifiers());
-        }
-    }
-
-    public MethodHandle getGetValueHandle() {
-        return valueHandle;
-    }
-
-    public MethodHandle getSetValueHandle() {
-        return setterHandle;
-    }
 }

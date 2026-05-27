@@ -25,9 +25,14 @@ class MapDeserializer implements ModelParser<JsonParser> {
 
     private final ModelParser<JsonParser> valueDelegate;
 
-    MapDeserializer(ModelParser<JsonParser> keyDelegate, ModelParser<JsonParser> valueDelegate) {
-        this.keyDelegate = keyDelegate;
-        this.valueDelegate = valueDelegate;
+    private enum Mode {
+
+        NONE, NORMAL, OBJECT
+    }
+
+    private enum State {
+
+        NEXT, VALUE, KEY, DONE
     }
 
     @SuppressWarnings("unchecked")
@@ -96,6 +101,11 @@ class MapDeserializer implements ModelParser<JsonParser> {
         return map;
     }
 
+    private Object deserializeValue(JsonParser parser, DefaultDeserializationContext context, ModelParser<JsonParser> deserializer) {
+        DefaultDeserializationContext keyContext = new DefaultDeserializationContext(context);
+        return deserializer.deserializeModel(parser, keyContext);
+    }
+
     private void validateKeyName(String keyName, State state) {
         if (State.KEY != state || keyName.equals("key")) {
             if (State.VALUE == state && !keyName.equals("value")) {
@@ -106,18 +116,9 @@ class MapDeserializer implements ModelParser<JsonParser> {
         }
     }
 
-    private Object deserializeValue(JsonParser parser, DefaultDeserializationContext context, ModelParser<JsonParser> deserializer) {
-        DefaultDeserializationContext keyContext = new DefaultDeserializationContext(context);
-        return deserializer.deserializeModel(parser, keyContext);
+    MapDeserializer(ModelParser<JsonParser> keyDelegate, ModelParser<JsonParser> valueDelegate) {
+        this.keyDelegate = keyDelegate;
+        this.valueDelegate = valueDelegate;
     }
 
-    private enum Mode {
-
-        NONE, NORMAL, OBJECT
-    }
-
-    private enum State {
-
-        NEXT, VALUE, KEY, DONE
-    }
 }

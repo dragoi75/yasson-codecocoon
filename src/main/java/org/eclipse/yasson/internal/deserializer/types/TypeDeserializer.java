@@ -27,6 +27,24 @@ public abstract class TypeDeserializer implements ModelParser<String> {
     private final ModelParser<Object> delegate;
     private final Class<?> clazz;
 
+    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
+        return deserializeStringValue(String.valueOf(value), context, rType);
+    }
+
+    public final Object deserialize(boolean value, DefaultDeserializationContext context) {
+        return delegate.deserializeModel(deserializeBooleanValue(value, context, clazz), context);
+    }
+
+    Object deserializeNumberValue(JsonParser value, DefaultDeserializationContext context, Type rType) {
+        return deserializeStringValue(value.getString(), context, rType);
+    }
+
+    Class<?> getType() {
+        return clazz;
+    }
+
+    abstract Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType);
+
     TypeDeserializer(TypeDeserializerBuilder builder) {
         this.delegate = builder.getDelegate();
         this.clazz = builder.getClazz();
@@ -37,26 +55,8 @@ public abstract class TypeDeserializer implements ModelParser<String> {
         return delegate.deserializeModel(deserializeStringValue(value, context, clazz), context);
     }
 
-    public final Object deserialize(boolean value, DefaultDeserializationContext context) {
-        return delegate.deserializeModel(deserializeBooleanValue(value, context, clazz), context);
-    }
-
     public final Object deserialize(JsonParser value, DefaultDeserializationContext context) {
         return delegate.deserializeModel(deserializeNumberValue(value, context, clazz), context);
-    }
-
-    abstract Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType);
-
-    Object deserializeBooleanValue(boolean value, DefaultDeserializationContext context, Type rType) {
-        return deserializeStringValue(String.valueOf(value), context, rType);
-    }
-
-    Object deserializeNumberValue(JsonParser value, DefaultDeserializationContext context, Type rType) {
-        return deserializeStringValue(value.getString(), context, rType);
-    }
-
-    Class<?> getType() {
-        return clazz;
     }
 
 }

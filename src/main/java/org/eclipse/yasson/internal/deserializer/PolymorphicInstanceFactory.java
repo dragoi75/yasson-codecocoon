@@ -36,6 +36,24 @@ class PolymorphicInstanceFactory implements ModelParser<JsonParser> {
 
     private final ModelParser<JsonParser> fallbackParser;
 
+    private Class<?> getPolymorphicTypeClass(String typeKey) {
+        if (classRegistry.containsKey(typeKey)) {
+            return classRegistry.get(typeKey);
+        }
+        for (Map.Entry<Class<?>, String> mappingPair : inheritanceSettings.getAliases().entrySet()) {
+            if (mappingPair.getValue().equals(typeKey)) {
+                classRegistry.put(typeKey, mappingPair.getKey());
+                return mappingPair.getKey();
+            }
+        }
+        throw new JsonbException("Unknown alias \"" + typeKey + "\" known aliases: " + inheritanceSettings.getAliases().values());
+    }
+
+    @Override
+    public String toString() {
+        return "Property " + inheritanceSettings.getFieldName() + " polymorphic information handler";
+    }
+
     PolymorphicInstanceFactory(Class<?> targetClass, DeserializationModelFactory modelFactory, TypeInheritanceSettings inheritanceSettings, ModelParser<JsonParser> fallbackParser) {
         this.targetClass = targetClass;
         this.modelFactory = modelFactory;
@@ -67,21 +85,4 @@ class PolymorphicInstanceFactory implements ModelParser<JsonParser> {
         return modelParser.deserializeModel(internalParser, deserializationState);
     }
 
-    @Override
-    public String toString() {
-        return "Property " + inheritanceSettings.getFieldName() + " polymorphic information handler";
-    }
-
-    private Class<?> getPolymorphicTypeClass(String typeKey) {
-        if (classRegistry.containsKey(typeKey)) {
-            return classRegistry.get(typeKey);
-        }
-        for (Map.Entry<Class<?>, String> mappingPair : inheritanceSettings.getAliases().entrySet()) {
-            if (mappingPair.getValue().equals(typeKey)) {
-                classRegistry.put(typeKey, mappingPair.getKey());
-                return mappingPair.getKey();
-            }
-        }
-        throw new JsonbException("Unknown alias \"" + typeKey + "\" known aliases: " + inheritanceSettings.getAliases().values());
-    }
 }

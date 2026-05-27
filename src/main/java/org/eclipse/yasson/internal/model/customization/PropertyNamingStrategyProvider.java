@@ -37,13 +37,33 @@ import static jakarta.json.bind.config.PropertyOrderStrategy.REVERSE;
  */
 public final class PropertyNamingStrategyProvider {
 
-    private PropertyNamingStrategyProvider() {
-    }
-
     /**
      * Case insensitive naming strategy.
      */
     public static final PropertyNamingStrategy CASE_INSENSITIVE_STRATEGY = Objects::requireNonNull;
+
+    private static boolean isLowerCaseCharacter(char ch) {
+        return Character.isAlphabetic(ch) && Character.isLowerCase(ch);
+    }
+
+    private static PropertyNamingStrategy createLowerCaseWithSeparatorStrategy(char delimiter) {
+        return name -> {
+            Objects.requireNonNull(name);
+            CharBuffer charsSequence = CharBuffer.allocate(name.length() * 2);
+            char prevChar = Character.MIN_VALUE;
+            int index = 0;
+            while (name.length() > index) {
+                char activeChar = name.charAt(index);
+                if (0 < index && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
+                    charsSequence.append(delimiter);
+                }
+                prevChar = activeChar;
+                charsSequence.append(Character.toLowerCase(activeChar));
+                ++index;
+            }
+            return new String(charsSequence.array(), 0, charsSequence.position());
+        };
+    }
 
     /**
      * Returns an ordering strategy which corresponds to the ordering strategy name.
@@ -90,14 +110,6 @@ public final class PropertyNamingStrategyProvider {
         }
     }
 
-    private static PropertyNamingStrategy createPascalCaseStrategy() {
-        return name -> {
-            Objects.requireNonNull(name);
-            char initialChar = Character.toUpperCase(name.charAt(0));
-            return initialChar + name.substring(1);
-        };
-    }
-
     private static PropertyNamingStrategy createUpperCamelCaseWithSpacesStrategy() {
         return name -> {
             String upperCaseVersion = createPascalCaseStrategy().translateName(name);
@@ -117,26 +129,15 @@ public final class PropertyNamingStrategyProvider {
         };
     }
 
-    private static PropertyNamingStrategy createLowerCaseWithSeparatorStrategy(char delimiter) {
+    private static PropertyNamingStrategy createPascalCaseStrategy() {
         return name -> {
             Objects.requireNonNull(name);
-            CharBuffer charsSequence = CharBuffer.allocate(name.length() * 2);
-            char prevChar = Character.MIN_VALUE;
-            int index = 0;
-            while (name.length() > index) {
-                char activeChar = name.charAt(index);
-                if (0 < index && Character.isUpperCase(activeChar) && isLowerCaseCharacter(prevChar)) {
-                    charsSequence.append(delimiter);
-                }
-                prevChar = activeChar;
-                charsSequence.append(Character.toLowerCase(activeChar));
-                ++index;
-            }
-            return new String(charsSequence.array(), 0, charsSequence.position());
+            char initialChar = Character.toUpperCase(name.charAt(0));
+            return initialChar + name.substring(1);
         };
     }
 
-    private static boolean isLowerCaseCharacter(char ch) {
-        return Character.isAlphabetic(ch) && Character.isLowerCase(ch);
+    private PropertyNamingStrategyProvider() {
     }
+
 }

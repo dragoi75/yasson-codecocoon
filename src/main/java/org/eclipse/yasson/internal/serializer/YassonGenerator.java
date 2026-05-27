@@ -28,60 +28,22 @@ class YassonGenerator implements JsonGenerator {
 
     private int level;
 
-    YassonGenerator(JsonGenerator delegate) {
-        this.delegate = delegate;
+    private void writeValidate(String method) {
+        if (0 > level) {
+            throw new JsonbException(method + " cannot be called outside of the scope of user generator.");
+        }
     }
 
     @Override
-    public JsonGenerator writeStartObject() {
-        writeValidate("writeStartObject()");
-        level += 1;
-        return delegate.writeStartObject();
-    }
-
-    @Override
-    public JsonGenerator writeStartObject(String name) {
-        writeValidate("writeStartObject(String name)");
-        level += 1;
-        return delegate.writeStartObject(name);
-    }
-
-    @Override
-    public JsonGenerator writeKey(String name) {
-        writeValidate("writeKey(String name)");
-        level += 1;
-        return delegate.writeKey(name);
-    }
-
-    @Override
-    public JsonGenerator writeStartArray() {
-        writeValidate("writeStartArray()");
-        level += 1;
-        return delegate.writeStartArray();
-    }
-
-    @Override
-    public JsonGenerator writeStartArray(String name) {
-        writeValidate("writeStartArray(String name)");
-        level += 1;
-        return delegate.writeStartArray(name);
+    public JsonGenerator write(boolean value) {
+        writeValidate("write(boolean value)");
+        level -= 1;
+        return delegate.write(value);
     }
 
     @Override
     public JsonGenerator write(String name, JsonValue value) {
         writeValidate("write(String name, JsonValue value)");
-        return delegate.write(name, value);
-    }
-
-    @Override
-    public JsonGenerator write(String name, String value) {
-        writeValidate("write(String name, String value)");
-        return delegate.write(name, value);
-    }
-
-    @Override
-    public JsonGenerator write(String name, BigInteger value) {
-        writeValidate("write(String name, BigInteger value)");
         return delegate.write(name, value);
     }
 
@@ -92,9 +54,10 @@ class YassonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(String name, int value) {
-        writeValidate("write(String name, int value)");
-        return delegate.write(name, value);
+    public JsonGenerator write(JsonValue value) {
+        writeValidate("write(JsonValue value)");
+        level -= 1;
+        return delegate.write(value);
     }
 
     @Override
@@ -104,21 +67,49 @@ class YassonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(String name, double value) {
-        writeValidate("write(String name, double value)");
+    public JsonGenerator write(String name, int value) {
+        writeValidate("write(String name, int value)");
         return delegate.write(name, value);
     }
 
     @Override
-    public JsonGenerator write(String name, boolean value) {
-        writeValidate("write(String name, boolean value)");
-        return delegate.write(name, value);
+    public JsonGenerator write(String value) {
+        writeValidate("write(String value)");
+        level -= 1;
+        return delegate.write(value);
+    }
+
+    @Override
+    public JsonGenerator writeNull() {
+        writeValidate("writeNull()");
+        level -= 1;
+        return delegate.writeNull();
+    }
+
+    @Override
+    public JsonGenerator write(int value) {
+        writeValidate("write(int value)");
+        level -= 1;
+        return delegate.write(value);
+    }
+
+    @Override
+    public JsonGenerator writeStartObject() {
+        writeValidate("writeStartObject()");
+        level += 1;
+        return delegate.writeStartObject();
     }
 
     @Override
     public JsonGenerator writeNull(String name) {
         writeValidate("writeNull(String name)");
         return delegate.writeNull(name);
+    }
+
+    @Override
+    public JsonGenerator write(String name, double value) {
+        writeValidate("write(String name, double value)");
+        return delegate.write(name, value);
     }
 
     @Override
@@ -135,22 +126,8 @@ class YassonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(JsonValue value) {
-        writeValidate("write(JsonValue value)");
-        level -= 1;
-        return delegate.write(value);
-    }
-
-    @Override
-    public JsonGenerator write(String value) {
-        writeValidate("write(String value)");
-        level -= 1;
-        return delegate.write(value);
-    }
-
-    @Override
-    public JsonGenerator write(BigDecimal value) {
-        writeValidate("write(BigDecimal value)");
+    public JsonGenerator write(long value) {
+        writeValidate("write(long value)");
         level -= 1;
         return delegate.write(value);
     }
@@ -163,17 +140,63 @@ class YassonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(int value) {
-        writeValidate("write(int value)");
+    public void close() {
+        throw new JsonbException("Unsupported operation in user defined deserializer.");
+    }
+
+    @Override
+    public JsonGenerator writeStartObject(String name) {
+        writeValidate("writeStartObject(String name)");
+        level += 1;
+        return delegate.writeStartObject(name);
+    }
+
+    @Override
+    public JsonGenerator write(String name, String value) {
+        writeValidate("write(String name, String value)");
+        return delegate.write(name, value);
+    }
+
+    @Override
+    public JsonGenerator write(BigDecimal value) {
+        writeValidate("write(BigDecimal value)");
         level -= 1;
         return delegate.write(value);
     }
 
     @Override
-    public JsonGenerator write(long value) {
-        writeValidate("write(long value)");
-        level -= 1;
-        return delegate.write(value);
+    public void flush() {
+        throw new JsonbException("Unsupported operation in user defined deserializer.");
+    }
+
+    @Override
+    public JsonGenerator writeKey(String name) {
+        writeValidate("writeKey(String name)");
+        level += 1;
+        return delegate.writeKey(name);
+    }
+
+    @Override
+    public JsonGenerator writeStartArray() {
+        writeValidate("writeStartArray()");
+        level += 1;
+        return delegate.writeStartArray();
+    }
+
+    YassonGenerator(JsonGenerator delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public JsonGenerator write(String name, boolean value) {
+        writeValidate("write(String name, boolean value)");
+        return delegate.write(name, value);
+    }
+
+    @Override
+    public JsonGenerator write(String name, BigInteger value) {
+        writeValidate("write(String name, BigInteger value)");
+        return delegate.write(name, value);
     }
 
     @Override
@@ -184,32 +207,10 @@ class YassonGenerator implements JsonGenerator {
     }
 
     @Override
-    public JsonGenerator write(boolean value) {
-        writeValidate("write(boolean value)");
-        level -= 1;
-        return delegate.write(value);
+    public JsonGenerator writeStartArray(String name) {
+        writeValidate("writeStartArray(String name)");
+        level += 1;
+        return delegate.writeStartArray(name);
     }
 
-    @Override
-    public JsonGenerator writeNull() {
-        writeValidate("writeNull()");
-        level -= 1;
-        return delegate.writeNull();
-    }
-
-    @Override
-    public void close() {
-        throw new JsonbException("Unsupported operation in user defined deserializer.");
-    }
-
-    @Override
-    public void flush() {
-        throw new JsonbException("Unsupported operation in user defined deserializer.");
-    }
-
-    private void writeValidate(String method) {
-        if (0 > level) {
-            throw new JsonbException(method + " cannot be called outside of the scope of user generator.");
-        }
-    }
 }

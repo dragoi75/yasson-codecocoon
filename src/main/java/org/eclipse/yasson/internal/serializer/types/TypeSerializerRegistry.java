@@ -132,32 +132,6 @@ public class TypeSerializerRegistry {
         ALLOWED_KEY_TYPES = Set.copyOf(mapKeys);
     }
 
-    private TypeSerializerRegistry() {
-        throw new IllegalStateException("Util class cannot be instantiated");
-    }
-
-    /**
-     * Whether type is the supported key type.
-     *
-     * @param keyType key type
-     * @return whether type is supported key type
-     */
-    public static boolean isSupportedMapKey(Class<?> keyType) {
-        return Enum.class.isAssignableFrom(keyType) || ALLOWED_KEY_TYPES.contains(keyType);
-    }
-
-    /**
-     * Create new type serializer.
-     *
-     * @param keyType         type of the serializer
-     * @param customizer serializer customization
-     * @param bindingContext  jsonb context
-     * @return new type serializer
-     */
-    public static ModelMarshaller getTypeSerializer(Class<?> keyType, SerializationCustomizer customizer, JsonBindingContext bindingContext) {
-        return getTypeSerializer(Collections.emptyList(), keyType, customizer, bindingContext, false);
-    }
-
     /**
      * Create new type serializer.
      *
@@ -215,4 +189,31 @@ public class TypeSerializerRegistry {
         }
         return null == marshaller ? null : SerializationModelBuilder.wrapWithCommonSet(marshaller, customizer, bindingContext);
     }
+
+    /**
+     * Create new type serializer.
+     *
+     * @param keyType         type of the serializer
+     * @param customizer serializer customization
+     * @param bindingContext  jsonb context
+     * @return new type serializer
+     */
+    public static ModelMarshaller getTypeSerializer(Class<?> keyType, SerializationCustomizer customizer, JsonBindingContext bindingContext) {
+        return getTypeSerializer(Collections.emptyList(), keyType, customizer, bindingContext, false);
+    }
+
+    /**
+     * Whether type is the supported key type.
+     *
+     * @param keyType key type
+     * @return whether type is supported key type
+     */
+    public static boolean isSupportedMapKey(Class<?> keyType) {
+        return Enum.class.isAssignableFrom(keyType) || ALLOWED_KEY_TYPES.contains(keyType);
+    }
+
+    private TypeSerializerRegistry() {
+        throw new IllegalStateException("Util class cannot be instantiated");
+    }
+
 }

@@ -29,14 +29,6 @@ class AdapterMarshaller extends AbstractSerializer {
     private final JsonbAdapter<Object, Object> jsonbConverter;
     private final AdapterBindingInfo bindingInfo;
 
-    @SuppressWarnings("unchecked")
-    AdapterMarshaller(AdapterBindingInfo bindingInfo,
-                      ModelMarshaller modelMarshaller) {
-        super(modelMarshaller);
-        this.jsonbConverter = (JsonbAdapter<Object, Object>) bindingInfo.getAdapter();
-        this.bindingInfo = bindingInfo;
-    }
-
     @Override
     public void marshal(Object inputObj, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
         try {
@@ -47,6 +39,14 @@ class AdapterMarshaller extends AbstractSerializer {
                                                          bindingInfo.getToType(),
                                                          jsonbConverter.getClass()), exception);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    AdapterMarshaller(AdapterBindingInfo bindingInfo,
+                      ModelMarshaller modelMarshaller) {
+        super(modelMarshaller);
+        this.jsonbConverter = (JsonbAdapter<Object, Object>) bindingInfo.getAdapter();
+        this.bindingInfo = bindingInfo;
     }
 
 }

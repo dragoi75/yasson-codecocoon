@@ -41,26 +41,6 @@ class CollectionInstanceCreator implements ModelParser<JsonParser> {
 
     private final boolean isEnumSet;
 
-    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
-        this.delegate = delegate;
-        this.clazz = implementationClass(ReflectionHelper.getRawType(type));
-        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
-        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        Object instance;
-        if (!isEnumSet) {
-            instance = InstanceCreator.createInstance(clazz);
-        } else {
-            instance = EnumSet.noneOf((Class<Enum>) type);
-        }
-        context.setInstance(instance);
-        return delegate.deserializeModel(value, context);
-    }
-
     private Class<?> implementationClass(Class<?> type) {
         if (type.isInterface()) {
             return createInterfaceInstance(type);
@@ -86,4 +66,25 @@ class CollectionInstanceCreator implements ModelParser<JsonParser> {
         }
         return ifcType;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        Object instance;
+        if (!isEnumSet) {
+            instance = InstanceCreator.createInstance(clazz);
+        } else {
+            instance = EnumSet.noneOf((Class<Enum>) type);
+        }
+        context.setInstance(instance);
+        return delegate.deserializeModel(value, context);
+    }
+
+    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
+        this.delegate = delegate;
+        this.clazz = implementationClass(ReflectionHelper.getRawType(type));
+        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
+        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
+    }
+
 }

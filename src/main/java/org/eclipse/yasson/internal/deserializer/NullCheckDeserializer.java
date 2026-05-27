@@ -27,6 +27,11 @@ public class NullCheckDeserializer implements ModelParser<JsonParser> {
 
     private final ModelParser<Object> nullDeserializer;
 
+    @Override
+    public String toString() {
+        return "Null value check";
+    }
+
     /**
      * Create new instance.
      *
@@ -46,8 +51,4 @@ public class NullCheckDeserializer implements ModelParser<JsonParser> {
         return nullDeserializer.deserializeModel(null, context);
     }
 
-    @Override
-    public String toString() {
-        return "Null value check";
-    }
 }

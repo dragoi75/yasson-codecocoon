@@ -39,50 +39,27 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
 
     private Object targetObject;
 
-    /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param binding context of Jsonb
-     */
-    public DefaultDeserializationContext(JsonBindingContext binding) {
-        super(binding);
+    @SuppressWarnings("unchecked")
+    private <T> T deserializeValue(Type target, JsonParser jsonReader) {
+        try {
+            if (null == finalValueEvent) {
+                finalValueEvent = jsonReader.next();
+                validateState();
+            }
+            ModelParser<JsonParser> modelParser = getJsonbContext().getChainModelCreator().createDeserializerChain(target);
+            return (T) modelParser.deserializeModel(jsonReader, this);
+        } catch (JsonbException ex) {
+            LOG.severe(ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            LOG.severe(ex.getMessage());
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, ex.getMessage()), ex);
+        }
     }
 
-    /**
-     * Create new instance based on previous context.
-     *
-     * @param ctx previous deserialization context
-     */
-    public DefaultDeserializationContext(DefaultDeserializationContext ctx) {
-        super(ctx.getJsonbContext());
-        this.finalValueEvent = ctx.finalValueEvent;
-    }
-
-    /**
-     * Return instance of currently deserialized type.
-     *
-     * @return null if instance has not been created yet
-     */
-    public Object getInstance() {
-        return targetObject;
-    }
-
-    /**
-     * Set currently deserialized type instance.
-     *
-     * @param targetObject deserialized type instance
-     */
-    public void setInstance(Object targetObject) {
-        this.targetObject = targetObject;
-    }
-
-    /**
-     * Return the list of deferred deserializers.
-     *
-     * @return list of deferred deserializers
-     */
-    public List<Runnable> getDeferredDeserializers() {
-        return deferredSetters;
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
     }
 
     /**
@@ -112,6 +89,38 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
         return serializationCustomizer;
     }
 
+    @Override
+    public <T> T deserialize(Type target, JsonParser jsonReader) {
+        return deserializeValue(target, jsonReader);
+    }
+
+    /**
+     * Set currently deserialized type instance.
+     *
+     * @param targetObject deserialized type instance
+     */
+    public void setInstance(Object targetObject) {
+        this.targetObject = targetObject;
+    }
+
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param binding context of Jsonb
+     */
+    public DefaultDeserializationContext(JsonBindingContext binding) {
+        super(binding);
+    }
+
+    /**
+     * Return instance of currently deserialized type.
+     *
+     * @return null if instance has not been created yet
+     */
+    public Object getInstance() {
+        return targetObject;
+    }
+
     /**
      * Set customization used by currently processed user defined deserializer.
      *
@@ -121,37 +130,29 @@ public class DefaultDeserializationContext extends ProcessingScope implements De
         this.serializationCustomizer = serializationCustomizer;
     }
 
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type target, JsonParser jsonReader) {
-        return deserializeValue(target, jsonReader);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T deserializeValue(Type target, JsonParser jsonReader) {
-        try {
-            if (null == finalValueEvent) {
-                finalValueEvent = jsonReader.next();
-                validateState();
-            }
-            ModelParser<JsonParser> modelParser = getJsonbContext().getChainModelCreator().createDeserializerChain(target);
-            return (T) modelParser.deserializeModel(jsonReader, this);
-        } catch (JsonbException ex) {
-            LOG.severe(ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            LOG.severe(ex.getMessage());
-            throw new JsonbException(MessageProvider.getMessage(MessageConstants.INTERNAL_ERROR, ex.getMessage()), ex);
-        }
-    }
-
     private void validateState() {
         if (JsonParser.Event.KEY_NAME == finalValueEvent) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
     }
+
+    /**
+     * Return the list of deferred deserializers.
+     *
+     * @return list of deferred deserializers
+     */
+    public List<Runnable> getDeferredDeserializers() {
+        return deferredSetters;
+    }
+
+    /**
+     * Create new instance based on previous context.
+     *
+     * @param ctx previous deserialization context
+     */
+    public DefaultDeserializationContext(DefaultDeserializationContext ctx) {
+        super(ctx.getJsonbContext());
+        this.finalValueEvent = ctx.finalValueEvent;
+    }
+
 }

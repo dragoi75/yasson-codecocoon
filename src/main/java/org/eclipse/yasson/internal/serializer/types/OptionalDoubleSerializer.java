@@ -23,10 +23,6 @@ class OptionalDoubleSerializer implements ModelMarshaller {
 
     private final ModelMarshaller typeSerializer;
 
-    OptionalDoubleSerializer(ModelMarshaller typeSerializer) {
-        this.typeSerializer = typeSerializer;
-    }
-
     @Override
     public void marshal(Object value, JsonGenerator generator, SerializationContextImpl context) {
         OptionalDouble optionalDouble = (OptionalDouble) value;
@@ -36,4 +32,9 @@ class OptionalDoubleSerializer implements ModelMarshaller {
             typeSerializer.marshal(optionalDouble.getAsDouble(), generator, context);
         }
     }
+
+    OptionalDoubleSerializer(ModelMarshaller typeSerializer) {
+        this.typeSerializer = typeSerializer;
+    }
+
 }

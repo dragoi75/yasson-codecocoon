@@ -27,10 +27,6 @@ import org.eclipse.yasson.internal.properties.MessageProvider;
  */
 class StringSerializer extends TypeSerializer<String> {
 
-    StringSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(String value, JsonGenerator generator, SerializationContextImpl context) {
         JsonbConfigurationProperties configProperties = context.getJsonbContext().getConfigProperties();
@@ -41,6 +37,10 @@ class StringSerializer extends TypeSerializer<String> {
             }
         }
         generator.write(value);
+    }
+
+    StringSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
 }

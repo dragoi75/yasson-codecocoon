@@ -39,14 +39,52 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
 
     private ModelParser<String> actualDeserializer;
 
+    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
+        return Optional.ofNullable(customization.getDeserializeDateFormatter()).orElse(properties.getConfigDateFormatter());
+    }
+
+    /**
+     * Parse java.time date object with provided formatter.
+     *
+     * @param jsonValue string value to parse from
+     * @param formatter a formatter to use
+     * @return parsed date object
+     */
+    abstract T parseWithFormatter(String jsonValue, DateTimeFormatter formatter);
+
+    /**
+     * Parse java.time date object with default formatter.
+     * Different default formatter for each date object type is used.
+     *
+     * @param jsonValue string value to parse from
+     * @param locale    annotated locale or default
+     * @return parsed date object
+     */
+    abstract T parseDefault(String jsonValue, Locale locale);
+
+    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
+        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
+    }
+
+    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
+        try {
+            return parseWithFormatter(jsonValue, formatter);
+        } catch (DateTimeException e) {
+            throw new JsonbException(MessageProvider.getMessage(MessageConstants.DATE_PARSE_ERROR, jsonValue, getType()), e);
+        }
+    }
+
     AbstractDateDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
         this.actualDeserializer = actualDeserializer(builder.getConfigProperties(), builder.getCustomization());
     }
 
-    AbstractDateDeserializer(Class<Date> clazz) {
-        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
-        this.actualDeserializer = null;
+    @Override
+    public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
+        if (null == actualDeserializer) {
+            actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
+        }
+        return actualDeserializer.deserializeModel(value, context);
     }
 
     private ModelParser<String> actualDeserializer(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
@@ -76,16 +114,9 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         };
     }
 
-    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigurationProperties properties, SerializationCustomizer customization) {
-        return Optional.ofNullable(customization.getDeserializeDateFormatter()).orElse(properties.getConfigDateFormatter());
-    }
-
-    @Override
-    public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
-        if (null == actualDeserializer) {
-            actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
-        }
-        return actualDeserializer.deserializeModel(value, context);
+    AbstractDateDeserializer(Class<Date> clazz) {
+        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
+        this.actualDeserializer = null;
     }
 
     /**
@@ -97,34 +128,4 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
      */
     abstract T fromInstant(Instant instant);
 
-    /**
-     * Parse java.time date object with default formatter.
-     * Different default formatter for each date object type is used.
-     *
-     * @param jsonValue string value to parse from
-     * @param locale    annotated locale or default
-     * @return parsed date object
-     */
-    abstract T parseDefault(String jsonValue, Locale locale);
-
-    /**
-     * Parse java.time date object with provided formatter.
-     *
-     * @param jsonValue string value to parse from
-     * @param formatter a formatter to use
-     * @return parsed date object
-     */
-    abstract T parseWithFormatter(String jsonValue, DateTimeFormatter formatter);
-
-    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
-        try {
-            return parseWithFormatter(jsonValue, formatter);
-        } catch (DateTimeException e) {
-            throw new JsonbException(MessageProvider.getMessage(MessageConstants.DATE_PARSE_ERROR, jsonValue, getType()), e);
-        }
-    }
-
-    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
-    }
 }

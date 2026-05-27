@@ -29,10 +29,6 @@ public class JsonbComponentInstanceCreatorFactory {
 
     private static final Logger LOGGER = Logger.getLogger(JsonbComponentInstanceCreator.class.getName());
 
-    private JsonbComponentInstanceCreatorFactory() {
-        throw new IllegalStateException("This class should never be instantiated");
-    }
-
     /**
      * JNDI bean manager name.
      */
@@ -46,23 +42,33 @@ public class JsonbComponentInstanceCreatorFactory {
     private static final String CDI_SPI_CLASS = "jakarta.enterprise.inject.spi.CDI";
 
     /**
-     * First check a CDI provider, if available use those.
-     * Try to lookup in a JNDI if no provider is registered.
-     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
-     * or {@link DefaultConstructorCreator} otherwise.
-     *
-     * @return Component instance creator, either CDI or default constructor.
+     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
      */
-    public static JsonbComponentInstanceCreator getComponentInstanceCreator() {
-        Object beanManager = getCdiBeanManager();
-        if (null == beanManager) {
-            beanManager = getJndiBeanManager();
-        }
-        if (null == beanManager) {
-            LOGGER.finest(MessageProvider.getMessage(MessageConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
-            return new DefaultConstructorCreator();
-        }
-        return new BeanManagerInstanceCreator(beanManager);
+    private interface BeanManagerProvider {
+
+        Object provide() throws ReflectiveOperationException;
+    }
+
+    /**
+     * Get bean manager from JNDI context.
+     *
+     * @return bean manager instance or null if javax.naming is not available.
+     */
+    private static Object getJndiBeanManager() {
+        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            try {
+                return getBeanManager(() -> {
+                    Class<?> initialContextClass = Class.forName(INITIAL_CONTEXT_CLASS);
+                    Method lookupMethod = initialContextClass.getMethod("lookup", String.class);
+                    Constructor<?> initialContextConstructor = initialContextClass.getConstructor();
+                    Object initialContextObject = initialContextConstructor.newInstance();
+                    return lookupMethod.invoke(initialContextObject, BEAN_MANAGER_NAME);
+                });
+            } catch (ClassNotFoundException e) {
+                LOGGER.finest(MessageProvider.getMessage(MessageConstants.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
+                return null;
+            }
+        });
     }
 
     /**
@@ -85,28 +91,6 @@ public class JsonbComponentInstanceCreatorFactory {
                 });
             } catch (ClassNotFoundException e) {
                 LOGGER.finest(MessageProvider.getMessage(MessageConstants.NO_CDI_API_PROVIDER, CDI_SPI_CLASS));
-                return null;
-            }
-        });
-    }
-
-    /**
-     * Get bean manager from JNDI context.
-     *
-     * @return bean manager instance or null if javax.naming is not available.
-     */
-    private static Object getJndiBeanManager() {
-        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            try {
-                return getBeanManager(() -> {
-                    Class<?> initialContextClass = Class.forName(INITIAL_CONTEXT_CLASS);
-                    Method lookupMethod = initialContextClass.getMethod("lookup", String.class);
-                    Constructor<?> initialContextConstructor = initialContextClass.getConstructor();
-                    Object initialContextObject = initialContextConstructor.newInstance();
-                    return lookupMethod.invoke(initialContextObject, BEAN_MANAGER_NAME);
-                });
-            } catch (ClassNotFoundException e) {
-                LOGGER.finest(MessageProvider.getMessage(MessageConstants.NO_JNDI_ENVIRONMENT, INITIAL_CONTEXT_CLASS));
                 return null;
             }
         });
@@ -136,11 +120,28 @@ public class JsonbComponentInstanceCreatorFactory {
         }
     }
 
-    /**
-     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
-     */
-    private interface BeanManagerProvider {
-
-        Object provide() throws ReflectiveOperationException;
+    private JsonbComponentInstanceCreatorFactory() {
+        throw new IllegalStateException("This class should never be instantiated");
     }
+
+    /**
+     * First check a CDI provider, if available use those.
+     * Try to lookup in a JNDI if no provider is registered.
+     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
+     * or {@link DefaultConstructorCreator} otherwise.
+     *
+     * @return Component instance creator, either CDI or default constructor.
+     */
+    public static JsonbComponentInstanceCreator getComponentInstanceCreator() {
+        Object beanManager = getCdiBeanManager();
+        if (null == beanManager) {
+            beanManager = getJndiBeanManager();
+        }
+        if (null == beanManager) {
+            LOGGER.finest(MessageProvider.getMessage(MessageConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
+            return new DefaultConstructorCreator();
+        }
+        return new BeanManagerInstanceCreator(beanManager);
+    }
+
 }

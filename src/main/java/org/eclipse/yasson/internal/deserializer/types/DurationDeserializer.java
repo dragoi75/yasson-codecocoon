@@ -22,13 +22,13 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
  */
 class DurationDeserializer extends TypeDeserializer {
 
-    DurationDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     public Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return Duration.parse(value);
+    }
+
+    DurationDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
     }
 
 }

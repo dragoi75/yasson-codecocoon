@@ -27,11 +27,6 @@ class ValueGetterDelegatingSerializer implements ModelMarshaller {
     private final MethodHandle valueAccessor;
     private final ModelMarshaller modelMarshaller;
 
-    ValueGetterDelegatingSerializer(MethodHandle valueAccessor, ModelMarshaller modelMarshaller) {
-        this.valueAccessor = valueAccessor;
-        this.modelMarshaller = modelMarshaller;
-    }
-
     @Override
     public void marshal(Object instance, JsonGenerator jsonWriter, SerializationContextImpl serializationState) {
         Object target;
@@ -42,4 +37,10 @@ class ValueGetterDelegatingSerializer implements ModelMarshaller {
         }
         modelMarshaller.marshal(target, jsonWriter, serializationState);
     }
+
+    ValueGetterDelegatingSerializer(MethodHandle valueAccessor, ModelMarshaller modelMarshaller) {
+        this.valueAccessor = valueAccessor;
+        this.modelMarshaller = modelMarshaller;
+    }
+
 }

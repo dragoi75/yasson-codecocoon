@@ -32,6 +32,34 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     private JsonValue currentValue;
 
+    @Override
+    JsonbException createIncompatibleValueError() {
+        return new JsonbException(MessageProvider.getMessage(MessageConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
+                                                      getValue().getValueType()));
+    }
+
+    @Override
+    public JsonParser.Event next() {
+        if (valueIterator.hasNext()) {
+            currentValue = valueIterator.next();
+            return getValueEvent(currentValue);
+        }
+        return JsonParser.Event.END_ARRAY;
+    }
+
+    @Override
+    JsonValue getValue() {
+        return currentValue;
+    }
+
+    @Override
+    String getString() {
+        if (currentValue instanceof JsonString) {
+            return ((JsonString) currentValue).getString();
+        }
+        return currentValue.toString();
+    }
+
     /**
      * Creates new array iterator.
      *
@@ -51,31 +79,4 @@ public class JsonArrayIterator extends JsonStructureIterator {
         return true;
     }
 
-    @Override
-    public JsonParser.Event next() {
-        if (valueIterator.hasNext()) {
-            currentValue = valueIterator.next();
-            return getValueEvent(currentValue);
-        }
-        return JsonParser.Event.END_ARRAY;
-    }
-
-    @Override
-    JsonValue getValue() {
-        return currentValue;
-    }
-
-    @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(MessageProvider.getMessage(MessageConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
-                                                      getValue().getValueType()));
-    }
-
-    @Override
-    String getString() {
-        if (currentValue instanceof JsonString) {
-            return ((JsonString) currentValue).getString();
-        }
-        return currentValue.toString();
-    }
 }

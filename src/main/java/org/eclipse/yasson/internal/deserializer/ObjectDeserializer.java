@@ -35,14 +35,6 @@ class ObjectDeserializer implements ModelParser<JsonParser> {
 
     private final Set<String> ignoredProperties;
 
-    ObjectDeserializer(Map<String, ModelParser<JsonParser>> propertyDeserializerChains, Function<String, String> renamer, Class<?> rawClass, boolean failOnUnknownProperty, Set<String> ignoredProperties) {
-        this.propertyDeserializerChains = Map.copyOf(propertyDeserializerChains);
-        this.renamer = renamer;
-        this.rawClass = rawClass;
-        this.failOnUnknownProperty = failOnUnknownProperty;
-        this.ignoredProperties = Set.copyOf(ignoredProperties);
-    }
-
     @Override
     public Object deserializeModel(JsonParser parser, DefaultDeserializationContext context) {
         String key = null;
@@ -82,4 +74,13 @@ class ObjectDeserializer implements ModelParser<JsonParser> {
         }
         return context.getInstance();
     }
+
+    ObjectDeserializer(Map<String, ModelParser<JsonParser>> propertyDeserializerChains, Function<String, String> renamer, Class<?> rawClass, boolean failOnUnknownProperty, Set<String> ignoredProperties) {
+        this.propertyDeserializerChains = Map.copyOf(propertyDeserializerChains);
+        this.renamer = renamer;
+        this.rawClass = rawClass;
+        this.failOnUnknownProperty = failOnUnknownProperty;
+        this.ignoredProperties = Set.copyOf(ignoredProperties);
+    }
+
 }

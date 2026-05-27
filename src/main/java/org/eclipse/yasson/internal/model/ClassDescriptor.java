@@ -52,6 +52,75 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
+     * Default no argument constructor of the class used for deserialization.
+     *
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
+        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
+        // Note: Null is a valid result and needs to be cached.
+        if (!initializedFlag.get()) {
+            noArgConstructor = ReflectionHelper.getDefaultConstructor(targetClass, false);
+            initializedFlag.set(true);
+        }
+        return noArgConstructor;
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return sorted class properties.
+     */
+    public BeanPropertyDescriptor[] getSortedProperties() {
+        return orderedProperties;
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassSerializationConfig getClassCustomization() {
+        return serializationConfig;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     *
+     * @return class properties.
+     */
+    public Map<String, BeanPropertyDescriptor> getProperties() {
+        return Collections.unmodifiableMap(propertyMap);
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedProps class properties
+     */
+    public void setProperties(List<BeanPropertyDescriptor> parsedProps) {
+        orderedProperties = parsedProps.toArray(new BeanPropertyDescriptor[] {});
+        this.propertyMap = parsedProps.stream().collect(Collectors.toMap(BeanPropertyDescriptor::getPropertyName, (modifier) -> modifier));
+    }
+
+    private BeanPropertyDescriptor findProperty(ClassDescriptor targetDescriptor, String jsonFieldName) {
+        //Standard javabean properties without overridden name (most of the cases)
+        final BeanPropertyDescriptor foundProperty = targetDescriptor.getPropertyModel(jsonFieldName);
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+            return foundProperty;
+        }
+        //Search for overridden name on setter with @JsonbProperty annotation
+        for (BeanPropertyDescriptor propertyDescriptor : propertyMap.values()) {
+            if (matchesReadName(jsonFieldName, propertyDescriptor)) {
+                return propertyDescriptor;
+            }
+        }
+        //property not found
+        return null;
+    }
+
+    /**
      * Gets a property model by default (non customized) name.
      *
      * @param propertyName A name as parsed from field / getter / setter without annotation customizing.
@@ -59,6 +128,30 @@ public class ClassDescriptor {
      */
     public BeanPropertyDescriptor getPropertyModel(String propertyName) {
         return propertyMap.get(propertyName);
+    }
+
+    /**
+     * Check if name is equal according to property strategy.
+     * In case of {@link PropertyNamingStrategyProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean matchesReadName(String candidateJsonName, BeanPropertyDescriptor propertyDescriptor) {
+        final String resolvedReadName = propertyDescriptor.getReadName();
+        if (PropertyNamingStrategyProvider.CASE_INSENSITIVE_STRATEGY == namingStrategy) {
+            return candidateJsonName.equalsIgnoreCase(resolvedReadName);
+        }
+        return candidateJsonName.equals(resolvedReadName);
+    }
+
+    /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return targetClass;
     }
 
     /**
@@ -88,55 +181,6 @@ public class ClassDescriptor {
         return findProperty(this, jsonFieldName);
     }
 
-    private BeanPropertyDescriptor findProperty(ClassDescriptor targetDescriptor, String jsonFieldName) {
-        //Standard javabean properties without overridden name (most of the cases)
-        final BeanPropertyDescriptor foundProperty = targetDescriptor.getPropertyModel(jsonFieldName);
-        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
-            return foundProperty;
-        }
-        //Search for overridden name on setter with @JsonbProperty annotation
-        for (BeanPropertyDescriptor propertyDescriptor : propertyMap.values()) {
-            if (matchesReadName(jsonFieldName, propertyDescriptor)) {
-                return propertyDescriptor;
-            }
-        }
-        //property not found
-        return null;
-    }
-
-    /**
-     * Check if name is equal according to property strategy.
-     * In case of {@link PropertyNamingStrategyProvider#CASE_INSENSITIVE_STRATEGY} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
-     *
-     * @return True if names are equal.
-     */
-    private boolean matchesReadName(String candidateJsonName, BeanPropertyDescriptor propertyDescriptor) {
-        final String resolvedReadName = propertyDescriptor.getReadName();
-        if (PropertyNamingStrategyProvider.CASE_INSENSITIVE_STRATEGY == namingStrategy) {
-            return candidateJsonName.equalsIgnoreCase(resolvedReadName);
-        }
-        return candidateJsonName.equals(resolvedReadName);
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return targetClass;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassSerializationConfig getClassCustomization() {
-        return serializationConfig;
-    }
-
     /**
      * Class model of parent class if present.
      *
@@ -146,47 +190,4 @@ public class ClassDescriptor {
         return parentDescriptor;
     }
 
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return sorted class properties.
-     */
-    public BeanPropertyDescriptor[] getSortedProperties() {
-        return orderedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProps class properties
-     */
-    public void setProperties(List<BeanPropertyDescriptor> parsedProps) {
-        orderedProperties = parsedProps.toArray(new BeanPropertyDescriptor[] {});
-        this.propertyMap = parsedProps.stream().collect(Collectors.toMap(BeanPropertyDescriptor::getPropertyName, (modifier) -> modifier));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, BeanPropertyDescriptor> getProperties() {
-        return Collections.unmodifiableMap(propertyMap);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     *
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
-        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
-        // Note: Null is a valid result and needs to be cached.
-        if (!initializedFlag.get()) {
-            noArgConstructor = ReflectionHelper.getDefaultConstructor(targetClass, false);
-            initializedFlag.set(true);
-        }
-        return noArgConstructor;
-    }
 }

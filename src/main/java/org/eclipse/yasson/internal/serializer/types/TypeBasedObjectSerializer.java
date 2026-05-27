@@ -35,18 +35,14 @@ public class TypeBasedObjectSerializer extends TypeSerializer<Object> {
 
     private final boolean keyFlag;
 
-    TypeBasedObjectSerializer(TypeSerializerBuilder typeBuilder) {
-        super(typeBuilder);
-        this.serializationCustomizer = typeBuilder.getCustomization();
-        this.serializerMap = new ConcurrentHashMap<>();
-        this.typeSequence = new LinkedList<>(typeBuilder.getChain());
-        this.keyFlag = typeBuilder.isKey();
-    }
-
-    @Override
-    void serializeValue(Object obj, JsonGenerator jsonOut, SerializationContextImpl ctx) {
-        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
-        resolveSerializer(obj, jsonOut, ctx);
+    /**
+     * Add serializer to the cache.
+     *
+     * @param targetClass           class of the serializer
+     * @param marshallerInstance model serializer bound to the class
+     */
+    public void registerSpecificSerializer(Class<?> targetClass, ModelMarshaller marshallerInstance) {
+        serializerMap.put(targetClass, marshallerInstance);
     }
 
     @Override
@@ -67,13 +63,18 @@ public class TypeBasedObjectSerializer extends TypeSerializer<Object> {
         }).marshal(identifier, jsonOut, ctx);
     }
 
-    /**
-     * Add serializer to the cache.
-     *
-     * @param targetClass           class of the serializer
-     * @param marshallerInstance model serializer bound to the class
-     */
-    public void registerSpecificSerializer(Class<?> targetClass, ModelMarshaller marshallerInstance) {
-        serializerMap.put(targetClass, marshallerInstance);
+    TypeBasedObjectSerializer(TypeSerializerBuilder typeBuilder) {
+        super(typeBuilder);
+        this.serializationCustomizer = typeBuilder.getCustomization();
+        this.serializerMap = new ConcurrentHashMap<>();
+        this.typeSequence = new LinkedList<>(typeBuilder.getChain());
+        this.keyFlag = typeBuilder.isKey();
     }
+
+    @Override
+    void serializeValue(Object obj, JsonGenerator jsonOut, SerializationContextImpl ctx) {
+        //Dynamically resolved type during runtime. Cached in SerializationModelCreator.
+        resolveSerializer(obj, jsonOut, ctx);
+    }
+
 }

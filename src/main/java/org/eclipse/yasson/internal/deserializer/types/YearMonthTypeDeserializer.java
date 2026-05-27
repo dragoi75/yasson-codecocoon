@@ -24,13 +24,9 @@ class YearMonthTypeDeserializer extends AbstractDateDeserializer<YearMonth> {
 
     private static final DateTimeFormatter DEFAULT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM").withZone(UTC);
 
-    YearMonthTypeDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
-    protected YearMonth fromInstant(Instant instant) {
-        return YearMonth.from(instant.atZone(UTC));
+    protected YearMonth parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return YearMonth.parse(jsonValue, formatter);
     }
 
     @Override
@@ -38,9 +34,13 @@ class YearMonthTypeDeserializer extends AbstractDateDeserializer<YearMonth> {
         return YearMonth.parse(jsonValue, DEFAULT_FORMAT.withLocale(locale));
     }
 
+    YearMonthTypeDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
     @Override
-    protected YearMonth parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return YearMonth.parse(jsonValue, formatter);
+    protected YearMonth fromInstant(Instant instant) {
+        return YearMonth.from(instant.atZone(UTC));
     }
 
 }

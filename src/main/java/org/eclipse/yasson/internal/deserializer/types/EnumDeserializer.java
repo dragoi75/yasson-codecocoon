@@ -21,13 +21,14 @@ import org.eclipse.yasson.internal.DefaultDeserializationContext;
  */
 class EnumDeserializer extends TypeDeserializer {
 
-    EnumDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     Object deserializeStringValue(String value, DefaultDeserializationContext context, Type rType) {
         return Enum.valueOf((Class<Enum>) rType, value);
     }
+
+    EnumDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

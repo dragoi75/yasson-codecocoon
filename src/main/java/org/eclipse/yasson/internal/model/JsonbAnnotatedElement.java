@@ -30,49 +30,36 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
 
     private final T element;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param element Element.
-     */
-    public JsonbAnnotatedElement(T element) {
-        for (Annotation ann : element.getAnnotations()) {
-            if (!(element instanceof Class)) {
-                putAnnotation(ann, false, null);
-            } else {
-                putAnnotation(ann, false, (Class<?>) element);
-            }
+    public static final class AnnotationWrapper<T extends Annotation> {
+
+        private final T annotation;
+
+        private final boolean inherited;
+
+        private final Class<?> definedType;
+
+        public boolean isInherited() {
+            return inherited;
         }
-        this.element = element;
+
+        public AnnotationWrapper(T annotation, boolean inherited, Class<?> definedType) {
+            this.annotation = annotation;
+            this.inherited = inherited;
+            this.definedType = definedType;
+        }
+
+        public Class<?> getDefinedType() {
+            return definedType;
+        }
+
+        public T getAnnotation() {
+            return annotation;
+        }
+
     }
 
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return element;
-    }
-
-    /**
-     * Get an annotation by type.
-     *
-     * @param <AT>            Type of annotation
-     * @param annotationClass Type of annotation
-     * @return Annotation by passed type
-     */
-    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationClass) {
-        return Optional.ofNullable(annotations.get(annotationClass)).map(LinkedList::getFirst).map(AnnotationWrapper::getAnnotation).map(annotationClass::cast);
-    }
-
-    public <AT extends Annotation> LinkedList<AnnotationWrapper<?>> getAnnotations(Class<AT> annotationClass) {
-        return annotations.getOrDefault(annotationClass, new LinkedList<>());
-    }
-
-    @SuppressWarnings("unchecked")
-    public <AT extends Annotation> AnnotationWrapper<AT> getAnnotationWrapper(Class<AT> annotationClass) {
-        return (AnnotationWrapper<AT>) annotations.get(annotationClass).getFirst();
+    public void putAnnotationWrapper(AnnotationWrapper<?> annotationWrapper) {
+        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(annotationWrapper);
     }
 
     public Annotation[] getAnnotations() {
@@ -94,34 +81,49 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> {
         annotations.computeIfAbsent(annotation.annotationType(), aClass -> new LinkedList<>()).add(new AnnotationWrapper(annotation, inherited, definedType));
     }
 
-    public void putAnnotationWrapper(AnnotationWrapper<?> annotationWrapper) {
-        annotations.computeIfAbsent(annotationWrapper.getAnnotation().annotationType(), aClass -> new LinkedList<>()).add(annotationWrapper);
+    /**
+     * Creates a new instance.
+     *
+     * @param element Element.
+     */
+    public JsonbAnnotatedElement(T element) {
+        for (Annotation ann : element.getAnnotations()) {
+            if (!(element instanceof Class)) {
+                putAnnotation(ann, false, null);
+            } else {
+                putAnnotation(ann, false, (Class<?>) element);
+            }
+        }
+        this.element = element;
     }
 
-    public static final class AnnotationWrapper<T extends Annotation> {
-
-        private final T annotation;
-
-        private final boolean inherited;
-
-        private final Class<?> definedType;
-
-        public AnnotationWrapper(T annotation, boolean inherited, Class<?> definedType) {
-            this.annotation = annotation;
-            this.inherited = inherited;
-            this.definedType = definedType;
-        }
-
-        public T getAnnotation() {
-            return annotation;
-        }
-
-        public boolean isInherited() {
-            return inherited;
-        }
-
-        public Class<?> getDefinedType() {
-            return definedType;
-        }
+    @SuppressWarnings("unchecked")
+    public <AT extends Annotation> AnnotationWrapper<AT> getAnnotationWrapper(Class<AT> annotationClass) {
+        return (AnnotationWrapper<AT>) annotations.get(annotationClass).getFirst();
     }
+
+    /**
+     * Get an annotation by type.
+     *
+     * @param <AT>            Type of annotation
+     * @param annotationClass Type of annotation
+     * @return Annotation by passed type
+     */
+    public <AT extends Annotation> Optional<AT> getAnnotation(Class<AT> annotationClass) {
+        return Optional.ofNullable(annotations.get(annotationClass)).map(LinkedList::getFirst).map(AnnotationWrapper::getAnnotation).map(annotationClass::cast);
+    }
+
+    public <AT extends Annotation> LinkedList<AnnotationWrapper<?>> getAnnotations(Class<AT> annotationClass) {
+        return annotations.getOrDefault(annotationClass, new LinkedList<>());
+    }
+
+    /**
+     * Gets element.
+     *
+     * @return Element.
+     */
+    public T getElement() {
+        return element;
+    }
+
 }

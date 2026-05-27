@@ -30,45 +30,6 @@ public class MessageProvider {
 
     private static final String DEFAULT_CHARSET = "UTF-8";
 
-    private MessageProvider() {
-    }
-
-    /**
-     * Gets message by key. Default locale is used.
-     *
-     * @param messageCode     Message key.
-     * @param args Message parameters.
-     * @return Formatted message in string.
-     */
-    public static String getMessage(MessageConstants messageCode, Object... args) {
-        return getMessage(messageCode, Locale.getDefault(), args);
-    }
-
-    /**
-     * Gets message by key and locale.
-     *
-     * @param messageCode     Message key.
-     * @param userRegion  Locale.
-     * @param args Message parameters.
-     * @return Formatted message in string.
-     */
-    public static String getMessage(MessageConstants messageCode, Locale userRegion, Object... args) {
-        ResourceBundle resourceBundle = getResourceBundle(userRegion);
-        MessageFormat messageFormat = new MessageFormat(resourceBundle.getString(messageCode.getKey()));
-        return messageFormat.format(args);
-    }
-
-    /**
-     * ResourceBundle.Control is not supported when loaded from JPMS native module.
-     */
-    private static ResourceBundle getResourceBundle(Locale userRegion) {
-        try {
-            return ResourceBundle.getBundle(MESSAGES_BASE_NAME, userRegion, new UTF8ResourceBundleControl());
-        } catch (UnsupportedOperationException e) {
-            return ResourceBundle.getBundle(MESSAGES_BASE_NAME, userRegion);
-        }
-    }
-
     static class UTF8ResourceBundleControl extends ResourceBundle.Control {
 
         public ResourceBundle newBundle(String bundleBase, Locale userRegion, String format, ClassLoader classProvider, boolean shouldRefresh) throws IllegalAccessException, InstantiationException, IOException {
@@ -100,4 +61,44 @@ public class MessageProvider {
             return resourceSet;
         }
     }
+
+    /**
+     * Gets message by key and locale.
+     *
+     * @param messageCode     Message key.
+     * @param userRegion  Locale.
+     * @param args Message parameters.
+     * @return Formatted message in string.
+     */
+    public static String getMessage(MessageConstants messageCode, Locale userRegion, Object... args) {
+        ResourceBundle resourceBundle = getResourceBundle(userRegion);
+        MessageFormat messageFormat = new MessageFormat(resourceBundle.getString(messageCode.getKey()));
+        return messageFormat.format(args);
+    }
+
+    private MessageProvider() {
+    }
+
+    /**
+     * ResourceBundle.Control is not supported when loaded from JPMS native module.
+     */
+    private static ResourceBundle getResourceBundle(Locale userRegion) {
+        try {
+            return ResourceBundle.getBundle(MESSAGES_BASE_NAME, userRegion, new UTF8ResourceBundleControl());
+        } catch (UnsupportedOperationException e) {
+            return ResourceBundle.getBundle(MESSAGES_BASE_NAME, userRegion);
+        }
+    }
+
+    /**
+     * Gets message by key. Default locale is used.
+     *
+     * @param messageCode     Message key.
+     * @param args Message parameters.
+     * @return Formatted message in string.
+     */
+    public static String getMessage(MessageConstants messageCode, Object... args) {
+        return getMessage(messageCode, Locale.getDefault(), args);
+    }
+
 }

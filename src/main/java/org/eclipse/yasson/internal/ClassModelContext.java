@@ -34,15 +34,67 @@ public class ClassModelContext {
 
     private final ClassParser typeParser;
 
+    //    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
+    //                                                                           Optional<Polymorphism> maybeClassPolymorphism,
+    //                                                                           ClassCustomization customization,
+    //                                                                           Class<?> aClass) {
+    //        PolymorphismConfig polymorphismConfig = customization.getPolymorphismConfig();
+    //        PolymorphismConfig.Builder polyConfigBuilder;
+    //        if (polymorphismConfig != null) {
+    //            polyConfigBuilder = PolymorphismConfig.builder().of(polymorphismConfig);
+    //        } else {
+    //            polyConfigBuilder = PolymorphismConfig.builder();
+    //            maybeClassPolymorphism.ifPresent(classPolymorphism -> polyConfigBuilder
+    //                    .inherited(!classPolymorphism.getBoundClass().equals(aClass)));
+    //        }
+    //        generalPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
+    //        generalPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
+    //        polyConfigBuilder.whitelistedPackages(generalPolymorphism.getWhitelistedPackages());
+    //
+    //        maybeClassPolymorphism.ifPresent(classPolymorphism -> {
+    //            classPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
+    //            classPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
+    //            classPolymorphism.getFormat().ifPresent(polyConfigBuilder::format);
+    //            classPolymorphism.getAliases().forEach(polyConfigBuilder::alias);
+    //            polyConfigBuilder.whitelistedPackages(classPolymorphism.getWhitelistedPackages());
+    //        });
+    //        PolymorphismConfig polyConfigMerged = polyConfigBuilder.build();
+    //        if (polyConfigMerged.getFieldName() == null || polyConfigMerged.getFieldName().isEmpty()) {
+    //            throw new JsonbException("Polymorphism type field name cannot be null or empty: " + aClass);
+    //        }
+    //        return ClassCustomization.builder()
+    //                .of(customization)
+    //                .polymorphismConfig(polyConfigMerged)
+    //                .build();
+    //    }
+
+    private static Function<Class<?>, ClassDescriptor> createClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser typeParser, JsonBindingContext bindingContext) {
+        return candidateType -> {
+            JsonbAnnotatedElement<Class<?>> annotatedElement = bindingContext.getAnnotationIntrospector().collectAnnotations(candidateType);
+            ClassSerializationConfig serializationConfig = bindingContext.getAnnotationIntrospector().introspectCustomization(annotatedElement, null == parentDescriptor ? ClassSerializationConfig.emptyConfig() : parentDescriptor.getClassCustomization());
+            //            PolymorphismSupport configPolymorphism = jsonbContext.getConfigProperties().getPolymorphismSupport();
+            //            if (configPolymorphism != null) {
+            //                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
+            //                                                                     configPolymorphism.getClassPolymorphism(aClass),
+            //                                                                     customization,
+            //                                                                     aClass);
+            //            }
+            ClassDescriptor newDescriptor = new ClassDescriptor(candidateType, serializationConfig, parentDescriptor, bindingContext.getConfigProperties().getPropertyNamingStrategy());
+            if (!BuiltInTypes.isKnownType(candidateType)) {
+                typeParser.parseProperties(newDescriptor, annotatedElement);
+            }
+            return newDescriptor;
+        };
+    }
+
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Search for class model, without parsing if not found.
      *
-     * @param bindingContext Context. Required.
+     * @param targetType Class to search by or parse, not null.
+     * @return Model of a class if found.
      */
-    public ClassModelContext(JsonBindingContext bindingContext) {
-        Objects.requireNonNull(bindingContext);
-        this.bindingContext = bindingContext;
-        this.typeParser = new ClassParser(bindingContext);
+    public ClassDescriptor getClassModel(Class<?> targetType) {
+        return classDescriptorMap.get(targetType);
     }
 
     /**
@@ -77,65 +129,15 @@ public class ClassModelContext {
         return classDescriptorMap.get(typeToken);
     }
 
-    private static Function<Class<?>, ClassDescriptor> createClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser typeParser, JsonBindingContext bindingContext) {
-        return candidateType -> {
-            JsonbAnnotatedElement<Class<?>> annotatedElement = bindingContext.getAnnotationIntrospector().collectAnnotations(candidateType);
-            ClassSerializationConfig serializationConfig = bindingContext.getAnnotationIntrospector().introspectCustomization(annotatedElement, null == parentDescriptor ? ClassSerializationConfig.emptyConfig() : parentDescriptor.getClassCustomization());
-            //            PolymorphismSupport configPolymorphism = jsonbContext.getConfigProperties().getPolymorphismSupport();
-            //            if (configPolymorphism != null) {
-            //                customization = mergeConfigAndAnnotationPolymorphism(configPolymorphism,
-            //                                                                     configPolymorphism.getClassPolymorphism(aClass),
-            //                                                                     customization,
-            //                                                                     aClass);
-            //            }
-            ClassDescriptor newDescriptor = new ClassDescriptor(candidateType, serializationConfig, parentDescriptor, bindingContext.getConfigProperties().getPropertyNamingStrategy());
-            if (!BuiltInTypes.isKnownType(candidateType)) {
-                typeParser.parseProperties(newDescriptor, annotatedElement);
-            }
-            return newDescriptor;
-        };
+    /**
+     * Create mapping context which is scoped to jsonb runtime.
+     *
+     * @param bindingContext Context. Required.
+     */
+    public ClassModelContext(JsonBindingContext bindingContext) {
+        Objects.requireNonNull(bindingContext);
+        this.bindingContext = bindingContext;
+        this.typeParser = new ClassParser(bindingContext);
     }
 
-    //    private static ClassCustomization mergeConfigAndAnnotationPolymorphism(PolymorphismSupport generalPolymorphism,
-    //                                                                           Optional<Polymorphism> maybeClassPolymorphism,
-    //                                                                           ClassCustomization customization,
-    //                                                                           Class<?> aClass) {
-    //        PolymorphismConfig polymorphismConfig = customization.getPolymorphismConfig();
-    //        PolymorphismConfig.Builder polyConfigBuilder;
-    //        if (polymorphismConfig != null) {
-    //            polyConfigBuilder = PolymorphismConfig.builder().of(polymorphismConfig);
-    //        } else {
-    //            polyConfigBuilder = PolymorphismConfig.builder();
-    //            maybeClassPolymorphism.ifPresent(classPolymorphism -> polyConfigBuilder
-    //                    .inherited(!classPolymorphism.getBoundClass().equals(aClass)));
-    //        }
-    //        generalPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
-    //        generalPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
-    //        polyConfigBuilder.whitelistedPackages(generalPolymorphism.getWhitelistedPackages());
-    //
-    //        maybeClassPolymorphism.ifPresent(classPolymorphism -> {
-    //            classPolymorphism.getKeyName().filter(s -> !s.isEmpty()).ifPresent(polyConfigBuilder::fieldName);
-    //            classPolymorphism.useClassNames().ifPresent(polyConfigBuilder::useClassNames);
-    //            classPolymorphism.getFormat().ifPresent(polyConfigBuilder::format);
-    //            classPolymorphism.getAliases().forEach(polyConfigBuilder::alias);
-    //            polyConfigBuilder.whitelistedPackages(classPolymorphism.getWhitelistedPackages());
-    //        });
-    //        PolymorphismConfig polyConfigMerged = polyConfigBuilder.build();
-    //        if (polyConfigMerged.getFieldName() == null || polyConfigMerged.getFieldName().isEmpty()) {
-    //            throw new JsonbException("Polymorphism type field name cannot be null or empty: " + aClass);
-    //        }
-    //        return ClassCustomization.builder()
-    //                .of(customization)
-    //                .polymorphismConfig(polyConfigMerged)
-    //                .build();
-    //    }
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param targetType Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassDescriptor getClassModel(Class<?> targetType) {
-        return classDescriptorMap.get(targetType);
-    }
 }

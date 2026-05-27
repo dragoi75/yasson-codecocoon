@@ -32,6 +32,78 @@ class SerializerBuilderParams {
     private final boolean resolveRootAdapter;
     private final ModelMarshaller objectBaseSerializer;
 
+    static final class Builder {
+
+        private Type type;
+        private SerializationCustomizer customization;
+        private boolean root;
+        private boolean key;
+        private boolean resolveRootAdapter;
+        private ModelMarshaller objectBaseSerializer;
+
+        public SerializerBuilderParams build() {
+            return new SerializerBuilderParams(this);
+        }
+
+        public Builder resolveRootAdapter(boolean resolveRootAdapter) {
+            this.resolveRootAdapter = resolveRootAdapter;
+            return this;
+        }
+
+        public Builder key(boolean key) {
+            this.key = key;
+            return this;
+        }
+
+        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
+            this.objectBaseSerializer = objectBaseSerializer;
+            return this;
+        }
+
+        public Builder type(Type type) {
+            this.type = Objects.requireNonNull(type);
+            return this;
+        }
+
+        public Builder customization(SerializationCustomizer customization) {
+            this.customization = Objects.requireNonNull(customization);
+            return this;
+        }
+
+        private Builder(Type type) {
+            this.type = Objects.requireNonNull(type);
+            this.customization = ClassSerializationConfig.emptyConfig();
+            this.root = true;
+            this.key = false;
+        }
+
+        public Builder root(boolean root) {
+            this.root = root;
+            return this;
+        }
+
+    }
+
+    public ModelMarshaller getObjectBaseSerializer() {
+        return objectBaseSerializer;
+    }
+
+    public boolean isRoot() {
+        return root;
+    }
+
+    public SerializationCustomizer getCustomization() {
+        return customization;
+    }
+
+    public boolean isResolveRootAdapter() {
+        return resolveRootAdapter;
+    }
+
+    public boolean isKey() {
+        return key;
+    }
+
     private SerializerBuilderParams(Builder builder) {
         this.type = builder.type;
         this.customization = builder.customization;
@@ -47,78 +119,6 @@ class SerializerBuilderParams {
 
     public Type getType() {
         return type;
-    }
-
-    public SerializationCustomizer getCustomization() {
-        return customization;
-    }
-
-    public boolean isRoot() {
-        return root;
-    }
-
-    public boolean isKey() {
-        return key;
-    }
-
-    public boolean isResolveRootAdapter() {
-        return resolveRootAdapter;
-    }
-
-    public ModelMarshaller getObjectBaseSerializer() {
-        return objectBaseSerializer;
-    }
-
-    static final class Builder {
-
-        private Type type;
-        private SerializationCustomizer customization;
-        private boolean root;
-        private boolean key;
-        private boolean resolveRootAdapter;
-        private ModelMarshaller objectBaseSerializer;
-
-        private Builder(Type type) {
-            this.type = Objects.requireNonNull(type);
-            this.customization = ClassSerializationConfig.emptyConfig();
-            this.root = true;
-            this.key = false;
-        }
-
-        public Builder type(Type type) {
-            this.type = Objects.requireNonNull(type);
-            return this;
-        }
-
-        public Builder customization(SerializationCustomizer customization) {
-            this.customization = Objects.requireNonNull(customization);
-            return this;
-        }
-
-        public Builder root(boolean root) {
-            this.root = root;
-            return this;
-        }
-
-        public Builder key(boolean key) {
-            this.key = key;
-            return this;
-        }
-
-        public Builder resolveRootAdapter(boolean resolveRootAdapter) {
-            this.resolveRootAdapter = resolveRootAdapter;
-            return this;
-        }
-
-        public Builder objectBaseSerializer(ModelMarshaller objectBaseSerializer) {
-            this.objectBaseSerializer = objectBaseSerializer;
-            return this;
-        }
-
-        public SerializerBuilderParams build() {
-            return new SerializerBuilderParams(this);
-        }
-
     }
 
 }

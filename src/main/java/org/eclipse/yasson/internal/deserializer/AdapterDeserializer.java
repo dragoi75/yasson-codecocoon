@@ -29,14 +29,6 @@ class AdapterDeserializer implements ModelParser<Object> {
     private final AdapterBindingInfo adapterBinding;
     private final ModelParser<Object> delegate;
 
-    @SuppressWarnings("unchecked")
-    AdapterDeserializer(AdapterBindingInfo adapterBinding,
-                        ModelParser<Object> delegate) {
-        this.adapterBinding = adapterBinding;
-        this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
-        this.delegate = delegate;
-    }
-
     @Override
     public Object deserializeModel(Object value, DefaultDeserializationContext context) {
         try {
@@ -47,6 +39,14 @@ class AdapterDeserializer implements ModelParser<Object> {
                                                          adapterBinding.getToType(),
                                                          adapterBinding.getAdapter().getClass()), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    AdapterDeserializer(AdapterBindingInfo adapterBinding,
+                        ModelParser<Object> delegate) {
+        this.adapterBinding = adapterBinding;
+        this.adapter = (JsonbAdapter<Object, Object>) adapterBinding.getAdapter();
+        this.delegate = delegate;
     }
 
 }

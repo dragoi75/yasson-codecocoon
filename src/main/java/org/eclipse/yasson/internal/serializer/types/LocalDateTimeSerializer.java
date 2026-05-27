@@ -25,15 +25,6 @@ import org.eclipse.yasson.internal.JsonbDateFormatter;
  */
 class LocalDateTimeSerializer extends AbstractDateSerializer<LocalDateTime> {
 
-    LocalDateTimeSerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected Instant toInstant(LocalDateTime value) {
-        return value.atZone(UTC).toInstant();
-    }
-
     @Override
     protected String formatDefault(LocalDateTime value, Locale locale) {
         return DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale).format(value);
@@ -48,6 +39,15 @@ class LocalDateTimeSerializer extends AbstractDateSerializer<LocalDateTime> {
     protected String formatStrictIJson(LocalDateTime value) {
         final ZonedDateTime zonedDateTime = value.atZone(UTC);
         return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(zonedDateTime);
+    }
+
+    LocalDateTimeSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
+    @Override
+    protected Instant toInstant(LocalDateTime value) {
+        return value.atZone(UTC).toInstant();
     }
 
 }

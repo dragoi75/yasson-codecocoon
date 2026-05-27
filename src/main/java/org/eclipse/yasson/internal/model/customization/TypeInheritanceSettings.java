@@ -29,38 +29,6 @@ public class TypeInheritanceSettings {
     private final Class<?> explicitType;
     private final TypeInheritanceSettings parentSettings;
 
-    private TypeInheritanceSettings(FieldConfigBuilder configCreator) {
-        this.propertyName = configCreator.propertyName;
-        this.inheritsFromParent = configCreator.inheritsFromParent;
-        this.aliasMap = Map.copyOf(configCreator.aliasMap);
-        this.parentSettings = configCreator.parentSettings;
-        this.explicitType = configCreator.explicitType;
-    }
-
-    public static FieldConfigBuilder newBuilder() {
-        return new FieldConfigBuilder();
-    }
-
-    public String getFieldName() {
-        return propertyName;
-    }
-
-    public boolean isInherited() {
-        return inheritsFromParent;
-    }
-
-    public Map<Class<?>, String> getAliases() {
-        return aliasMap;
-    }
-
-    public Class<?> getDefinedType() {
-        return explicitType;
-    }
-
-    public TypeInheritanceSettings getParentConfig() {
-        return parentSettings;
-    }
-
     public static final class FieldConfigBuilder {
 
         private Map<Class<?>, String> aliasMap = new HashMap<>();
@@ -69,31 +37,12 @@ public class TypeInheritanceSettings {
         private Class<?> explicitType;
         private TypeInheritanceSettings parentSettings;
 
-        private FieldConfigBuilder() {
-        }
-
-        public FieldConfigBuilder setInherited(boolean inheritsFromParent) {
-            this.inheritsFromParent = inheritsFromParent;
-            return this;
-        }
-
-        public FieldConfigBuilder setFieldName(String propertyName) {
-            this.propertyName = Objects.requireNonNull(propertyName);
-            return this;
+        public TypeInheritanceSettings create() {
+            return new TypeInheritanceSettings(this);
         }
 
         public FieldConfigBuilder addAlias(Class<?> targetType, String alternateName) {
             this.aliasMap.put(targetType, alternateName);
-            return this;
-        }
-
-        public FieldConfigBuilder setParentConfig(TypeInheritanceSettings parentSettings) {
-            this.parentSettings = parentSettings;
-            return this;
-        }
-
-        public FieldConfigBuilder setDefinedType(Class<?> explicitType) {
-            this.explicitType = explicitType;
             return this;
         }
 
@@ -106,9 +55,61 @@ public class TypeInheritanceSettings {
             return this;
         }
 
-        public TypeInheritanceSettings create() {
-            return new TypeInheritanceSettings(this);
+        public FieldConfigBuilder setDefinedType(Class<?> explicitType) {
+            this.explicitType = explicitType;
+            return this;
         }
+
+        public FieldConfigBuilder setParentConfig(TypeInheritanceSettings parentSettings) {
+            this.parentSettings = parentSettings;
+            return this;
+        }
+
+        public FieldConfigBuilder setFieldName(String propertyName) {
+            this.propertyName = Objects.requireNonNull(propertyName);
+            return this;
+        }
+
+        private FieldConfigBuilder() {
+        }
+
+        public FieldConfigBuilder setInherited(boolean inheritsFromParent) {
+            this.inheritsFromParent = inheritsFromParent;
+            return this;
+        }
+
+    }
+
+    public TypeInheritanceSettings getParentConfig() {
+        return parentSettings;
+    }
+
+    public boolean isInherited() {
+        return inheritsFromParent;
+    }
+
+    public Class<?> getDefinedType() {
+        return explicitType;
+    }
+
+    public static FieldConfigBuilder newBuilder() {
+        return new FieldConfigBuilder();
+    }
+
+    public String getFieldName() {
+        return propertyName;
+    }
+
+    private TypeInheritanceSettings(FieldConfigBuilder configCreator) {
+        this.propertyName = configCreator.propertyName;
+        this.inheritsFromParent = configCreator.inheritsFromParent;
+        this.aliasMap = Map.copyOf(configCreator.aliasMap);
+        this.parentSettings = configCreator.parentSettings;
+        this.explicitType = configCreator.explicitType;
+    }
+
+    public Map<Class<?>, String> getAliases() {
+        return aliasMap;
     }
 
 }

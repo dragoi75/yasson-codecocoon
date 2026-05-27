@@ -21,6 +21,15 @@ public class KeySerializer implements ModelMarshaller {
 
     private final ModelMarshaller backingMarshaller;
 
+    @Override
+    public void marshal(Object inputObject, JsonGenerator jsonWriter, SerializationContextImpl serializationEnvironment) {
+        if (null != serializationEnvironment.getKey()) {
+            jsonWriter.writeKey(serializationEnvironment.getKey());
+            serializationEnvironment.setKey(null);
+        }
+        backingMarshaller.marshal(inputObject, jsonWriter, serializationEnvironment);
+    }
+
     /**
      * Create new instance.
      *
@@ -30,12 +39,4 @@ public class KeySerializer implements ModelMarshaller {
         this.backingMarshaller = backingMarshaller;
     }
 
-    @Override
-    public void marshal(Object inputObject, JsonGenerator jsonWriter, SerializationContextImpl serializationEnvironment) {
-        if (null != serializationEnvironment.getKey()) {
-            jsonWriter.writeKey(serializationEnvironment.getKey());
-            serializationEnvironment.setKey(null);
-        }
-        backingMarshaller.marshal(inputObject, jsonWriter, serializationEnvironment);
-    }
 }

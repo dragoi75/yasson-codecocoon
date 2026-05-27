@@ -26,15 +26,16 @@ class OptionalDeserializer implements ModelParser<JsonParser> {
     private final ModelParser<JsonParser> typeDeserializer;
     private final ModelParser<Object> delegate;
 
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        Optional<Object> val = Optional.ofNullable(typeDeserializer.deserializeModel(value, context));
+        return delegate.deserializeModel(val, context);
+    }
+
     OptionalDeserializer(ModelParser<JsonParser> typeDeserializer,
                          ModelParser<Object> delegate) {
         this.typeDeserializer = typeDeserializer;
         this.delegate = delegate;
     }
 
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        Optional<Object> val = Optional.ofNullable(typeDeserializer.deserializeModel(value, context));
-        return delegate.deserializeModel(val, context);
-    }
 }

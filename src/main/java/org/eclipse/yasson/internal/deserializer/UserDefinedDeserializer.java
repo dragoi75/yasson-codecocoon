@@ -30,6 +30,26 @@ class UserDefinedDeserializer implements ModelParser<JsonParser> {
     private final Type rType;
     private final SerializationCustomizer customization;
 
+    @Override
+    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
+        DefaultDeserializationContext newContext = new DefaultDeserializationContext(context);
+        newContext.setCustomization(customization);
+        //TODO remove or not? deserializer cycle
+        //        if (context.getUserProcessorChain().contains(userDefinedDeserializer.getClass())) {
+        //            if (context.getLastValueEvent() != JsonParser.Event.START_ARRAY
+        //                    && context.getLastValueEvent() != JsonParser.Event.START_OBJECT) {
+        //                newContext.setDisableNextPositionCheck(true);
+        //            }
+        //            return exactType.deserialize(value, newContext);
+        //        }
+        //        newContext.getUserProcessorChain().add(userDefinedDeserializer.getClass());
+        YassonParser yassonParser = new YassonParser(value, context.getLastValueEvent(), newContext);
+        Object object = userDefinedDeserializer.deserialize(yassonParser, newContext, rType);
+        yassonParser.skipRemaining();
+        context.setLastValueEvent(newContext.getLastValueEvent());
+        return delegate.deserializeModel(object, context);
+    }
+
     //TODO remove or not? deserializer cycle
     //    public UserDefinedDeserializer(JsonbDeserializer<?> userDefinedDeserializer,
     //                                   ModelDeserializer<JsonParser> exactType,
@@ -50,26 +70,6 @@ class UserDefinedDeserializer implements ModelParser<JsonParser> {
         this.delegate = delegate;
         this.rType = rType;
         this.customization = customization;
-    }
-
-    @Override
-    public Object deserializeModel(JsonParser value, DefaultDeserializationContext context) {
-        DefaultDeserializationContext newContext = new DefaultDeserializationContext(context);
-        newContext.setCustomization(customization);
-        //TODO remove or not? deserializer cycle
-        //        if (context.getUserProcessorChain().contains(userDefinedDeserializer.getClass())) {
-        //            if (context.getLastValueEvent() != JsonParser.Event.START_ARRAY
-        //                    && context.getLastValueEvent() != JsonParser.Event.START_OBJECT) {
-        //                newContext.setDisableNextPositionCheck(true);
-        //            }
-        //            return exactType.deserialize(value, newContext);
-        //        }
-        //        newContext.getUserProcessorChain().add(userDefinedDeserializer.getClass());
-        YassonParser yassonParser = new YassonParser(value, context.getLastValueEvent(), newContext);
-        Object object = userDefinedDeserializer.deserialize(yassonParser, newContext, rType);
-        yassonParser.skipRemaining();
-        context.setLastValueEvent(newContext.getLastValueEvent());
-        return delegate.deserializeModel(object, context);
     }
 
 }

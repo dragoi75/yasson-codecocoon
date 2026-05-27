@@ -38,6 +38,27 @@ public class JsonbDateFormatter {
 
     private final String locale;
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (null == o || o.getClass() != getClass()) {
+            return false;
+        }
+        JsonbDateFormatter that = (JsonbDateFormatter) o;
+        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale) && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
+    }
+
+    @Override
+    public String toString() {
+        return "JsonbDateFormatter{" + "dateTimeFormatter=" + dateTimeFormatter + ", format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
+    }
+
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
     /**
      * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
@@ -64,13 +85,9 @@ public class JsonbDateFormatter {
         this.dateTimeFormatter = null;
     }
 
-    /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
-     *
-     * @return Formatter instance.
-     */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateTimeFormatter, format, locale);
     }
 
     /**
@@ -84,6 +101,10 @@ public class JsonbDateFormatter {
         return format;
     }
 
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
+    }
+
     /**
      * Locale to use with formatter.
      *
@@ -93,33 +114,13 @@ public class JsonbDateFormatter {
         return locale;
     }
 
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
     }
 
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (null == o || o.getClass() != getClass()) {
-            return false;
-        }
-        JsonbDateFormatter that = (JsonbDateFormatter) o;
-        return Objects.equals(format, that.format) && Objects.equals(locale, that.locale) && Objects.equals(dateTimeFormatter, that.dateTimeFormatter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(dateTimeFormatter, format, locale);
-    }
-
-    @Override
-    public String toString() {
-        return "JsonbDateFormatter{" + "dateTimeFormatter=" + dateTimeFormatter + ", format='" + format + '\'' + ", locale='" + locale + '\'' + '}';
-    }
 }
