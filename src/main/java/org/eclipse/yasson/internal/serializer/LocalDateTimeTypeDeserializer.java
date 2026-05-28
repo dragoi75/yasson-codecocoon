@@ -27,6 +27,21 @@ import java.util.Locale;
  */
 public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<LocalDateTime> {
 
+    @Override
+    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return LocalDateTime.parse(jsonValue, formatter);
+    }
+
+    @Override
+    protected LocalDateTime parseDefault(String jsonValue, Locale locale) {
+        return LocalDateTime.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
+    }
+
+    @Override
+    protected LocalDateTime fromInstant(Instant instant) {
+        return LocalDateTime.ofInstant(instant, UTC);
+    }
+
     /**
      * Creates an instance.
      *
@@ -36,18 +51,4 @@ public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
         super(LocalDateTime.class, customization);
     }
 
-    @Override
-    protected LocalDateTime fromInstant(Instant instant) {
-        return LocalDateTime.ofInstant(instant, UTC);
-    }
-
-    @Override
-    protected LocalDateTime parseDefault(String jsonValue, Locale locale) {
-        return LocalDateTime.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
-    }
-
-    @Override
-    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return LocalDateTime.parse(jsonValue, formatter);
-    }
 }

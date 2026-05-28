@@ -31,6 +31,11 @@ import java.io.UnsupportedEncodingException;
  */
 public class StringTypeSerializer extends ConfigurableValueTypeSerializer<String> {
 
+    @Override
+    protected void serializeValue(String obj, JsonGenerator generator, ObjectMarshaller marshaller) {
+        generator.write(toJson(obj, marshaller.getJsonbContext()));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -54,8 +59,4 @@ public class StringTypeSerializer extends ConfigurableValueTypeSerializer<String
         return object;
     }
 
-    @Override
-    protected void serializeValue(String obj, JsonGenerator generator, ObjectMarshaller marshaller) {
-        generator.write(toJson(obj, marshaller.getJsonbContext()));
-    }
 }

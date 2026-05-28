@@ -41,24 +41,12 @@ public class AdaptedObjectDeserializer<A, T> implements ActiveItemModel<T>, Json
     private final AbstractContainerDeserializer<?> wrapperItem;
 
     /**
-     * Creates decoration instance wrapping real adapted object item.
+     * Sets adapted item.
      *
-     * @param adapterInfo components type info
-     * @param wrapperItem wrapper item to get instance from
+     * @param adaptedTypeDeserializer Adapted item to set.
      */
-    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
-        this.adapterInfo = adapterInfo;
-        this.wrapperItem = wrapperItem;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ActiveItemModel<?> getWrapper() {
-        return wrapperItem;
+    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedTypeDeserializer) {
+        this.adaptedTypeDeserializer = adaptedTypeDeserializer;
     }
 
     @Override
@@ -67,15 +55,6 @@ public class AdaptedObjectDeserializer<A, T> implements ActiveItemModel<T>, Json
             return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
         }
         throw new JsonbException(Messages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
-    }
-
-    /**
-     * Sets adapted item.
-     *
-     * @param adaptedTypeDeserializer Adapted item to set.
-     */
-    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedTypeDeserializer) {
-        this.adaptedTypeDeserializer = adaptedTypeDeserializer;
     }
 
     @Override
@@ -89,4 +68,26 @@ public class AdaptedObjectDeserializer<A, T> implements ActiveItemModel<T>, Json
             throw new JsonbException(Messages.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
         }
     }
+
+    @Override
+    public ActiveItemModel<?> getWrapper() {
+        return wrapperItem;
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates decoration instance wrapping real adapted object item.
+     *
+     * @param adapterInfo components type info
+     * @param wrapperItem wrapper item to get instance from
+     */
+    public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
+        this.adapterInfo = adapterInfo;
+        this.wrapperItem = wrapperItem;
+    }
+
 }

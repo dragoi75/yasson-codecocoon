@@ -23,15 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class ByteArraySerializer extends AbstractArraySerializer<byte[]> {
 
-    protected ByteArraySerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected void serializeContents(byte[] obj, JsonGenerator generator, SerializationContext ctx) {
         for (byte b : obj) {
             generator.write(b);
         }
+    }
+
+    protected ByteArraySerializer(TypeSerializerBuilder builder) {
+        super(builder);
     }
 
 }

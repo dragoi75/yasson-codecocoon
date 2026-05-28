@@ -21,6 +21,60 @@ import java.math.BigInteger;
 abstract class JsonStructureBuilder {
 
     /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(int value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(BigDecimal value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(boolean value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(double value);
+
+    /**
+     * Write null into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     */
+    abstract void writeNull();
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(BigInteger value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(JsonValue value);
+
+    /**
      * Build and get constructed {@link JsonStructure}
      * @return JsonStructure result.
      */
@@ -39,7 +93,7 @@ abstract class JsonStructureBuilder {
      *
      * @param value A value to write.
      */
-    abstract void write(JsonValue value);
+    abstract void write(long value);
 
     /**
      * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
@@ -49,57 +103,4 @@ abstract class JsonStructureBuilder {
      */
     abstract void write(String value);
 
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(BigDecimal value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(BigInteger value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(int value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(long value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(double value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(boolean value);
-
-    /**
-     * Write null into current {@link JsonStructure}. If current is {@link javax.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     */
-    abstract void writeNull();
 }

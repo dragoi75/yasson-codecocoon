@@ -27,6 +27,11 @@ import java.net.URI;
  */
 public class URITypeSerializer extends ConfigurableValueTypeSerializer<URI> {
 
+    @Override
+    protected void serializeValue(URI obj, JsonGenerator generator, ObjectMarshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,8 +41,4 @@ public class URITypeSerializer extends ConfigurableValueTypeSerializer<URI> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(URI obj, JsonGenerator generator, ObjectMarshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

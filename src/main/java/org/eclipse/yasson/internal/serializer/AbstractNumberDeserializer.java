@@ -32,16 +32,6 @@ import java.util.Optional;
  */
 public abstract class AbstractNumberDeserializer<T extends Number> extends AbstractValueTypeDeserializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param clazz         Class to work with.
-     * @param customization Model customization.
-     */
-    public AbstractNumberDeserializer(Class<T> clazz, SerializationCustomization customization) {
-        super(clazz, customization);
-    }
-
     protected final Optional<Number> deserializeFormatted(String jsonValue, boolean integerOnly, JsonbContext jsonbContext) {
         if (null == getCustomization() || null == getCustomization().getDeserializeNumberFormatter()) {
             return Optional.empty();
@@ -57,4 +47,15 @@ public abstract class AbstractNumberDeserializer<T extends Number> extends Abstr
             throw new JsonbException(Messages.getMessage(MessageKeyConstants.PARSING_NUMBER, jsonValue, numberFormat.getFormat()));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param clazz         Class to work with.
+     * @param customization Model customization.
+     */
+    public AbstractNumberDeserializer(Class<T> clazz, SerializationCustomization customization) {
+        super(clazz, customization);
+    }
+
 }

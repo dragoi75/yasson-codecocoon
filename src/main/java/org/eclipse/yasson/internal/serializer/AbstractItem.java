@@ -39,6 +39,16 @@ public abstract class AbstractItem<T> implements ActiveItemModel<T> {
      */
     private final ClassDescriptor classModel;
 
+    @Override
+    public ActiveItemModel<?> getWrapper() {
+        return wrapper;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
     /**
      * Creates and populates an instance from given builder.
      *
@@ -48,6 +58,11 @@ public abstract class AbstractItem<T> implements ActiveItemModel<T> {
         this.wrapper = builder.getWrapper();
         this.classModel = builder.getClassModel();
         this.runtimeType = builder.getRuntimeType();
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return classModel;
     }
 
     /**
@@ -61,21 +76,6 @@ public abstract class AbstractItem<T> implements ActiveItemModel<T> {
         this.wrapper = wrapper;
         this.runtimeType = runtimeType;
         this.classModel = classModel;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    @Override
-    public ActiveItemModel<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return runtimeType;
     }
 
 }

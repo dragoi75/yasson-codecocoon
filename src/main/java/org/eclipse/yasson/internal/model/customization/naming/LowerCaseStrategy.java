@@ -24,6 +24,12 @@ import java.util.Objects;
  */
 public abstract class LowerCaseStrategy implements PropertyNamingStrategy {
 
+    /**
+     * Separator for replacing camel case.
+     * @return separator
+     */
+    protected abstract char getSeparator();
+
     @Override
     public String translateName(String propertyName) {
         Objects.requireNonNull(propertyName);
@@ -46,9 +52,4 @@ public abstract class LowerCaseStrategy implements PropertyNamingStrategy {
         return Character.isAlphabetic(character) && Character.isLowerCase(character);
     }
 
-    /**
-     * Separator for replacing camel case.
-     * @return separator
-     */
-    protected abstract char getSeparator();
 }

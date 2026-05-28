@@ -38,103 +38,8 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
 
     protected JsonbRiParser.LevelContext parserContext;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link DeserializerBuilder} used to build this instance
-     */
-    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
-     *
-     * @param parser JSON parser.
-     * @param context Deseriaization context.
-     * @param rtType Runtime type.
-     * @return Instance of a type for this item.
-     */
-    @Override
-    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        Unmarshaller ctx = (Unmarshaller) context;
-        deserializeInternal((JsonbParser) parser, ctx);
-        return getInstance((Unmarshaller) context);
-    }
-
-    /**
-     * Creates and initializes an instance of deserializing item.
-     *
-     * @param unmarshaller Current deserialization context.
-     * @return An instance of deserializing item.
-     */
-    protected abstract T getInstance(Unmarshaller unmarshaller);
-
-    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
-        parserContext = moveToFirst(parser);
-        while (parser.hasNext()) {
-            final JsonParser.Event event = parser.next();
-            switch(event) {
-                case START_OBJECT:
-                case START_ARRAY:
-                case VALUE_STRING:
-                case VALUE_NUMBER:
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                    try {
-                        deserializeNext(parser, context);
-                    } catch (JsonbException e) {
-                        if (null == parserContext || null == parserContext.getLastKeyName())
-                            throw e;
-                        else
-                            throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName() + "' because of: " + e.getMessage(), e);
-                    }
-                    break;
-                case KEY_NAME:
-                    break;
-                case VALUE_NULL:
-                    appendResult(null);
-                    break;
-                case END_OBJECT:
-                case END_ARRAY:
-                    return;
-                default:
-                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
-            }
-        }
-    }
-
-    /**
-     * Determine class mappings and create an instance of a new deserializer.
-     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
-     *
-     * @param parser Json parser.
-     * @param context Current unmarshalling context.
-     */
-    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
-
-    /**
-     * Move to first event for current deserializer structure.
-     *
-     * @param parser Json parser.
-     * @return First event.
-     */
-    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
-
     protected DeserializerBuilder newUnmarshallerItemBuilder(JsonbContext ctx) {
         return new DeserializerBuilder(ctx).setWrapper(this).withJsonValueType(parserContext.getLastEvent());
-    }
-
-    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
-        //TODO needs performance optimization on not to create deserializer each time
-        //TODO In contrast to serialization value type cannot change here
-        Type actualValueType = ReflectiveTypeResolver.resolveActualType(this, valueType);
-        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).setType(actualValueType);
-        if (!DefaultSerializers.getInstance().isKnownType(ReflectiveTypeResolver.getRawType(actualValueType))) {
-            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(actualValueType));
-            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getCustomization());
-        }
-        return deserializerBuilder.build();
     }
 
     /**
@@ -173,6 +78,31 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
     }
 
     /**
+     * Determine class mappings and create an instance of a new deserializer.
+     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
+     *
+     * @param parser Json parser.
+     * @param context Current unmarshalling context.
+     */
+    protected abstract void deserializeNext(JsonParser parser, Unmarshaller context);
+
+    /**
+     * Move to first event for current deserializer structure.
+     *
+     * @param parser Json parser.
+     * @return First event.
+     */
+    protected abstract JsonbRiParser.LevelContext moveToFirst(JsonbParser parser);
+
+    /**
+     * Creates and initializes an instance of deserializing item.
+     *
+     * @param unmarshaller Current deserialization context.
+     * @return An instance of deserializing item.
+     */
+    protected abstract T getInstance(Unmarshaller unmarshaller);
+
+    /**
      * After object is transitively deserialized from JSON, "append" it to its wrapper.
      * In case of a field set value to field, in case of collections
      * or other embedded objects use methods provided.
@@ -180,4 +110,75 @@ public abstract class AbstractContainerDeserializer<T> extends AbstractItem<T> i
      * @param result An instance result of an item.
      */
     public abstract void appendResult(Object result);
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link DeserializerBuilder} used to build this instance
+     */
+    protected AbstractContainerDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
+    protected JsonbDeserializer<?> newCollectionOrMapItem(Type valueType, JsonbContext ctx) {
+        //TODO needs performance optimization on not to create deserializer each time
+        //TODO In contrast to serialization value type cannot change here
+        Type actualValueType = ReflectiveTypeResolver.resolveActualType(this, valueType);
+        DeserializerBuilder deserializerBuilder = newUnmarshallerItemBuilder(ctx).setType(actualValueType);
+        if (!DefaultSerializers.getInstance().isKnownType(ReflectiveTypeResolver.getRawType(actualValueType))) {
+            ClassDescriptor classModel = ctx.getMappingContext().getOrCreateClassModel(ReflectiveTypeResolver.getRawType(actualValueType));
+            deserializerBuilder.setCustomization(null == classModel ? null : classModel.getCustomization());
+        }
+        return deserializerBuilder.build();
+    }
+
+    /**
+     * Drives JSONP {@link JsonParser} to deserialize json document.
+     *
+     * @param parser JSON parser.
+     * @param context Deseriaization context.
+     * @param rtType Runtime type.
+     * @return Instance of a type for this item.
+     */
+    @Override
+    public final T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
+        Unmarshaller ctx = (Unmarshaller) context;
+        deserializeInternal((JsonbParser) parser, ctx);
+        return getInstance((Unmarshaller) context);
+    }
+
+    protected void deserializeInternal(JsonbParser parser, Unmarshaller context) {
+        parserContext = moveToFirst(parser);
+        while (parser.hasNext()) {
+            final JsonParser.Event event = parser.next();
+            switch(event) {
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    try {
+                        deserializeNext(parser, context);
+                    } catch (JsonbException e) {
+                        if (null == parserContext || null == parserContext.getLastKeyName())
+                            throw e;
+                        else
+                            throw new JsonbException("Unable to deserialize property '" + parserContext.getLastKeyName() + "' because of: " + e.getMessage(), e);
+                    }
+                    break;
+                case KEY_NAME:
+                    break;
+                case VALUE_NULL:
+                    appendResult(null);
+                    break;
+                case END_OBJECT:
+                case END_ARRAY:
+                    return;
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.NOT_VALUE_TYPE, event));
+            }
+        }
+    }
+
 }

@@ -41,22 +41,52 @@ public class PropertyCustomization extends CustomizationBindingBase {
 
     private final Class implementationClass;
 
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
+    }
+
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Implementation class if property is interface type.
      *
-     * @param builder not null
+     * @return class implementing property interface
      */
-    public PropertyCustomization(PropertyCustomizationBuilder builder) {
-        super(builder);
-        this.jsonReadName = builder.getJsonReadName();
-        this.jsonWriteName = builder.getJsonWriteName();
-        this.serializeNumberFormatter = builder.getSerializeNumberFormatter();
-        this.deserializeNumberFormatter = builder.getDeserializeNumberFormatter();
-        this.serializeDateFormatter = builder.getSerializeDateFormatter();
-        this.deserializeDateFormatter = builder.getDeserializeDateFormatter();
-        this.readTransient = builder.isReadTransient();
-        this.writeTransient = builder.isWriteTransient();
-        this.implementationClass = builder.getImplementationClass();
+    public Class getImplementationClass() {
+        return implementationClass;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
+     */
+    public boolean isWriteTransient() {
+        return writeTransient;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
+     */
+    public boolean isReadTransient() {
+        return readTransient;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return serializeDateFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return serializeNumberFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
     }
 
     /**
@@ -77,52 +107,22 @@ public class PropertyCustomization extends CustomizationBindingBase {
         return jsonWriteName;
     }
 
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return serializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return serializeDateFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
-    }
-
-
     /**
-     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
+     * Copies properties from builder an creates immutable instance.
      *
-     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
+     * @param builder not null
      */
-    public boolean isReadTransient() {
-        return readTransient;
-    }
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
-     *
-     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
-     */
-    public boolean isWriteTransient() {
-        return writeTransient;
-    }
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class getImplementationClass() {
-        return implementationClass;
+    public PropertyCustomization(PropertyCustomizationBuilder builder) {
+        super(builder);
+        this.jsonReadName = builder.getJsonReadName();
+        this.jsonWriteName = builder.getJsonWriteName();
+        this.serializeNumberFormatter = builder.getSerializeNumberFormatter();
+        this.deserializeNumberFormatter = builder.getDeserializeNumberFormatter();
+        this.serializeDateFormatter = builder.getSerializeDateFormatter();
+        this.deserializeDateFormatter = builder.getDeserializeDateFormatter();
+        this.readTransient = builder.isReadTransient();
+        this.writeTransient = builder.isWriteTransient();
+        this.implementationClass = builder.getImplementationClass();
     }
 
 }

@@ -12,6 +12,11 @@ public class GetFromField extends GetValueCommand {
 
     private final Field field;
 
+    @Override
+    public Object internalGetValue(Object object) throws IllegalAccessException, InvocationTargetException {
+        return field.get(object);
+    }
+
     /**
      * Create instance.
      *
@@ -21,8 +26,4 @@ public class GetFromField extends GetValueCommand {
         this.field = field;
     }
 
-    @Override
-    public Object internalGetValue(Object object) throws IllegalAccessException, InvocationTargetException {
-        return field.get(object);
-    }
 }

@@ -31,9 +31,28 @@ public class MapSerializer<T extends Map<?, ?>> extends ContainerSerializerBase<
 
     private final boolean nullable;
 
+    @Override
+    protected Type getValueType(Type valueType) {
+        if (valueType instanceof ParameterizedType) {
+            Optional<Type> runtimeTypeOptional = ReflectiveTypeResolver.resolveAsOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
+            return runtimeTypeOptional.orElse(Object.class);
+        }
+        return Object.class;
+    }
+
+    @Override
+    protected void writeBegin(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
     protected MapSerializer(TypeSerializerBuilder builder) {
         super(builder);
         nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
+    }
+
+    @Override
+    protected void writeBegin(JsonGenerator generator) {
+        generator.writeStartObject();
     }
 
     @Override
@@ -52,22 +71,4 @@ public class MapSerializer<T extends Map<?, ?>> extends ContainerSerializerBase<
         }
     }
 
-    @Override
-    protected void writeBegin(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeBegin(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
-    @Override
-    protected Type getValueType(Type valueType) {
-        if (valueType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeOptional = ReflectiveTypeResolver.resolveAsOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
-            return runtimeTypeOptional.orElse(Object.class);
-        }
-        return Object.class;
-    }
 }

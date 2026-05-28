@@ -33,44 +33,6 @@ import java.util.OptionalLong;
  */
 public class ObjectMarshaller<T> extends ContainerSerializerBase<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param typeSerializerCreator Builder to initialize the instance.
-     */
-    public ObjectMarshaller(TypeSerializerBuilder typeSerializerCreator) {
-        super(typeSerializerCreator);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param activeItem wrapped item
-     * @param actualType class type
-     * @param classDescriptor model of the class
-     */
-    public ObjectMarshaller(ActiveItemModel<?> activeItem, Type actualType, ClassDescriptor classDescriptor) {
-        super(activeItem, actualType, classDescriptor);
-    }
-
-    @Override
-    protected void serializeContents(T entity, JsonGenerator jsonWriter, SerializationContext serializationContext) {
-        final PropertyDescriptor[] propertyDescriptors = ((org.eclipse.yasson.internal.ObjectMarshaller) serializationContext).getMappingContext().getOrCreateClassModel(entity.getClass()).getSortedProperties();
-        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            marshalProperty(entity, jsonWriter, serializationContext, propertyDescriptor);
-        }
-    }
-
-    @Override
-    protected void writeBegin(JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject();
-    }
-
-    @Override
-    protected void writeBegin(String propertyName, JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject(propertyName);
-    }
-
     @SuppressWarnings("unchecked")
     private void marshalProperty(T entity, JsonGenerator jsonWriter, SerializationContext serializationContext, PropertyDescriptor propertyDescriptor) {
         org.eclipse.yasson.internal.ObjectMarshaller objectSerializer = (org.eclipse.yasson.internal.ObjectMarshaller) serializationContext;
@@ -95,6 +57,11 @@ public class ObjectMarshaller<T> extends ContainerSerializerBase<T> {
         }
     }
 
+    @Override
+    protected void writeBegin(String propertyName, JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject(propertyName);
+    }
+
     private boolean isEmptyOptional(Object entity) {
         if (!(entity instanceof Optional)) {
             if (!(entity instanceof OptionalInt)) {
@@ -113,4 +80,38 @@ public class ObjectMarshaller<T> extends ContainerSerializerBase<T> {
         }
         return false;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param activeItem wrapped item
+     * @param actualType class type
+     * @param classDescriptor model of the class
+     */
+    public ObjectMarshaller(ActiveItemModel<?> activeItem, Type actualType, ClassDescriptor classDescriptor) {
+        super(activeItem, actualType, classDescriptor);
+    }
+
+    @Override
+    protected void writeBegin(JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject();
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param typeSerializerCreator Builder to initialize the instance.
+     */
+    public ObjectMarshaller(TypeSerializerBuilder typeSerializerCreator) {
+        super(typeSerializerCreator);
+    }
+
+    @Override
+    protected void serializeContents(T entity, JsonGenerator jsonWriter, SerializationContext serializationContext) {
+        final PropertyDescriptor[] propertyDescriptors = ((org.eclipse.yasson.internal.ObjectMarshaller) serializationContext).getMappingContext().getOrCreateClassModel(entity.getClass()).getSortedProperties();
+        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            marshalProperty(entity, jsonWriter, serializationContext, propertyDescriptor);
+        }
+    }
+
 }

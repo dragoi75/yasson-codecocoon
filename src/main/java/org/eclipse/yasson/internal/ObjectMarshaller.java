@@ -45,6 +45,64 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
     private final Type resolvedClass;
 
     /**
+     * Serializes root element.
+     *
+     * @param <T> Root type
+     * @param sourceObject Root.
+     * @param outputWriter JSON generator.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> void serializeRootObject(T sourceObject, JsonGenerator outputWriter) {
+        if (null == sourceObject) {
+            getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, outputWriter, this);
+            return;
+        }
+        final JsonbSerializer<T> primarySerializer = (JsonbSerializer<T>) getRootSerializer(sourceObject.getClass());
+        if (jsonbContext.getConfigProperties().isStrictIJson() && primarySerializer instanceof ConfigurableValueTypeSerializer) {
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
+        }
+        primarySerializer.serialize(sourceObject, outputWriter, this);
+    }
+
+    @Override
+    public <T> void serialize(T value, JsonGenerator outputWriter) {
+        Objects.requireNonNull(value);
+        serializeRootObject(value, outputWriter);
+    }
+
+    @Override
+    public <T> void serialize(String propertyName, T value, JsonGenerator outputWriter) {
+        Objects.requireNonNull(propertyName);
+        Objects.requireNonNull(value);
+        outputWriter.writeKey(propertyName);
+        serializeRootObject(value, outputWriter);
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Leaves generator open for further interaction after completion.
+     *
+     * @param value object to marshall
+     * @param outWriter generator to use
+     */
+    public void marshalWithoutClose(Object value, JsonGenerator outWriter) {
+        marshal(value, outWriter, false);
+    }
+
+    private JsonbSerializer<?> getRootSerializer(Class<?> targetClass) {
+        final ContainerSerializerProvider containerProvider = getMappingContext().getSerializerProvider(targetClass);
+        if (null != containerProvider) {
+            return containerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(resolvedClass));
+        }
+        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(jsonbContext).setObjectClass(targetClass).setType(resolvedClass);
+        if (!DefaultSerializers.getInstance().isKnownType(targetClass)) {
+            ClassDescriptor descriptor = getMappingContext().getOrCreateClassModel(targetClass);
+            typeBuilder.setCustomization(descriptor.getCustomization());
+        }
+        return typeBuilder.buildSerializer();
+    }
+
+    /**
      * Creates Marshaller for generation to String.
      *
      * @param marshallingContext Current context.
@@ -53,16 +111,6 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
     public ObjectMarshaller(JsonbContext marshallingContext, Type baseClass) {
         super(marshallingContext);
         this.resolvedClass = baseClass;
-    }
-
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param marshallingContext Current context.
-     */
-    public ObjectMarshaller(JsonbContext marshallingContext) {
-        super(marshallingContext);
-        this.resolvedClass = null;
     }
 
     /**
@@ -93,6 +141,16 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
     }
 
     /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param marshallingContext Current context.
+     */
+    public ObjectMarshaller(JsonbContext marshallingContext) {
+        super(marshallingContext);
+        this.resolvedClass = null;
+    }
+
+    /**
      * Marshals given object to provided Writer or OutputStream.
      * Closes the generator on completion.
      *
@@ -103,61 +161,4 @@ public class ObjectMarshaller extends ObjectProcessingContext implements Seriali
         marshal(value, outWriter, true);
     }
 
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Leaves generator open for further interaction after completion.
-     *
-     * @param value object to marshall
-     * @param outWriter generator to use
-     */
-    public void marshalWithoutClose(Object value, JsonGenerator outWriter) {
-        marshal(value, outWriter, false);
-    }
-
-    @Override
-    public <T> void serialize(String propertyName, T value, JsonGenerator outputWriter) {
-        Objects.requireNonNull(propertyName);
-        Objects.requireNonNull(value);
-        outputWriter.writeKey(propertyName);
-        serializeRootObject(value, outputWriter);
-    }
-
-    @Override
-    public <T> void serialize(T value, JsonGenerator outputWriter) {
-        Objects.requireNonNull(value);
-        serializeRootObject(value, outputWriter);
-    }
-
-    /**
-     * Serializes root element.
-     *
-     * @param <T> Root type
-     * @param sourceObject Root.
-     * @param outputWriter JSON generator.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> void serializeRootObject(T sourceObject, JsonGenerator outputWriter) {
-        if (null == sourceObject) {
-            getJsonbContext().getConfigProperties().getNullSerializer().serialize(null, outputWriter, this);
-            return;
-        }
-        final JsonbSerializer<T> primarySerializer = (JsonbSerializer<T>) getRootSerializer(sourceObject.getClass());
-        if (jsonbContext.getConfigProperties().isStrictIJson() && primarySerializer instanceof ConfigurableValueTypeSerializer) {
-            throw new JsonbException(Messages.getMessage(MessageKeyConstants.IJSON_ENABLED_SINGLE_VALUE));
-        }
-        primarySerializer.serialize(sourceObject, outputWriter, this);
-    }
-
-    private JsonbSerializer<?> getRootSerializer(Class<?> targetClass) {
-        final ContainerSerializerProvider containerProvider = getMappingContext().getSerializerProvider(targetClass);
-        if (null != containerProvider) {
-            return containerProvider.provideSerializer(new JsonbPropertyInfo().withRuntimeType(resolvedClass));
-        }
-        TypeSerializerBuilder typeBuilder = new TypeSerializerBuilder(jsonbContext).setObjectClass(targetClass).setType(resolvedClass);
-        if (!DefaultSerializers.getInstance().isKnownType(targetClass)) {
-            ClassDescriptor descriptor = getMappingContext().getOrCreateClassModel(targetClass);
-            typeBuilder.setCustomization(descriptor.getCustomization());
-        }
-        return typeBuilder.buildSerializer();
-    }
 }

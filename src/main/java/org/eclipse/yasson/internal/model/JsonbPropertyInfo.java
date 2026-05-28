@@ -33,12 +33,41 @@ public class JsonbPropertyInfo {
     private ActiveItemModel<?> wrapper;
 
     /**
-     * Gets context.
+     * Sets wrapper.
      *
-     * @return Context.
+     * @param wrapper Wrapper to set.
+     * @return Updated object.
      */
-    public JsonbContext getContext() {
-        return context;
+    public JsonbPropertyInfo withWrapper(ActiveItemModel<?> wrapper) {
+        this.wrapper = wrapper;
+        return this;
+    }
+
+    /**
+     * Gets class model.
+     *
+     * @return Class model.
+     */
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Gets wrapper.
+     *
+     * @return Wrapper.
+     */
+    public ActiveItemModel<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Gets runtime type.
+     *
+     * @return Runtime type.
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
     }
 
     /**
@@ -53,12 +82,12 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets runtime type.
+     * Gets context.
      *
-     * @return Runtime type.
+     * @return Context.
      */
-    public Type getRuntimeType() {
-        return runtimeType;
+    public JsonbContext getContext() {
+        return context;
     }
 
     /**
@@ -73,15 +102,6 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets class model.
-     *
-     * @return Class model.
-     */
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    /**
      * Sets class model.
      *
      * @param classModel Class model to set.
@@ -92,23 +112,4 @@ public class JsonbPropertyInfo {
         return this;
     }
 
-    /**
-     * Gets wrapper.
-     *
-     * @return Wrapper.
-     */
-    public ActiveItemModel<?> getWrapper() {
-        return wrapper;
-    }
-
-    /**
-     * Sets wrapper.
-     *
-     * @param wrapper Wrapper to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyInfo withWrapper(ActiveItemModel<?> wrapper) {
-        this.wrapper = wrapper;
-        return this;
-    }
 }

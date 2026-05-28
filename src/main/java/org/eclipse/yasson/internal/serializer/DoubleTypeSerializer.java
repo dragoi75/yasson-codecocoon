@@ -24,15 +24,6 @@ import javax.json.stream.JsonGenerator;
  */
 public class DoubleTypeSerializer extends AbstractNumberSerializer<Double> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public DoubleTypeSerializer(SerializationCustomization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeNonFormatted(Double obj, JsonGenerator generator, String key) {
         generator.write(key, obj);
@@ -42,4 +33,14 @@ public class DoubleTypeSerializer extends AbstractNumberSerializer<Double> {
     protected void serializeNonFormatted(Double obj, JsonGenerator generator) {
         generator.write(obj);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public DoubleTypeSerializer(SerializationCustomization customization) {
+        super(customization);
+    }
+
 }

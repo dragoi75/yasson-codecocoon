@@ -36,6 +36,34 @@ public class ClassCustomization extends CustomizationBindingBase {
 
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
+     * Property visibility strategy for this class model.
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -48,6 +76,15 @@ public class ClassCustomization extends CustomizationBindingBase {
         this.numberFormatter = builder.getNumberFormatter();
         this.dateTimeFormatter = builder.getDateFormatter();
         this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
+    }
+
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
     }
 
     /**
@@ -65,24 +102,6 @@ public class ClassCustomization extends CustomizationBindingBase {
     }
 
     /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
-
-    /**
      * Sets sorted properties.
      *
      * @param propertyOrder sorted names of properties
@@ -92,31 +111,12 @@ public class ClassCustomization extends CustomizationBindingBase {
     }
 
     /**
-     * Property visibility strategy for this class model.
-     * @return visibility strategy
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
+    public JsonbCreator getCreator() {
+        return creator;
     }
 
 }

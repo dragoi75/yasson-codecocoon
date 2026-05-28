@@ -39,76 +39,6 @@ public abstract class ContainerSerializerBase<T> extends AbstractItem<T> impleme
     private Class<?> elementClass;
 
     /**
-     * Create instance of current item with its builder.
-     *
-     * @param typeFactory {@link TypeSerializerBuilder} used to build this instance
-     */
-    protected ContainerSerializerBase(TypeSerializerBuilder typeFactory) {
-        super(typeFactory);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param activeModel Item to serialize.
-     * @param actualType Runtime type of the item.
-     * @param typeDescriptor Class model.
-     */
-    public ContainerSerializerBase(ActiveItemModel<?> activeModel, Type actualType, ClassDescriptor typeDescriptor) {
-        super(activeModel, actualType, typeDescriptor);
-    }
-
-    @Override
-    public final void serialize(T value, JsonGenerator jsonGenerator, SerializationContext context) {
-        writeBegin(jsonGenerator);
-        serializeContents(value, jsonGenerator, context);
-        writeClose(jsonGenerator);
-    }
-
-    protected abstract void serializeContents(T obj, JsonGenerator generator, SerializationContext ctx);
-
-    /**
-     * Write start object or start array without a key.
-     *
-     * @param jsonGenerator JSON generator.
-     */
-    protected abstract void writeBegin(JsonGenerator jsonGenerator);
-
-    /**
-     * Writes end for object or array.
-     *
-     * @param jsonGenerator JSON generator.
-     */
-    protected void writeClose(JsonGenerator jsonGenerator) {
-        jsonGenerator.writeEnd();
-    }
-
-    /**
-     * Write start object or start array with key.
-     *
-     * @param fieldName JSON key name.
-     * @param jsonGenerator JSON generator.
-     */
-    protected abstract void writeBegin(String fieldName, JsonGenerator jsonGenerator);
-
-    @SuppressWarnings("unchecked")
-    protected <X> void invokeSerializer(JsonbSerializer<?> delegateSerializer, X target, JsonGenerator jsonGenerator, SerializationContext context) {
-        ((JsonbSerializer<X>) delegateSerializer).serialize(target, jsonGenerator, context);
-    }
-
-    /**
-     * Return last used serializer if last value class matches.
-     * @param elementClass class of the serialized object
-     * @return cached serializer or null
-     */
-    protected JsonbSerializer<?> getValueSerializer(Class<?> elementClass) {
-        if (null != elementSerializer && this.elementClass == elementClass) {
-            return elementSerializer;
-        }
-        return null;
-    }
-
-    /**
      * Cache a serializer and serialized object class for next use.
      * @param elementSerializer serializer
      * @param elementClass class of serializer object
@@ -118,6 +48,14 @@ public abstract class ContainerSerializerBase<T> extends AbstractItem<T> impleme
         Objects.requireNonNull(elementClass);
         this.elementSerializer = elementSerializer;
         this.elementClass = elementClass;
+    }
+
+    protected Type getValueType(Type requestedType) {
+        if (requestedType instanceof ParameterizedType) {
+            Optional<Type> maybeRuntimeType = ReflectiveTypeResolver.resolveAsOptional(this, ((ParameterizedType) requestedType).getActualTypeArguments()[0]);
+            return maybeRuntimeType.orElse(Object.class);
+        }
+        return Object.class;
     }
 
     protected void serializeElement(Object elementValue, JsonGenerator jsonGenerator, SerializationContext context) {
@@ -152,11 +90,74 @@ public abstract class ContainerSerializerBase<T> extends AbstractItem<T> impleme
         invokeSerializer(delegateSerializer, elementValue, jsonGenerator, context);
     }
 
-    protected Type getValueType(Type requestedType) {
-        if (requestedType instanceof ParameterizedType) {
-            Optional<Type> maybeRuntimeType = ReflectiveTypeResolver.resolveAsOptional(this, ((ParameterizedType) requestedType).getActualTypeArguments()[0]);
-            return maybeRuntimeType.orElse(Object.class);
-        }
-        return Object.class;
+    protected abstract void serializeContents(T obj, JsonGenerator generator, SerializationContext ctx);
+
+    /**
+     * Write start object or start array with key.
+     *
+     * @param fieldName JSON key name.
+     * @param jsonGenerator JSON generator.
+     */
+    protected abstract void writeBegin(String fieldName, JsonGenerator jsonGenerator);
+
+    /**
+     * Writes end for object or array.
+     *
+     * @param jsonGenerator JSON generator.
+     */
+    protected void writeClose(JsonGenerator jsonGenerator) {
+        jsonGenerator.writeEnd();
     }
+
+    /**
+     * Return last used serializer if last value class matches.
+     * @param elementClass class of the serialized object
+     * @return cached serializer or null
+     */
+    protected JsonbSerializer<?> getValueSerializer(Class<?> elementClass) {
+        if (null != elementSerializer && this.elementClass == elementClass) {
+            return elementSerializer;
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <X> void invokeSerializer(JsonbSerializer<?> delegateSerializer, X target, JsonGenerator jsonGenerator, SerializationContext context) {
+        ((JsonbSerializer<X>) delegateSerializer).serialize(target, jsonGenerator, context);
+    }
+
+    @Override
+    public final void serialize(T value, JsonGenerator jsonGenerator, SerializationContext context) {
+        writeBegin(jsonGenerator);
+        serializeContents(value, jsonGenerator, context);
+        writeClose(jsonGenerator);
+    }
+
+    /**
+     * Write start object or start array without a key.
+     *
+     * @param jsonGenerator JSON generator.
+     */
+    protected abstract void writeBegin(JsonGenerator jsonGenerator);
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param typeFactory {@link TypeSerializerBuilder} used to build this instance
+     */
+    protected ContainerSerializerBase(TypeSerializerBuilder typeFactory) {
+        super(typeFactory);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param activeModel Item to serialize.
+     * @param actualType Runtime type of the item.
+     * @param typeDescriptor Class model.
+     */
+    public ContainerSerializerBase(ActiveItemModel<?> activeModel, Type actualType, ClassDescriptor typeDescriptor) {
+        super(activeModel, actualType, typeDescriptor);
+    }
+
 }

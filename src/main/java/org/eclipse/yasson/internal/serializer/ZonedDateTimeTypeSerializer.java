@@ -28,6 +28,16 @@ import java.util.Locale;
  */
 public class ZonedDateTimeTypeSerializer extends AbstractDateTimeSerializer<ZonedDateTime> {
 
+    @Override
+    protected String formatDefault(ZonedDateTime value, Locale locale) {
+        return DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale).format(value);
+    }
+
+    @Override
+    protected Instant toInstant(ZonedDateTime value) {
+        return value.toInstant();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,13 +47,4 @@ public class ZonedDateTimeTypeSerializer extends AbstractDateTimeSerializer<Zone
         super(customization);
     }
 
-    @Override
-    protected Instant toInstant(ZonedDateTime value) {
-        return value.toInstant();
-    }
-
-    @Override
-    protected String formatDefault(ZonedDateTime value, Locale locale) {
-        return DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale).format(value);
-    }
 }

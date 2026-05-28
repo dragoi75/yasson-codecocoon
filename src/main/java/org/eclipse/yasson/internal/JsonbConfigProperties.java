@@ -81,165 +81,47 @@ public class JsonbConfigProperties {
 
     private final JsonbSerializer<Object> nullSerializer;
 
-    public JsonbConfigProperties(JsonbConfig jsonbConfig) {
-        this.jsonbConfig = jsonbConfig;
-        this.binaryDataStrategy = initBinaryDataStrategy();
-        this.propertyNamingStrategy = initPropertyNamingStrategy();
-        this.propertyVisibilityStrategy = initPropertyVisibilityStrategy();
-        this.propertyOrdering = new PropertyOrdering(initOrderStrategy());
-        this.locale = initConfigLocale();
-        this.dateFormatter = initDateFormatter(this.locale);
-        this.nullable = initConfigNullable();
-        this.failOnUnknownProperties = initConfigFailOnUnknownProperties();
-        this.strictIJson = initStrictJson();
-        this.userTypeMapping = initUserTypeMapping();
-        this.zeroTimeDefaulting = initZeroTimeDefaultingForJavaTime();
-        this.defaultMapImplType = initDefaultMapImplType();
-        this.nullSerializer = initNullSerializer();
-    }
-
-    private Class<?> initDefaultMapImplType() {
-        Optional<String> os = getPropertyOrderStrategy();
-        if (os.isPresent()) {
-            switch(os.get()) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
-                    return TreeMap.class;
-                case PropertyOrderStrategy.REVERSE:
-                    return ReverseTreeMap.class;
-                default:
-                    return HashMap.class;
-            }
-        }
-        return HashMap.class;
-    }
-
-    private boolean initZeroTimeDefaultingForJavaTime() {
-        return getBooleanConfigProperty(YassonProperties.ZERO_TIME_PARSE_DEFAULTING, false);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<Class<?>, Class<?>> initUserTypeMapping() {
-        Optional<Object> property = jsonbConfig.getProperty(YassonProperties.USER_TYPE_MAPPING);
-        if (!property.isPresent()) {
-            return Collections.emptyMap();
-        }
-        Object result = property.get();
-        if (!(result instanceof Map)) {
-            throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonProperties.USER_TYPE_MAPPING, Map.class.getSimpleName()));
-        }
-        return (Map<Class<?>, Class<?>>) result;
-    }
-
-    private JsonbDateFormatter initDateFormatter(Locale locale) {
-        final String dateFormat = getGlobalConfigJsonbDateFormat();
-        if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
-            return new JsonbDateFormatter(dateFormat, locale.toLanguageTag());
-        }
-        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-        builder.appendPattern(dateFormat);
-        if (isZeroTimeDefaulting()) {
-            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
-            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
-            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
-        }
-        DateTimeFormatter dateTimeFormatter = builder.toFormatter(locale);
-        return new JsonbDateFormatter(dateTimeFormatter, dateFormat, locale.toLanguageTag());
-    }
-
-    private String getGlobalConfigJsonbDateFormat() {
-        final Optional<Object> formatProperty = jsonbConfig.getProperty(JsonbConfig.DATE_FORMAT);
-        return formatProperty.map(f -> {
-            if (!(f instanceof String)) {
-                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.DATE_FORMAT, String.class.getSimpleName()));
-            }
-            return (String) f;
-        }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
-    }
-
-    private PropOrderStrategy initOrderStrategy() {
-        Optional<String> strategy = getPropertyOrderStrategy();
-        if (strategy.isPresent()) {
-            switch(strategy.get()) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
-                    return new LexicographicalOrderStrategy();
-                case PropertyOrderStrategy.REVERSE:
-                    return new ReverseOrderStrategy();
-                case PropertyOrderStrategy.ANY:
-                    return new AnyOrderStrategy();
-                default:
-                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
-            }
-        }
-        //default by spec
-        return new LexicographicalOrderStrategy();
-    }
-
-    private Optional<String> getPropertyOrderStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY);
+    private boolean getBooleanConfigProperty(String propertyName, boolean defaultValue) {
+        final Optional<Object> property = jsonbConfig.getProperty(propertyName);
         if (property.isPresent()) {
-            final Object strategy = property.get();
-            if (!(strategy instanceof String)) {
-                throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
+            final Object result = property.get();
+            if (!(result instanceof Boolean)) {
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, Boolean.class.getSimpleName()));
             }
-            switch((String) strategy) {
-                case PropertyOrderStrategy.LEXICOGRAPHICAL:
-                case PropertyOrderStrategy.REVERSE:
-                case PropertyOrderStrategy.ANY:
-                    return Optional.of((String) strategy);
-                default:
-                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
-            }
+            return (boolean) result;
         }
-        return Optional.empty();
-    }
-
-    private PropertyNamingStrategy initPropertyNamingStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
-        if (!property.isPresent()) {
-            return new IdentityStrategy();
-        }
-        Object propertyNamingStrategy = property.get();
-        if (propertyNamingStrategy instanceof String) {
-            String namingStrategyName = (String) propertyNamingStrategy;
-            final PropertyNamingStrategy foundNamingStrategy = DefaultNamingStrategies.getStrategy(namingStrategyName);
-            if (null == foundNamingStrategy) {
-                throw new JsonbException("No property naming strategy was found for: " + namingStrategyName);
-            }
-            return foundNamingStrategy;
-        }
-        if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
-            throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_NAMING_STRATEGY_INVALID));
-        }
-        return (PropertyNamingStrategy) property.get();
-    }
-
-    private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
-        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_VISIBILITY_STRATEGY);
-        if (!property.isPresent()) {
-            return null;
-        }
-        final Object propertyVisibilityStrategy = property.get();
-        if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
-            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
-        }
-        return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
-    }
-
-    private String initBinaryDataStrategy() {
-        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj -> (Boolean) obj));
-        if (iJson.isPresent() && iJson.get()) {
-            return BinaryDataStrategy.BASE_64_URL;
-        }
-        final Optional<String> strategy = jsonbConfig.getProperty(JsonbConfig.BINARY_DATA_STRATEGY).map((obj) -> (String) obj);
-        return strategy.orElse(BinaryDataStrategy.BYTE);
-    }
-
-    private boolean initConfigNullable() {
-        return getBooleanConfigProperty(JsonbConfig.NULL_VALUES, false);
+        return defaultValue;
     }
 
     private boolean initConfigFailOnUnknownProperties() {
         return getBooleanConfigProperty(YassonProperties.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    /**
+     * Checks for binary data strategy to use.
+     *
+     * @return Binary data strategy.
+     */
+    public String getBinaryDataStrategy() {
+        return binaryDataStrategy;
+    }
+
+    /**
+     * Gets property ordering component.
+     *
+     * @return Component for ordering properties.
+     */
+    public PropertyOrdering getPropertyOrdering() {
+        return propertyOrdering;
+    }
+
+    /**
+     * Gets property naming strategy.
+     *
+     * @return Property naming strategy.
+     */
+    public PropertyNamingStrategy getPropertyNamingStrategy() {
+        return propertyNamingStrategy;
     }
 
     private JsonbSerializer<Object> initNullSerializer() {
@@ -264,106 +146,37 @@ public class JsonbConfigProperties {
         return nullable;
     }
 
-    /**
-     * Gets unknown properties flag from {@link JsonbConfig}.
-     * If false, {@link JsonbException} is not thrown for deserialization, when json key
-     * cannot be mapped to class property.
-     *
-     * @return
-     *      {@link JsonbException} is risen on unknown property. Default is true even if
-     *      not set in json config.
-     */
-    public boolean getConfigFailOnUnknownProperties() {
-        return failOnUnknownProperties;
+    private boolean initConfigNullable() {
+        return getBooleanConfigProperty(JsonbConfig.NULL_VALUES, false);
     }
 
-    private boolean getBooleanConfigProperty(String propertyName, boolean defaultValue) {
-        final Optional<Object> property = jsonbConfig.getProperty(propertyName);
-        if (property.isPresent()) {
-            final Object result = property.get();
-            if (!(result instanceof Boolean)) {
-                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, propertyName, Boolean.class.getSimpleName()));
-            }
-            return (boolean) result;
+    /**
+     * User type mapping for map interface to implementation classes.
+     *
+     * @return User type mapping.
+     */
+    public Map<Class<?>, Class<?>> getUserTypeMapping() {
+        return userTypeMapping;
+    }
+
+    private JsonbDateFormatter initDateFormatter(Locale locale) {
+        final String dateFormat = getGlobalConfigJsonbDateFormat();
+        if (JsonbDateFormat.DEFAULT_FORMAT.equals(dateFormat) || JsonbDateFormat.TIME_IN_MILLIS.equals(dateFormat)) {
+            return new JsonbDateFormatter(dateFormat, locale.toLanguageTag());
         }
-        return defaultValue;
-    }
-
-    /**
-     * Checks for binary data strategy to use.
-     *
-     * @return Binary data strategy.
-     */
-    public String getBinaryDataStrategy() {
-        return binaryDataStrategy;
-    }
-
-    /**
-     * Converts string locale to {@link Locale}.
-     *
-     * @param locale Locale to convert.
-     * @return {@link Locale} instance.
-     */
-    public Locale getLocale(String locale) {
-        if (locale.equals(JsonbDateFormat.DEFAULT_LOCALE)) {
-            return this.locale;
+        DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
+        builder.appendPattern(dateFormat);
+        if (isZeroTimeDefaulting()) {
+            builder.parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0);
+            builder.parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0);
+            builder.parseDefaulting(ChronoField.HOUR_OF_DAY, 0);
         }
-        return Locale.forLanguageTag(locale);
-    }
-
-    /**
-     * Gets locale from {@link JsonbConfig}.
-     *
-     * @return Configured locale.
-     */
-    private Locale initConfigLocale() {
-        final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
-        return localeProperty.map(loc -> {
-            if (!(loc instanceof Locale)) {
-                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
-            }
-            return (Locale) loc;
-        }).orElseGet(Locale::getDefault);
+        DateTimeFormatter dateTimeFormatter = builder.toFormatter(locale);
+        return new JsonbDateFormatter(dateTimeFormatter, dateFormat, locale.toLanguageTag());
     }
 
     private boolean initStrictJson() {
         return getBooleanConfigProperty(JsonbConfig.STRICT_IJSON, false);
-    }
-
-    /**
-     * Gets property visibility strategy.
-     *
-     * @return Property visibility strategy.
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    /**
-     * Gets property naming strategy.
-     *
-     * @return Property naming strategy.
-     */
-    public PropertyNamingStrategy getPropertyNamingStrategy() {
-        return propertyNamingStrategy;
-    }
-
-    /**
-     * Gets instantiated shared config date formatter.
-     *
-     * @return Date formatter.
-     */
-    public JsonbDateFormatter getConfigDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
-     * Gets property ordering component.
-     *
-     * @return Component for ordering properties.
-     */
-    public PropertyOrdering getPropertyOrdering() {
-        return propertyOrdering;
     }
 
     /**
@@ -376,12 +189,21 @@ public class JsonbConfigProperties {
     }
 
     /**
-     * User type mapping for map interface to implementation classes.
+     * Gets instantiated shared config date formatter.
      *
-     * @return User type mapping.
+     * @return Date formatter.
      */
-    public Map<Class<?>, Class<?>> getUserTypeMapping() {
-        return userTypeMapping;
+    public JsonbDateFormatter getConfigDateFormatter() {
+        return dateFormatter;
+    }
+
+    private String initBinaryDataStrategy() {
+        final Optional<Boolean> iJson = jsonbConfig.getProperty(JsonbConfig.STRICT_IJSON).map((obj -> (Boolean) obj));
+        if (iJson.isPresent() && iJson.get()) {
+            return BinaryDataStrategy.BASE_64_URL;
+        }
+        final Optional<String> strategy = jsonbConfig.getProperty(JsonbConfig.BINARY_DATA_STRATEGY).map((obj) -> (String) obj);
+        return strategy.orElse(BinaryDataStrategy.BYTE);
     }
 
     /**
@@ -399,6 +221,112 @@ public class JsonbConfigProperties {
         return zeroTimeDefaulting;
     }
 
+    private PropOrderStrategy initOrderStrategy() {
+        Optional<String> strategy = getPropertyOrderStrategy();
+        if (strategy.isPresent()) {
+            switch(strategy.get()) {
+                case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                    return new LexicographicalOrderStrategy();
+                case PropertyOrderStrategy.REVERSE:
+                    return new ReverseOrderStrategy();
+                case PropertyOrderStrategy.ANY:
+                    return new AnyOrderStrategy();
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
+            }
+        }
+        //default by spec
+        return new LexicographicalOrderStrategy();
+    }
+
+    private Class<?> initDefaultMapImplType() {
+        Optional<String> os = getPropertyOrderStrategy();
+        if (os.isPresent()) {
+            switch(os.get()) {
+                case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                    return TreeMap.class;
+                case PropertyOrderStrategy.REVERSE:
+                    return ReverseTreeMap.class;
+                default:
+                    return HashMap.class;
+            }
+        }
+        return HashMap.class;
+    }
+
+    public JsonbConfigProperties(JsonbConfig jsonbConfig) {
+        this.jsonbConfig = jsonbConfig;
+        this.binaryDataStrategy = initBinaryDataStrategy();
+        this.propertyNamingStrategy = initPropertyNamingStrategy();
+        this.propertyVisibilityStrategy = initPropertyVisibilityStrategy();
+        this.propertyOrdering = new PropertyOrdering(initOrderStrategy());
+        this.locale = initConfigLocale();
+        this.dateFormatter = initDateFormatter(this.locale);
+        this.nullable = initConfigNullable();
+        this.failOnUnknownProperties = initConfigFailOnUnknownProperties();
+        this.strictIJson = initStrictJson();
+        this.userTypeMapping = initUserTypeMapping();
+        this.zeroTimeDefaulting = initZeroTimeDefaultingForJavaTime();
+        this.defaultMapImplType = initDefaultMapImplType();
+        this.nullSerializer = initNullSerializer();
+    }
+
+    /**
+     * Gets property visibility strategy.
+     *
+     * @return Property visibility strategy.
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    private String getGlobalConfigJsonbDateFormat() {
+        final Optional<Object> formatProperty = jsonbConfig.getProperty(JsonbConfig.DATE_FORMAT);
+        return formatProperty.map(f -> {
+            if (!(f instanceof String)) {
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.DATE_FORMAT, String.class.getSimpleName()));
+            }
+            return (String) f;
+        }).orElse(JsonbDateFormat.DEFAULT_FORMAT);
+    }
+
+    /**
+     * Converts string locale to {@link Locale}.
+     *
+     * @param locale Locale to convert.
+     * @return {@link Locale} instance.
+     */
+    public Locale getLocale(String locale) {
+        if (locale.equals(JsonbDateFormat.DEFAULT_LOCALE)) {
+            return this.locale;
+        }
+        return Locale.forLanguageTag(locale);
+    }
+
+    private PropertyNamingStrategy initPropertyNamingStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_NAMING_STRATEGY);
+        if (!property.isPresent()) {
+            return new IdentityStrategy();
+        }
+        Object propertyNamingStrategy = property.get();
+        if (propertyNamingStrategy instanceof String) {
+            String namingStrategyName = (String) propertyNamingStrategy;
+            final PropertyNamingStrategy foundNamingStrategy = DefaultNamingStrategies.getStrategy(namingStrategyName);
+            if (null == foundNamingStrategy) {
+                throw new JsonbException("No property naming strategy was found for: " + namingStrategyName);
+            }
+            return foundNamingStrategy;
+        }
+        if (!(propertyNamingStrategy instanceof PropertyNamingStrategy)) {
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_NAMING_STRATEGY_INVALID));
+        }
+        return (PropertyNamingStrategy) property.get();
+    }
+
+    private boolean initZeroTimeDefaultingForJavaTime() {
+        return getBooleanConfigProperty(YassonProperties.ZERO_TIME_PARSE_DEFAULTING, false);
+    }
+
     /**
      * Default {@link java.util.Map} implementation to use, based on order strategy.
      * @return map impl type
@@ -410,4 +338,77 @@ public class JsonbConfigProperties {
     public JsonbSerializer<Object> getNullSerializer() {
         return nullSerializer;
     }
+
+    /**
+     * Gets unknown properties flag from {@link JsonbConfig}.
+     * If false, {@link JsonbException} is not thrown for deserialization, when json key
+     * cannot be mapped to class property.
+     *
+     * @return
+     *      {@link JsonbException} is risen on unknown property. Default is true even if
+     *      not set in json config.
+     */
+    public boolean getConfigFailOnUnknownProperties() {
+        return failOnUnknownProperties;
+    }
+
+    /**
+     * Gets locale from {@link JsonbConfig}.
+     *
+     * @return Configured locale.
+     */
+    private Locale initConfigLocale() {
+        final Optional<Object> localeProperty = jsonbConfig.getProperty(JsonbConfig.LOCALE);
+        return localeProperty.map(loc -> {
+            if (!(loc instanceof Locale)) {
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, JsonbConfig.LOCALE, Locale.class.getSimpleName()));
+            }
+            return (Locale) loc;
+        }).orElseGet(Locale::getDefault);
+    }
+
+    private Optional<String> getPropertyOrderStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_ORDER_STRATEGY);
+        if (property.isPresent()) {
+            final Object strategy = property.get();
+            if (!(strategy instanceof String)) {
+                throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
+            }
+            switch((String) strategy) {
+                case PropertyOrderStrategy.LEXICOGRAPHICAL:
+                case PropertyOrderStrategy.REVERSE:
+                case PropertyOrderStrategy.ANY:
+                    return Optional.of((String) strategy);
+                default:
+                    throw new JsonbException(Messages.getMessage(MessageKeyConstants.PROPERTY_ORDER, strategy));
+            }
+        }
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Class<?>, Class<?>> initUserTypeMapping() {
+        Optional<Object> property = jsonbConfig.getProperty(YassonProperties.USER_TYPE_MAPPING);
+        if (!property.isPresent()) {
+            return Collections.emptyMap();
+        }
+        Object result = property.get();
+        if (!(result instanceof Map)) {
+            throw new JsonbException(Messages.getMessage(MessageKeyConstants.JSONB_CONFIG_PROPERTY_INVALID_TYPE, YassonProperties.USER_TYPE_MAPPING, Map.class.getSimpleName()));
+        }
+        return (Map<Class<?>, Class<?>>) result;
+    }
+
+    private PropertyVisibilityStrategy initPropertyVisibilityStrategy() {
+        final Optional<Object> property = jsonbConfig.getProperty(JsonbConfig.PROPERTY_VISIBILITY_STRATEGY);
+        if (!property.isPresent()) {
+            return null;
+        }
+        final Object propertyVisibilityStrategy = property.get();
+        if (!(propertyVisibilityStrategy instanceof PropertyVisibilityStrategy)) {
+            throw new JsonbException("JsonbConfig.PROPERTY_VISIBILITY_STRATEGY must be instance of " + PropertyVisibilityStrategy.class);
+        }
+        return (PropertyVisibilityStrategy) propertyVisibilityStrategy;
+    }
+
 }

@@ -32,13 +32,22 @@ public abstract class ObjectProcessingContext {
      */
     private final Set<Object> inProgressEntities = new HashSet<>();
 
+
+    public boolean registerProcessedObject(Object entity) {
+        return this.inProgressEntities.add(entity);
+    }
+
     /**
-     * Parent instance for marshaller and unmarshaller.
+     * Mapping context.
      *
-     * @param jsonBindingContext context of Jsonb
+     * @return mapping context
      */
-    public ObjectProcessingContext(JsonbContext jsonBindingContext) {
-        this.jsonbContext = jsonBindingContext;
+    public ClassMappingContext getMappingContext() {
+        return getJsonbContext().getMappingContext();
+    }
+
+    public boolean unregisterProcessedObject(Object entity) {
+        return inProgressEntities.remove(entity);
     }
 
     /**
@@ -51,21 +60,12 @@ public abstract class ObjectProcessingContext {
     }
 
     /**
-     * Mapping context.
+     * Parent instance for marshaller and unmarshaller.
      *
-     * @return mapping context
+     * @param jsonBindingContext context of Jsonb
      */
-    public ClassMappingContext getMappingContext() {
-        return getJsonbContext().getMappingContext();
-    }
-
-
-    public boolean registerProcessedObject(Object entity) {
-        return this.inProgressEntities.add(entity);
-    }
-
-    public boolean unregisterProcessedObject(Object entity) {
-        return inProgressEntities.remove(entity);
+    public ObjectProcessingContext(JsonbContext jsonBindingContext) {
+        this.jsonbContext = jsonBindingContext;
     }
 
 }

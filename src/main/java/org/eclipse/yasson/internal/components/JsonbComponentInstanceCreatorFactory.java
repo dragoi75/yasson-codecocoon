@@ -45,48 +45,11 @@ public class JsonbComponentInstanceCreatorFactory {
     private static final String CDI_SPI_CLASS = "javax.enterprise.inject.spi.CDI";
 
     /**
-     * First check a CDI provider, if available use those.
-     * Try to lookup in a JNDI if no provider is registered.
-     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
-     * or {@link DefaultConstructorCreator} otherwise.
-     * @param creator Instance creator
-     * @return Component instance creator, either CDI or default constructor.
+     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
      */
-    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceCreator creator) {
-        Object beanManager = getCdiBeanManager();
-        if (null == beanManager) {
-            beanManager = getJndiBeanManager();
-        }
-        if (null == beanManager) {
-            log.finest(Messages.getMessage(MessageKeyConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
-            return new DefaultConstructorCreator(creator);
-        }
-        return new BeanManagerInstanceCreator(beanManager);
-    }
+    private interface BeanManagerProvider {
 
-    /**
-     * Get bean manager with CDI api.
-     *
-     * @return bean manager instance or null if CDI API dependency is not available.
-     */
-    private static Object getCdiBeanManager() {
-        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            try {
-                return getBeanManager(() -> {
-                    Class<?> cdiClass = Class.forName(CDI_SPI_CLASS);
-                    Method current = cdiClass.getMethod("current");
-                    Method getBeanManager = cdiClass.getMethod("getBeanManager");
-                    Object cdiObject = current.invoke(cdiClass);
-                    if (null == cdiObject) {
-                        return null;
-                    }
-                    return getBeanManager.invoke(cdiObject);
-                });
-            } catch (ClassNotFoundException e) {
-                log.finest(Messages.getMessage(MessageKeyConstants.NO_CDI_API_PROVIDER, CDI_SPI_CLASS));
-                return null;
-            }
-        });
+        Object provide() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, ClassNotFoundException;
     }
 
     /**
@@ -137,10 +100,48 @@ public class JsonbComponentInstanceCreatorFactory {
     }
 
     /**
-     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
+     * Get bean manager with CDI api.
+     *
+     * @return bean manager instance or null if CDI API dependency is not available.
      */
-    private interface BeanManagerProvider {
-
-        Object provide() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException, ClassNotFoundException;
+    private static Object getCdiBeanManager() {
+        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            try {
+                return getBeanManager(() -> {
+                    Class<?> cdiClass = Class.forName(CDI_SPI_CLASS);
+                    Method current = cdiClass.getMethod("current");
+                    Method getBeanManager = cdiClass.getMethod("getBeanManager");
+                    Object cdiObject = current.invoke(cdiClass);
+                    if (null == cdiObject) {
+                        return null;
+                    }
+                    return getBeanManager.invoke(cdiObject);
+                });
+            } catch (ClassNotFoundException e) {
+                log.finest(Messages.getMessage(MessageKeyConstants.NO_CDI_API_PROVIDER, CDI_SPI_CLASS));
+                return null;
+            }
+        });
     }
+
+    /**
+     * First check a CDI provider, if available use those.
+     * Try to lookup in a JNDI if no provider is registered.
+     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
+     * or {@link DefaultConstructorCreator} otherwise.
+     * @param creator Instance creator
+     * @return Component instance creator, either CDI or default constructor.
+     */
+    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceCreator creator) {
+        Object beanManager = getCdiBeanManager();
+        if (null == beanManager) {
+            beanManager = getJndiBeanManager();
+        }
+        if (null == beanManager) {
+            log.finest(Messages.getMessage(MessageKeyConstants.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
+            return new DefaultConstructorCreator(creator);
+        }
+        return new BeanManagerInstanceCreator(beanManager);
+    }
+
 }

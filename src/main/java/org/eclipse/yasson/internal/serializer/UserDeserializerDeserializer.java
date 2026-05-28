@@ -32,31 +32,6 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
 
     private T deserializerResult;
 
-    /**
-     * Create instance of current item with its builder.
-     * Contains user provided component for custom deserialization.
-     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
-     * in wrong position after returning from deserializerBinding.
-     *
-     * @param builder {@link DeserializerBuilder} used to build this instance
-     * @param deserializerBinding Deserializer.
-     */
-    protected UserDeserializerDeserializer(DeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
-        super(builder);
-        this.deserializerBinding = deserializerBinding;
-    }
-
-    @Override
-    public void appendResult(Object result) {
-        //ignore internal deserialize() call in custom deserializer
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(Unmarshaller unmarshaller) {
-        return deserializerResult;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void deserializeInternal(JsonbParser parser, Unmarshaller context) {
@@ -71,11 +46,6 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
         }
     }
 
-    @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
-    }
-
     /**
      * Don't move anywhere in case of user deserializer.
      */
@@ -83,4 +53,35 @@ public class UserDeserializerDeserializer<T> extends AbstractContainerDeserializ
     protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
         return parser.getCurrentLevel();
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T getInstance(Unmarshaller unmarshaller) {
+        return deserializerResult;
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
+    }
+
+    @Override
+    public void appendResult(Object result) {
+        //ignore internal deserialize() call in custom deserializer
+    }
+
+    /**
+     * Create instance of current item with its builder.
+     * Contains user provided component for custom deserialization.
+     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
+     * in wrong position after returning from deserializerBinding.
+     *
+     * @param builder {@link DeserializerBuilder} used to build this instance
+     * @param deserializerBinding Deserializer.
+     */
+    protected UserDeserializerDeserializer(DeserializerBuilder builder, DeserializerBinding<?> deserializerBinding) {
+        super(builder);
+        this.deserializerBinding = deserializerBinding;
+    }
+
 }

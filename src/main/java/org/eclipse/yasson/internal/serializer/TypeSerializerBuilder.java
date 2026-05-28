@@ -38,24 +38,59 @@ public class TypeSerializerBuilder extends AbstractSerializationBuilder<TypeSeri
 
     private Class<?> targetType;
 
-    /**
-     * Creates a new builder.
-     *
-     * @param jsonbEnv JSON-B context.
-     */
-    public TypeSerializerBuilder(JsonbContext jsonbEnv) {
-        super(jsonbEnv);
+    private boolean isByteArray(Class<?> candidateType) {
+        return candidateType.isArray() && Byte.TYPE == candidateType.getComponentType();
     }
 
     /**
-     * Adds object class.
-     *
-     * @param targetType object class
-     * @return Builder.
+     * Instance is not created in case of array items, because, we don't know how long it should be
+     * till parser ends parsing.
      */
-    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
-        this.targetType = targetType;
-        return this;
+    private JsonbSerializer<?> createArraySerializer(Class<?> elementType) {
+        if (byte.class != elementType) {
+            if (short.class != elementType) {
+                if (char.class != elementType) {
+                    if (int.class != elementType) {
+                        if (long.class != elementType) {
+                            if (float.class != elementType) {
+                                if (double.class != elementType) {
+                                    return new ObjectArraySerializer(this);
+                                } else {
+                                    return new DoubleArraySerializer(this);
+                                }
+                            } else {
+                                return new FloatArraySerializer(this);
+                            }
+                        } else {
+                            return new LongArraySerializer(this);
+                        }
+                    } else {
+                        return new IntArraySerializer(this);
+                    }
+                } else {
+                    return new CharArraySerializer(this);
+                }
+            } else {
+                return new ShortArraySerializer(this);
+            }
+        } else {
+            return new ByteArraySerializer(this);
+        }
+    }
+
+    private Type determineRuntimeType() {
+        if (null != genericType && Object.class != genericType) {
+            return genericType;
+        }
+        return targetType;
+    }
+
+    private Optional<ConfigurableValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> candidateType) {
+        final Optional<? extends SerializerProviderWrapper> providerWrapperOpt = DefaultSerializers.getInstance().findValueSerializerProvider(candidateType);
+        if (providerWrapperOpt.isPresent()) {
+            return Optional.of(providerWrapperOpt.get().getSerializerProvider().provideSerializer(customization));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -121,58 +156,24 @@ public class TypeSerializerBuilder extends AbstractSerializationBuilder<TypeSeri
         }
     }
 
-    private boolean isByteArray(Class<?> candidateType) {
-        return candidateType.isArray() && Byte.TYPE == candidateType.getComponentType();
+    /**
+     * Creates a new builder.
+     *
+     * @param jsonbEnv JSON-B context.
+     */
+    public TypeSerializerBuilder(JsonbContext jsonbEnv) {
+        super(jsonbEnv);
     }
 
     /**
-     * Instance is not created in case of array items, because, we don't know how long it should be
-     * till parser ends parsing.
+     * Adds object class.
+     *
+     * @param targetType object class
+     * @return Builder.
      */
-    private JsonbSerializer<?> createArraySerializer(Class<?> elementType) {
-        if (byte.class != elementType) {
-            if (short.class != elementType) {
-                if (char.class != elementType) {
-                    if (int.class != elementType) {
-                        if (long.class != elementType) {
-                            if (float.class != elementType) {
-                                if (double.class != elementType) {
-                                    return new ObjectArraySerializer(this);
-                                } else {
-                                    return new DoubleArraySerializer(this);
-                                }
-                            } else {
-                                return new FloatArraySerializer(this);
-                            }
-                        } else {
-                            return new LongArraySerializer(this);
-                        }
-                    } else {
-                        return new IntArraySerializer(this);
-                    }
-                } else {
-                    return new CharArraySerializer(this);
-                }
-            } else {
-                return new ShortArraySerializer(this);
-            }
-        } else {
-            return new ByteArraySerializer(this);
-        }
+    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
+        this.targetType = targetType;
+        return this;
     }
 
-    private Optional<ConfigurableValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> candidateType) {
-        final Optional<? extends SerializerProviderWrapper> providerWrapperOpt = DefaultSerializers.getInstance().findValueSerializerProvider(candidateType);
-        if (providerWrapperOpt.isPresent()) {
-            return Optional.of(providerWrapperOpt.get().getSerializerProvider().provideSerializer(customization));
-        }
-        return Optional.empty();
-    }
-
-    private Type determineRuntimeType() {
-        if (null != genericType && Object.class != genericType) {
-            return genericType;
-        }
-        return targetType;
-    }
 }

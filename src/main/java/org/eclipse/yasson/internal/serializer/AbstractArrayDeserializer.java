@@ -38,6 +38,20 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     protected final ClassDescriptor componentClassModel;
 
+    @Override
+    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    protected abstract List<?> getItems();
+
+    @Override
+    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).build();
+        appendResult(deserializer.deserialize(parser, context, componentClass));
+    }
+
     protected AbstractArrayDeserializer(DeserializerBuilder builder) {
         super(builder);
         if (!(getRuntimeType() instanceof GenericArrayType)) {
@@ -52,27 +66,14 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         }
     }
 
-    @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(componentClass, result));
-    }
-
     @SuppressWarnings("unchecked")
     private <X> void appendCaptor(X value) {
         ((List<X>) getItems()).add(value);
     }
 
     @Override
-    protected void deserializeNext(JsonParser parser, Unmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).build();
-        appendResult(deserializer.deserialize(parser, context, componentClass));
+    public void appendResult(Object result) {
+        appendCaptor(convertNullToOptionalEmpty(componentClass, result));
     }
 
-    protected abstract List<?> getItems();
-
-    @Override
-    protected JsonbRiParser.LevelContext moveToFirst(JsonbParser parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

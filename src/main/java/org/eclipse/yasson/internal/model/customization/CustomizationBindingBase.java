@@ -17,6 +17,34 @@ abstract class CustomizationBindingBase implements SerializationCustomization, C
 
     private final boolean allowNull;
 
+
+    /**
+     * Serializer wrapper with resolved generic info.
+     *
+     * @return serializer wrapper
+     */
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinder;
+    }
+
+    /**
+     * Adapter wrapper class with resolved generic information.
+     *
+     * @return components wrapper
+     */
+    public AdapterBinding getAdapterBinding() {
+        return adapterBinder;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinder;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -49,33 +77,5 @@ abstract class CustomizationBindingBase implements SerializationCustomization, C
     public boolean isNillable() {
         return allowNull;
     }
-
-    /**
-     * Adapter wrapper class with resolved generic information.
-     *
-     * @return components wrapper
-     */
-    public AdapterBinding getAdapterBinding() {
-        return adapterBinder;
-    }
-
-    /**
-     * Serializer wrapper with resolved generic info.
-     *
-     * @return serializer wrapper
-     */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinder;
-    }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinder;
-    }
-
 
 }

@@ -25,6 +25,11 @@ import java.math.BigDecimal;
  */
 public class BigDecimalTypeSerializer extends AbstractNumberSerializer<BigDecimal> {
 
+    @Override
+    protected void serializeNonFormatted(BigDecimal obj, JsonGenerator generator) {
+        generator.write(obj);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -39,8 +44,4 @@ public class BigDecimalTypeSerializer extends AbstractNumberSerializer<BigDecima
         generator.write(key, obj);
     }
 
-    @Override
-    protected void serializeNonFormatted(BigDecimal obj, JsonGenerator generator) {
-        generator.write(obj);
-    }
 }

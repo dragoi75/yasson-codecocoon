@@ -32,111 +32,20 @@ class JsonObjectBuilder extends JsonStructureBuilder {
     private String nextKey;
 
     /**
-     * Create instance with cached provider.
-     * @param provider Json provider to create JsonObjectBuilder on.
-     */
-    JsonObjectBuilder(JsonProvider provider) {
-        this.builder = provider.createObjectBuilder();
-    }
-
-    @Override
-    JsonStructure build() {
-        return builder.build();
-    }
-
-    @Override
-    void put(JsonStructure structure) {
-        builder.add(getNextKey(), structure);
-    }
-
-    /**
-     * Puts another {@link JsonStructure} into current using provided key.
-     * @param name key to put JsonStructure under.
-     * @param structure JsonStructure to put.
-     */
-    void put(String name, JsonStructure structure) {
-        builder.add(name, structure);
-    }
-
-    @Override
-    void write(JsonValue value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(String value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(BigDecimal value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(BigInteger value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(int value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(long value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(double value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(boolean value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void writeNull() {
-        builder.addNull(getNextKey());
-    }
-
-    /**
      * Write a key-value pair into current {@link javax.json.JsonObject}.
      * @param name Key name to write value with.
      * @param value A value to write.
      */
-    void write(String name, JsonValue value) {
+    void write(String name, boolean value) {
         builder.add(name, value);
     }
 
     /**
-     * Write a key-value pair into current {@link javax.json.JsonObject}.
-     * @param name Key name to write value with.
-     * @param value A value to write.
+     * Write a null into current {@link javax.json.JsonObject} with a given key.
+     * @param name Key name to write null with.
      */
-    void write(String name, String value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a key-value pair into current {@link javax.json.JsonObject}.
-     * @param name Key name to write value with.
-     * @param value A value to write.
-     */
-    void write(String name, BigDecimal value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a key-value pair into current {@link javax.json.JsonObject}.
-     * @param name Key name to write value with.
-     * @param value A value to write.
-     */
-    void write(String name, BigInteger value) {
-        builder.add(name, value);
+    void writeNull(String name) {
+        builder.addNull(name);
     }
 
     /**
@@ -167,28 +76,34 @@ class JsonObjectBuilder extends JsonStructureBuilder {
     }
 
     /**
-     * Write a key-value pair into current {@link javax.json.JsonObject}.
-     * @param name Key name to write value with.
-     * @param value A value to write.
-     */
-    void write(String name, boolean value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a null into current {@link javax.json.JsonObject} with a given key.
-     * @param name Key name to write null with.
-     */
-    void writeNull(String name) {
-        builder.addNull(name);
-    }
-
-    /**
      * Store a key for putting next value into built {@link javax.json.JsonObject}.
      * @param key Key to store.
      */
     void writeKey(String key) {
         this.nextKey = key;
+    }
+
+    @Override
+    void write(String value) {
+        builder.add(getNextKey(), value);
+    }
+
+    @Override
+    void writeNull() {
+        builder.addNull(getNextKey());
+    }
+
+    @Override
+    void write(double value) {
+        builder.add(getNextKey(), value);
+    }
+
+    /**
+     * Create instance with cached provider.
+     * @param provider Json provider to create JsonObjectBuilder on.
+     */
+    JsonObjectBuilder(JsonProvider provider) {
+        this.builder = provider.createObjectBuilder();
     }
 
     private String getNextKey() {
@@ -199,4 +114,90 @@ class JsonObjectBuilder extends JsonStructureBuilder {
         nextKey = null;
         return key;
     }
+
+    /**
+     * Puts another {@link JsonStructure} into current using provided key.
+     * @param name key to put JsonStructure under.
+     * @param structure JsonStructure to put.
+     */
+    void put(String name, JsonStructure structure) {
+        builder.add(name, structure);
+    }
+
+    @Override
+    void write(long value) {
+        builder.add(getNextKey(), value);
+    }
+
+    /**
+     * Write a key-value pair into current {@link javax.json.JsonObject}.
+     * @param name Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, BigDecimal value) {
+        builder.add(name, value);
+    }
+
+    @Override
+    void write(BigInteger value) {
+        builder.add(getNextKey(), value);
+    }
+
+    @Override
+    void put(JsonStructure structure) {
+        builder.add(getNextKey(), structure);
+    }
+
+    @Override
+    void write(boolean value) {
+        builder.add(getNextKey(), value);
+    }
+
+    /**
+     * Write a key-value pair into current {@link javax.json.JsonObject}.
+     * @param name Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, JsonValue value) {
+        builder.add(name, value);
+    }
+
+    @Override
+    void write(int value) {
+        builder.add(getNextKey(), value);
+    }
+
+    @Override
+    JsonStructure build() {
+        return builder.build();
+    }
+
+    /**
+     * Write a key-value pair into current {@link javax.json.JsonObject}.
+     * @param name Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, BigInteger value) {
+        builder.add(name, value);
+    }
+
+    @Override
+    void write(JsonValue value) {
+        builder.add(getNextKey(), value);
+    }
+
+    @Override
+    void write(BigDecimal value) {
+        builder.add(getNextKey(), value);
+    }
+
+    /**
+     * Write a key-value pair into current {@link javax.json.JsonObject}.
+     * @param name Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, String value) {
+        builder.add(name, value);
+    }
+
 }

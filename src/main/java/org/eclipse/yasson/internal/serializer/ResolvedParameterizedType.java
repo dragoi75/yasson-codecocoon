@@ -36,6 +36,26 @@ public class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
+    }
+
+    @Override
+    public Type getOwnerType() {
+        return original.getOwnerType();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (null == o || !(o instanceof ParameterizedType))
+            return false;
+        final ParameterizedType that = (ParameterizedType) o;
+        return this.getRawType().equals(that.getRawType()) && Objects.equals(this.getOwnerType(), that.getOwnerType()) && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -63,11 +83,6 @@ public class ResolvedParameterizedType implements ParameterizedType {
     }
 
     @Override
-    public Type getOwnerType() {
-        return original.getOwnerType();
-    }
-
-    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(original.toString());
@@ -81,18 +96,4 @@ public class ResolvedParameterizedType implements ParameterizedType {
         return sb.toString();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (null == o || !(o instanceof ParameterizedType))
-            return false;
-        final ParameterizedType that = (ParameterizedType) o;
-        return this.getRawType().equals(that.getRawType()) && Objects.equals(this.getOwnerType(), that.getOwnerType()) && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
-    }
 }

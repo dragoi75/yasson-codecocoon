@@ -32,25 +32,9 @@ public class JsonbAnnotated implements AnnotatedElement {
 
     protected final Map<Class<? extends Annotation>, Annotation> annotations;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param initialAnnotations Annotations to initialize from.
-     */
-    public JsonbAnnotated(Annotation[] initialAnnotations) {
-        this.annotations = new HashMap<>();
-        addInitialAnnotations(initialAnnotations);
-    }
-
-    private void addInitialAnnotations(Annotation[] initialAnnotations) {
-        for (Annotation ann : initialAnnotations) {
-            annotations.put(ann.annotationType(), ann);
-        }
-    }
-
     @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return annotationClass.cast(annotations.get(annotationClass));
+    public Annotation[] getDeclaredAnnotations() {
+        throw new UnsupportedOperationException("Jsonb elements don't track declared annotations");
     }
 
     @Override
@@ -59,9 +43,10 @@ public class JsonbAnnotated implements AnnotatedElement {
         return values.toArray(new Annotation[values.size()]);
     }
 
-    @Override
-    public Annotation[] getDeclaredAnnotations() {
-        throw new UnsupportedOperationException("Jsonb elements don't track declared annotations");
+    private void addInitialAnnotations(Annotation[] initialAnnotations) {
+        for (Annotation ann : initialAnnotations) {
+            annotations.put(ann.annotationType(), ann);
+        }
     }
 
     /**
@@ -75,4 +60,20 @@ public class JsonbAnnotated implements AnnotatedElement {
         }
         annotations.put(annotation.annotationType(), annotation);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param initialAnnotations Annotations to initialize from.
+     */
+    public JsonbAnnotated(Annotation[] initialAnnotations) {
+        this.annotations = new HashMap<>();
+        addInitialAnnotations(initialAnnotations);
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return annotationClass.cast(annotations.get(annotationClass));
+    }
+
 }

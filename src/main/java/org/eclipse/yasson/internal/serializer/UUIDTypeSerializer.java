@@ -24,6 +24,11 @@ import java.util.UUID;
  */
 public class UUIDTypeSerializer extends ConfigurableValueTypeSerializer<UUID> {
 
+    @Override
+    protected void serializeValue(UUID obj, JsonGenerator generator, ObjectMarshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class UUIDTypeSerializer extends ConfigurableValueTypeSerializer<UUID> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(UUID obj, JsonGenerator generator, ObjectMarshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

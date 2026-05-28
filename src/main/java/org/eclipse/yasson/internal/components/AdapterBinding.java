@@ -28,6 +28,11 @@ public class AdapterBinding extends AbstractComponentBinding {
 
     private final JsonbAdapter<?,?> adapter;
 
+    @Override
+    public Class<?> getComponentClass() {
+        return adapter.getClass();
+    }
+
     /**
      * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
      * @param fromType from not null
@@ -62,8 +67,4 @@ public class AdapterBinding extends AbstractComponentBinding {
         return adapter;
     }
 
-    @Override
-    public Class<?> getComponentClass() {
-        return adapter.getClass();
-    }
 }

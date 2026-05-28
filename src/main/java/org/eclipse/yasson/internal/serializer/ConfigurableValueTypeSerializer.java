@@ -30,15 +30,6 @@ public abstract class ConfigurableValueTypeSerializer<T> implements JsonbSeriali
     protected final SerializationCustomization customization;
 
     /**
-     * Creates a new instance.
-     *
-     * @param serializationConfig Model customization.
-     */
-    public ConfigurableValueTypeSerializer(SerializationCustomization serializationConfig) {
-        this.customization = serializationConfig;
-    }
-
-    /**
      * Serializes an object to JSON.
      *
      * @param value Object to serialize.
@@ -52,4 +43,14 @@ public abstract class ConfigurableValueTypeSerializer<T> implements JsonbSeriali
     }
 
     protected abstract void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller);
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializationConfig Model customization.
+     */
+    public ConfigurableValueTypeSerializer(SerializationCustomization serializationConfig) {
+        this.customization = serializationConfig;
+    }
+
 }

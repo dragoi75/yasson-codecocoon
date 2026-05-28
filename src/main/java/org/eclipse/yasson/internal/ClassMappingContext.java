@@ -44,12 +44,6 @@ public class ClassMappingContext {
 
         private JsonbContext jsonbConfig;
 
-        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser descriptorParser, JsonbContext jsonbConfig) {
-            this.parentDescriptor = parentDescriptor;
-            this.descriptorParser = descriptorParser;
-            this.jsonbConfig = jsonbConfig;
-        }
-
         @Override
         public ClassDescriptor apply(Class inputClass) {
             final JsonbAnnotatedElement<Class<?>> classAnnotatedElement = jsonbConfig.getAnnotationIntrospector().collectAnnotations(inputClass);
@@ -58,6 +52,13 @@ public class ClassMappingContext {
             descriptorParser.parseProperties(createdDescriptor, classAnnotatedElement);
             return createdDescriptor;
         }
+
+        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser descriptorParser, JsonbContext jsonbConfig) {
+            this.parentDescriptor = parentDescriptor;
+            this.descriptorParser = descriptorParser;
+            this.jsonbConfig = jsonbConfig;
+        }
+
     }
 
     private final JsonbContext jsonbConfig;
@@ -69,6 +70,16 @@ public class ClassMappingContext {
     private final ClassParser descriptorParser;
 
     /**
+     * Adds given serializer provider for given class.
+     *
+     * @param targetClass Class to add serializer provider for.
+     * @param provider Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerProvider provider) {
+        serializerProviderMap.putIfAbsent(targetClass, provider);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param jsonbConfig Context. Required.
@@ -77,6 +88,42 @@ public class ClassMappingContext {
         Objects.requireNonNull(jsonbConfig);
         this.jsonbConfig = jsonbConfig;
         this.descriptorParser = new ClassParser(jsonbConfig);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param targetClass Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> targetClass) {
+        return serializerProviderMap.get(targetClass);
+    }
+
+    /**
+     * Provided class class model is returned first by iterator.
+     * Following class models are sorted by hierarchy from provided class up to the Object.class.
+     *
+     * @param targetClass class to start iteration of class models from
+     * @return iterator of class models
+     */
+    public Iterator<ClassDescriptor> classModelIterator(final Class<?> targetClass) {
+        return new Iterator<ClassDescriptor>() {
+
+            private Class<?> next = targetClass;
+
+            @Override
+            public boolean hasNext() {
+                return Object.class != next;
+            }
+
+            @Override
+            public ClassDescriptor next() {
+                final ClassDescriptor result = classMap.get(next);
+                next = next.getSuperclass();
+                return result;
+            }
+        };
     }
 
     /**
@@ -113,32 +160,6 @@ public class ClassMappingContext {
     }
 
     /**
-     * Provided class class model is returned first by iterator.
-     * Following class models are sorted by hierarchy from provided class up to the Object.class.
-     *
-     * @param targetClass class to start iteration of class models from
-     * @return iterator of class models
-     */
-    public Iterator<ClassDescriptor> classModelIterator(final Class<?> targetClass) {
-        return new Iterator<ClassDescriptor>() {
-
-            private Class<?> next = targetClass;
-
-            @Override
-            public boolean hasNext() {
-                return Object.class != next;
-            }
-
-            @Override
-            public ClassDescriptor next() {
-                final ClassDescriptor result = classMap.get(next);
-                next = next.getSuperclass();
-                return result;
-            }
-        };
-    }
-
-    /**
      * Search for class model, without parsing if not found.
      *
      * @param targetClass Class to search by or parse, not null.
@@ -148,23 +169,4 @@ public class ClassMappingContext {
         return classMap.get(targetClass);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param targetClass Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> targetClass) {
-        return serializerProviderMap.get(targetClass);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param targetClass Class to add serializer provider for.
-     * @param provider Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerProvider provider) {
-        serializerProviderMap.putIfAbsent(targetClass, provider);
-    }
 }

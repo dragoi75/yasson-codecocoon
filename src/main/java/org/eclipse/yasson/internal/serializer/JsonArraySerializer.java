@@ -25,8 +25,18 @@ import javax.json.stream.JsonGenerator;
  */
 public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
 
+    @Override
+    protected void writeBegin(String key, JsonGenerator generator) {
+        generator.writeStartArray(key);
+    }
+
     protected JsonArraySerializer(TypeSerializerBuilder builder) {
         super(builder);
+    }
+
+    @Override
+    protected void writeBegin(JsonGenerator generator) {
+        generator.writeStartArray();
     }
 
     @Override
@@ -36,13 +46,4 @@ public class JsonArraySerializer extends AbstractJsonpSerializer<JsonArray> {
         }
     }
 
-    @Override
-    protected void writeBegin(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    @Override
-    protected void writeBegin(String key, JsonGenerator generator) {
-        generator.writeStartArray(key);
-    }
 }
