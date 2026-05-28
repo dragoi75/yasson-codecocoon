@@ -23,12 +23,13 @@ import org.eclipse.yasson.internal.SerializationContextImpl;
  */
 class TimeZoneSerializer extends TypeSerializer<TimeZone> {
 
-    TimeZoneSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     void serializeValue(TimeZone value, JsonGenerator generator, SerializationContextImpl context) {
         generator.write(value.getID());
     }
+
+    TimeZoneSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
+    }
+
 }

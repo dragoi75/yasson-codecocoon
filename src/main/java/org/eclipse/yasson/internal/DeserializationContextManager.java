@@ -37,61 +37,6 @@ public class DeserializationContextManager extends ProcessingContext implements 
     private Object currentObject;
 
     /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param jsonbState context of Jsonb
-     */
-    public DeserializationContextManager(JsonbContext jsonbState) {
-        super(jsonbState);
-    }
-
-    /**
-     * Create new instance based on previous context.
-     *
-     * @param managerRef previous deserialization context
-     */
-    public DeserializationContextManager(DeserializationContextManager managerRef) {
-        super(managerRef.getJsonbContext());
-        this.latestEvent = managerRef.latestEvent;
-    }
-
-    /**
-     * Return instance of currently deserialized type.
-     *
-     * @return null if instance has not been created yet
-     */
-    public Object getInstance() {
-        return currentObject;
-    }
-
-    /**
-     * Set currently deserialized type instance.
-     *
-     * @param currentObject deserialized type instance
-     */
-    public void setInstance(Object currentObject) {
-        this.currentObject = currentObject;
-    }
-
-    /**
-     * Return the list of deferred deserializers.
-     *
-     * @return list of deferred deserializers
-     */
-    public List<Runnable> getDeferredDeserializers() {
-        return deferredTasks;
-    }
-
-    /**
-     * Return last obtained {@link JsonParser.Event} event.
-     *
-     * @return last obtained event
-     */
-    public JsonParser.Event getLastValueEvent() {
-        return latestEvent;
-    }
-
-    /**
      * Set last obtained {@link JsonParser.Event} event.
      *
      * @param latestEvent last obtained event
@@ -101,31 +46,12 @@ public class DeserializationContextManager extends ProcessingContext implements 
     }
 
     /**
-     * Return customization used by currently processed user defined deserializer.
+     * Parent instance for marshaller and unmarshaller.
      *
-     * @return currently used customization
+     * @param jsonbState context of Jsonb
      */
-    public Customization getCustomization() {
-        return customSettings;
-    }
-
-    /**
-     * Set customization used by currently processed user defined deserializer.
-     *
-     * @param customSettings currently used customization
-     */
-    public void setCustomization(Customization customSettings) {
-        this.customSettings = customSettings;
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type valueType, JsonParser jsonReader) {
-        return deserializeValue(valueType, jsonReader);
+    public DeserializationContextManager(JsonbContext jsonbState) {
+        super(jsonbState);
     }
 
     @SuppressWarnings("unchecked")
@@ -144,9 +70,84 @@ public class DeserializationContextManager extends ProcessingContext implements 
         }
     }
 
+    @Override
+    public <T> T deserialize(Type valueType, JsonParser jsonReader) {
+        return deserializeValue(valueType, jsonReader);
+    }
+
+    /**
+     * Return customization used by currently processed user defined deserializer.
+     *
+     * @return currently used customization
+     */
+    public Customization getCustomization() {
+        return customSettings;
+    }
+
     private void validateState() {
         if (JsonParser.Event.KEY_NAME == latestEvent) {
             throw new JsonbException("JsonParser has incorrect position as the first event: KEY_NAME");
         }
     }
+
+    /**
+     * Return last obtained {@link JsonParser.Event} event.
+     *
+     * @return last obtained event
+     */
+    public JsonParser.Event getLastValueEvent() {
+        return latestEvent;
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
+    }
+
+    /**
+     * Return the list of deferred deserializers.
+     *
+     * @return list of deferred deserializers
+     */
+    public List<Runnable> getDeferredDeserializers() {
+        return deferredTasks;
+    }
+
+    /**
+     * Set currently deserialized type instance.
+     *
+     * @param currentObject deserialized type instance
+     */
+    public void setInstance(Object currentObject) {
+        this.currentObject = currentObject;
+    }
+
+    /**
+     * Create new instance based on previous context.
+     *
+     * @param managerRef previous deserialization context
+     */
+    public DeserializationContextManager(DeserializationContextManager managerRef) {
+        super(managerRef.getJsonbContext());
+        this.latestEvent = managerRef.latestEvent;
+    }
+
+    /**
+     * Set customization used by currently processed user defined deserializer.
+     *
+     * @param customSettings currently used customization
+     */
+    public void setCustomization(Customization customSettings) {
+        this.customSettings = customSettings;
+    }
+
+    /**
+     * Return instance of currently deserialized type.
+     *
+     * @return null if instance has not been created yet
+     */
+    public Object getInstance() {
+        return currentObject;
+    }
+
 }

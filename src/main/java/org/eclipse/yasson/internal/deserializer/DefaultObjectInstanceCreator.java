@@ -31,6 +31,16 @@ class DefaultObjectInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final JsonbException exception;
 
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
+        if (null != exception) {
+            throw exception;
+        }
+        Object instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);
+        context.setInstance(instance);
+        return delegate.unmarshal(value, context);
+    }
+
     DefaultObjectInstanceCreator(ModelUnmarshaller<JsonParser> delegate, Class<?> clazz, Constructor<?> defaultConstructor) {
         this.delegate = delegate;
         this.defaultConstructor = defaultConstructor;
@@ -45,13 +55,4 @@ class DefaultObjectInstanceCreator implements ModelUnmarshaller<JsonParser> {
         }
     }
 
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
-        if (null != exception) {
-            throw exception;
-        }
-        Object instance = ReflectionUtils.createNoArgConstructorInstance(defaultConstructor);
-        context.setInstance(instance);
-        return delegate.unmarshal(value, context);
-    }
 }

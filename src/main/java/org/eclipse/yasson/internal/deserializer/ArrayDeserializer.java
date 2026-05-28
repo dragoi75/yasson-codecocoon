@@ -27,10 +27,6 @@ class ArrayDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final ModelUnmarshaller<JsonParser> delegate;
 
-    ArrayDeserializer(ModelUnmarshaller<JsonParser> delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public Object unmarshal(JsonParser parser, DeserializationContextManager context) {
         Collection<Object> collection = new ArrayList<>();
@@ -55,6 +51,10 @@ class ArrayDeserializer implements ModelUnmarshaller<JsonParser> {
             }
         }
         return collection;
+    }
+
+    ArrayDeserializer(ModelUnmarshaller<JsonParser> delegate) {
+        this.delegate = delegate;
     }
 
 }

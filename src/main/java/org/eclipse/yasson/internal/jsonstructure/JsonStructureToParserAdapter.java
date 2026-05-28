@@ -36,18 +36,25 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
-    /**
-     * Creates new {@link JsonStructure} parser.
-     *
-     * @param structure json structure
-     */
-    public JsonStructureToParserAdapter(JsonStructure structure) {
-        this.rootStructure = structure;
+    @Override
+    public boolean isIntegralNumber() {
+        return getJsonNumberValue().isIntegral();
     }
 
     @Override
-    public boolean hasNext() {
-        return iterators.peek().hasNext();
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public JsonObject getObject() {
+        //        ((JsonObjectIterator) iterators.peek()).jsonObject
+        return iterators.peek().getValue().asJsonObject();
+    }
+
+    @Override
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
     }
 
     @Override
@@ -79,37 +86,6 @@ public class JsonStructureToParserAdapter implements JsonParser {
         return next;
     }
 
-    @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return getJsonNumberValue().isIntegral();
-    }
-
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
-    }
-
-    @Override
-    public JsonObject getObject() {
-        //        ((JsonObjectIterator) iterators.peek()).jsonObject
-        return iterators.peek().getValue().asJsonObject();
-    }
-
     private JsonNumber getJsonNumberValue() {
         JsonStructureIterator iterator = iterators.peek();
         JsonValue value = iterator.getValue();
@@ -120,12 +96,37 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    @Override
+    public String getString() {
+        return iterators.peek().getString();
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
+    @Override
     public JsonLocation getLocation() {
         throw new JsonbException("Operation not supported");
     }
 
-    @Override
-    public void close() {
-        //noop
+    /**
+     * Creates new {@link JsonStructure} parser.
+     *
+     * @param structure json structure
+     */
+    public JsonStructureToParserAdapter(JsonStructure structure) {
+        this.rootStructure = structure;
     }
+
+    @Override
+    public boolean hasNext() {
+        return iterators.peek().hasNext();
+    }
+
 }

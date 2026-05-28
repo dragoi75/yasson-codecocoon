@@ -55,51 +55,18 @@ public class JsonObjectIterator extends JsonStructureIterator {
 
     private State state = State.START;
 
-    JsonObjectIterator(JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
-        this.keyIterator = jsonObject.keySet().iterator();
-    }
-
-    private void nextKey() {
-        if (!keyIterator.hasNext()) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Object is empty"));
-        }
-        currentKey = keyIterator.next();
+    /**
+     * Current key this iterator is pointing at.
+     *
+     * @return Current key.
+     */
+    public String getKey() {
+        return currentKey;
     }
 
     @Override
-    public JsonParser.Event next() {
-        switch(state) {
-            case START:
-                if (!keyIterator.hasNext()) {
-                    setState(State.END);
-                    return JsonParser.Event.END_OBJECT;
-                } else {
-                    nextKey();
-                    setState(JsonObjectIterator.State.KEY);
-                    return JsonParser.Event.KEY_NAME;
-                }
-            case KEY:
-                setState(JsonObjectIterator.State.VALUE);
-                JsonValue value = getValue();
-                return getValueEvent(value);
-            case VALUE:
-                if (keyIterator.hasNext()) {
-                    nextKey();
-                    setState(JsonObjectIterator.State.KEY);
-                    return JsonParser.Event.KEY_NAME;
-                }
-                setState(State.END);
-                return JsonParser.Event.END_OBJECT;
-            default:
-                throw new JsonbException("Illegal state");
-        }
-    }
-
-    @Override
-    public boolean hasNext() {
-        //From the perspective of JsonParser not finished until END_OBJECT is being read.
-        return State.END != state;
+    JsonbException createIncompatibleValueError() {
+        return new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
     }
 
     /**
@@ -115,28 +82,62 @@ public class JsonObjectIterator extends JsonStructureIterator {
     }
 
     @Override
+    public JsonParser.Event next() {
+        switch(state) {
+            case START:
+                if (!keyIterator.hasNext()) {
+                    setState(State.END);
+                    return JsonParser.Event.END_OBJECT;
+                } else {
+                    nextKey();
+                    setState(State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
+            case KEY:
+                setState(State.VALUE);
+                JsonValue value = getValue();
+                return getValueEvent(value);
+            case VALUE:
+                if (keyIterator.hasNext()) {
+                    nextKey();
+                    setState(State.KEY);
+                    return JsonParser.Event.KEY_NAME;
+                }
+                setState(State.END);
+                return JsonParser.Event.END_OBJECT;
+            default:
+                throw new JsonbException("Illegal state");
+        }
+    }
+
+    @Override
     String getString() {
-        if (JsonObjectIterator.State.KEY == state) {
+        if (State.KEY == state) {
             return currentKey;
         }
         return super.getString();
     }
 
     @Override
-    JsonbException createIncompatibleValueError() {
-        return new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.NUMBER_INCOMPATIBLE_VALUE_TYPE_OBJECT, getValue().getValueType(), currentKey));
+    public boolean hasNext() {
+        //From the perspective of JsonParser not finished until END_OBJECT is being read.
+        return State.END != state;
     }
 
     private void setState(State state) {
         this.state = state;
     }
 
-    /**
-     * Current key this iterator is pointing at.
-     *
-     * @return Current key.
-     */
-    public String getKey() {
-        return currentKey;
+    private void nextKey() {
+        if (!keyIterator.hasNext()) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Object is empty"));
+        }
+        currentKey = keyIterator.next();
     }
+
+    JsonObjectIterator(JsonObject jsonObject) {
+        this.jsonObject = jsonObject;
+        this.keyIterator = jsonObject.keySet().iterator();
+    }
+
 }

@@ -24,13 +24,19 @@ import java.util.Locale;
  */
 class CalendarSerializer extends AbstractDateSerializer<Calendar> {
 
-    CalendarSerializer(TypeSerializerBuilder serializerBuilder) {
-        super(serializerBuilder);
-    }
-
     @Override
     protected Instant toInstant(Calendar value) {
         return value.toInstant();
+    }
+
+    @Override
+    protected TemporalAccessor toTemporalAccessor(Calendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.getTimeInMillis()),
+                                       object.getTimeZone().toZoneId());
+    }
+
+    CalendarSerializer(TypeSerializerBuilder serializerBuilder) {
+        super(serializerBuilder);
     }
 
     @Override
@@ -40,12 +46,6 @@ class CalendarSerializer extends AbstractDateSerializer<Calendar> {
                 : DateTimeFormatter.ISO_DATE;
         return formatter.withZone(value.getTimeZone().toZoneId())
                 .withLocale(locale).format(toTemporalAccessor(value));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Calendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.getTimeInMillis()),
-                                       object.getTimeZone().toZoneId());
     }
 
 }

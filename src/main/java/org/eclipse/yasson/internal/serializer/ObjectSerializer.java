@@ -28,10 +28,6 @@ class ObjectSerializer implements ModelSerializer {
 
     private final LinkedHashMap<String, ModelSerializer> propertySerializers;
 
-    ObjectSerializer(LinkedHashMap<String, ModelSerializer> propertySerializers) {
-        this.propertySerializers = propertySerializers;
-    }
-
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
         generator.writeStartObject();
@@ -46,4 +42,9 @@ class ObjectSerializer implements ModelSerializer {
         });
         generator.writeEnd();
     }
+
+    ObjectSerializer(LinkedHashMap<String, ModelSerializer> propertySerializers) {
+        this.propertySerializers = propertySerializers;
+    }
+
 }

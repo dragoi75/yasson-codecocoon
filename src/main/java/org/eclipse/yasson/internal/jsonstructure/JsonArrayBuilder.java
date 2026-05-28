@@ -27,37 +27,13 @@ class JsonArrayBuilder extends JsonStructureBuilder {
 
     private final jakarta.json.JsonArrayBuilder arrayBuilder;
 
-    /**
-     * Create instance with cached provider.
-     *
-     * @param provider Json provider to create JsonArrayBuilder on.
-     */
-    JsonArrayBuilder(JsonProvider provider) {
-        this.arrayBuilder = provider.createArrayBuilder();
-    }
-
     @Override
-    JsonArray build() {
-        return arrayBuilder.build();
-    }
-
-    @Override
-    void write(JsonValue value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
-    void write(String value) {
-        arrayBuilder.add(value);
+    void put(JsonStructure structure) {
+        arrayBuilder.add(structure);
     }
 
     @Override
     void write(BigDecimal value) {
-        arrayBuilder.add(value);
-    }
-
-    @Override
-    void write(BigInteger value) {
         arrayBuilder.add(value);
     }
 
@@ -67,13 +43,18 @@ class JsonArrayBuilder extends JsonStructureBuilder {
     }
 
     @Override
-    void write(long value) {
+    void write(double value) {
         arrayBuilder.add(value);
     }
 
     @Override
-    void write(double value) {
+    void write(BigInteger value) {
         arrayBuilder.add(value);
+    }
+
+    @Override
+    JsonArray build() {
+        return arrayBuilder.build();
     }
 
     @Override
@@ -87,7 +68,27 @@ class JsonArrayBuilder extends JsonStructureBuilder {
     }
 
     @Override
-    void put(JsonStructure structure) {
-        arrayBuilder.add(structure);
+    void write(JsonValue value) {
+        arrayBuilder.add(value);
     }
+
+    @Override
+    void write(long value) {
+        arrayBuilder.add(value);
+    }
+
+    /**
+     * Create instance with cached provider.
+     *
+     * @param provider Json provider to create JsonArrayBuilder on.
+     */
+    JsonArrayBuilder(JsonProvider provider) {
+        this.arrayBuilder = provider.createArrayBuilder();
+    }
+
+    @Override
+    void write(String value) {
+        arrayBuilder.add(value);
+    }
+
 }

@@ -22,13 +22,13 @@ class RequiredCreatorParameter implements ModelUnmarshaller<Object> {
 
     private final String parameterName;
 
-    RequiredCreatorParameter(String parameterName) {
-        this.parameterName = parameterName;
-    }
-
     @Override
     public Object unmarshal(Object value, DeserializationContextManager context) {
         throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CREATOR_MISSING_PROPERTY, parameterName));
+    }
+
+    RequiredCreatorParameter(String parameterName) {
+        this.parameterName = parameterName;
     }
 
 }

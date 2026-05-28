@@ -37,32 +37,38 @@ class AnnotationFinder {
     private final Class<? extends Annotation> annotationClass;
 
     /**
-     * Gets the {@link AnnotationFinder} for the given Annotation-Type.
-     *
-     * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationFinder}
+     * Searches for annotation, collects processed, to avoid StackOverflow.
      */
-    public static AnnotationFinder findAnnotation(Class<?> annotation) {
-        return findAnnotationByName(annotation.getName());
+    // "static" to use it in a hybrid procedural and object oriented manner.
+    @SuppressWarnings("unchecked")
+    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass, Set<Annotation> processed) {
+        for (Annotation candidate : declaredAnnotations) {
+            final Class<? extends Annotation> annType = candidate.annotationType();
+            if (annType.equals(annotationClass)) {
+                return (T) candidate;
+            }
+            processed.add(candidate);
+            final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
+            inheritedAnnotations.removeAll(processed);
+            if (0 < inheritedAnnotations.size()) {
+                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
+                if (null != inherited) {
+                    return inherited;
+                }
+            }
+        }
+        return null;
     }
 
-    /**
-     * Gets the {@link AnnotationFinder} for the given Annotation-Type Name.
-     *
-     * @param annotationClassName {@link String}, that is a sub-type of {@link Annotation}
-     * @return {@link AnnotationFinder}
-     */
-    public static AnnotationFinder findAnnotationByName(String annotationClassName) {
-        return new AnnotationFinder(annotationClassName, getOptionalAnnotationClass(annotationClassName));
-    }
-
-    /**
-     * Gets the {@link AnnotationFinder} for @ConstructorProperties-Annotation.
-     *
-     * @return {@link AnnotationFinder}
-     */
-    public static AnnotationFinder findConstructorProperties() {
-        return findAnnotationByName(CONSTRUCTOR_PROPERTIES_ANNOTATION);
+    @SuppressWarnings("unchecked")
+    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classname) {
+        try {
+            return (Class<T>) Class.forName(classname);
+        } catch (ClassNotFoundException e) {
+            String message = LocalizedMessages.getMessage(MessageKeyConstants.ANNOTATION_NOT_AVAILABLE, classname);
+            LOGGER.finest(message);
+            return null;
+        }
     }
 
     private AnnotationFinder(String annotationClassName, Class<? extends Annotation> annotationClass) {
@@ -76,6 +82,30 @@ class AnnotationFinder {
             return null;
         }
         return (T) findAnnotation(annotations, annotationClass, new HashSet<>());
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationFinder [annotationClassName=" + annotationClassName + ", annotationClass=" + annotationClass + "]";
+    }
+
+    /**
+     * Gets the {@link AnnotationFinder} for the given Annotation-Type.
+     *
+     * @param annotation {@link Class}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationFinder}
+     */
+    public static AnnotationFinder findAnnotation(Class<?> annotation) {
+        return findAnnotationByName(annotation.getName());
+    }
+
+    /**
+     * Gets the {@link AnnotationFinder} for @ConstructorProperties-Annotation.
+     *
+     * @return {@link AnnotationFinder}
+     */
+    public static AnnotationFinder findConstructorProperties() {
+        return findAnnotationByName(CONSTRUCTOR_PROPERTIES_ANNOTATION);
     }
 
     /**
@@ -102,43 +132,14 @@ class AnnotationFinder {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends Annotation> Class<T> getOptionalAnnotationClass(String classname) {
-        try {
-            return (Class<T>) Class.forName(classname);
-        } catch (ClassNotFoundException e) {
-            String message = LocalizedMessages.getMessage(MessageKeyConstants.ANNOTATION_NOT_AVAILABLE, classname);
-            LOGGER.finest(message);
-            return null;
-        }
-    }
-
     /**
-     * Searches for annotation, collects processed, to avoid StackOverflow.
+     * Gets the {@link AnnotationFinder} for the given Annotation-Type Name.
+     *
+     * @param annotationClassName {@link String}, that is a sub-type of {@link Annotation}
+     * @return {@link AnnotationFinder}
      */
-    // "static" to use it in a hybrid procedural and object oriented manner.
-    @SuppressWarnings("unchecked")
-    public static <T extends Annotation> T findAnnotation(Annotation[] declaredAnnotations, Class<T> annotationClass, Set<Annotation> processed) {
-        for (Annotation candidate : declaredAnnotations) {
-            final Class<? extends Annotation> annType = candidate.annotationType();
-            if (annType.equals(annotationClass)) {
-                return (T) candidate;
-            }
-            processed.add(candidate);
-            final List<Annotation> inheritedAnnotations = new ArrayList<>(Arrays.asList(annType.getDeclaredAnnotations()));
-            inheritedAnnotations.removeAll(processed);
-            if (0 < inheritedAnnotations.size()) {
-                final T inherited = findAnnotation(inheritedAnnotations.toArray(new Annotation[inheritedAnnotations.size()]), annotationClass, processed);
-                if (null != inherited) {
-                    return inherited;
-                }
-            }
-        }
-        return null;
+    public static AnnotationFinder findAnnotationByName(String annotationClassName) {
+        return new AnnotationFinder(annotationClassName, getOptionalAnnotationClass(annotationClassName));
     }
 
-    @Override
-    public String toString() {
-        return "AnnotationFinder [annotationClassName=" + annotationClassName + ", annotationClass=" + annotationClass + "]";
-    }
 }

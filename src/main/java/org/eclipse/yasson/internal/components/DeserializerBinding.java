@@ -26,17 +26,6 @@ public class DeserializerBinding<T> extends AbstractComponentBinding {
     private final JsonbDeserializer<T> jsonbDeserializer;
 
     /**
-     * Creates a new instance.
-     *
-     * @param bindingType       Binding type.
-     * @param jsonbDeserializer Deserializer.
-     */
-    public DeserializerBinding(Type bindingType, JsonbDeserializer<T> jsonbDeserializer) {
-        super(bindingType);
-        this.jsonbDeserializer = jsonbDeserializer;
-    }
-
-    /**
      * Gets deserializer if any.
      *
      * @return Deserializer.
@@ -49,4 +38,16 @@ public class DeserializerBinding<T> extends AbstractComponentBinding {
     public Class<?> getComponentClass() {
         return jsonbDeserializer.getClass();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param bindingType       Binding type.
+     * @param jsonbDeserializer Deserializer.
+     */
+    public DeserializerBinding(Type bindingType, JsonbDeserializer<T> jsonbDeserializer) {
+        super(bindingType);
+        this.jsonbDeserializer = jsonbDeserializer;
+    }
+
 }

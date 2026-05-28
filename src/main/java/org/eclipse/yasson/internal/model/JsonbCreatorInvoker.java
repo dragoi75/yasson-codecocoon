@@ -29,38 +29,6 @@ public class JsonbCreatorInvoker {
     private final CreatorProfile[] creatorProfiles;
 
     /**
-     * Creates a new instance.
-     *
-     * @param callable    Executable.
-     * @param creatorProfiles Parameters.
-     */
-    public JsonbCreatorInvoker(Executable callable, CreatorProfile[] creatorProfiles) {
-        this.callable = callable;
-        this.creatorProfiles = creatorProfiles;
-    }
-
-    /**
-     * Create instance by either constructor or factory method, with provided parameter values and a Class to call on.
-     *
-     * @param creatorProfiles parameters to be passed into constructor / factory method
-     * @param targetType     class to call onto
-     * @param <T>    Type of class / instance
-     * @return instance
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T invoke(Object[] creatorProfiles, Class<T> targetType) {
-        try {
-            if (!(callable instanceof Constructor)) {
-                return (T) ((Method) callable).invoke(targetType, creatorProfiles);
-            } else {
-                return ((Constructor<T>) callable).newInstance(creatorProfiles);
-            }
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException ex) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, targetType), ex);
-        }
-    }
-
-    /**
      * True if param name is one of creator params.
      *
      * @param parameterName Param name to check.
@@ -93,4 +61,37 @@ public class JsonbCreatorInvoker {
     public CreatorProfile[] getParams() {
         return creatorProfiles;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param callable    Executable.
+     * @param creatorProfiles Parameters.
+     */
+    public JsonbCreatorInvoker(Executable callable, CreatorProfile[] creatorProfiles) {
+        this.callable = callable;
+        this.creatorProfiles = creatorProfiles;
+    }
+
+    /**
+     * Create instance by either constructor or factory method, with provided parameter values and a Class to call on.
+     *
+     * @param creatorProfiles parameters to be passed into constructor / factory method
+     * @param targetType     class to call onto
+     * @param <T>    Type of class / instance
+     * @return instance
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T invoke(Object[] creatorProfiles, Class<T> targetType) {
+        try {
+            if (!(callable instanceof Constructor)) {
+                return (T) ((Method) callable).invoke(targetType, creatorProfiles);
+            } else {
+                return ((Constructor<T>) callable).newInstance(creatorProfiles);
+            }
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException ex) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ERROR_CALLING_JSONB_CREATOR, targetType), ex);
+        }
+    }
+
 }

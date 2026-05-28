@@ -45,41 +45,7 @@ abstract class ArraySerializer implements ModelSerializer {
 
     private final ModelSerializer valueSerializer;
 
-    protected ArraySerializer(ModelSerializer valueSerializer) {
-        this.valueSerializer = valueSerializer;
-    }
-
-    public static ModelSerializer create(Class<?> arrayType,
-                                         JsonbContext jsonbContext,
-                                         ModelSerializer modelSerializer) {
-        String binaryDataStrategy = jsonbContext.getConfigProperties().getBinaryDataStrategy();
-        if (byte[].class.equals(arrayType) && !binaryDataStrategy.equals(BinaryDataStrategy.BYTE)) {
-            return new Base64ByteArraySerializer(binaryDataStrategy);
-        }
-        if (ARRAY_SERIALIZERS.containsKey(arrayType)) {
-            return ARRAY_SERIALIZERS.get(arrayType).apply(modelSerializer);
-        }
-        return new ObjectArraySerializer(modelSerializer);
-    }
-
-    @Override
-    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
-        generator.writeStartArray();
-        serializeArray(value, generator, context);
-        generator.writeEnd();
-    }
-
-    abstract void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context);
-
-    protected ModelSerializer getValueSerializer() {
-        return valueSerializer;
-    }
-
     private static final class ByteArraySerializer extends ArraySerializer {
-
-        ByteArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -89,15 +55,15 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        ByteArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class Base64ByteArraySerializer implements ModelSerializer {
 
         private final Base64.Encoder encoder;
-
-        Base64ByteArraySerializer(String strategy) {
-            this.encoder = getEncoder(strategy);
-        }
 
         @Override
         public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -115,13 +81,14 @@ abstract class ArraySerializer implements ModelSerializer {
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Invalid strategy: " + strategy));
             }
         }
+
+        Base64ByteArraySerializer(String strategy) {
+            this.encoder = getEncoder(strategy);
+        }
+
     }
 
     private static final class ShortArraySerializer extends ArraySerializer {
-
-        ShortArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -131,13 +98,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        ShortArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class IntegerArraySerializer extends ArraySerializer {
-
-        IntegerArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -147,13 +114,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        IntegerArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class LongArraySerializer extends ArraySerializer {
-
-        LongArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -163,13 +130,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        LongArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class FloatArraySerializer extends ArraySerializer {
-
-        FloatArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -179,13 +146,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        FloatArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class DoubleArraySerializer extends ArraySerializer {
-
-        DoubleArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -195,13 +162,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        DoubleArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class BooleanArraySerializer extends ArraySerializer {
-
-        BooleanArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -211,13 +178,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        BooleanArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class CharacterArraySerializer extends ArraySerializer {
-
-        CharacterArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -227,13 +194,13 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        CharacterArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
     }
 
     private static final class ObjectArraySerializer extends ArraySerializer {
-
-        ObjectArraySerializer(ModelSerializer valueSerializer) {
-            super(valueSerializer);
-        }
 
         @Override
         public void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context) {
@@ -243,6 +210,40 @@ abstract class ArraySerializer implements ModelSerializer {
             }
         }
 
+        ObjectArraySerializer(ModelSerializer valueSerializer) {
+            super(valueSerializer);
+        }
+
+    }
+
+    protected ModelSerializer getValueSerializer() {
+        return valueSerializer;
+    }
+
+    abstract void serializeArray(Object value, JsonGenerator generator, SerializationContextImpl context);
+
+    protected ArraySerializer(ModelSerializer valueSerializer) {
+        this.valueSerializer = valueSerializer;
+    }
+
+    @Override
+    public void serialize(Object value, JsonGenerator generator, SerializationContextImpl context) {
+        generator.writeStartArray();
+        serializeArray(value, generator, context);
+        generator.writeEnd();
+    }
+
+    public static ModelSerializer create(Class<?> arrayType,
+                                         JsonbContext jsonbContext,
+                                         ModelSerializer modelSerializer) {
+        String binaryDataStrategy = jsonbContext.getConfigProperties().getBinaryDataStrategy();
+        if (byte[].class.equals(arrayType) && !binaryDataStrategy.equals(BinaryDataStrategy.BYTE)) {
+            return new Base64ByteArraySerializer(binaryDataStrategy);
+        }
+        if (ARRAY_SERIALIZERS.containsKey(arrayType)) {
+            return ARRAY_SERIALIZERS.get(arrayType).apply(modelSerializer);
+        }
+        return new ObjectArraySerializer(modelSerializer);
     }
 
 }

@@ -41,26 +41,6 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
 
     private final boolean isEnumSet;
 
-    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
-        this.delegate = delegate;
-        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
-        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
-        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
-        Object instance;
-        if (!isEnumSet) {
-            instance = InstanceCreator.createInstance(clazz);
-        } else {
-            instance = EnumSet.noneOf((Class<Enum>) type);
-        }
-        context.setInstance(instance);
-        return delegate.unmarshal(value, context);
-    }
-
     private Class<?> implementationClass(Class<?> type) {
         if (type.isInterface()) {
             return createInterfaceInstance(type);
@@ -86,4 +66,25 @@ class CollectionInstanceCreator implements ModelUnmarshaller<JsonParser> {
         }
         return ifcType;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object unmarshal(JsonParser value, DeserializationContextManager context) {
+        Object instance;
+        if (!isEnumSet) {
+            instance = InstanceCreator.createInstance(clazz);
+        } else {
+            instance = EnumSet.noneOf((Class<Enum>) type);
+        }
+        context.setInstance(instance);
+        return delegate.unmarshal(value, context);
+    }
+
+    CollectionInstanceCreator(CollectionDeserializer delegate, Type type) {
+        this.delegate = delegate;
+        this.clazz = implementationClass(ReflectionUtils.getRawType(type));
+        this.isEnumSet = EnumSet.class.isAssignableFrom(clazz);
+        this.type = isEnumSet ? ((ParameterizedType) type).getActualTypeArguments()[0] : type;
+    }
+
 }

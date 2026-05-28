@@ -30,6 +30,23 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private final AnnotationFinder constructorProperties;
 
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    }
+
+    private JsonbCreatorInvoker createJsonbCreator(Executable executable, String[] properties) {
+        final Parameter[] parameters = executable.getParameters();
+        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
+        int i = 0;
+        while (parameters.length > i) {
+            final Parameter parameter = parameters[i];
+            creatorModels[i] = new CreatorProfile(properties[i], parameter, executable, jsonbContext);
+            i += 1;
+        }
+        return new JsonbCreatorInvoker(executable, creatorModels);
+    }
+
     public static ConstructorPropertiesAnnotationIntrospector forContext(JsonbContext jsonbContext) {
         return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
     }
@@ -73,20 +90,4 @@ class ConstructorPropertiesAnnotationIntrospector {
         return jsonbCreator;
     }
 
-    private JsonbCreatorInvoker createJsonbCreator(Executable executable, String[] properties) {
-        final Parameter[] parameters = executable.getParameters();
-        CreatorProfile[] creatorModels = new CreatorProfile[parameters.length];
-        int i = 0;
-        while (parameters.length > i) {
-            final Parameter parameter = parameters[i];
-            creatorModels[i] = new CreatorProfile(properties[i], parameter, executable, jsonbContext);
-            i += 1;
-        }
-        return new JsonbCreatorInvoker(executable, creatorModels);
-    }
-
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
-    }
 }

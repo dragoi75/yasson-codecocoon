@@ -29,38 +29,6 @@ public class TypeInheritanceConfiguration {
     private final Class<?> definedType;
     private final TypeInheritanceConfiguration parentConfig;
 
-    private TypeInheritanceConfiguration(Builder builder) {
-        this.fieldName = builder.fieldName;
-        this.inherited = builder.inherited;
-        this.aliases = Map.copyOf(builder.aliases);
-        this.parentConfig = builder.parentConfig;
-        this.definedType = builder.definedType;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public boolean isInherited() {
-        return inherited;
-    }
-
-    public Map<Class<?>, String> getAliases() {
-        return aliases;
-    }
-
-    public Class<?> getDefinedType() {
-        return definedType;
-    }
-
-    public TypeInheritanceConfiguration getParentConfig() {
-        return parentConfig;
-    }
-
     public static final class Builder {
 
         private Map<Class<?>, String> aliases = new HashMap<>();
@@ -69,11 +37,8 @@ public class TypeInheritanceConfiguration {
         private Class<?> definedType;
         private TypeInheritanceConfiguration parentConfig;
 
-        private Builder() {
-        }
-
-        public Builder inherited(boolean inherited) {
-            this.inherited = inherited;
+        public Builder definedType(Class<?> definedType) {
+            this.definedType = definedType;
             return this;
         }
 
@@ -82,18 +47,8 @@ public class TypeInheritanceConfiguration {
             return this;
         }
 
-        public Builder alias(Class<?> clazz, String alias) {
-            this.aliases.put(clazz, alias);
-            return this;
-        }
-
         public Builder parentConfig(TypeInheritanceConfiguration parentConfig) {
             this.parentConfig = parentConfig;
-            return this;
-        }
-
-        public Builder definedType(Class<?> definedType) {
-            this.definedType = definedType;
             return this;
         }
 
@@ -109,6 +64,52 @@ public class TypeInheritanceConfiguration {
         public TypeInheritanceConfiguration build() {
             return new TypeInheritanceConfiguration(this);
         }
+
+        public Builder alias(Class<?> clazz, String alias) {
+            this.aliases.put(clazz, alias);
+            return this;
+        }
+
+        private Builder() {
+        }
+
+        public Builder inherited(boolean inherited) {
+            this.inherited = inherited;
+            return this;
+        }
+
+    }
+
+    public TypeInheritanceConfiguration getParentConfig() {
+        return parentConfig;
+    }
+
+    public Class<?> getDefinedType() {
+        return definedType;
+    }
+
+    public boolean isInherited() {
+        return inherited;
+    }
+
+    public Map<Class<?>, String> getAliases() {
+        return aliases;
+    }
+
+    private TypeInheritanceConfiguration(Builder builder) {
+        this.fieldName = builder.fieldName;
+        this.inherited = builder.inherited;
+        this.aliases = Map.copyOf(builder.aliases);
+        this.parentConfig = builder.parentConfig;
+        this.definedType = builder.definedType;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
 }

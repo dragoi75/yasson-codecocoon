@@ -33,6 +33,19 @@ public class CreatorProfile {
 
     private final CreatorCustomization creationConfig;
 
+    public CreatorCustomization getCustomization() {
+        return creationConfig;
+    }
+
+    /**
+     * Gets parameter type.
+     *
+     * @return Parameter type.
+     */
+    public Type getType() {
+        return kind;
+    }
+
     /**
      * Creates a new instance.
      *  @param label      Parameter name
@@ -65,16 +78,4 @@ public class CreatorProfile {
         return label;
     }
 
-    public CreatorCustomization getCustomization() {
-        return creationConfig;
-    }
-
-    /**
-     * Gets parameter type.
-     *
-     * @return Parameter type.
-     */
-    public Type getType() {
-        return kind;
-    }
 }

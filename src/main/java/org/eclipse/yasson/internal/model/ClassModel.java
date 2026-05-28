@@ -53,29 +53,70 @@ public class ClassModel {
     private final PropertyNamingStrategy propertyNamingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
      *
-     * @param name A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * @return class properties.
      */
-    public PropertyModel getPropertyModel(String name) {
-        return properties.get(name);
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
     /**
-     * Create instance of class model.
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
      *
-     * @param clazz                  Class to model.
-     * @param customization          Customization of the class parsed from annotations.
-     * @param parentClassModel       Class model of parent class.
-     * @param propertyNamingStrategy Property naming strategy.
+     * @return sorted class properties.
      */
-    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
-        this.clazz = clazz;
-        this.classCustomization = customization;
-        this.parentClassModel = parentClassModel;
-        this.propertyNamingStrategy = propertyNamingStrategy;
-        setProperties(new ArrayList<>());
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassCustomization getClassCustomization() {
+        return classCustomization;
+    }
+
+    /**
+     * Gets type.
+     *
+     * @return Type.
+     */
+    public Class<?> getType() {
+        return clazz;
+    }
+
+    /**
+     * Default no argument constructor of the class used for deserialization.
+     *
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
+        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
+        // Note: Null is a valid result and needs to be cached.
+        if (!isInitialized.get()) {
+            if (!ClassMultiReleaseExtension.isRecord(clazz)) {
+                defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
+            } else {
+                //No default constructor should be used in case of records
+                defaultConstructor = null;
+            }
+            isInitialized.set(true);
+        }
+        return defaultConstructor;
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedProperties class properties
+     */
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
     }
 
     /**
@@ -87,6 +128,21 @@ public class ClassModel {
     public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
         Objects.requireNonNull(jsonReadName);
         return searchProperty(this, jsonReadName);
+    }
+
+    @Override
+    public String toString() {
+        return "ClassModel{" + "clazz=" + clazz + '}';
+    }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param name A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public PropertyModel getPropertyModel(String name) {
+        return properties.get(name);
     }
 
     private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
@@ -121,24 +177,6 @@ public class ClassModel {
     }
 
     /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return clazz;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassCustomization getClassCustomization() {
-        return classCustomization;
-    }
-
-    /**
      * Class model of parent class if present.
      *
      * @return class model of a parent
@@ -148,56 +186,19 @@ public class ClassModel {
     }
 
     /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * Create instance of class model.
      *
-     * @return sorted class properties.
+     * @param clazz                  Class to model.
+     * @param customization          Customization of the class parsed from annotations.
+     * @param parentClassModel       Class model of parent class.
+     * @param propertyNamingStrategy Property naming strategy.
      */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
+    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
+        this.clazz = clazz;
+        this.classCustomization = customization;
+        this.parentClassModel = parentClassModel;
+        this.propertyNamingStrategy = propertyNamingStrategy;
+        setProperties(new ArrayList<>());
     }
 
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProperties class properties
-     */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     *
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     *
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        // Lazy-loads the default constructor to avoid Java 9+ "Illegal reflective access" warnings where possible.
-        // Example: Deserialization into Map won't use this constructor, and therefore never needs to call this method.
-        // Note: Null is a valid result and needs to be cached.
-        if (!isInitialized.get()) {
-            if (!ClassMultiReleaseExtension.isRecord(clazz)) {
-                defaultConstructor = ReflectionUtils.getDefaultConstructor(clazz, false);
-            } else {
-                //No default constructor should be used in case of records
-                defaultConstructor = null;
-            }
-            isInitialized.set(true);
-        }
-        return defaultConstructor;
-    }
-
-    @Override
-    public String toString() {
-        return "ClassModel{" + "clazz=" + clazz + '}';
-    }
 }

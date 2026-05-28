@@ -47,59 +47,66 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     private boolean root = true;
 
     /**
-     * Creates Marshaller for generation to String.
+     * Adds currently processed object to the {@link Set}.
      *
-     * @param jsonbContext    Current context.
-     * @param rootRuntimeType Type of root object.
+     * @param object processed object
+     * @return if object was added
      */
-    public SerializationContextImpl(JsonbContext jsonbContext, Type rootRuntimeType) {
-        super(jsonbContext);
-        this.runtimeType = rootRuntimeType;
+    public boolean addProcessedObject(Object object) {
+        return this.currentlyProcessedObjects.add(object);
     }
 
     /**
-     * Creates Marshaller for generation to String.
+     * Serializes root element.
      *
-     * @param jsonbContext Current context.
+     * @param <T>       Root type
+     * @param root      Root.
+     * @param generator JSON generator.
      */
-    public SerializationContextImpl(JsonbContext jsonbContext) {
-        this(jsonbContext, null);
+    public <T> void serializeObject(T root, JsonGenerator generator) {
+        Type type = determineSerializationType(root);
+        final ModelSerializer rootSerializer = getRootSerializer(type);
+        rootSerializer.serialize(root, generator, this);
     }
 
     /**
-     * Set new current property key name.
+     * Set if container supports null values.
      *
-     * @param key key name
+     * @param writeNulls should write nulls in container
      */
-    public void setKey(String key) {
-        this.key = key;
+    public void setContainerWithNulls(boolean writeNulls) {
+        this.containerWithNulls = writeNulls;
     }
 
     /**
-     * Current property key name.
+     * Marshals given object to provided Writer or OutputStream.
+     * Leaves generator open for further interaction after completion.
      *
-     * @return current property key name
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
      */
-    public String getKey() {
-        return key;
+    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, false);
     }
 
     /**
-     * Serialized value is a root value.
+     * Removes processed object from the {@link Set}.
      *
-     * @return is root value
+     * @param object processed object
+     * @return if object was removed
      */
-    public boolean isRoot() {
-        return root;
+    public boolean removeProcessedObject(Object object) {
+        return currentlyProcessedObjects.remove(object);
     }
 
-    /**
-     * Set whether serialized value is root value.
-     *
-     * @param root is root value
-     */
-    public void setRoot(boolean root) {
-        this.root = root;
+    public ModelSerializer getRootSerializer(Type type) {
+        return getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
+    }
+
+    @Override
+    public <T> void serialize(T object, JsonGenerator generator) {
+        Objects.requireNonNull(object);
+        serializeObject(object, generator);
     }
 
     /**
@@ -113,12 +120,47 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Set if container supports null values.
+     * Marshals given object to provided Writer or OutputStream.
+     * Closes the generator on completion.
      *
-     * @param writeNulls should write nulls in container
+     * @param object        object to marshall
+     * @param jsonGenerator generator to use
      */
-    public void setContainerWithNulls(boolean writeNulls) {
-        this.containerWithNulls = writeNulls;
+    public void marshall(Object object, JsonGenerator jsonGenerator) {
+        marshall(object, jsonGenerator, true);
+    }
+
+    private <T> Type determineSerializationType(T root) {
+        if (isRoot() && null != runtimeType) {
+            return runtimeType;
+        }
+        return null == root ? Object.class : root.getClass();
+    }
+
+    /**
+     * Serialized value is a root value.
+     *
+     * @return is root value
+     */
+    public boolean isRoot() {
+        return root;
+    }
+
+    @Override
+    public <T> void serialize(String key, T object, JsonGenerator generator) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(object);
+        setKey(key);
+        serializeObject(object, generator);
+    }
+
+    /**
+     * Current property key name.
+     *
+     * @return current property key name
+     */
+    public String getKey() {
+        return key;
     }
 
     /**
@@ -149,82 +191,41 @@ public class SerializationContextImpl extends ProcessingContext implements Seria
     }
 
     /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Closes the generator on completion.
+     * Set whether serialized value is root value.
      *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
+     * @param root is root value
      */
-    public void marshall(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, true);
+    public void setRoot(boolean root) {
+        this.root = root;
     }
 
     /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Leaves generator open for further interaction after completion.
+     * Set new current property key name.
      *
-     * @param object        object to marshall
-     * @param jsonGenerator generator to use
+     * @param key key name
      */
-    public void marshallWithoutClose(Object object, JsonGenerator jsonGenerator) {
-        marshall(object, jsonGenerator, false);
-    }
-
-    @Override
-    public <T> void serialize(String key, T object, JsonGenerator generator) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(object);
-        setKey(key);
-        serializeObject(object, generator);
-    }
-
-    @Override
-    public <T> void serialize(T object, JsonGenerator generator) {
-        Objects.requireNonNull(object);
-        serializeObject(object, generator);
+    public void setKey(String key) {
+        this.key = key;
     }
 
     /**
-     * Serializes root element.
+     * Creates Marshaller for generation to String.
      *
-     * @param <T>       Root type
-     * @param root      Root.
-     * @param generator JSON generator.
+     * @param jsonbContext Current context.
      */
-    public <T> void serializeObject(T root, JsonGenerator generator) {
-        Type type = determineSerializationType(root);
-        final ModelSerializer rootSerializer = getRootSerializer(type);
-        rootSerializer.serialize(root, generator, this);
-    }
-
-    private <T> Type determineSerializationType(T root) {
-        if (isRoot() && null != runtimeType) {
-            return runtimeType;
-        }
-        return null == root ? Object.class : root.getClass();
-    }
-
-    public ModelSerializer getRootSerializer(Type type) {
-        return getJsonbContext().getSerializationModelCreator().serializerChain(type, true, true);
+    public SerializationContextImpl(JsonbContext jsonbContext) {
+        this(jsonbContext, null);
     }
 
     /**
-     * Adds currently processed object to the {@link Set}.
+     * Creates Marshaller for generation to String.
      *
-     * @param object processed object
-     * @return if object was added
+     * @param jsonbContext    Current context.
+     * @param rootRuntimeType Type of root object.
      */
-    public boolean addProcessedObject(Object object) {
-        return this.currentlyProcessedObjects.add(object);
+    public SerializationContextImpl(JsonbContext jsonbContext, Type rootRuntimeType) {
+        super(jsonbContext);
+        this.runtimeType = rootRuntimeType;
     }
 
-    /**
-     * Removes processed object from the {@link Set}.
-     *
-     * @param object processed object
-     * @return if object was removed
-     */
-    public boolean removeProcessedObject(Object object) {
-        return currentlyProcessedObjects.remove(object);
-    }
 }

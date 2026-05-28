@@ -41,25 +41,6 @@ class XmlGregorianCalendarDeserializer extends AbstractDateDeserializer<XMLGrego
 
     private final DatatypeFactory datatypeFactory;
 
-    XmlGregorianCalendarDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-        this.calendarTemplate = new GregorianCalendar();
-        this.calendarTemplate.clear();
-        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
-        try {
-            this.datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
-        }
-    }
-
-    @Override
-    protected XMLGregorianCalendar fromInstant(Instant instant) {
-        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return datatypeFactory.newXMLGregorianCalendar(calendar);
-    }
-
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
         DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
@@ -80,4 +61,24 @@ class XmlGregorianCalendarDeserializer extends AbstractDateDeserializer<XMLGrego
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
         return datatypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(result));
     }
+
+    XmlGregorianCalendarDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+        this.calendarTemplate = new GregorianCalendar();
+        this.calendarTemplate.clear();
+        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
+        try {
+            this.datatypeFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
+        }
+    }
+
+    @Override
+    protected XMLGregorianCalendar fromInstant(Instant instant) {
+        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
+        calendar.setTimeInMillis(instant.toEpochMilli());
+        return datatypeFactory.newXMLGregorianCalendar(calendar);
+    }
+
 }

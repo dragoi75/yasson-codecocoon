@@ -22,14 +22,14 @@ class DeferredDeserializer implements ModelUnmarshaller<Object> {
 
     private final ModelUnmarshaller<Object> delegate;
 
-    DeferredDeserializer(ModelUnmarshaller<Object> delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public Object unmarshal(Object value, DeserializationContextManager context) {
         context.getDeferredDeserializers().add(() -> delegate.unmarshal(value, context));
         return value;
+    }
+
+    DeferredDeserializer(ModelUnmarshaller<Object> delegate) {
+        this.delegate = delegate;
     }
 
 }

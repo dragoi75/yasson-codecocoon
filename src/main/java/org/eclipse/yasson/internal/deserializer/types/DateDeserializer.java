@@ -24,18 +24,9 @@ class DateDeserializer extends AbstractDateDeserializer<Date> {
 
     private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
-    DateDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     Date fromInstant(Instant instant) {
         return new Date(instant.toEpochMilli());
-    }
-
-    @Override
-    Date parseDefault(String jsonValue, Locale locale) {
-        return parseWithOrWithoutZone(jsonValue, DEFAULT_DATE_TIME_FORMATTER.withLocale(locale));
     }
 
     @Override
@@ -52,4 +43,14 @@ class DateDeserializer extends AbstractDateDeserializer<Date> {
         }
         return Date.from(parsed.toInstant());
     }
+
+    @Override
+    Date parseDefault(String jsonValue, Locale locale) {
+        return parseWithOrWithoutZone(jsonValue, DEFAULT_DATE_TIME_FORMATTER.withLocale(locale));
+    }
+
+    DateDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

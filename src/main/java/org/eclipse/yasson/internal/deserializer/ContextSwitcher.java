@@ -24,12 +24,6 @@ class ContextSwitcher implements ModelUnmarshaller<JsonParser> {
     private final ModelUnmarshaller<Object> delegate;
     private final ModelUnmarshaller<JsonParser> modelDeserializer;
 
-    ContextSwitcher(ModelUnmarshaller<Object> delegate,
-                    ModelUnmarshaller<JsonParser> modelDeserializer) {
-        this.delegate = delegate;
-        this.modelDeserializer = modelDeserializer;
-    }
-
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextManager context) {
         DeserializationContextManager ctx = new DeserializationContextManager(context);
@@ -37,4 +31,11 @@ class ContextSwitcher implements ModelUnmarshaller<JsonParser> {
         context.setLastValueEvent(ctx.getLastValueEvent());
         return returnedValue;
     }
+
+    ContextSwitcher(ModelUnmarshaller<Object> delegate,
+                    ModelUnmarshaller<JsonParser> modelDeserializer) {
+        this.delegate = delegate;
+        this.modelDeserializer = modelDeserializer;
+    }
+
 }

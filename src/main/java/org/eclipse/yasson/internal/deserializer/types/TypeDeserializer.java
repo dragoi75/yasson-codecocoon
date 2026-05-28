@@ -27,28 +27,8 @@ public abstract class TypeDeserializer implements ModelUnmarshaller<String> {
     private final ModelUnmarshaller<Object> delegate;
     private final Class<?> clazz;
 
-    TypeDeserializer(TypeDeserializerBuilder builder) {
-        this.delegate = builder.getDelegate();
-        this.clazz = builder.getClazz();
-    }
-
-    @Override
-    public final Object unmarshal(String value, DeserializationContextManager context) {
-        return delegate.unmarshal(deserializeStringValue(value, context, clazz), context);
-    }
-
-    public final Object deserialize(boolean value, DeserializationContextManager context) {
-        return delegate.unmarshal(deserializeBooleanValue(value, context, clazz), context);
-    }
-
     public final Object deserialize(JsonParser value, DeserializationContextManager context) {
         return delegate.unmarshal(deserializeNumberValue(value, context, clazz), context);
-    }
-
-    abstract Object deserializeStringValue(String value, DeserializationContextManager context, Type rType);
-
-    Object deserializeBooleanValue(boolean value, DeserializationContextManager context, Type rType) {
-        return deserializeStringValue(String.valueOf(value), context, rType);
     }
 
     Object deserializeNumberValue(JsonParser value, DeserializationContextManager context, Type rType) {
@@ -58,5 +38,25 @@ public abstract class TypeDeserializer implements ModelUnmarshaller<String> {
     Class<?> getType() {
         return clazz;
     }
+
+    public final Object deserialize(boolean value, DeserializationContextManager context) {
+        return delegate.unmarshal(deserializeBooleanValue(value, context, clazz), context);
+    }
+
+    Object deserializeBooleanValue(boolean value, DeserializationContextManager context, Type rType) {
+        return deserializeStringValue(String.valueOf(value), context, rType);
+    }
+
+    @Override
+    public final Object unmarshal(String value, DeserializationContextManager context) {
+        return delegate.unmarshal(deserializeStringValue(value, context, clazz), context);
+    }
+
+    TypeDeserializer(TypeDeserializerBuilder builder) {
+        this.delegate = builder.getDelegate();
+        this.clazz = builder.getClazz();
+    }
+
+    abstract Object deserializeStringValue(String value, DeserializationContextManager context, Type rType);
 
 }

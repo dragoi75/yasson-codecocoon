@@ -32,11 +32,6 @@ class ObjectTypeDeserializer implements ModelUnmarshaller<JsonParser> {
     private final ModelUnmarshaller<Object> delegate;
     private final Class<?> mapClass;
 
-    ObjectTypeDeserializer(TypeDeserializerBuilder builder) {
-        this.delegate = builder.getDelegate();
-        this.mapClass = builder.getConfigProperties().getDefaultMapImplType();
-    }
-
     @Override
     public Object unmarshal(JsonParser value, DeserializationContextManager context) {
         Object toSet;
@@ -66,6 +61,11 @@ class ObjectTypeDeserializer implements ModelUnmarshaller<JsonParser> {
             throw new JsonbException("Unexpected event: " + context.getLastValueEvent());
         }
         return delegate.unmarshal(toSet, context);
+    }
+
+    ObjectTypeDeserializer(TypeDeserializerBuilder builder) {
+        this.delegate = builder.getDelegate();
+        this.mapClass = builder.getConfigProperties().getDefaultMapImplType();
     }
 
 }

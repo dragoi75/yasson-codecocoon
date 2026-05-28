@@ -31,30 +31,9 @@ class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param original         Original type.
-     * @param resolvedTypeArgs Resolved type arguments.
-     */
-    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
-        this.original = original;
-        this.resolvedTypeArgs = resolvedTypeArgs;
-    }
-
-    /**
-     * Type arguments with resolved TypeVariables.
-     *
-     * @return type args
-     */
     @Override
-    public Type[] getActualTypeArguments() {
-        return resolvedTypeArgs;
-    }
-
-    @Override
-    public Type getRawType() {
-        return original.getRawType();
+    public int hashCode() {
+        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
     }
 
     @Override
@@ -88,8 +67,30 @@ class ResolvedParameterizedType implements ParameterizedType {
         return this.getRawType().equals(that.getRawType()) && Objects.equals(this.getOwnerType(), that.getOwnerType()) && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
     }
 
+    /**
+     * Type arguments with resolved TypeVariables.
+     *
+     * @return type args
+     */
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
+    public Type[] getActualTypeArguments() {
+        return resolvedTypeArgs;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param original         Original type.
+     * @param resolvedTypeArgs Resolved type arguments.
+     */
+    ResolvedParameterizedType(ParameterizedType original, Type[] resolvedTypeArgs) {
+        this.original = original;
+        this.resolvedTypeArgs = resolvedTypeArgs;
+    }
+
+    @Override
+    public Type getRawType() {
+        return original.getRawType();
+    }
+
 }

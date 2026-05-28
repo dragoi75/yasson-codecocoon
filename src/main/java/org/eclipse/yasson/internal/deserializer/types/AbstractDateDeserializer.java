@@ -39,15 +39,45 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
 
     private ModelUnmarshaller<String> actualDeserializer;
 
+    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
+        try {
+            return parseWithFormatter(jsonValue, formatter);
+        } catch (DateTimeException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getType()), e);
+        }
+    }
+
+    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
+        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
+    }
+
+    /**
+     * Parse java.time date object with default formatter.
+     * Different default formatter for each date object type is used.
+     *
+     * @param jsonValue string value to parse from
+     * @param locale    annotated locale or default
+     * @return parsed date object
+     */
+    abstract T parseDefault(String jsonValue, Locale locale);
+
     AbstractDateDeserializer(TypeDeserializerBuilder builder) {
         super(builder);
         this.actualDeserializer = actualDeserializer(builder.getConfigProperties(), builder.getCustomization());
     }
 
-    AbstractDateDeserializer(Class<Date> clazz) {
-        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
-        this.actualDeserializer = null;
+    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
+        return Optional.ofNullable(customization.getDeserializeDateFormatter()).orElse(properties.getConfigDateFormatter());
     }
+
+    /**
+     * Construct date object from an instant containing epoch millisecond.
+     * If date object supports zone offset / zone id, system default is used and warning is logged.
+     *
+     * @param instant instant to construct from
+     * @return date object
+     */
+    abstract T fromInstant(Instant instant);
 
     private ModelUnmarshaller<String> actualDeserializer(JsonbConfigProperties properties, Customization customization) {
         final JsonbDateFormatter formatter = getJsonbDateFormatter(properties, customization);
@@ -76,36 +106,10 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
         };
     }
 
-    private JsonbDateFormatter getJsonbDateFormatter(JsonbConfigProperties properties, Customization customization) {
-        return Optional.ofNullable(customization.getDeserializeDateFormatter()).orElse(properties.getConfigDateFormatter());
+    AbstractDateDeserializer(Class<Date> clazz) {
+        super(new TypeDeserializerBuilder(clazz, null, null, JustReturn.instance()));
+        this.actualDeserializer = null;
     }
-
-    @Override
-    public Object deserializeStringValue(String value, DeserializationContextManager context, Type rType) {
-        if (null == actualDeserializer) {
-            actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
-        }
-        return actualDeserializer.unmarshal(value, context);
-    }
-
-    /**
-     * Construct date object from an instant containing epoch millisecond.
-     * If date object supports zone offset / zone id, system default is used and warning is logged.
-     *
-     * @param instant instant to construct from
-     * @return date object
-     */
-    abstract T fromInstant(Instant instant);
-
-    /**
-     * Parse java.time date object with default formatter.
-     * Different default formatter for each date object type is used.
-     *
-     * @param jsonValue string value to parse from
-     * @param locale    annotated locale or default
-     * @return parsed date object
-     */
-    abstract T parseDefault(String jsonValue, Locale locale);
 
     /**
      * Parse java.time date object with provided formatter.
@@ -116,15 +120,12 @@ abstract class AbstractDateDeserializer<T> extends TypeDeserializer {
      */
     abstract T parseWithFormatter(String jsonValue, DateTimeFormatter formatter);
 
-    private T parseWithFormatterInternal(String jsonValue, DateTimeFormatter formatter) {
-        try {
-            return parseWithFormatter(jsonValue, formatter);
-        } catch (DateTimeException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DATE_PARSE_ERROR, jsonValue, getType()), e);
+    @Override
+    public Object deserializeStringValue(String value, DeserializationContextManager context, Type rType) {
+        if (null == actualDeserializer) {
+            actualDeserializer = actualDeserializer(context.getJsonbContext().getConfigProperties(), context.getCustomization());
         }
+        return actualDeserializer.unmarshal(value, context);
     }
 
-    protected DateTimeFormatter getZonedFormatter(DateTimeFormatter formatter) {
-        return null != formatter.getZone() ? formatter : formatter.withZone(UTC);
-    }
 }

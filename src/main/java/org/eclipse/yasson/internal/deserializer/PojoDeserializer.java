@@ -35,14 +35,6 @@ class PojoDeserializer implements ModelUnmarshaller<JsonParser> {
 
     private final Set<String> excludedProperties;
 
-    PojoDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyUnmarshallers, Function<String, String> nameMapper, Class<?> targetType, boolean throwOnUnknownFields, Set<String> excludedProperties) {
-        this.propertyUnmarshallers = Map.copyOf(propertyUnmarshallers);
-        this.nameMapper = nameMapper;
-        this.targetType = targetType;
-        this.throwOnUnknownFields = throwOnUnknownFields;
-        this.excludedProperties = Set.copyOf(excludedProperties);
-    }
-
     @Override
     public Object unmarshal(JsonParser jsonInput, DeserializationContextManager ctxManager) {
         String propertyName = null;
@@ -82,4 +74,13 @@ class PojoDeserializer implements ModelUnmarshaller<JsonParser> {
         }
         return ctxManager.getInstance();
     }
+
+    PojoDeserializer(Map<String, ModelUnmarshaller<JsonParser>> propertyUnmarshallers, Function<String, String> nameMapper, Class<?> targetType, boolean throwOnUnknownFields, Set<String> excludedProperties) {
+        this.propertyUnmarshallers = Map.copyOf(propertyUnmarshallers);
+        this.nameMapper = nameMapper;
+        this.targetType = targetType;
+        this.throwOnUnknownFields = throwOnUnknownFields;
+        this.excludedProperties = Set.copyOf(excludedProperties);
+    }
+
 }

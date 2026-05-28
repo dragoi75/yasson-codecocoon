@@ -27,11 +27,12 @@ class TypeDeserializerBuilder {
 
     private final ModelUnmarshaller<Object> delegate;
 
-    TypeDeserializerBuilder(Class<?> clazz, Customization customization, JsonbConfigProperties configProperties, ModelUnmarshaller<Object> delegate) {
-        this.clazz = Objects.requireNonNull(clazz);
-        this.customization = null == customization ? ClassCustomization.empty() : customization;
-        this.configProperties = configProperties;
-        this.delegate = Objects.requireNonNull(delegate);
+    public ModelUnmarshaller<Object> getDelegate() {
+        return delegate;
+    }
+
+    public Customization getCustomization() {
+        return customization;
     }
 
     public Class<?> getClazz() {
@@ -42,11 +43,11 @@ class TypeDeserializerBuilder {
         return configProperties;
     }
 
-    public ModelUnmarshaller<Object> getDelegate() {
-        return delegate;
+    TypeDeserializerBuilder(Class<?> clazz, Customization customization, JsonbConfigProperties configProperties, ModelUnmarshaller<Object> delegate) {
+        this.clazz = Objects.requireNonNull(clazz);
+        this.customization = null == customization ? ClassCustomization.empty() : customization;
+        this.configProperties = configProperties;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
-    public Customization getCustomization() {
-        return customization;
-    }
 }

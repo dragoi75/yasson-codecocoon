@@ -35,10 +35,86 @@ class YassonParser implements JsonParser {
 
     private int level;
 
+    @Override
+    public JsonValue getValue() {
+        final Event currentLevel = context.getLastValueEvent();
+        switch(currentLevel) {
+            case START_ARRAY:
+                return getArray();
+            case START_OBJECT:
+                return getObject();
+            default:
+                return delegate.getValue();
+        }
+    }
+
+    @Override
+    public int getInt() {
+        return delegate.getInt();
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        return delegate.getLocation();
+    }
+
+    @Override
+    public void skipObject() {
+        validate();
+        level -= 1;
+        delegate.skipObject();
+    }
+
+    @Override
+    public JsonArray getArray() {
+        validate();
+        level -= 1;
+        JsonArray array = delegate.getArray();
+        context.setLastValueEvent(Event.END_ARRAY);
+        return array;
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return delegate.getBigDecimal();
+    }
+
+    @Override
+    public void close() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Stream<JsonValue> getValueStream() {
+        validate();
+        level -= 1;
+        return delegate.getValueStream();
+    }
+
     YassonParser(JsonParser delegate, Event firstEvent, DeserializationContextManager context) {
         this.delegate = delegate;
         this.context = context;
         this.level = determineLevelValue(firstEvent);
+    }
+
+    @Override
+    public String getString() {
+        return delegate.getString();
+    }
+
+    @Override
+    public boolean hasNext() {
+        if (1 > level) {
+            return false;
+        }
+        return delegate.hasNext();
+    }
+
+    @Override
+    public Stream<JsonValue> getArrayStream() {
+        validate();
+        level -= 1;
+        return delegate.getArrayStream();
     }
 
     private int determineLevelValue(Event firstEvent) {
@@ -53,18 +129,22 @@ class YassonParser implements JsonParser {
         }
     }
 
-    void skipRemaining() {
-        while (hasNext()) {
-            next();
-        }
+    @Override
+    public long getLong() {
+        return delegate.getLong();
     }
 
     @Override
-    public boolean hasNext() {
+    public void skipArray() {
+        validate();
+        level -= 1;
+        delegate.skipArray();
+    }
+
+    private void validate() {
         if (1 > level) {
-            return false;
+            throw new NoSuchElementException("There are no more elements available!");
         }
-        return delegate.hasNext();
     }
 
     @Override
@@ -87,33 +167,10 @@ class YassonParser implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return delegate.getString();
-    }
-
-    @Override
-    public boolean isIntegralNumber() {
-        return delegate.isIntegralNumber();
-    }
-
-    @Override
-    public int getInt() {
-        return delegate.getInt();
-    }
-
-    @Override
-    public long getLong() {
-        return delegate.getLong();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return delegate.getBigDecimal();
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        return delegate.getLocation();
+    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
+        validate();
+        level -= 1;
+        return delegate.getObjectStream();
     }
 
     @Override
@@ -126,70 +183,14 @@ class YassonParser implements JsonParser {
     }
 
     @Override
-    public JsonValue getValue() {
-        final Event currentLevel = context.getLastValueEvent();
-        switch(currentLevel) {
-            case START_ARRAY:
-                return getArray();
-            case START_OBJECT:
-                return getObject();
-            default:
-                return delegate.getValue();
+    public boolean isIntegralNumber() {
+        return delegate.isIntegralNumber();
+    }
+
+    void skipRemaining() {
+        while (hasNext()) {
+            next();
         }
     }
 
-    @Override
-    public JsonArray getArray() {
-        validate();
-        level -= 1;
-        JsonArray array = delegate.getArray();
-        context.setLastValueEvent(Event.END_ARRAY);
-        return array;
-    }
-
-    @Override
-    public Stream<JsonValue> getArrayStream() {
-        validate();
-        level -= 1;
-        return delegate.getArrayStream();
-    }
-
-    @Override
-    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
-        validate();
-        level -= 1;
-        return delegate.getObjectStream();
-    }
-
-    @Override
-    public Stream<JsonValue> getValueStream() {
-        validate();
-        level -= 1;
-        return delegate.getValueStream();
-    }
-
-    @Override
-    public void skipArray() {
-        validate();
-        level -= 1;
-        delegate.skipArray();
-    }
-
-    @Override
-    public void skipObject() {
-        validate();
-        level -= 1;
-        delegate.skipObject();
-    }
-
-    @Override
-    public void close() {
-        throw new UnsupportedOperationException();
-    }
-
-    private void validate() {
-        if (1 > level) {
-            throw new NoSuchElementException("There are no more elements available!");
-        }
-    }
 }

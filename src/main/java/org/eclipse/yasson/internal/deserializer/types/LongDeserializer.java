@@ -23,8 +23,9 @@ import org.eclipse.yasson.internal.DeserializationContextManager;
  */
 class LongDeserializer extends AbstractNumberDeserializer<Long> {
 
-    LongDeserializer(TypeDeserializerBuilder builder) {
-        super(builder, true);
+    @Override
+    Object deserializeNumberValue(JsonParser value, DeserializationContextManager context, Type rType) {
+        return value.getLong();
     }
 
     @Override
@@ -32,8 +33,8 @@ class LongDeserializer extends AbstractNumberDeserializer<Long> {
         return Long.parseLong(value);
     }
 
-    @Override
-    Object deserializeNumberValue(JsonParser value, DeserializationContextManager context, Type rType) {
-        return value.getLong();
+    LongDeserializer(TypeDeserializerBuilder builder) {
+        super(builder, true);
     }
+
 }

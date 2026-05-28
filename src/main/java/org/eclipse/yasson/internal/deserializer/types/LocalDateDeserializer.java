@@ -22,10 +22,6 @@ import java.util.Locale;
  */
 class LocalDateDeserializer extends AbstractDateDeserializer<LocalDate> {
 
-    LocalDateDeserializer(TypeDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected LocalDate fromInstant(Instant instant) {
         return instant.atZone(UTC).toLocalDate();
@@ -40,4 +36,9 @@ class LocalDateDeserializer extends AbstractDateDeserializer<LocalDate> {
     protected LocalDate parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
         return LocalDate.parse(jsonValue, formatter);
     }
+
+    LocalDateDeserializer(TypeDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }
