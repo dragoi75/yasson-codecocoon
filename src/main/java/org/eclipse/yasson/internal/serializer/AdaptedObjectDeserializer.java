@@ -40,6 +40,26 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItemProvider<T>, 
 
     private final AbstractContainerDeserializer<?> wrapperItem;
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
+        try {
+            final A result =  adaptedTypeDeserializer.deserialize(parser, context, rtType);
+            final T adapted = ((JsonbAdapter<T, A>) adapterInfo.getAdapter()).adaptFromJson(result);
+            return adapted;
+        } catch (Exception e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
+        }
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
+            return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
+        }
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
+    }
+
     /**
      * Creates decoration instance wrapping real adapted object item.
      *
@@ -49,24 +69,6 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItemProvider<T>, 
     public AdaptedObjectDeserializer(AdapterBinding adapterInfo, AbstractContainerDeserializer<?> wrapperItem) {
         this.adapterInfo = adapterInfo;
         this.wrapperItem = wrapperItem;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItemProvider<?> getWrapper() {
-        return wrapperItem;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        if (adaptedTypeDeserializer instanceof AbstractContainerDeserializer) {
-            return ((AbstractContainerDeserializer) adaptedTypeDeserializer).getRuntimeType();
-        }
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedTypeDeserializer));
     }
 
     /**
@@ -79,14 +81,13 @@ public class AdaptedObjectDeserializer<A, T> implements CurrentItemProvider<T>, 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public T deserialize(JsonParser parser, DeserializationContext context, Type rtType) {
-        try {
-            final A result =  adaptedTypeDeserializer.deserialize(parser, context, rtType);
-            final T adapted = ((JsonbAdapter<T, A>) adapterInfo.getAdapter()).adaptFromJson(result);
-            return adapted;
-        } catch (Exception e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ADAPTER_EXCEPTION, adapterInfo.getBindingType(), adapterInfo.getToType(), adapterInfo.getAdapter().getClass()), e);
-        }
+    public CurrentItemProvider<?> getWrapper() {
+        return wrapperItem;
     }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
 }

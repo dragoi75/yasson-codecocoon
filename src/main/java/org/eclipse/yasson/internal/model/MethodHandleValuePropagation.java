@@ -39,6 +39,30 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
     private MethodHandle setHandle;
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(Object object) {
+        try {
+            return getHandle.invoke(object);
+        } catch (Throwable throwable) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.GETTING_VALUE_WITH, getHandle), throwable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValue(Object object, Object value) {
+        try {
+            setHandle.invoke(object, value);
+        } catch (Throwable throwable) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.SETTING_VALUE_WITH, setHandle), throwable);
+        }
+    }
+
     MethodHandleValuePropagation(Property property, JsonbConfigurationContext ctx) {
         super(property, ctx);
     }
@@ -76,31 +100,6 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
             }
         } catch (IllegalAccessException e) {
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.CREATING_HANDLES), e);
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(Object object, Object value) {
-        try {
-            setHandle.invoke(object, value);
-        } catch (Throwable throwable) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.SETTING_VALUE_WITH, setHandle), throwable);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object getValue(Object object) {
-        try {
-            return getHandle.invoke(object);
-        } catch (Throwable throwable) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.GETTING_VALUE_WITH, getHandle), throwable);
         }
     }
 

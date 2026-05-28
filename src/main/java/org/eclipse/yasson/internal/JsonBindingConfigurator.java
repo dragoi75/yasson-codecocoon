@@ -28,18 +28,6 @@ public class JsonBindingConfigurator implements JsonbBuilder {
     private JsonbConfig jsonbSettings = new JsonbConfig();
     private JsonProvider jsonEngine = null;
 
-    @Override
-    public JsonbBuilder withConfig(JsonbConfig jsonbSettings) {
-        this.jsonbSettings = jsonbSettings;
-        return this;
-    }
-
-    @Override
-    public JsonbBuilder withProvider(JsonProvider jsonpHandler) {
-        this.jsonEngine = jsonpHandler;
-        return this;
-    }
-
     /**
      * Gets configuration.
      *
@@ -47,6 +35,11 @@ public class JsonBindingConfigurator implements JsonbBuilder {
      */
     public JsonbConfig getConfig() {
         return jsonbSettings;
+    }
+
+    @Override
+    public Jsonb build() {
+        return new JsonConverter(this);
     }
 
     /**
@@ -59,7 +52,15 @@ public class JsonBindingConfigurator implements JsonbBuilder {
     }
 
     @Override
-    public Jsonb build() {
-        return new JsonConverter(this);
+    public JsonbBuilder withProvider(JsonProvider jsonpHandler) {
+        this.jsonEngine = jsonpHandler;
+        return this;
     }
+
+    @Override
+    public JsonbBuilder withConfig(JsonbConfig jsonbSettings) {
+        this.jsonbSettings = jsonbSettings;
+        return this;
+    }
+
 }

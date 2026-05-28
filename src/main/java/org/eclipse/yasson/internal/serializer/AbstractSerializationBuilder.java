@@ -57,13 +57,39 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     protected final JsonbConfigurationContext jsonbContext;
 
     /**
-     * Crates a builder.
+     * Model of a class representing current item and instance (if any).
+     * Known collection classes doesn't need such a model.
      *
-     * @param jsonbConfiguration Not null.
+     * @return model of a class
      */
-    public AbstractSerializationBuilder(JsonbConfigurationContext jsonbConfiguration) {
-        Objects.requireNonNull(jsonbConfiguration);
-        this.jsonbContext = jsonbConfiguration;
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     *
+     * @param targetType type of instance not null
+     * @return builder instance for call chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setType(Type targetType) {
+        this.genericType = targetType;
+        return (T) this;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbConfigurationContext getJsonbContext() {
+        return jsonbContext;
     }
 
     /**
@@ -91,6 +117,16 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
+     * Otherwise provided type in type field, or type of field model.
+     *
+     * @return runtime type
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
      * Gets or load class model for a class an its superclasses.
      *
      * @param declaredClass Class to get model for.
@@ -114,48 +150,13 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
-     * Model of a class representing current item and instance (if any).
-     * Known collection classes doesn't need such a model.
+     * Crates a builder.
      *
-     * @return model of a class
+     * @param jsonbConfiguration Not null.
      */
-    public ClassDescriptor getClassModel() {
-        return classModel;
+    public AbstractSerializationBuilder(JsonbConfigurationContext jsonbConfiguration) {
+        Objects.requireNonNull(jsonbConfiguration);
+        this.jsonbContext = jsonbConfiguration;
     }
 
-    /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
-     * Otherwise provided type in type field, or type of field model.
-     *
-     * @return runtime type
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
-
-    /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
-     *
-     * @param targetType type of instance not null
-     * @return builder instance for call chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T setType(Type targetType) {
-        this.genericType = targetType;
-        return (T) this;
-    }
-
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbConfigurationContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
 }

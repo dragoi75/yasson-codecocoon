@@ -23,11 +23,24 @@ import javax.json.stream.JsonParser;
 public interface JsonbStreamParser extends JsonParser {
 
     /**
+     * Skips a value or a structure.
+     * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
+     */
+    void skipJsonStructure();
+
+    /**
+     * Current level of JsonbRiParser.
+     *
+     * @return Current level.
+     */
+    JsonbRiStreamParser.LevelParseState getCurrentLevel();
+
+    /**
      * Moves parser to required event, if current event is equal to required does nothing.
      *
      * @param message Required event.
      */
-    void moveTo(JsonParser.Event message);
+    void moveTo(Event message);
 
     /**
      * Moves parser cursor to any JSON value.
@@ -43,16 +56,4 @@ public interface JsonbStreamParser extends JsonParser {
      */
     Event moveToStartStructure();
 
-    /**
-     * Current level of JsonbRiParser.
-     *
-     * @return Current level.
-     */
-    JsonbRiStreamParser.LevelParseState getCurrentLevel();
-
-    /**
-     * Skips a value or a structure.
-     * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
-     */
-    void skipJsonStructure();
 }

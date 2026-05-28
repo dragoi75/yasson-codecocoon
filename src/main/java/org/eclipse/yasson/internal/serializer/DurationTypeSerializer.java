@@ -26,6 +26,11 @@ import java.time.Duration;
  */
 public class DurationTypeSerializer extends ValueTypeSerializerBase<Duration> {
 
+    @Override
+    protected void serializeValue(Duration obj, JsonGenerator generator, ObjectMarshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class DurationTypeSerializer extends ValueTypeSerializerBase<Duration> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(Duration obj, JsonGenerator generator, ObjectMarshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

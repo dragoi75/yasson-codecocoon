@@ -30,6 +30,16 @@ import java.util.Locale;
 public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializer<XMLGregorianCalendar> {
 
 
+    @Override
+    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
+        return toZonedDateTime(object);
+    }
+
+    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
+                object.toGregorianCalendar().getTimeZone().toZoneId());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -53,13 +63,4 @@ public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializ
                 .format(toTemporalAccessor(value));
     }
 
-    @Override
-    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
-        return toZonedDateTime(object);
-    }
-
-    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
-                object.toGregorianCalendar().getTimeZone().toZoneId());
-    }
 }

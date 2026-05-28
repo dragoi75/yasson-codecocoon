@@ -33,12 +33,32 @@ public class JsonbPropertyDescriptor {
     private CurrentItemProvider<?> itemProvider;
 
     /**
-     * Gets context.
+     * Gets wrapper.
      *
-     * @return Context.
+     * @return Wrapper.
      */
-    public JsonbConfigurationContext getContext() {
-        return jsonbConfiguration;
+    public CurrentItemProvider<?> getWrapper() {
+        return itemProvider;
+    }
+
+    /**
+     * Gets class model.
+     *
+     * @return Class model.
+     */
+    public ClassDescriptor getClassModel() {
+        return classDescriptor;
+    }
+
+    /**
+     * Sets wrapper.
+     *
+     * @param itemProvider Wrapper to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyDescriptor setWrapper(CurrentItemProvider<?> itemProvider) {
+        this.itemProvider = itemProvider;
+        return this;
     }
 
     /**
@@ -53,12 +73,23 @@ public class JsonbPropertyDescriptor {
     }
 
     /**
-     * Gets runtime type.
+     * Sets class model.
      *
-     * @return Runtime type.
+     * @param classDescriptor Class model to set.
+     * @return Updated object.
      */
-    public Type getRuntimeType() {
-        return resolvedType;
+    public JsonbPropertyDescriptor withClassModel(ClassDescriptor classDescriptor) {
+        this.classDescriptor = classDescriptor;
+        return this;
+    }
+
+    /**
+     * Gets context.
+     *
+     * @return Context.
+     */
+    public JsonbConfigurationContext getContext() {
+        return jsonbConfiguration;
     }
 
     /**
@@ -73,42 +104,12 @@ public class JsonbPropertyDescriptor {
     }
 
     /**
-     * Gets class model.
+     * Gets runtime type.
      *
-     * @return Class model.
+     * @return Runtime type.
      */
-    public ClassDescriptor getClassModel() {
-        return classDescriptor;
+    public Type getRuntimeType() {
+        return resolvedType;
     }
 
-    /**
-     * Sets class model.
-     *
-     * @param classDescriptor Class model to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyDescriptor withClassModel(ClassDescriptor classDescriptor) {
-        this.classDescriptor = classDescriptor;
-        return this;
-    }
-
-    /**
-     * Gets wrapper.
-     *
-     * @return Wrapper.
-     */
-    public CurrentItemProvider<?> getWrapper() {
-        return itemProvider;
-    }
-
-    /**
-     * Sets wrapper.
-     *
-     * @param itemProvider Wrapper to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyDescriptor setWrapper(CurrentItemProvider<?> itemProvider) {
-        this.itemProvider = itemProvider;
-        return this;
-    }
 }

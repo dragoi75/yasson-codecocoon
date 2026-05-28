@@ -37,12 +37,38 @@ public class JsonConverter implements Jsonb {
 
     private final JsonbConfigurationContext bindingConfig;
 
-    JsonConverter(JsonBindingConfigurator configurator) {
-        this.bindingConfig = new JsonbConfigurationContext(configurator.getConfig(), configurator.getProvider().orElseGet(JsonProvider::provider));
+    private JsonGenerator streamGenerator(OutputStream inputSource) {
+        Map<String, ?> configMap = createJsonpProperties(bindingConfig.getConfig());
+        final String charset = (String) bindingConfig.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8");
+        return bindingConfig.getJsonProvider().createGeneratorFactory(configMap).createGenerator(inputSource, Charset.forName(charset));
     }
 
-    private <T> T deserialize(final Type targetDescriptor, final JsonParser tokenReader, final JsonUnmarshaller jsonDeserializer) {
-        return jsonDeserializer.deserialize(targetDescriptor, tokenReader);
+    @Override
+    public void toJson(Object value, Writer stringBuffer) throws JsonbException {
+        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig);
+        objectSerializer.marshal(value, writerGenerator(stringBuffer));
+    }
+
+    @Override
+    public <T> T fromJson(InputStream inputSource, Class<T> targetClass) throws JsonbException {
+        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
+        return deserialize(targetClass, inputStreamParser(inputSource), jsonDeserializer);
+    }
+
+    private JsonGenerator writerGenerator(Writer stringBuffer) {
+        Map<String, ?> configMap = createJsonpProperties(bindingConfig.getConfig());
+        if (configMap.isEmpty()) {
+            return bindingConfig.getJsonProvider().createGenerator(stringBuffer);
+        }
+        return bindingConfig.getJsonProvider().createGeneratorFactory(configMap).createGenerator(stringBuffer);
+    }
+
+    @Override
+    public String toJson(Object value, Type targetDescriptor) throws JsonbException {
+        StringWriter stringBuffer = new StringWriter();
+        final JsonGenerator jsonEmitter = writerGenerator(stringBuffer);
+        new ObjectMarshaller(bindingConfig, targetDescriptor).marshal(value, jsonEmitter);
+        return stringBuffer.toString();
     }
 
     @Override
@@ -53,17 +79,23 @@ public class JsonConverter implements Jsonb {
     }
 
     @Override
-    public <T> T fromJson(String jsonText, Type targetDescriptor) throws JsonbException {
-        JsonParser tokenReader = new JsonbRiStreamParser(bindingConfig.getJsonProvider().createParser(new StringReader(jsonText)));
-        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
-        return deserialize(targetDescriptor, tokenReader, jsonDeserializer);
+    public void toJson(Object value, OutputStream inputSource) throws JsonbException {
+        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig);
+        objectSerializer.marshal(value, streamGenerator(inputSource));
     }
 
     @Override
-    public <T> T fromJson(Reader charSource, Class<T> targetDescriptor) throws JsonbException {
-        JsonParser tokenReader = new JsonbRiStreamParser(bindingConfig.getJsonProvider().createParser(charSource));
-        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
-        return deserialize(targetDescriptor, tokenReader, jsonDeserializer);
+    public void toJson(Object value, Type targetDescriptor, Writer stringBuffer) throws JsonbException {
+        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig, targetDescriptor);
+        objectSerializer.marshal(value, writerGenerator(stringBuffer));
+    }
+
+    @Override
+    public String toJson(Object value) throws JsonbException {
+        StringWriter stringBuffer = new StringWriter();
+        final JsonGenerator jsonEmitter = writerGenerator(stringBuffer);
+        new ObjectMarshaller(bindingConfig).marshal(value, jsonEmitter);
+        return stringBuffer.toString();
     }
 
     @Override
@@ -74,9 +106,8 @@ public class JsonConverter implements Jsonb {
     }
 
     @Override
-    public <T> T fromJson(InputStream inputSource, Class<T> targetClass) throws JsonbException {
-        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
-        return deserialize(targetClass, inputStreamParser(inputSource), jsonDeserializer);
+    public void close() throws Exception {
+        bindingConfig.getComponentInstanceCreator().close();
     }
 
     @Override
@@ -92,62 +123,27 @@ public class JsonConverter implements Jsonb {
     }
 
     @Override
-    public String toJson(Object value) throws JsonbException {
-        StringWriter stringBuffer = new StringWriter();
-        final JsonGenerator jsonEmitter = writerGenerator(stringBuffer);
-        new ObjectMarshaller(bindingConfig).marshal(value, jsonEmitter);
-        return stringBuffer.toString();
-    }
-
-    @Override
-    public String toJson(Object value, Type targetDescriptor) throws JsonbException {
-        StringWriter stringBuffer = new StringWriter();
-        final JsonGenerator jsonEmitter = writerGenerator(stringBuffer);
-        new ObjectMarshaller(bindingConfig, targetDescriptor).marshal(value, jsonEmitter);
-        return stringBuffer.toString();
-    }
-
-    @Override
-    public void toJson(Object value, Writer stringBuffer) throws JsonbException {
-        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig);
-        objectSerializer.marshal(value, writerGenerator(stringBuffer));
-    }
-
-    @Override
-    public void toJson(Object value, Type targetDescriptor, Writer stringBuffer) throws JsonbException {
-        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig, targetDescriptor);
-        objectSerializer.marshal(value, writerGenerator(stringBuffer));
-    }
-
-    private JsonGenerator writerGenerator(Writer stringBuffer) {
-        Map<String, ?> configMap = createJsonpProperties(bindingConfig.getConfig());
-        if (configMap.isEmpty()) {
-            return bindingConfig.getJsonProvider().createGenerator(stringBuffer);
-        }
-        return bindingConfig.getJsonProvider().createGeneratorFactory(configMap).createGenerator(stringBuffer);
-    }
-
-    @Override
-    public void toJson(Object value, OutputStream inputSource) throws JsonbException {
-        final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig);
-        objectSerializer.marshal(value, streamGenerator(inputSource));
-    }
-
-    @Override
     public void toJson(Object value, Type targetDescriptor, OutputStream inputSource) throws JsonbException {
         final ObjectMarshaller objectSerializer = new ObjectMarshaller(bindingConfig, targetDescriptor);
         objectSerializer.marshal(value, streamGenerator(inputSource));
     }
 
-    private JsonGenerator streamGenerator(OutputStream inputSource) {
-        Map<String, ?> configMap = createJsonpProperties(bindingConfig.getConfig());
-        final String charset = (String) bindingConfig.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8");
-        return bindingConfig.getJsonProvider().createGeneratorFactory(configMap).createGenerator(inputSource, Charset.forName(charset));
+    JsonConverter(JsonBindingConfigurator configurator) {
+        this.bindingConfig = new JsonbConfigurationContext(configurator.getConfig(), configurator.getProvider().orElseGet(JsonProvider::provider));
     }
 
     @Override
-    public void close() throws Exception {
-        bindingConfig.getComponentInstanceCreator().close();
+    public <T> T fromJson(String jsonText, Type targetDescriptor) throws JsonbException {
+        JsonParser tokenReader = new JsonbRiStreamParser(bindingConfig.getJsonProvider().createParser(new StringReader(jsonText)));
+        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
+        return deserialize(targetDescriptor, tokenReader, jsonDeserializer);
+    }
+
+    @Override
+    public <T> T fromJson(Reader charSource, Class<T> targetDescriptor) throws JsonbException {
+        JsonParser tokenReader = new JsonbRiStreamParser(bindingConfig.getJsonProvider().createParser(charSource));
+        JsonUnmarshaller jsonDeserializer = new JsonUnmarshaller(bindingConfig);
+        return deserialize(targetDescriptor, tokenReader, jsonDeserializer);
     }
 
     /**
@@ -172,4 +168,9 @@ public class JsonConverter implements Jsonb {
         }
         return configMap;
     }
+
+    private <T> T deserialize(final Type targetDescriptor, final JsonParser tokenReader, final JsonUnmarshaller jsonDeserializer) {
+        return jsonDeserializer.deserialize(targetDescriptor, tokenReader);
+    }
+
 }

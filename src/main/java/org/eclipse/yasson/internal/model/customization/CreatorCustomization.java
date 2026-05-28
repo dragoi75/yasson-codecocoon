@@ -15,10 +15,40 @@ public class CreatorCustomization extends CustomizationBase {
 
     private PropertyModel propertyModel;
 
+    @Override
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        if (null == dateFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeDateFormatter();
+            }
+        } else {
+            return dateFormatter;
+        }
+        return null;
+    }
+
     public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
         this.dateFormatter = dateFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    /**
+     * Set property referenced model.
+     * @param propertyModel referenced property model
+     */
+    public void setPropertyModel(PropertyModel propertyModel) {
+        this.propertyModel = propertyModel;
     }
 
     @Override
@@ -38,33 +68,4 @@ public class CreatorCustomization extends CustomizationBase {
         return null;
     }
 
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (null == dateFormatter) {
-            if (null != propertyModel) {
-                return propertyModel.getCustomization().getDeserializeDateFormatter();
-            }
-        } else {
-            return dateFormatter;
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
-    }
-
-    /**
-     * Set property referenced model.
-     * @param propertyModel referenced property model
-     */
-    public void setPropertyModel(PropertyModel propertyModel) {
-        this.propertyModel = propertyModel;
-    }
 }

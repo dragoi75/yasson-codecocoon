@@ -48,6 +48,48 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
 
         private boolean isProcessed;
 
+        private void setLastKeyName(String previousKey) {
+            this.previousKey = previousKey;
+        }
+
+        private void finish() {
+            if (isProcessed) {
+                throw new IllegalStateException("Level already parsed");
+            }
+            isProcessed = true;
+        }
+
+        /**
+         * Get parent.
+         *
+         * @return Parent.
+         */
+        public LevelParseState getParent() {
+            return enclosingState;
+        }
+
+        private void setLastEvent(Event previousEvent) {
+            this.previousEvent = previousEvent;
+        }
+
+        /**
+         * Gets last key name.
+         *
+         * @return Last key name.
+         */
+        public String getLastKeyName() {
+            return previousKey;
+        }
+
+        /**
+         * Getter for parsed property.
+         *
+         * @return True or false.
+         */
+        public boolean isParsed() {
+            return isProcessed;
+        }
+
         /**
          * Creates an instance.
          *
@@ -62,86 +104,101 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
          *
          * @return Last event.
          */
-        public JsonParser.Event getLastEvent() {
+        public Event getLastEvent() {
             return previousEvent;
         }
 
-        private void setLastEvent(JsonParser.Event previousEvent) {
-            this.previousEvent = previousEvent;
-        }
-
-        /**
-         * Gets last key name.
-         *
-         * @return Last key name.
-         */
-        public String getLastKeyName() {
-            return previousKey;
-        }
-
-        private void setLastKeyName(String previousKey) {
-            this.previousKey = previousKey;
-        }
-
-        /**
-         * Get parent.
-         *
-         * @return Parent.
-         */
-        public LevelParseState getParent() {
-            return enclosingState;
-        }
-
-        /**
-         * Getter for parsed property.
-         *
-         * @return True or false.
-         */
-        public boolean isParsed() {
-            return isProcessed;
-        }
-
-        private void finish() {
-            if (isProcessed) {
-                throw new IllegalStateException("Level already parsed");
-            }
-            isProcessed = true;
-        }
     }
 
     private final JsonParser tokenParser;
 
     private final Stack<LevelParseState> stateStack = new Stack<>();
 
-    /**
-     * Creates a parser.
-     *
-     * @param tokenParser JSON-P parser to decorate.
-     */
-    public JsonbRiStreamParser(JsonParser tokenParser) {
-        this.tokenParser = tokenParser;
-        //root level
-        this.stateStack.push(new LevelParseState(null));
+    @Override
+    public JsonArray getArray() {
+        JsonArray jsonArray = tokenParser.getArray();
+        stateStack.pop();
+        return jsonArray;
     }
 
     @Override
-    public boolean hasNext() {
-        return tokenParser.hasNext();
+    public String getString() {
+        return tokenParser.getString();
+    }
+
+    private Event moveToEvent(Event... candidates) {
+        if (!stateStack.empty() && containsEvent(candidates, stateStack.peek().getLastEvent())) {
+            return stateStack.peek().getLastEvent();
+        }
+        final Event upcomingEvent = next();
+        if (containsEvent(candidates, upcomingEvent)) {
+            return upcomingEvent;
+        }
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(candidates) + "] not found." + getLastDataMsg()));
     }
 
     @Override
-    public long getLong() {
-        return tokenParser.getLong();
+    public void close() {
+        tokenParser.close();
     }
 
     @Override
-    public int getInt() {
-        return tokenParser.getInt();
+    public Stream<JsonValue> getArrayStream() {
+        return tokenParser.getArrayStream();
+    }
+
+    @Override
+    public JsonValue getValue() {
+        return tokenParser.getValue();
+    }
+
+    @Override
+    public void skipObject() {
+        tokenParser.skipObject();
+        stateStack.pop();
+    }
+
+    public Event getLastEvent() {
+        return stateStack.peek().getLastEvent();
+    }
+
+    @Override
+    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
+        return tokenParser.getObjectStream();
+    }
+
+    @Override
+    public void moveTo(Event targetEvent) {
+        if (!stateStack.empty() && targetEvent == stateStack.peek().getLastEvent()) {
+            return;
+        }
+        final Event upcomingEvent = next();
+        if (targetEvent == upcomingEvent) {
+            return;
+        }
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + targetEvent + " not found." + getLastDataMsg()));
+    }
+
+    private String getLastDataMsg() {
+        StringBuilder sb = new StringBuilder();
+        final LevelParseState activeState = getCurrentLevel();
+        sb.append(" Last data: [").append("EVENT: ").append(activeState.getLastEvent()).append(" KEY_NAME: ").append(activeState.getLastKeyName()).append("]");
+        return sb.toString();
+    }
+
+    @Override
+    public boolean isIntegralNumber() {
+        return tokenParser.isIntegralNumber();
+    }
+
+    @Override
+    public Stream<JsonValue> getValueStream() {
+        return tokenParser.getValueStream();
     }
 
     @Override
     public JsonParser.Event next() {
-        final JsonParser.Event upcomingEvent = tokenParser.next();
+        final Event upcomingEvent = tokenParser.next();
         stateStack.peek().setLastEvent(upcomingEvent);
         switch(upcomingEvent) {
             case START_ARRAY:
@@ -164,61 +221,18 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     }
 
     @Override
-    public boolean isIntegralNumber() {
-        return tokenParser.isIntegralNumber();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return tokenParser.getBigDecimal();
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        return tokenParser.getLocation();
-    }
-
-    @Override
-    public void close() {
-        tokenParser.close();
-    }
-
-    @Override
-    public String getString() {
-        return tokenParser.getString();
-    }
-
-    @Override
-    public void moveTo(JsonParser.Event targetEvent) {
-        if (!stateStack.empty() && targetEvent == stateStack.peek().getLastEvent()) {
-            return;
-        }
-        final Event upcomingEvent = next();
-        if (targetEvent == upcomingEvent) {
-            return;
-        }
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Event " + targetEvent + " not found." + getLastDataMsg()));
-    }
-
-    @Override
-    public Event moveToValue() {
-        return moveToEvent(Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_NULL);
-    }
-
-    @Override
     public Event moveToStartStructure() {
         return moveToEvent(Event.START_OBJECT, Event.START_ARRAY);
     }
 
-    private Event moveToEvent(Event... candidates) {
-        if (!stateStack.empty() && containsEvent(candidates, stateStack.peek().getLastEvent())) {
-            return stateStack.peek().getLastEvent();
-        }
-        final Event upcomingEvent = next();
-        if (containsEvent(candidates, upcomingEvent)) {
-            return upcomingEvent;
-        }
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Parser event [" + Arrays.toString(candidates) + "] not found." + getLastDataMsg()));
+    @Override
+    public boolean hasNext() {
+        return tokenParser.hasNext();
+    }
+
+    @Override
+    public long getLong() {
+        return tokenParser.getLong();
     }
 
     private boolean containsEvent(Event[] candidates, Event potentialEvent) {
@@ -230,16 +244,14 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
         return false;
     }
 
-    private String getLastDataMsg() {
-        StringBuilder sb = new StringBuilder();
-        final LevelParseState activeState = getCurrentLevel();
-        sb.append(" Last data: [").append("EVENT: ").append(activeState.getLastEvent()).append(" KEY_NAME: ").append(activeState.getLastKeyName()).append("]");
-        return sb.toString();
+    @Override
+    public int getInt() {
+        return tokenParser.getInt();
     }
 
     @Override
-    public JsonbRiStreamParser.LevelParseState getCurrentLevel() {
-        return stateStack.peek();
+    public JsonLocation getLocation() {
+        return tokenParser.getLocation();
     }
 
     @Override
@@ -258,37 +270,8 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     }
 
     @Override
-    public JsonObject getObject() {
-        JsonObject jsonObj = tokenParser.getObject();
-        stateStack.pop();
-        return jsonObj;
-    }
-
-    @Override
-    public JsonValue getValue() {
-        return tokenParser.getValue();
-    }
-
-    @Override
-    public JsonArray getArray() {
-        JsonArray jsonArray = tokenParser.getArray();
-        stateStack.pop();
-        return jsonArray;
-    }
-
-    @Override
-    public Stream<JsonValue> getArrayStream() {
-        return tokenParser.getArrayStream();
-    }
-
-    @Override
-    public Stream<Map.Entry<String, JsonValue>> getObjectStream() {
-        return tokenParser.getObjectStream();
-    }
-
-    @Override
-    public Stream<JsonValue> getValueStream() {
-        return tokenParser.getValueStream();
+    public Event moveToValue() {
+        return moveToEvent(Event.VALUE_STRING, Event.VALUE_NUMBER, Event.VALUE_FALSE, Event.VALUE_TRUE, Event.VALUE_NULL);
     }
 
     @Override
@@ -298,12 +281,31 @@ public class JsonbRiStreamParser implements JsonParser, JsonbStreamParser {
     }
 
     @Override
-    public void skipObject() {
-        tokenParser.skipObject();
-        stateStack.pop();
+    public JsonbRiStreamParser.LevelParseState getCurrentLevel() {
+        return stateStack.peek();
     }
 
-    public JsonParser.Event getLastEvent() {
-        return stateStack.peek().getLastEvent();
+    /**
+     * Creates a parser.
+     *
+     * @param tokenParser JSON-P parser to decorate.
+     */
+    public JsonbRiStreamParser(JsonParser tokenParser) {
+        this.tokenParser = tokenParser;
+        //root level
+        this.stateStack.push(new LevelParseState(null));
     }
+
+    @Override
+    public JsonObject getObject() {
+        JsonObject jsonObj = tokenParser.getObject();
+        stateStack.pop();
+        return jsonObj;
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return tokenParser.getBigDecimal();
+    }
+
 }

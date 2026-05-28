@@ -43,12 +43,6 @@ public class MappingRegistry {
 
         private JsonbConfigurationContext jsonbConfig;
 
-        public ClassModelParserFunction(ClassDescriptor parentClassDescriptor, ClassParser classModelParser, JsonbConfigurationContext jsonbConfig) {
-            this.parentClassDescriptor = parentClassDescriptor;
-            this.classModelParser = classModelParser;
-            this.jsonbConfig = jsonbConfig;
-        }
-
         @Override
         public ClassDescriptor apply(Class targetClass) {
             final JsonbAnnotatedElement<Class<?>> classElement = jsonbConfig.getAnnotationIntrospector().collectAnnotations(targetClass);
@@ -57,6 +51,13 @@ public class MappingRegistry {
             classModelParser.parseProperties(createdClassDescriptor, classElement);
             return createdClassDescriptor;
         }
+
+        public ClassModelParserFunction(ClassDescriptor parentClassDescriptor, ClassParser classModelParser, JsonbConfigurationContext jsonbConfig) {
+            this.parentClassDescriptor = parentClassDescriptor;
+            this.classModelParser = classModelParser;
+            this.jsonbConfig = jsonbConfig;
+        }
+
     }
 
     private final JsonbConfigurationContext jsonbConfig;
@@ -68,14 +69,33 @@ public class MappingRegistry {
     private final ClassParser classModelParser;
 
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Search for class model, without parsing if not found.
      *
-     * @param jsonbConfig Context. Required.
+     * @param targetClass Class to search by or parse, not null.
+     * @return Model of a class if found.
      */
-    public MappingRegistry(JsonbConfigurationContext jsonbConfig) {
-        Objects.requireNonNull(jsonbConfig);
-        this.jsonbConfig = jsonbConfig;
-        this.classModelParser = new ClassParser(jsonbConfig);
+    public ClassDescriptor getClassModel(Class<?> targetClass) {
+        return classModels.get(targetClass);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param targetClass Class to add serializer provider for.
+     * @param containerFactory Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerFactory containerFactory) {
+        serializerFactories.putIfAbsent(targetClass, containerFactory);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param targetClass Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerFactory getSerializerProvider(Class<?> targetClass) {
+        return serializerFactories.get(targetClass);
     }
 
     /**
@@ -138,32 +158,14 @@ public class MappingRegistry {
     }
 
     /**
-     * Search for class model, without parsing if not found.
+     * Create mapping context which is scoped to jsonb runtime.
      *
-     * @param targetClass Class to search by or parse, not null.
-     * @return Model of a class if found.
+     * @param jsonbConfig Context. Required.
      */
-    public ClassDescriptor getClassModel(Class<?> targetClass) {
-        return classModels.get(targetClass);
+    public MappingRegistry(JsonbConfigurationContext jsonbConfig) {
+        Objects.requireNonNull(jsonbConfig);
+        this.jsonbConfig = jsonbConfig;
+        this.classModelParser = new ClassParser(jsonbConfig);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param targetClass Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerFactory getSerializerProvider(Class<?> targetClass) {
-        return serializerFactories.get(targetClass);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param targetClass Class to add serializer provider for.
-     * @param containerFactory Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerFactory containerFactory) {
-        serializerFactories.putIfAbsent(targetClass, containerFactory);
-    }
 }

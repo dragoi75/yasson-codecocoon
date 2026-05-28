@@ -27,15 +27,6 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
 
     private final List<Integer> items = new ArrayList<>();
 
-    protected IntArrayDeserializer(DeserializationBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public int[] getInstance(JsonUnmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +38,14 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
         }
         return intArray;
     }
+
+    protected IntArrayDeserializer(DeserializationBuilder builder) {
+        super(builder);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
 }

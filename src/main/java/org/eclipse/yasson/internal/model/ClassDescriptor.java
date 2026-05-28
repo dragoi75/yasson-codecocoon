@@ -46,6 +46,74 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(propertyMap);
+    }
+
+    /**
+     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean isReadNameEqual(String expectedName, PropertyModel candidateProperty) {
+        final String readName = candidateProperty.getReadName();
+        if (namingStrategy instanceof CaseInsensitiveStrategy) {
+            return expectedName.equalsIgnoreCase(readName);
+        }
+        return expectedName.equals(readName);
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassCustomization getClassCustomization() {
+        return customizationConfig;
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param propertyList class properties
+     */
+    public void setProperties(List<PropertyModel> propertyList) {
+        orderedProperties = propertyList.toArray(new PropertyModel[] {});
+        this.propertyMap = propertyList.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (model) -> model));
+    }
+
+    /**
+     * Class model of parent class if present.
+     * @return class model of a parent
+     */
+    public ClassDescriptor getParentClassModel() {
+        return parentDescriptor;
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return orderedProperties;
+    }
+
+    /**
+     * Search for field in this class model and superclasses of its class.
+     *
+     * @param readName name as it appears in JSON during reading.
+     * @return PropertyModel if found.
+     */
+    public PropertyModel findPropertyModelByReadName(String readName) {
+        Objects.requireNonNull(readName);
+        return findProperty(this, readName);
+    }
+
+    /**
      * Gets a property model by default (non customized) name.
      *
      * @param propertyName A name as parsed from field / getter / setter without annotation customizing.
@@ -72,14 +140,12 @@ public class ClassDescriptor {
     }
 
     /**
-     * Search for field in this class model and superclasses of its class.
+     * Gets type.
      *
-     * @param readName name as it appears in JSON during reading.
-     * @return PropertyModel if found.
+     * @return Type.
      */
-    public PropertyModel findPropertyModelByReadName(String readName) {
-        Objects.requireNonNull(readName);
-        return findProperty(this, readName);
+    public Class<?> getType() {
+        return targetClass;
     }
 
     private PropertyModel findProperty(ClassDescriptor targetDescriptor, String readName) {
@@ -99,20 +165,6 @@ public class ClassDescriptor {
     }
 
     /**
-     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
-     *
-     * @return True if names are equal.
-     */
-    private boolean isReadNameEqual(String expectedName, PropertyModel candidateProperty) {
-        final String readName = candidateProperty.getReadName();
-        if (namingStrategy instanceof CaseInsensitiveStrategy) {
-            return expectedName.equalsIgnoreCase(readName);
-        }
-        return expectedName.equals(readName);
-    }
-
-    /**
      * Gets customization.
      *
      * @return Customization.
@@ -121,55 +173,4 @@ public class ClassDescriptor {
         return customizationConfig;
     }
 
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return targetClass;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassCustomization getClassCustomization() {
-        return customizationConfig;
-    }
-
-    /**
-     * Class model of parent class if present.
-     * @return class model of a parent
-     */
-    public ClassDescriptor getParentClassModel() {
-        return parentDescriptor;
-    }
-
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return orderedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param propertyList class properties
-     */
-    public void setProperties(List<PropertyModel> propertyList) {
-        orderedProperties = propertyList.toArray(new PropertyModel[] {});
-        this.propertyMap = propertyList.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (model) -> model));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(propertyMap);
-    }
 }

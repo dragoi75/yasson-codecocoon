@@ -26,8 +26,14 @@ public class ReflectionPropagation extends PropertyValuePropagation {
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(Property property, JsonbConfigurationContext ctx) {
-        super(property, ctx);
+    @Override
+    void setValue(Object object, Object value) {
+        setValueCommand.setValue(object, value);
+    }
+
+    @Override
+    Object getValue(Object object) {
+        return getValueCommand.getValue(object);
     }
 
     /**
@@ -46,6 +52,10 @@ public class ReflectionPropagation extends PropertyValuePropagation {
         }
     }
 
+    public ReflectionPropagation(Property property, JsonbConfigurationContext ctx) {
+        super(property, ctx);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -62,13 +72,4 @@ public class ReflectionPropagation extends PropertyValuePropagation {
         }
     }
 
-    @Override
-    void setValue(Object object, Object value) {
-        setValueCommand.setValue(object, value);
-    }
-
-    @Override
-    Object getValue(Object object) {
-        return getValueCommand.getValue(object);
-    }
 }

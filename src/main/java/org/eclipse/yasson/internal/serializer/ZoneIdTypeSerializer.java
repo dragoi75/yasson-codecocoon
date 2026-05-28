@@ -26,6 +26,11 @@ import java.time.ZoneId;
  */
 public class ZoneIdTypeSerializer extends ValueTypeSerializerBase<ZoneId> {
 
+    @Override
+    protected void serializeValue(ZoneId obj, JsonGenerator generator, ObjectMarshaller marshaller) {
+        generator.write(obj.getId());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class ZoneIdTypeSerializer extends ValueTypeSerializerBase<ZoneId> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(ZoneId obj, JsonGenerator generator, ObjectMarshaller marshaller) {
-        generator.write(obj.getId());
-    }
 }

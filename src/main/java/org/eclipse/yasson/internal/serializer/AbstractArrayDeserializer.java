@@ -38,6 +38,30 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
 
     protected final ClassDescriptor componentClassModel;
 
+    @Override
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).buildDeserializer();
+        appendResult(deserializer.deserialize(parser, context, componentClass));
+    }
+
+    protected abstract List<?> getItems();
+
+    @Override
+    public void appendResult(Object result) {
+        appendCaptor(convertNullToOptionalEmpty(componentClass, result));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <X> void appendCaptor(X value) {
+        ((List<X>) getItems()).add(value);
+    }
+
     protected AbstractArrayDeserializer(DeserializationBuilder builder) {
         super(builder);
         if (!(getRuntimeType() instanceof GenericArrayType)) {
@@ -52,27 +76,4 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractContainerDese
         }
     }
 
-    @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(componentClass, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <X> void appendCaptor(X value) {
-        ((List<X>) getItems()).add(value);
-    }
-
-    @Override
-    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).buildDeserializer();
-        appendResult(deserializer.deserialize(parser, context, componentClass));
-    }
-
-    protected abstract List<?> getItems();
-
-    @Override
-    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

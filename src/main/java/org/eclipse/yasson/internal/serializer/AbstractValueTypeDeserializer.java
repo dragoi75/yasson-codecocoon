@@ -34,14 +34,21 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     private final Customization customization;
 
     /**
-     * Creates a new instance.
+     * Type of a property or creator parameter which is deserialized.
      *
-     * @param clazz Class to work with.
-     * @param customization Model customization.
+     * @return property type.
      */
-    public AbstractValueTypeDeserializer(Class<T> clazz, Customization customization) {
-        this.clazz = clazz;
-        this.customization = customization;
+    protected Class<T> getPropertyType() {
+        return clazz;
+    }
+
+    /**
+     * Returns customization of object
+     *
+     * @return object customization
+     */
+    public Customization getCustomization() {
+        return customization;
     }
 
     /**
@@ -64,6 +71,17 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     }
 
     /**
+     * Creates a new instance.
+     *
+     * @param clazz Class to work with.
+     * @param customization Model customization.
+     */
+    public AbstractValueTypeDeserializer(Class<T> clazz, Customization customization) {
+        this.clazz = clazz;
+        this.customization = customization;
+    }
+
+    /**
      * Convert string value to object.
      *
      * @param jsonValue Json value.
@@ -75,21 +93,4 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
         throw new UnsupportedOperationException("Operation not supported in " + getClass());
     }
 
-    /**
-     * Returns customization of object
-     *
-     * @return object customization
-     */
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    /**
-     * Type of a property or creator parameter which is deserialized.
-     *
-     * @return property type.
-     */
-    protected Class<T> getPropertyType() {
-        return clazz;
-    }
 }

@@ -39,6 +39,21 @@ public abstract class AbstractItem<T> implements CurrentItemProvider<T> {
      */
     private final ClassDescriptor classModel;
 
+    @Override
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    @Override
+    public CurrentItemProvider<?> getWrapper() {
+        return wrapper;
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
     /**
      * Creates and populates an instance from given builder.
      *
@@ -61,21 +76,6 @@ public abstract class AbstractItem<T> implements CurrentItemProvider<T> {
         this.wrapper = wrapper;
         this.runtimeType = runtimeType;
         this.classModel = classModel;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    @Override
-    public CurrentItemProvider<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return runtimeType;
     }
 
 }

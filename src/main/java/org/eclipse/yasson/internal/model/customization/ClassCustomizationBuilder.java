@@ -37,43 +37,6 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     private JsonbDateFormatter dateFormatter;
 
     /**
-     * Creates a customization for class properties.
-     *
-     * @return A new instance of {@link PropertyCustomization}
-     */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
-    }
-
-    /**
-     * Returns the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
-     *
-     * @return the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter
-     */
-    public JsonbNumberFormatter getNumberFormatter() {
-        return numberFormatter;
-    }
-
-    /**
-     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
-     *
-     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
-     *                        formatter.
-     */
-    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
-        this.numberFormatter = numberFormatter;
-    }
-
-    /**
-     * Gets a date format for formatting dates.
-     *
-     * @return Date format.
-     */
-    public JsonbDateFormatter getDateFormatter() {
-        return dateFormatter;
-    }
-
-    /**
      * Sets date format for formatting dates.
      *
      * @param dateFormatter Date format.
@@ -92,6 +55,15 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     }
 
     /**
+     * Returns the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
+     *
+     * @return the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter
+     */
+    public JsonbNumberFormatter getNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
      * Sets custom constructor or method for user instantiation.
      *
      * @param jsonbCreator Creator to set.
@@ -99,4 +71,33 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     public void setCreator(JsonbCreator jsonbCreator) {
         this.jsonbCreator = jsonbCreator;
     }
+
+    /**
+     * Sets the default number formatter instance that would be used for all number properties that don't have a dedicated number formatter.
+     *
+     * @param numberFormatter the default number formatter instance that would be used for all number properties that don't have a dedicated number
+     *                        formatter.
+     */
+    public void setNumberFormatter(JsonbNumberFormatter numberFormatter) {
+        this.numberFormatter = numberFormatter;
+    }
+
+    /**
+     * Creates a customization for class properties.
+     *
+     * @return A new instance of {@link PropertyCustomization}
+     */
+    public ClassCustomization buildClassCustomization() {
+        return new ClassCustomization(this);
+    }
+
+    /**
+     * Gets a date format for formatting dates.
+     *
+     * @return Date format.
+     */
+    public JsonbDateFormatter getDateFormatter() {
+        return dateFormatter;
+    }
+
 }

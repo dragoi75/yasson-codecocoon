@@ -25,6 +25,11 @@ import java.lang.reflect.Type;
  */
 public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Character> {
 
+    @Override
+    protected Character deserialize(String value, JsonUnmarshaller unmarshaller, Type rtType) {
+        return value.charAt(0);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,8 +39,4 @@ public class CharacterTypeDeserializer extends AbstractValueTypeDeserializer<Cha
         super(Character.class, customization);
     }
 
-    @Override
-    protected Character deserialize(String value, JsonUnmarshaller unmarshaller, Type rtType) {
-        return value.charAt(0);
-    }
 }

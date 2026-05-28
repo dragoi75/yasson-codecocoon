@@ -30,38 +30,6 @@ public class ComponentBindings {
     private final AdapterBinding adapterInfo;
 
     /**
-     * Construct empty bindings for a given type.
-     * @param bindingType type components are bound to
-     */
-    public ComponentBindings(Type bindingType) {
-        this(bindingType, null, null, null);
-    }
-
-    /**
-     * Creates an instance and populates it with bindings for a given type.
-     *
-     * @param bindingType Type components are bound to.
-     * @param serializer Serializer.
-     * @param deserializer Deserializer.
-     * @param adapter Adapter.
-     */
-    public ComponentBindings(Type bindingType, SerializerBinding serializer, DeserializerBinding deserializer, AdapterBinding adapter) {
-        this.bindingType = bindingType;
-        this.serializer = serializer;
-        this.deserializer = deserializer;
-        this.adapterInfo = adapter;
-    }
-
-    /**
-     * Type to which components are bound.
-     *
-     * @return Bound type.
-     */
-    public Type getBindingType() {
-        return bindingType;
-    }
-
-    /**
      * Serializer if any.
      * @return serializer
      */
@@ -83,6 +51,38 @@ public class ComponentBindings {
      */
     public AdapterBinding getAdapterInfo() {
         return adapterInfo;
+    }
+
+    /**
+     * Construct empty bindings for a given type.
+     * @param bindingType type components are bound to
+     */
+    public ComponentBindings(Type bindingType) {
+        this(bindingType, null, null, null);
+    }
+
+    /**
+     * Type to which components are bound.
+     *
+     * @return Bound type.
+     */
+    public Type getBindingType() {
+        return bindingType;
+    }
+
+    /**
+     * Creates an instance and populates it with bindings for a given type.
+     *
+     * @param bindingType Type components are bound to.
+     * @param serializer Serializer.
+     * @param deserializer Deserializer.
+     * @param adapter Adapter.
+     */
+    public ComponentBindings(Type bindingType, SerializerBinding serializer, DeserializerBinding deserializer, AdapterBinding adapter) {
+        this.bindingType = bindingType;
+        this.serializer = serializer;
+        this.deserializer = deserializer;
+        this.adapterInfo = adapter;
     }
 
 }

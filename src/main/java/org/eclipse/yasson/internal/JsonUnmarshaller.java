@@ -29,25 +29,6 @@ import java.lang.reflect.Type;
  */
 public class JsonUnmarshaller extends ProcessingContextManager implements DeserializationContext {
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param configurationContext context to use
-     */
-    public JsonUnmarshaller(JsonbConfigurationContext configurationContext) {
-        super(configurationContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
-        return deserializeValue(targetClass, jsonReader);
-    }
-
-    @Override
-    public <T> T deserialize(Type targetGeneric, JsonParser jsonReader) {
-        return deserializeValue(targetGeneric, jsonReader);
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T deserializeValue(Type targetGeneric, JsonParser jsonReader) {
         DeserializationBuilder deserializationBuilder = new DeserializationBuilder(jsonbContext).setType(targetGeneric).withJsonEvent(getRootEvent(jsonReader));
@@ -70,4 +51,24 @@ public class JsonUnmarshaller extends ProcessingContextManager implements Deseri
         final JsonParser.Event terminalEvent = ((JsonbStreamParser) jsonReader).getCurrentLevel().getLastEvent();
         return JsonParser.Event.KEY_NAME == terminalEvent ? jsonReader.next() : terminalEvent;
     }
+
+    @Override
+    public <T> T deserialize(Class<T> targetClass, JsonParser jsonReader) {
+        return deserializeValue(targetClass, jsonReader);
+    }
+
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param configurationContext context to use
+     */
+    public JsonUnmarshaller(JsonbConfigurationContext configurationContext) {
+        super(configurationContext);
+    }
+
+    @Override
+    public <T> T deserialize(Type targetGeneric, JsonParser jsonReader) {
+        return deserializeValue(targetGeneric, jsonReader);
+    }
+
 }

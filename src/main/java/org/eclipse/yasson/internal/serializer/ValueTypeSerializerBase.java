@@ -29,6 +29,8 @@ public abstract class ValueTypeSerializerBase<T> implements JsonbSerializer<T> {
 
     protected final Customization customization;
 
+    protected abstract void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller);
+
     /**
      * Creates a new instance.
      *
@@ -51,5 +53,4 @@ public abstract class ValueTypeSerializerBase<T> implements JsonbSerializer<T> {
         serializeValue(value, jsonWriter, objectConverter);
     }
 
-    protected abstract void serializeValue(T obj, JsonGenerator generator, ObjectMarshaller marshaller);
 }

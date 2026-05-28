@@ -38,13 +38,26 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
 
     private T instance;
 
-    /**
-     * @param builder {@link DeserializationBuilder ) used to build this instance
-     */
-    protected CollectionDeserializer(DeserializationBuilder builder) {
-        super(builder);
-        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
-        instance = createInstance();
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return instance;
+    }
+
+    @Override
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
+        appendResult(deserializer.deserialize(parser, context, collectionValueType));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void appendCaptor(T object) {
+        ((Collection<T>) instance).add(object);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,6 +70,20 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
                 return x;
         }
         return ReflectionHelper.createInstanceNoArgs(rawType);
+    }
+
+    /**
+     * @param builder {@link DeserializationBuilder ) used to build this instance
+     */
+    protected CollectionDeserializer(DeserializationBuilder builder) {
+        super(builder);
+        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
+        instance = createInstance();
+    }
+
+    @Override
+    public void appendResult(Object result) {
+        appendCaptor(convertNullToOptionalEmpty(collectionValueType, result));
     }
 
     @SuppressWarnings("unchecked")
@@ -82,30 +109,4 @@ class CollectionDeserializer<T extends Collection<?>> extends AbstractContainerD
         return null;
     }
 
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void appendResult(Object result) {
-        appendCaptor(convertNullToOptionalEmpty(collectionValueType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void appendCaptor(T object) {
-        ((Collection<T>) instance).add(object);
-    }
-
-    @Override
-    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(collectionValueType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, collectionValueType));
-    }
-
-    @Override
-    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

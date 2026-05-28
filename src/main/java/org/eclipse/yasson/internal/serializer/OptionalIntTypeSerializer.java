@@ -26,15 +26,6 @@ import java.util.OptionalInt;
  */
 public class OptionalIntTypeSerializer extends ValueTypeSerializerBase<OptionalInt> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalIntTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeValue(OptionalInt obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         if (!obj.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalIntTypeSerializer extends ValueTypeSerializerBase<OptionalI
             generator.write(obj.getAsInt());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalIntTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

@@ -46,11 +46,6 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
 
         private final PropertyModel propertyModel;
 
-        public LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
-            this.jsonKeyName = jsonKeyName;
-            this.propertyModel = propertyModel;
-        }
-
         public String getJsonKeyName() {
             return jsonKeyName;
         }
@@ -58,6 +53,12 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         public PropertyModel getPropertyModel() {
             return propertyModel;
         }
+
+        public LastPropertyModel(String jsonKeyName, PropertyModel propertyModel) {
+            this.jsonKeyName = jsonKeyName;
+            this.propertyModel = propertyModel;
+        }
+
     }
 
     private static final Logger log = Logger.getLogger(ObjectDeserializer.class.getName());
@@ -68,6 +69,49 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
 
     private LastPropertyModel lastPropertyModel;
 
+    private static class ValueWrapper {
+
+        private final CreatorModel creatorModel;
+
+        private final PropertyModel propertyModel;
+
+        private final Object value;
+
+        public PropertyModel getPropertyModel() {
+            return propertyModel;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public CreatorModel getCreatorModel() {
+            return creatorModel;
+        }
+
+        public ValueWrapper(CreatorModel creator, Object value) {
+            this.creatorModel = creator;
+            this.value = value;
+            propertyModel = null;
+        }
+
+        public ValueWrapper(PropertyModel propertyModel, Object value) {
+            this.propertyModel = propertyModel;
+            this.value = value;
+            creatorModel = null;
+        }
+
+    }
+
+    protected PropertyModel getModel() {
+        final String lastKeyName = parserContext.getLastKeyName();
+        if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
+            return lastPropertyModel.getPropertyModel();
+        }
+        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByReadName(lastKeyName));
+        return lastPropertyModel.getPropertyModel();
+    }
+
     /**
      * Creates instance of an item.
      * @param builder builder to build from
@@ -76,65 +120,10 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         super(builder);
     }
 
-    /**
-     * Due to support of custom (parametrized) constructors and factory methods, values are held in map,
-     * which is transferred into instance values by calling getInstance.
-     *
-     * @param unmarshaller Current deserialization context.
-     * @return An instance of deserializing item.
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        if (null != instance) {
-            return instance;
-        }
-        final Class<?> rawType = ReflectionHelper.getRawType(getRuntimeType());
-        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
-        instance = null != creator ? createInstance((Class<T>) rawType, creator) : ReflectionHelper.createInstanceNoArgs((Class<T>) rawType);
-        //values must be set in order, in which they appears in JSON by spec
-        values.forEach((key, wrapper) -> {
-            //skip creator values
-            if (null != wrapper.getCreatorModel()) {
-                return;
-            }
-            final PropertyModel propertyModel = wrapper.getPropertyModel();
-            propertyModel.setValue(instance, wrapper.getValue());
-        });
-        return instance;
-    }
-
-    /**
-     * Creates instance with custom jsonb creator (parameterized constructor or factory method)
-     */
-    private T createInstance(Class<T> rawType, JsonbCreator creator) {
-        final T instance;
-        final List<Object> paramValues = new ArrayList<>();
-        for (CreatorModel param : creator.getParams()) {
-            final ValueWrapper valueWrapper = values.get(param.getName());
-            //required by spec
-            if (null == valueWrapper) {
-                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
-            }
-            paramValues.add(valueWrapper.getValue());
-        }
-        instance = creator.call(paramValues.toArray(), rawType);
-        return instance;
-    }
-
-    /**
-     * Set populated instance of current object to its unfinished wrapper values map.
-     *
-     * @param result An instance result of an item.
-     */
-    @Override
-    public void appendResult(Object result) {
-        final PropertyModel model = getModel();
-        //missing property for null values
-        if (null == model) {
-            return;
-        }
-        values.put(model.getReadName(), new ValueWrapper(model, convertNullToOptionalEmpty(model.getPropertyType(), result)));
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
     }
 
     @Override
@@ -173,51 +162,65 @@ class ObjectDeserializer<T> extends AbstractContainerDeserializer<T> {
         parser.skipJsonStructure();
     }
 
+    /**
+     * Creates instance with custom jsonb creator (parameterized constructor or factory method)
+     */
+    private T createInstance(Class<T> rawType, JsonbCreator creator) {
+        final T instance;
+        final List<Object> paramValues = new ArrayList<>();
+        for (CreatorModel param : creator.getParams()) {
+            final ValueWrapper valueWrapper = values.get(param.getName());
+            //required by spec
+            if (null == valueWrapper) {
+                throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.JSONB_CREATOR_MISSING_PROPERTY, param.getName()));
+            }
+            paramValues.add(valueWrapper.getValue());
+        }
+        instance = creator.call(paramValues.toArray(), rawType);
+        return instance;
+    }
+
+    /**
+     * Due to support of custom (parametrized) constructors and factory methods, values are held in map,
+     * which is transferred into instance values by calling getInstance.
+     *
+     * @param unmarshaller Current deserialization context.
+     * @return An instance of deserializing item.
+     */
     @Override
-    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
+    @SuppressWarnings("unchecked")
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        if (null != instance) {
+            return instance;
+        }
+        final Class<?> rawType = ReflectionHelper.getRawType(getRuntimeType());
+        final JsonbCreator creator = getClassModel().getClassCustomization().getCreator();
+        instance = null != creator ? createInstance((Class<T>) rawType, creator) : ReflectionHelper.createInstanceNoArgs((Class<T>) rawType);
+        //values must be set in order, in which they appears in JSON by spec
+        values.forEach((key, wrapper) -> {
+            //skip creator values
+            if (null != wrapper.getCreatorModel()) {
+                return;
+            }
+            final PropertyModel propertyModel = wrapper.getPropertyModel();
+            propertyModel.setValue(instance, wrapper.getValue());
+        });
+        return instance;
     }
 
-    protected PropertyModel getModel() {
-        final String lastKeyName = parserContext.getLastKeyName();
-        if (null != lastPropertyModel && lastPropertyModel.getJsonKeyName().equals(lastKeyName)) {
-            return lastPropertyModel.getPropertyModel();
+    /**
+     * Set populated instance of current object to its unfinished wrapper values map.
+     *
+     * @param result An instance result of an item.
+     */
+    @Override
+    public void appendResult(Object result) {
+        final PropertyModel model = getModel();
+        //missing property for null values
+        if (null == model) {
+            return;
         }
-        lastPropertyModel = new LastPropertyModel(lastKeyName, getClassModel().findPropertyModelByReadName(lastKeyName));
-        return lastPropertyModel.getPropertyModel();
+        values.put(model.getReadName(), new ValueWrapper(model, convertNullToOptionalEmpty(model.getPropertyType(), result)));
     }
 
-    private static class ValueWrapper {
-
-        private final CreatorModel creatorModel;
-
-        private final PropertyModel propertyModel;
-
-        private final Object value;
-
-        public ValueWrapper(CreatorModel creator, Object value) {
-            this.creatorModel = creator;
-            this.value = value;
-            propertyModel = null;
-        }
-
-        public ValueWrapper(PropertyModel propertyModel, Object value) {
-            this.propertyModel = propertyModel;
-            this.value = value;
-            creatorModel = null;
-        }
-
-        public CreatorModel getCreatorModel() {
-            return creatorModel;
-        }
-
-        public PropertyModel getPropertyModel() {
-            return propertyModel;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-    }
 }

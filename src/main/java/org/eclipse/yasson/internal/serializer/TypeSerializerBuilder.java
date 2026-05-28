@@ -38,24 +38,51 @@ public class TypeSerializerBuilder extends AbstractSerializationBuilder<TypeSeri
 
     private Class<?> targetType;
 
-    /**
-     * Creates a new builder.
-     *
-     * @param configContext JSON-B context.
-     */
-    public TypeSerializerBuilder(JsonbConfigurationContext configContext) {
-        super(configContext);
+    private Type determineRuntimeType() {
+        if (null != genericType && Object.class != genericType) {
+            return genericType;
+        }
+        return targetType;
+    }
+
+    private Optional<ValueTypeSerializerBase<?>> getSupportedTypeSerializer(Class<?> candidateClass) {
+        final Optional<? extends SerializerProviderWrapper> providerWrapperOpt = DefaultSerializerProvider.getInstance().locateValueSerializerProvider(candidateClass);
+        if (providerWrapperOpt.isPresent()) {
+            return Optional.of(providerWrapperOpt.get().getSerializerProvider().provideSerializer(customization));
+        }
+        return Optional.empty();
     }
 
     /**
-     * Adds object class.
-     *
-     * @param targetType object class
-     * @return Builder.
+     * Instance is not created in case of array items, because, we don't know how long it should be
+     * till parser ends parsing.
      */
-    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
-        this.targetType = targetType;
-        return this;
+    private JsonbSerializer<?> createArrayElement(Class<?> elementType) {
+        if (byte.class != elementType) {
+            if (short.class != elementType) {
+                if (int.class != elementType) {
+                    if (long.class != elementType) {
+                        if (float.class != elementType) {
+                            if (double.class != elementType) {
+                                return new ObjectArraySerializer(this);
+                            } else {
+                                return new DoubleArraySerializer(this);
+                            }
+                        } else {
+                            return new FloatArraySerializer(this);
+                        }
+                    } else {
+                        return new LongArraySerializer(this);
+                    }
+                } else {
+                    return new IntArraySerializer(this);
+                }
+            } else {
+                return new ShortArraySerializer(this);
+            }
+        } else {
+            return new ByteArraySerializer(this);
+        }
     }
 
     /**
@@ -126,49 +153,23 @@ public class TypeSerializerBuilder extends AbstractSerializationBuilder<TypeSeri
     }
 
     /**
-     * Instance is not created in case of array items, because, we don't know how long it should be
-     * till parser ends parsing.
+     * Adds object class.
+     *
+     * @param targetType object class
+     * @return Builder.
      */
-    private JsonbSerializer<?> createArrayElement(Class<?> elementType) {
-        if (byte.class != elementType) {
-            if (short.class != elementType) {
-                if (int.class != elementType) {
-                    if (long.class != elementType) {
-                        if (float.class != elementType) {
-                            if (double.class != elementType) {
-                                return new ObjectArraySerializer(this);
-                            } else {
-                                return new DoubleArraySerializer(this);
-                            }
-                        } else {
-                            return new FloatArraySerializer(this);
-                        }
-                    } else {
-                        return new LongArraySerializer(this);
-                    }
-                } else {
-                    return new IntArraySerializer(this);
-                }
-            } else {
-                return new ShortArraySerializer(this);
-            }
-        } else {
-            return new ByteArraySerializer(this);
-        }
+    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
+        this.targetType = targetType;
+        return this;
     }
 
-    private Optional<ValueTypeSerializerBase<?>> getSupportedTypeSerializer(Class<?> candidateClass) {
-        final Optional<? extends SerializerProviderWrapper> providerWrapperOpt = DefaultSerializerProvider.getInstance().locateValueSerializerProvider(candidateClass);
-        if (providerWrapperOpt.isPresent()) {
-            return Optional.of(providerWrapperOpt.get().getSerializerProvider().provideSerializer(customization));
-        }
-        return Optional.empty();
+    /**
+     * Creates a new builder.
+     *
+     * @param configContext JSON-B context.
+     */
+    public TypeSerializerBuilder(JsonbConfigurationContext configContext) {
+        super(configContext);
     }
 
-    private Type determineRuntimeType() {
-        if (null != genericType && Object.class != genericType) {
-            return genericType;
-        }
-        return targetType;
-    }
 }

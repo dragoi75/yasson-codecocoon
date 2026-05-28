@@ -30,13 +30,15 @@ public class SqlTimestampTypeDeserializer extends AbstractDateTimeDeserializer<T
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlTimestampTypeDeserializer(Customization customization) {
-        super(Timestamp.class, customization);
+    @Override
+    protected Timestamp parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
+        return Timestamp.from(getInstant(parsed));
+    }
+
+    private Instant getInstant(TemporalAccessor parsed) {
+        LocalDateTime local = LocalDateTime.from(parsed);
+        return local.atZone(ZoneId.of("UTC")).toInstant();
     }
 
     /**
@@ -51,21 +53,19 @@ public class SqlTimestampTypeDeserializer extends AbstractDateTimeDeserializer<T
         return Timestamp.from(instant);
     }
 
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlTimestampTypeDeserializer(Customization customization) {
+        super(Timestamp.class, customization);
+    }
+
     @Override
     protected Timestamp parseDefault(String jsonValue, Locale locale) {
         final TemporalAccessor parsed = DEFAULT_FORMATTER.withLocale(locale).parse(jsonValue);
         return Timestamp.from(getInstant(parsed));
     }
 
-    @Override
-    protected Timestamp parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
-        return Timestamp.from(getInstant(parsed));
-    }
-
-    private Instant getInstant(TemporalAccessor parsed) {
-        LocalDateTime local = LocalDateTime.from(parsed);
-        return local.atZone(ZoneId.of("UTC")).toInstant();
-    }
-    
 }

@@ -27,19 +27,22 @@ import java.util.Locale;
  */
 public abstract class AbstractDateTypeSerializer<T extends Date> extends AbstractDateTimeSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public AbstractDateTypeSerializer(Customization customization) {
-        super(customization);
+    @Override
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
     }
 
     @Override
-    protected Instant toInstant(Date value) {
-        return Instant.ofEpochMilli(value.getTime());
+    protected TemporalAccessor toTemporalAccessor(Date object) {
+        return toInstant(object);
     }
+
+    @Override
+    protected String formatStrictIJson(Date value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
+    }
+
+    protected abstract DateTimeFormatter getDefaultFormatter();
 
     @Override
     protected String formatDefault(Date value, Locale locale) {
@@ -52,19 +55,17 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
     }
 
     @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
-        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
+    protected Instant toInstant(Date value) {
+        return Instant.ofEpochMilli(value.getTime());
     }
 
-    @Override
-    protected String formatStrictIJson(Date value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public AbstractDateTypeSerializer(Customization customization) {
+        super(customization);
     }
 
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Date object) {
-        return toInstant(object);
-    }
-
-    protected abstract DateTimeFormatter getDefaultFormatter();
 }

@@ -27,6 +27,11 @@ import java.util.Locale;
  */
 public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<LocalDateTime> {
 
+    @Override
+    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return LocalDateTime.parse(jsonValue, formatter);
+    }
+
     /**
      * Creates an instance.
      *
@@ -46,8 +51,4 @@ public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
         return LocalDateTime.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
     }
 
-    @Override
-    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return LocalDateTime.parse(jsonValue, formatter);
-    }
 }

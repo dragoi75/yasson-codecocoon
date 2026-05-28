@@ -24,13 +24,13 @@ import javax.json.stream.JsonGenerator;
  */
 public class LongTypeSerializer extends AbstractNumberSerializer<Long> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public LongTypeSerializer(Customization customization) {
-        super(customization);
+    @Override
+    protected void serializeNonFormatted(Long obj, JsonGenerator generator) {
+        if (!BigNumberUtil.isIEEE754(obj)) {
+            generator.write(obj.toString());
+        } else {
+            generator.write(obj);
+        }
     }
 
     @Override
@@ -42,12 +42,13 @@ public class LongTypeSerializer extends AbstractNumberSerializer<Long> {
         }
     }
 
-    @Override
-    protected void serializeNonFormatted(Long obj, JsonGenerator generator) {
-        if (!BigNumberUtil.isIEEE754(obj)) {
-            generator.write(obj.toString());
-        } else {
-            generator.write(obj);
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public LongTypeSerializer(Customization customization) {
+        super(customization);
     }
+
 }

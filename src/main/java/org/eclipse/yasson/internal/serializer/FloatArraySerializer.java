@@ -24,10 +24,6 @@ import java.math.BigDecimal;
  */
 public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
 
-    protected FloatArraySerializer(TypeSerializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected void serializeInternal(float[] arr, JsonGenerator generator, SerializationContext ctx) {
         for (float obj : arr) {
@@ -35,4 +31,9 @@ public class FloatArraySerializer extends AbstractArraySerializer<float[]> {
             generator.write(new BigDecimal(String.valueOf(obj)));
         }
     }
+
+    protected FloatArraySerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
 }

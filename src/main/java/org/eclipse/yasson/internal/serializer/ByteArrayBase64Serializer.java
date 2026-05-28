@@ -30,15 +30,6 @@ import java.util.Base64;
  */
 public class ByteArrayBase64Serializer extends ValueTypeSerializerBase<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Customization model.
-     */
-    public ByteArrayBase64Serializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeValue(byte[] obj, JsonGenerator generator, ObjectMarshaller marshaller) {
         generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
@@ -55,4 +46,14 @@ public class ByteArrayBase64Serializer extends ValueTypeSerializerBase<byte[]> {
                         "Invalid strategy: " + strategy));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Customization model.
+     */
+    public ByteArrayBase64Serializer(Customization customization) {
+        super(customization);
+    }
+
 }

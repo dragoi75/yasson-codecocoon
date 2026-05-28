@@ -30,15 +30,6 @@ import java.lang.reflect.Type;
  */
 public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public StringTypeDeserializer(Customization customization) {
-        super(String.class, customization);
-    }
-
     @Override
     protected String deserialize(String jsonValue, JsonUnmarshaller unmarshaller, Type rtType) {
         if ((boolean) unmarshaller.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
@@ -53,4 +44,14 @@ public class StringTypeDeserializer extends AbstractValueTypeDeserializer<String
         }
         return jsonValue;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public StringTypeDeserializer(Customization customization) {
+        super(String.class, customization);
+    }
+
 }

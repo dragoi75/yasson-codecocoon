@@ -26,13 +26,9 @@ import java.util.Locale;
  */
 public class InstantTypeSerializer extends AbstractDateTimeSerializer<Instant> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public InstantTypeSerializer(Customization customization) {
-        super(customization);
+    @Override
+    protected String formatWithFormatter(Instant value, DateTimeFormatter formatter) {
+        return formatter.withZone(UTC).format(value);
     }
 
     @Override
@@ -41,18 +37,22 @@ public class InstantTypeSerializer extends AbstractDateTimeSerializer<Instant> {
     }
 
     @Override
+    protected String formatStrictIJson(Instant value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(value);
+    }
+
+    @Override
     protected String formatDefault(Instant value, Locale locale) {
         return DateTimeFormatter.ISO_INSTANT.withLocale(locale).format(value);
     }
 
-    @Override
-    protected String formatWithFormatter(Instant value, DateTimeFormatter formatter) {
-        return formatter.withZone(UTC).format(value);
-    }
-
-    @Override
-    protected String formatStrictIJson(Instant value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(value);
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public InstantTypeSerializer(Customization customization) {
+        super(customization);
     }
 
 }

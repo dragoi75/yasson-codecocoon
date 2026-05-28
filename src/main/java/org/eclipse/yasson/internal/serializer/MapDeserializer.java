@@ -50,6 +50,47 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
 
     private final T instance;
 
+    @SuppressWarnings("unchecked")
+    private <V> void appendCaptor(String key, V value) {
+        ((Map<String, V>) getInstance(null)).put(key, value);
+    }
+
+    @Override
+    public T getInstance(JsonUnmarshaller unmarshaller) {
+        return instance;
+    }
+
+    @Override
+    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
+    @SuppressWarnings("unchecked")
+    private T createInstance() {
+        Class<T> rawType = (Class<T>) ReflectionHelper.getRawType(getRuntimeType());
+        return rawType.isInterface() ? (T) getMapImpl(rawType) : ReflectionHelper.createInstanceNoArgs(rawType);
+    }
+
+    @Override
+    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
+        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
+        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
+    }
+
+    @Override
+    public void appendResult(Object result) {
+        appendCaptor(parserContext.getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
+    }
+
+    private Map<?, ?> getMapImpl(Class ifcType) {
+        // SortedMap, NavigableMap
+        if (SortedMap.class.isAssignableFrom(ifcType)) {
+            return ReflectionHelper.createInstanceNoArgs(sortedMapImplType);
+        }
+        return new HashMap<>();
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -70,44 +111,4 @@ public class MapDeserializer<T extends Map<?, ?>> extends AbstractContainerDeser
         this.instance = createInstance();
     }
 
-    @SuppressWarnings("unchecked")
-    private T createInstance() {
-        Class<T> rawType = (Class<T>) ReflectionHelper.getRawType(getRuntimeType());
-        return rawType.isInterface() ? (T) getMapImpl(rawType) : ReflectionHelper.createInstanceNoArgs(rawType);
-    }
-
-    private Map<?, ?> getMapImpl(Class ifcType) {
-        // SortedMap, NavigableMap
-        if (SortedMap.class.isAssignableFrom(ifcType)) {
-            return ReflectionHelper.createInstanceNoArgs(sortedMapImplType);
-        }
-        return new HashMap<>();
-    }
-
-    @Override
-    public T getInstance(JsonUnmarshaller unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void appendResult(Object result) {
-        appendCaptor(parserContext.getLastKeyName(), convertNullToOptionalEmpty(mapValueRuntimeType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <V> void appendCaptor(String key, V value) {
-        ((Map<String, V>) getInstance(null)).put(key, value);
-    }
-
-    @Override
-    protected void deserializeNext(JsonParser parser, JsonUnmarshaller context) {
-        final JsonbDeserializer<?> deserializer = newCollectionOrMapItem(mapValueRuntimeType, context.getJsonbContext());
-        appendResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
-    }
-
-    @Override
-    protected JsonbRiStreamParser.LevelParseState moveToFirst(JsonbStreamParser parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
 }
