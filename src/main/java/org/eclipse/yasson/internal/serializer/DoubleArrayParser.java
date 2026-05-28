@@ -27,15 +27,6 @@ public class DoubleArrayParser extends AbstractArrayDeserializer<double[]> {
 
     private final List<Double> values = new ArrayList<>();
 
-    protected DoubleArrayParser(JsonbDeserializerBuilder deserializerCreator) {
-        super(deserializerCreator);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return values;
-    }
-
     @Override
     public double[] getInstance(Unmarshaller unmarshaller) {
         final int length = values.size();
@@ -47,4 +38,14 @@ public class DoubleArrayParser extends AbstractArrayDeserializer<double[]> {
         }
         return values;
     }
+
+    protected DoubleArrayParser(JsonbDeserializerBuilder deserializerCreator) {
+        super(deserializerCreator);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return values;
+    }
+
 }

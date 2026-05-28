@@ -27,6 +27,11 @@ public class JsonArrayToObjectDeserializer extends AbstractJsonpDeserializer<Jso
 
     private JsonArray elements;
 
+    @Override
+    public JsonArray getInstance(Unmarshaller unmarshaller) {
+        return elements;
+    }
+
     /**
      * Create instance.
      *
@@ -41,8 +46,4 @@ public class JsonArrayToObjectDeserializer extends AbstractJsonpDeserializer<Jso
         this.elements = tokenReader.getArray();
     }
 
-    @Override
-    public JsonArray getInstance(Unmarshaller unmarshaller) {
-        return elements;
-    }
 }

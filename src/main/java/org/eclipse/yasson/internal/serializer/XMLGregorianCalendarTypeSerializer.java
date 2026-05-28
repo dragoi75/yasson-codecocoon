@@ -30,18 +30,9 @@ import java.util.Locale;
 public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializer<XMLGregorianCalendar> {
 
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public XMLGregorianCalendarTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
-    @Override
-    protected Instant toInstant(XMLGregorianCalendar value) {
-        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
+    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
+                object.toGregorianCalendar().getTimeZone().toZoneId());
     }
 
     @Override
@@ -54,12 +45,22 @@ public class XMLGregorianCalendarTypeSerializer extends AbstractDateTimeSerializ
     }
 
     @Override
+    protected Instant toInstant(XMLGregorianCalendar value) {
+        return Instant.ofEpochMilli(value.toGregorianCalendar().getTimeInMillis());
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public XMLGregorianCalendarTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
+    @Override
     protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar object) {
         return toZonedDateTime(object);
     }
 
-    private ZonedDateTime toZonedDateTime(XMLGregorianCalendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.toGregorianCalendar().getTimeInMillis()),
-                object.toGregorianCalendar().getTimeZone().toZoneId());
-    }
 }

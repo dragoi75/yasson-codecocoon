@@ -50,6 +50,28 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends BaseContainerD
 
     private final T createdInstance;
 
+    @Override
+    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonStreamParser) {
+        jsonStreamParser.moveTo(JsonParser.Event.START_OBJECT);
+        return jsonStreamParser.getCurrentLevel();
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser jsonStreamParser, Unmarshaller unmarshalContext) {
+        final JsonbDeserializer<?> valueDeserializer = createCollectionOrMapItemDeserializer(valueRuntimeType, unmarshalContext.getJsonbContext());
+        addResult(valueDeserializer.deserialize(jsonStreamParser, unmarshalContext, valueRuntimeType));
+    }
+
+    @Override
+    public void addResult(Object addedResult) {
+        putEntry(parserContext.getLastKeyName(), convertNullToEmptyOptional(valueRuntimeType, addedResult));
+    }
+
+    @Override
+    public T getInstance(Unmarshaller unmarshaller) {
+        return createdInstance;
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -70,12 +92,6 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends BaseContainerD
         this.createdInstance = newInstance();
     }
 
-    @SuppressWarnings("unchecked")
-    private T newInstance() {
-        Class<T> rawClassType = (Class<T>) ReflectionTypeResolver.getRawType(getRuntimeType());
-        return rawClassType.isInterface() ? (T) getMapImpl(rawClassType) : ReflectionTypeResolver.createInstanceWithNoArgs(rawClassType);
-    }
-
     private Map<?, ?> getMapImpl(Class interfaceClass) {
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(interfaceClass)) {
@@ -84,14 +100,10 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends BaseContainerD
         return new HashMap<>();
     }
 
-    @Override
-    public T getInstance(Unmarshaller unmarshaller) {
-        return createdInstance;
-    }
-
-    @Override
-    public void addResult(Object addedResult) {
-        putEntry(parserContext.getLastKeyName(), convertNullToEmptyOptional(valueRuntimeType, addedResult));
+    @SuppressWarnings("unchecked")
+    private T newInstance() {
+        Class<T> rawClassType = (Class<T>) ReflectionTypeResolver.getRawType(getRuntimeType());
+        return rawClassType.isInterface() ? (T) getMapImpl(rawClassType) : ReflectionTypeResolver.createInstanceWithNoArgs(rawClassType);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,15 +111,4 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends BaseContainerD
         ((Map<String, V>) getInstance(null)).put(entryKey, mappedValue);
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser jsonStreamParser, Unmarshaller unmarshalContext) {
-        final JsonbDeserializer<?> valueDeserializer = createCollectionOrMapItemDeserializer(valueRuntimeType, unmarshalContext.getJsonbContext());
-        addResult(valueDeserializer.deserialize(jsonStreamParser, unmarshalContext, valueRuntimeType));
-    }
-
-    @Override
-    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonStreamParser) {
-        jsonStreamParser.moveTo(JsonParser.Event.START_OBJECT);
-        return jsonStreamParser.getCurrentLevel();
-    }
 }

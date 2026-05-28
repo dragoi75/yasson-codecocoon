@@ -32,6 +32,27 @@ public class UserDelegatingDeserializer<T> extends BaseContainerDeserializer<T> 
 
     private T deserializedValue;
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void deserializeContents(JsonbParser jsonbReader, Unmarshaller unmarshalCtx) {
+        parserContext = advanceToFirst(jsonbReader);
+        JsonParser.Event prevEvent = parserContext.getLastEvent();
+        final UserDeserializerParser userParser = new UserDeserializerParser(jsonbReader);
+        deserializedValue = (T) binder.getJsonbDeserializer().deserialize(userParser, unmarshalCtx, getRuntimeType());
+        //Avoid moving parser to the end of the object, if deserializer was for one value only.
+        if (JsonParser.Event.START_ARRAY == prevEvent || JsonParser.Event.START_OBJECT == prevEvent) {
+            userParser.advanceParserToEnd();
+        }
+    }
+
+    /**
+     * Don't move anywhere in case of user deserializer.
+     */
+    @Override
+    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonbReader) {
+        return jsonbReader.getCurrentLevel();
+    }
+
     /**
      * Create instance of current item with its builder.
      * Contains user provided component for custom deserialization.
@@ -47,8 +68,8 @@ public class UserDelegatingDeserializer<T> extends BaseContainerDeserializer<T> 
     }
 
     @Override
-    public void addResult(Object result) {
-        //ignore internal deserialize() call in custom deserializer
+    protected void deserializeNextValue(JsonParser parser, Unmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 
     @Override
@@ -57,29 +78,9 @@ public class UserDelegatingDeserializer<T> extends BaseContainerDeserializer<T> 
         return deserializedValue;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void deserializeContents(JsonbParser jsonbReader, Unmarshaller unmarshalCtx) {
-        parserContext = advanceToFirst(jsonbReader);
-        JsonParser.Event prevEvent = parserContext.getLastEvent();
-        final UserDeserializerParser userParser = new UserDeserializerParser(jsonbReader);
-        deserializedValue = (T) binder.getJsonbDeserializer().deserialize(userParser, unmarshalCtx, getRuntimeType());
-        //Avoid moving parser to the end of the object, if deserializer was for one value only.
-        if (JsonParser.Event.START_ARRAY == prevEvent || JsonParser.Event.START_OBJECT == prevEvent) {
-            userParser.advanceParserToEnd();
-        }
+    public void addResult(Object result) {
+        //ignore internal deserialize() call in custom deserializer
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser parser, Unmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
-    }
-
-    /**
-     * Don't move anywhere in case of user deserializer.
-     */
-    @Override
-    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonbReader) {
-        return jsonbReader.getCurrentLevel();
-    }
 }

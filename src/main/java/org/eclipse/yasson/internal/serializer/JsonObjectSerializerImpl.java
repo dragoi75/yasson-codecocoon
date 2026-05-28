@@ -26,8 +26,14 @@ import java.util.Map;
  */
 public class JsonObjectSerializerImpl extends AbstractJsonpSerializer<JsonObject> {
 
-    protected JsonObjectSerializerImpl(TypeSerializerBuilder typeSerializerFactory) {
-        super(typeSerializerFactory);
+    @Override
+    protected void writeStart(String propertyName, JsonGenerator outputWriter) {
+        outputWriter.writeStartObject(propertyName);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator outputWriter) {
+        outputWriter.writeStartObject();
     }
 
     @Override
@@ -37,13 +43,8 @@ public class JsonObjectSerializerImpl extends AbstractJsonpSerializer<JsonObject
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator outputWriter) {
-        outputWriter.writeStartObject();
+    protected JsonObjectSerializerImpl(TypeSerializerBuilder typeSerializerFactory) {
+        super(typeSerializerFactory);
     }
 
-    @Override
-    protected void writeStart(String propertyName, JsonGenerator outputWriter) {
-        outputWriter.writeStartObject(propertyName);
-    }
 }

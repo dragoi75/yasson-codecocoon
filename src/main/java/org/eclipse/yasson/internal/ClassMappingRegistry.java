@@ -43,12 +43,6 @@ public class ClassMappingRegistry {
 
         private JsonbRuntimeContext jsonbRuntime;
 
-        public ClassModelParserFunction(ClassModel enclosingClassModel, ClassParser typeParser, JsonbRuntimeContext jsonbRuntime) {
-            this.enclosingClassModel = enclosingClassModel;
-            this.typeParser = typeParser;
-            this.jsonbRuntime = jsonbRuntime;
-        }
-
         @Override
         public ClassModel apply(Class inputClass) {
             final JsonbAnnotatedElement<Class<?>> annotatedElement = jsonbRuntime.getAnnotationIntrospector().collectAnnotations(inputClass);
@@ -57,6 +51,13 @@ public class ClassMappingRegistry {
             typeParser.parseProperties(constructedClassModel, annotatedElement);
             return constructedClassModel;
         }
+
+        public ClassModelParserFunction(ClassModel enclosingClassModel, ClassParser typeParser, JsonbRuntimeContext jsonbRuntime) {
+            this.enclosingClassModel = enclosingClassModel;
+            this.typeParser = typeParser;
+            this.jsonbRuntime = jsonbRuntime;
+        }
+
     }
 
     private final JsonbRuntimeContext jsonbRuntime;
@@ -68,14 +69,59 @@ public class ClassMappingRegistry {
     private final ClassParser typeParser;
 
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Search for class model, without parsing if not found.
      *
-     * @param jsonbRuntime Context. Required.
+     * @param targetClass Class to search by or parse, not null.
+     * @return Model of a class if found.
      */
-    public ClassMappingRegistry(JsonbRuntimeContext jsonbRuntime) {
-        Objects.requireNonNull(jsonbRuntime);
-        this.jsonbRuntime = jsonbRuntime;
-        this.typeParser = new ClassParser(jsonbRuntime);
+    public ClassModel getClassModel(Class<?> targetClass) {
+        return classModelMap.get(targetClass);
+    }
+
+    /**
+     * Provided class class model is returned first by iterator.
+     * Following class models are sorted by hierarchy from provided class up to the Object.class.
+     *
+     * @param targetClass class to start iteration of class models from
+     * @return iterator of class models
+     */
+    public Iterator<ClassModel> classModelIterator(final Class<?> targetClass) {
+        return new Iterator<ClassModel>() {
+
+            private Class<?> next = targetClass;
+
+            @Override
+            public boolean hasNext() {
+                return Object.class != next;
+            }
+
+            @Override
+            public ClassModel next() {
+                final ClassModel result = classModelMap.get(next);
+                next = next.getSuperclass();
+                return result;
+            }
+        };
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param targetClass Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> targetClass) {
+        return serializerProvidersMap.get(targetClass);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param targetClass Class to add serializer provider for.
+     * @param provider Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerProvider provider) {
+        serializerProvidersMap.putIfAbsent(targetClass, provider);
     }
 
     /**
@@ -112,58 +158,14 @@ public class ClassMappingRegistry {
     }
 
     /**
-     * Provided class class model is returned first by iterator.
-     * Following class models are sorted by hierarchy from provided class up to the Object.class.
+     * Create mapping context which is scoped to jsonb runtime.
      *
-     * @param targetClass class to start iteration of class models from
-     * @return iterator of class models
+     * @param jsonbRuntime Context. Required.
      */
-    public Iterator<ClassModel> classModelIterator(final Class<?> targetClass) {
-        return new Iterator<ClassModel>() {
-
-            private Class<?> next = targetClass;
-
-            @Override
-            public boolean hasNext() {
-                return Object.class != next;
-            }
-
-            @Override
-            public ClassModel next() {
-                final ClassModel result = classModelMap.get(next);
-                next = next.getSuperclass();
-                return result;
-            }
-        };
+    public ClassMappingRegistry(JsonbRuntimeContext jsonbRuntime) {
+        Objects.requireNonNull(jsonbRuntime);
+        this.jsonbRuntime = jsonbRuntime;
+        this.typeParser = new ClassParser(jsonbRuntime);
     }
 
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param targetClass Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassModel getClassModel(Class<?> targetClass) {
-        return classModelMap.get(targetClass);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param targetClass Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> targetClass) {
-        return serializerProvidersMap.get(targetClass);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param targetClass Class to add serializer provider for.
-     * @param provider Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> targetClass, ContainerSerializerProvider provider) {
-        serializerProvidersMap.putIfAbsent(targetClass, provider);
-    }
 }

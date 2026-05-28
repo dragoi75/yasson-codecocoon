@@ -29,25 +29,6 @@ import java.lang.reflect.Type;
  */
 public class Unmarshaller extends ProcessingContext implements DeserializationContext {
 
-    /**
-     * Creates instance of unmarshaller.
-     *
-     * @param jsonbContext context to use
-     */
-    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
-    }
-
-    @Override
-    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
-        return deserializeItem(clazz, parser);
-    }
-
-    @Override
-    public <T> T deserialize(Type type, JsonParser parser) {
-        return deserializeItem(type, parser);
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T deserializeItem(Type type, JsonParser parser) {
         JsonbDeserializerBuilder deserializerBuilder = new JsonbDeserializerBuilder(jsonbContext).setType(type).setJsonValueType(getRootEvent(parser));
@@ -57,6 +38,11 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
             deserializerBuilder.setCustomization(classModel.getCustomization());
         }
         return (T) deserializerBuilder.buildDeserializer().deserialize(parser, this, type);
+    }
+
+    @Override
+    public <T> T deserialize(Class<T> clazz, JsonParser parser) {
+        return deserializeItem(clazz, parser);
     }
 
     /**
@@ -70,4 +56,19 @@ public class Unmarshaller extends ProcessingContext implements DeserializationCo
         final JsonParser.Event lastEvent = ((JsonbParser) parser).getCurrentLevel().getLastEvent();
         return JsonParser.Event.KEY_NAME == lastEvent ? parser.next() : lastEvent;
     }
+
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param jsonbContext context to use
+     */
+    public Unmarshaller(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
+    }
+
+    @Override
+    public <T> T deserialize(Type type, JsonParser parser) {
+        return deserializeItem(type, parser);
+    }
+
 }

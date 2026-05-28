@@ -40,15 +40,28 @@ public class AdapterBasedObjectSerializer<T, A> implements CurrentItem<T>, Jsonb
 
     private final TypeAdapterBinding binding;
 
-    /**
-     * Creates AdapterObjectSerializer.
-     *
-     * @param classDescriptor Class model.
-     * @param binding    Adapter.
-     */
-    public AdapterBasedObjectSerializer(ClassModel classDescriptor, TypeAdapterBinding binding) {
-        this.classDescriptor = classDescriptor;
-        this.binding = binding;
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private JsonbSerializer<A> findSerializer(Marshaller serializationContext, A converted) {
+        final ContainerSerializerProvider providerCache = serializationContext.getMappingContext().getSerializerProvider(converted.getClass());
+        if (null != providerCache) {
+            return (JsonbSerializer<A>) providerCache.provideSerializer(new JsonbPropertyInfo().withWrapper(this).withRuntimeType(null == classDescriptor ? null : classDescriptor.getType()));
+        }
+        return (JsonbSerializer<A>) new TypeSerializerBuilder(serializationContext.getJsonbContext()).setObjectClass(converted.getClass()).setCustomization(null == classDescriptor ? null : classDescriptor.getCustomization()).setWrapper(this).buildSerializer();
+    }
+
+    @Override
+    public ClassModel getClassModel() {
+        return null;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return null;
     }
 
     @Override
@@ -75,27 +88,15 @@ public class AdapterBasedObjectSerializer<T, A> implements CurrentItem<T>, Jsonb
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private JsonbSerializer<A> findSerializer(Marshaller serializationContext, A converted) {
-        final ContainerSerializerProvider providerCache = serializationContext.getMappingContext().getSerializerProvider(converted.getClass());
-        if (null != providerCache) {
-            return (JsonbSerializer<A>) providerCache.provideSerializer(new JsonbPropertyInfo().withWrapper(this).withRuntimeType(null == classDescriptor ? null : classDescriptor.getType()));
-        }
-        return (JsonbSerializer<A>) new TypeSerializerBuilder(serializationContext.getJsonbContext()).setObjectClass(converted.getClass()).setCustomization(null == classDescriptor ? null : classDescriptor.getCustomization()).setWrapper(this).buildSerializer();
+    /**
+     * Creates AdapterObjectSerializer.
+     *
+     * @param classDescriptor Class model.
+     * @param binding    Adapter.
+     */
+    public AdapterBasedObjectSerializer(ClassModel classDescriptor, TypeAdapterBinding binding) {
+        this.classDescriptor = classDescriptor;
+        this.binding = binding;
     }
 
-    @Override
-    public ClassModel getClassModel() {
-        return null;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return null;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return null;
-    }
 }

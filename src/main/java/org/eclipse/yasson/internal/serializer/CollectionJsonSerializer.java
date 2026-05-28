@@ -28,18 +28,6 @@ public class CollectionJsonSerializer<T extends Collection> extends AbstractCont
 
     protected final JsonbRuntimeContext jsonbContext;
 
-    protected CollectionJsonSerializer(TypeSerializerBuilder typeSerializerFactory) {
-        super(typeSerializerFactory);
-        this.jsonbContext = typeSerializerFactory.getJsonbContext();
-    }
-
-    @Override
-    protected void serializeInternal(T items, JsonGenerator jsonWriter, SerializationContext serializationContext) {
-        for (Object element : items) {
-            serializeItem(element, jsonWriter, serializationContext);
-        }
-    }
-
     @Override
     protected void writeStart(JsonGenerator jsonWriter) {
         jsonWriter.writeStartArray();
@@ -49,4 +37,17 @@ public class CollectionJsonSerializer<T extends Collection> extends AbstractCont
     protected void writeStart(String fieldName, JsonGenerator jsonWriter) {
         jsonWriter.writeStartArray(fieldName);
     }
+
+    @Override
+    protected void serializeInternal(T items, JsonGenerator jsonWriter, SerializationContext serializationContext) {
+        for (Object element : items) {
+            serializeItem(element, jsonWriter, serializationContext);
+        }
+    }
+
+    protected CollectionJsonSerializer(TypeSerializerBuilder typeSerializerFactory) {
+        super(typeSerializerFactory);
+        this.jsonbContext = typeSerializerFactory.getJsonbContext();
+    }
+
 }

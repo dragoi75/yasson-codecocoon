@@ -22,14 +22,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class DoubleArrayEncoder extends AbstractArraySerializer<double[]> {
 
-    protected DoubleArrayEncoder(TypeSerializerBuilder typeSerializer) {
-        super(typeSerializer);
-    }
-
     @Override
     protected void serializeInternal(double[] values, JsonGenerator jsonWriter, SerializationContext ctx) {
         for (double value : values) {
             jsonWriter.write(value);
         }
     }
+
+    protected DoubleArrayEncoder(TypeSerializerBuilder typeSerializer) {
+        super(typeSerializer);
+    }
+
 }

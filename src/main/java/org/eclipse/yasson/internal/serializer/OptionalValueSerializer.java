@@ -39,43 +39,6 @@ public class OptionalValueSerializer<T extends Optional<?>> implements CurrentIt
 
     private final Type containedType;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializerFactory Builder to initialize the instance.
-     */
-    public OptionalValueSerializer(TypeSerializerBuilder serializerFactory) {
-        this.currentItemRef = serializerFactory.getWrapper();
-        this.config = serializerFactory.getCustomization();
-        this.containedType = extractOptionalType(serializerFactory.getRuntimeType());
-    }
-
-    private Type extractOptionalType(Type actualType) {
-        if (actualType instanceof ParameterizedType) {
-            return ((ParameterizedType) actualType).getActualTypeArguments()[0];
-        }
-        return Object.class;
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        return null;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return currentItemRef;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return containedType;
-    }
-
-    public Customization getCustomization() {
-        return config;
-    }
-
     @Override
     public void serialize(T value, JsonGenerator jsonWriter, SerializationContext serializationContext) {
         JsonbRuntimeContext jsonbRuntime = ((ProcessingContext) serializationContext).getJsonbContext();
@@ -95,4 +58,42 @@ public class OptionalValueSerializer<T extends Optional<?>> implements CurrentIt
     private <T> void invokeSerializer(JsonbSerializer<?> jsonbMarshaller, T value, JsonGenerator jsonWriter, SerializationContext serializationEnv) {
         ((JsonbSerializer<T>) jsonbMarshaller).serialize(value, jsonWriter, serializationEnv);
     }
+
+    public Customization getCustomization() {
+        return config;
+    }
+
+    @Override
+    public ClassModel getClassModel() {
+        return null;
+    }
+
+    private Type extractOptionalType(Type actualType) {
+        if (actualType instanceof ParameterizedType) {
+            return ((ParameterizedType) actualType).getActualTypeArguments()[0];
+        }
+        return Object.class;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return currentItemRef;
+    }
+
+    @Override
+    public Type getRuntimeType() {
+        return containedType;
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializerFactory Builder to initialize the instance.
+     */
+    public OptionalValueSerializer(TypeSerializerBuilder serializerFactory) {
+        this.currentItemRef = serializerFactory.getWrapper();
+        this.config = serializerFactory.getCustomization();
+        this.containedType = extractOptionalType(serializerFactory.getRuntimeType());
+    }
+
 }

@@ -27,10 +27,6 @@ public class PrimitiveFloatArrayDeserializer extends AbstractArrayDeserializer<f
 
     private final List<Float> elements = new ArrayList<>();
 
-    protected PrimitiveFloatArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return elements;
@@ -47,4 +43,9 @@ public class PrimitiveFloatArrayDeserializer extends AbstractArrayDeserializer<f
         }
         return floats;
     }
+
+    protected PrimitiveFloatArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

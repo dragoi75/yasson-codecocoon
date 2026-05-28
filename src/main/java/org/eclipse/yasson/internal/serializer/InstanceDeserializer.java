@@ -46,6 +46,10 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
 
         private final PropertyModel lastPropertyDescriptor;
 
+        public PropertyModel getPropertyModel() {
+            return lastPropertyDescriptor;
+        }
+
         public LastJsonPropertyModel(String lastJsonKey, PropertyModel lastPropertyDescriptor) {
             this.lastJsonKey = lastJsonKey;
             this.lastPropertyDescriptor = lastPropertyDescriptor;
@@ -55,9 +59,6 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
             return lastJsonKey;
         }
 
-        public PropertyModel getPropertyModel() {
-            return lastPropertyDescriptor;
-        }
     }
 
     private static final Logger log = Logger.getLogger(InstanceDeserializer.class.getName());
@@ -68,12 +69,70 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
 
     private LastJsonPropertyModel lastPropertyInfo;
 
-    /**
-     * Creates instance of an item.
-     * @param deserializerBuilder builder to build from
-     */
-    protected InstanceDeserializer(JsonbDeserializerBuilder deserializerBuilder) {
-        super(deserializerBuilder);
+    private static class ValueHolder {
+
+        private final CreatorModel creationModel;
+
+        private final PropertyModel lastPropertyDescriptor;
+
+        private final Object heldValue;
+
+        public PropertyModel getPropertyModel() {
+            return lastPropertyDescriptor;
+        }
+
+        public Object getValue() {
+            return heldValue;
+        }
+
+        public ValueHolder(CreatorModel creationInfo, Object heldValue) {
+            this.creationModel = creationInfo;
+            this.heldValue = heldValue;
+            lastPropertyDescriptor = null;
+        }
+
+        public ValueHolder(PropertyModel lastPropertyDescriptor, Object heldValue) {
+            this.lastPropertyDescriptor = lastPropertyDescriptor;
+            this.heldValue = heldValue;
+            creationModel = null;
+        }
+
+        public CreatorModel getCreatorModel() {
+            return creationModel;
+        }
+
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser jsonStream, Unmarshaller unmarshalEnv) {
+        final JsonbCreator creationInfo = getClassModel().getClassCustomization().getCreator();
+        //first check jsonb creator param, since it can be different from property name
+        if (null != creationInfo) {
+            final CreatorModel creatorInfo = creationInfo.findByName(parserContext.getLastKeyName());
+            if (null != creatorInfo) {
+                final JsonbDeserializer<?> valueReader = createUnmarshallerItemBuilder(unmarshalEnv.getJsonbContext()).setType(creatorInfo.getType()).setCustomization(creatorInfo.getCustomization()).buildDeserializer();
+                Object outcome = valueReader.deserialize(jsonStream, unmarshalEnv, creatorInfo.getType());
+                valueMap.put(creatorInfo.getName(), new ValueHolder(creatorInfo, outcome));
+                return;
+            }
+        }
+        //identify field model of currently processed class model
+        PropertyModel createdPropertyDescriptor = getModel();
+        if (null != createdPropertyDescriptor && createdPropertyDescriptor.isWritable()) {
+            //create current item instance of identified object field
+            final JsonbDeserializer<?> valueReader = createUnmarshallerItemBuilder(unmarshalEnv.getJsonbContext()).setCustomization(createdPropertyDescriptor.getCustomization()).setType(createdPropertyDescriptor.getPropertyDeserializationType()).buildDeserializer();
+            Type concreteType = ReflectionTypeResolver.resolveActualType(this, createdPropertyDescriptor.getPropertyDeserializationType());
+            Object outcome = valueReader.deserialize(jsonStream, unmarshalEnv, concreteType);
+            valueMap.put(createdPropertyDescriptor.getPropertyName(), new ValueHolder(createdPropertyDescriptor, outcome));
+            return;
+        }
+        skipUnknownProperty((JsonbParser) jsonStream, unmarshalEnv.getJsonbContext());
+    }
+
+    @Override
+    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonStream) {
+        jsonStream.moveTo(JsonParser.Event.START_OBJECT);
+        return jsonStream.getCurrentLevel();
     }
 
     /**
@@ -104,6 +163,23 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
         return targetInstance;
     }
 
+    protected PropertyModel getModel() {
+        final String finalKey = parserContext.getLastKeyName();
+        if (null != lastPropertyInfo && lastPropertyInfo.getJsonKeyName().equals(finalKey)) {
+            return lastPropertyInfo.getPropertyModel();
+        }
+        lastPropertyInfo = new LastJsonPropertyModel(finalKey, getClassModel().findPropertyModelByJsonReadName(finalKey));
+        return lastPropertyInfo.getPropertyModel();
+    }
+
+    /**
+     * Creates instance of an item.
+     * @param deserializerBuilder builder to build from
+     */
+    protected InstanceDeserializer(JsonbDeserializerBuilder deserializerBuilder) {
+        super(deserializerBuilder);
+    }
+
     /**
      * Creates instance with custom jsonb creator (parameterized constructor or factory method)
      */
@@ -123,6 +199,16 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
     }
 
     /**
+     * Rise an exception, or ignore JSON property, which is missing in class model.
+     */
+    private void skipUnknownProperty(JsonbParser jsonStream, JsonbRuntimeContext runtimeContext) {
+        if (runtimeContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
+        }
+        jsonStream.skipJsonStructure();
+    }
+
+    /**
      * Set populated instance of current object to its unfinished wrapper values map.
      *
      * @param outcome An instance result of an item.
@@ -137,87 +223,4 @@ class InstanceDeserializer<T> extends BaseContainerDeserializer<T> {
         valueMap.put(propDescriptor.getReadName(), new ValueHolder(propDescriptor, convertNullToEmptyOptional(propDescriptor.getPropertyType(), outcome)));
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser jsonStream, Unmarshaller unmarshalEnv) {
-        final JsonbCreator creationInfo = getClassModel().getClassCustomization().getCreator();
-        //first check jsonb creator param, since it can be different from property name
-        if (null != creationInfo) {
-            final CreatorModel creatorInfo = creationInfo.findByName(parserContext.getLastKeyName());
-            if (null != creatorInfo) {
-                final JsonbDeserializer<?> valueReader = createUnmarshallerItemBuilder(unmarshalEnv.getJsonbContext()).setType(creatorInfo.getType()).setCustomization(creatorInfo.getCustomization()).buildDeserializer();
-                Object outcome = valueReader.deserialize(jsonStream, unmarshalEnv, creatorInfo.getType());
-                valueMap.put(creatorInfo.getName(), new ValueHolder(creatorInfo, outcome));
-                return;
-            }
-        }
-        //identify field model of currently processed class model
-        PropertyModel createdPropertyDescriptor = getModel();
-        if (null != createdPropertyDescriptor && createdPropertyDescriptor.isWritable()) {
-            //create current item instance of identified object field
-            final JsonbDeserializer<?> valueReader = createUnmarshallerItemBuilder(unmarshalEnv.getJsonbContext()).setCustomization(createdPropertyDescriptor.getCustomization()).setType(createdPropertyDescriptor.getPropertyDeserializationType()).buildDeserializer();
-            Type concreteType = ReflectionTypeResolver.resolveActualType(this, createdPropertyDescriptor.getPropertyDeserializationType());
-            Object outcome = valueReader.deserialize(jsonStream, unmarshalEnv, concreteType);
-            valueMap.put(createdPropertyDescriptor.getPropertyName(), new ValueHolder(createdPropertyDescriptor, outcome));
-            return;
-        }
-        skipUnknownProperty((JsonbParser) jsonStream, unmarshalEnv.getJsonbContext());
-    }
-
-    /**
-     * Rise an exception, or ignore JSON property, which is missing in class model.
-     */
-    private void skipUnknownProperty(JsonbParser jsonStream, JsonbRuntimeContext runtimeContext) {
-        if (runtimeContext.getConfigProperties().getConfigFailOnUnknownProperties()) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.UNKNOWN_JSON_PROPERTY, parserContext.getLastKeyName(), getRuntimeType()));
-        }
-        jsonStream.skipJsonStructure();
-    }
-
-    @Override
-    protected JsonbRiParser.LevelContext advanceToFirst(JsonbParser jsonStream) {
-        jsonStream.moveTo(JsonParser.Event.START_OBJECT);
-        return jsonStream.getCurrentLevel();
-    }
-
-    protected PropertyModel getModel() {
-        final String finalKey = parserContext.getLastKeyName();
-        if (null != lastPropertyInfo && lastPropertyInfo.getJsonKeyName().equals(finalKey)) {
-            return lastPropertyInfo.getPropertyModel();
-        }
-        lastPropertyInfo = new LastJsonPropertyModel(finalKey, getClassModel().findPropertyModelByJsonReadName(finalKey));
-        return lastPropertyInfo.getPropertyModel();
-    }
-
-    private static class ValueHolder {
-
-        private final CreatorModel creationModel;
-
-        private final PropertyModel lastPropertyDescriptor;
-
-        private final Object heldValue;
-
-        public ValueHolder(CreatorModel creationInfo, Object heldValue) {
-            this.creationModel = creationInfo;
-            this.heldValue = heldValue;
-            lastPropertyDescriptor = null;
-        }
-
-        public ValueHolder(PropertyModel lastPropertyDescriptor, Object heldValue) {
-            this.lastPropertyDescriptor = lastPropertyDescriptor;
-            this.heldValue = heldValue;
-            creationModel = null;
-        }
-
-        public CreatorModel getCreatorModel() {
-            return creationModel;
-        }
-
-        public PropertyModel getPropertyModel() {
-            return lastPropertyDescriptor;
-        }
-
-        public Object getValue() {
-            return heldValue;
-        }
-    }
 }

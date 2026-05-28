@@ -27,6 +27,12 @@ public abstract class AbstractComponentBinding {
     private final Type bindingType;
 
     /**
+     * Class of user component.
+     * @return component class
+     */
+    public abstract Class<?> getComponentClass();
+
+    /**
      * Creates info.
      * @param bindingType type to which component is bound.
      */
@@ -44,9 +50,4 @@ public abstract class AbstractComponentBinding {
         return bindingType;
     }
 
-    /**
-     * Class of user component.
-     * @return component class
-     */
-    public abstract Class<?> getComponentClass();
 }

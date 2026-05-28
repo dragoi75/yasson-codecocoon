@@ -30,10 +30,6 @@ public class ObjectArrayParser<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] elementArray;
 
-    protected ObjectArrayParser(JsonbDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return elements;
@@ -47,4 +43,9 @@ public class ObjectArrayParser<T> extends AbstractArrayDeserializer<T[]> {
         }
         return elements.toArray(elementArray);
     }
+
+    protected ObjectArrayParser(JsonbDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

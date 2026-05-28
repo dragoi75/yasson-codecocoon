@@ -27,10 +27,6 @@ public class PrimitiveShortArrayDeserializer extends AbstractArrayDeserializer<s
 
     private final List<Short> shortList = new ArrayList<>();
 
-    protected PrimitiveShortArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return shortList;
@@ -47,4 +43,9 @@ public class PrimitiveShortArrayDeserializer extends AbstractArrayDeserializer<s
         }
         return shortValues;
     }
+
+    protected PrimitiveShortArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

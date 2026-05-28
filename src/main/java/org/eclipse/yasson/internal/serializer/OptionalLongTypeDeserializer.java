@@ -32,13 +32,13 @@ import java.util.OptionalLong;
  */
 public class OptionalLongTypeDeserializer extends BaseValueTypeDeserializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalLongTypeDeserializer(Customization customization) {
-        super(OptionalLong.class, customization);
+    @Override
+    protected OptionalLong deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalLong.of(Long.parseLong(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
+        }
     }
 
     @Override
@@ -50,12 +50,13 @@ public class OptionalLongTypeDeserializer extends BaseValueTypeDeserializer<Opti
         return deserializeInstance(parser.getString(), (Unmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalLong deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalLong.of(Long.parseLong(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalLongTypeDeserializer(Customization customization) {
+        super(OptionalLong.class, customization);
     }
+
 }

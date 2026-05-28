@@ -23,14 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class ShortPrimitiveArraySerializer extends AbstractArraySerializer<short[]> {
 
-    protected ShortPrimitiveArraySerializer(TypeSerializerBuilder typeSerializer) {
-        super(typeSerializer);
-    }
-
     @Override
     protected void serializeInternal(short[] shortArray, JsonGenerator jsonWriter, SerializationContext ctx) {
         for (short value : shortArray) {
             jsonWriter.write(value);
         }
     }
+
+    protected ShortPrimitiveArraySerializer(TypeSerializerBuilder typeSerializer) {
+        super(typeSerializer);
+    }
+
 }

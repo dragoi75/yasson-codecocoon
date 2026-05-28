@@ -48,9 +48,54 @@ public class DefaultSerializerRegistry {
 
     private final SerializerProviderAdapter enumSerializerAdapter;
 
-    private DefaultSerializerRegistry() {
-        this.providerRegistry = initializeSerializers();
-        enumSerializerAdapter = new SerializerProviderAdapter(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param targetType class to check
+     * @return true if supported
+     */
+    public boolean isKnownType(Class<?> targetType) {
+        boolean containerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
+        return containerValueKnown || lookupValueSerializerProvider(targetType).isPresent();
+    }
+
+    private <T> Optional<SerializerProviderAdapter> findSerializerByCondition(Class<T> targetType) {
+        if (!Enum.class.isAssignableFrom(targetType)) {
+            if (!JsonString.class.isAssignableFrom(targetType)) {
+                if (!JsonNumber.class.isAssignableFrom(targetType)) {
+                    if (JsonValue.class.isAssignableFrom(targetType) && !(JsonObject.class.isAssignableFrom(targetType) || JsonArray.class.isAssignableFrom(targetType))) {
+                        return Optional.of(providerRegistry.get(JsonValue.class));
+                    }
+                } else {
+                    return Optional.of(providerRegistry.get(JsonNumber.class));
+                }
+            } else {
+                return Optional.of(providerRegistry.get(JsonString.class));
+            }
+        } else {
+            return Optional.of(enumSerializerAdapter);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
+     *
+     * @param targetType supported type class
+     * @param <T> Type of serializer
+     * @return serializer if found
+     */
+    public <T> Optional<SerializerProviderAdapter> lookupValueSerializerProvider(Class<T> targetType) {
+        Class<?> potentialClass = targetType;
+        do {
+            final SerializerProviderAdapter serializerAdapter = providerRegistry.get(potentialClass);
+            if (null != serializerAdapter) {
+                return Optional.of(serializerAdapter);
+            }
+            potentialClass = potentialClass.getSuperclass();
+        } while (null != potentialClass);
+        return findSerializerByCondition(targetType);
     }
 
     private Map<Class<?>, SerializerProviderAdapter> initializeSerializers() {
@@ -106,60 +151,16 @@ public class DefaultSerializerRegistry {
     }
 
     /**
-     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
-     *
-     * @param targetType supported type class
-     * @param <T> Type of serializer
-     * @return serializer if found
-     */
-    public <T> Optional<SerializerProviderAdapter> lookupValueSerializerProvider(Class<T> targetType) {
-        Class<?> potentialClass = targetType;
-        do {
-            final SerializerProviderAdapter serializerAdapter = providerRegistry.get(potentialClass);
-            if (null != serializerAdapter) {
-                return Optional.of(serializerAdapter);
-            }
-            potentialClass = potentialClass.getSuperclass();
-        } while (null != potentialClass);
-        return findSerializerByCondition(targetType);
-    }
-
-    private <T> Optional<SerializerProviderAdapter> findSerializerByCondition(Class<T> targetType) {
-        if (!Enum.class.isAssignableFrom(targetType)) {
-            if (!JsonString.class.isAssignableFrom(targetType)) {
-                if (!JsonNumber.class.isAssignableFrom(targetType)) {
-                    if (JsonValue.class.isAssignableFrom(targetType) && !(JsonObject.class.isAssignableFrom(targetType) || JsonArray.class.isAssignableFrom(targetType))) {
-                        return Optional.of(providerRegistry.get(JsonValue.class));
-                    }
-                } else {
-                    return Optional.of(providerRegistry.get(JsonNumber.class));
-                }
-            } else {
-                return Optional.of(providerRegistry.get(JsonString.class));
-            }
-        } else {
-            return Optional.of(enumSerializerAdapter);
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param targetType class to check
-     * @return true if supported
-     */
-    public boolean isKnownType(Class<?> targetType) {
-        boolean containerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
-        return containerValueKnown || lookupValueSerializerProvider(targetType).isPresent();
-    }
-
-    /**
      * Singleton instance.
      * @return instance
      */
     public static DefaultSerializerRegistry getInstance() {
         return DEFAULT_SERIALIZER_REGISTRY;
     }
+
+    private DefaultSerializerRegistry() {
+        this.providerRegistry = initializeSerializers();
+        enumSerializerAdapter = new SerializerProviderAdapter(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+    }
+
 }

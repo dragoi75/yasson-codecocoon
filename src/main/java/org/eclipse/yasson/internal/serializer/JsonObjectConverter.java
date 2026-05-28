@@ -27,10 +27,6 @@ public class JsonObjectConverter extends AbstractJsonpDeserializer<JsonObject> {
 
     private JsonObject jsonNode;
 
-    @Override
-    protected void deserializeContents(JsonbParser jsonReader, Unmarshaller context) {
-        this.jsonNode = jsonReader.getObject();
-    }
 
     /**
      * Create instance of current item with its builder.
@@ -41,9 +37,14 @@ public class JsonObjectConverter extends AbstractJsonpDeserializer<JsonObject> {
         super(deserializerFactory);
     }
 
-
     @Override
     public JsonObject getInstance(Unmarshaller unmarshaller) {
         return jsonNode;
     }
+
+    @Override
+    protected void deserializeContents(JsonbParser jsonReader, Unmarshaller context) {
+        this.jsonNode = jsonReader.getObject();
+    }
+
 }

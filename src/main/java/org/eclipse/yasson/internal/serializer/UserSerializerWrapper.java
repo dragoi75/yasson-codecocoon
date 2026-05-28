@@ -36,17 +36,6 @@ public class UserSerializerWrapper<T> implements JsonbSerializer<T> {
 
     private final ClassModel typeModel;
 
-    /**
-     * Create instance of current item with its builder.
-     *
-     * @param typeModel model
-     * @param userJsonbAdapter user serializer
-     */
-    public UserSerializerWrapper(ClassModel typeModel, JsonbSerializer<T> userJsonbAdapter) {
-        this.typeModel = typeModel;
-        this.userJsonbAdapter = userJsonbAdapter;
-    }
-
     @Override
     public void serialize(T value, JsonGenerator jsonWriter, SerializationContext serializationContext) {
         ProcessingContext processingEnv = (Marshaller) serializationContext;
@@ -60,4 +49,16 @@ public class UserSerializerWrapper<T> implements JsonbSerializer<T> {
             processingEnv.removeProcessedObject(value);
         }
     }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param typeModel model
+     * @param userJsonbAdapter user serializer
+     */
+    public UserSerializerWrapper(ClassModel typeModel, JsonbSerializer<T> userJsonbAdapter) {
+        this.typeModel = typeModel;
+        this.userJsonbAdapter = userJsonbAdapter;
+    }
+
 }

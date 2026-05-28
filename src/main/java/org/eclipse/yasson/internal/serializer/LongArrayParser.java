@@ -27,10 +27,6 @@ public class LongArrayParser extends AbstractArrayDeserializer<long[]> {
 
     private final List<Long> values = new ArrayList<>();
 
-    protected LongArrayParser(JsonbDeserializerBuilder deserializerBuilder) {
-        super(deserializerBuilder);
-    }
-
     @Override
     protected List<?> getItems() {
         return values;
@@ -47,4 +43,9 @@ public class LongArrayParser extends AbstractArrayDeserializer<long[]> {
         }
         return values;
     }
+
+    protected LongArrayParser(JsonbDeserializerBuilder deserializerBuilder) {
+        super(deserializerBuilder);
+    }
+
 }

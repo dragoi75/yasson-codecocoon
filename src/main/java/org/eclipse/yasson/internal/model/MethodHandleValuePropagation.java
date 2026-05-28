@@ -39,8 +39,46 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
     private MethodHandle setHandle;
 
 
-    MethodHandleValuePropagation(Property property, JsonbRuntimeContext ctx) {
-        super(property, ctx);
+    @Override
+    protected void acceptField(Field field, OperationMode mode) {
+        try {
+            switch (mode) {
+                case GET:
+                    getHandle = MethodHandles.lookup().unreflectGetter(field);
+                    break;
+                case SET:
+                    setHandle = MethodHandles.lookup().unreflectSetter(field);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown mode");
+            }
+        } catch (IllegalAccessException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.CREATING_HANDLES), e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(Object object) {
+        try {
+            return getHandle.invoke(object);
+        } catch (Throwable throwable) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.GETTING_VALUE_WITH, getHandle), throwable);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setValue(Object object, Object value) {
+        try {
+            setHandle.invoke(object, value);
+        } catch (Throwable throwable) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.SETTING_VALUE_WITH, setHandle), throwable);
+        }
     }
 
     @Override
@@ -61,47 +99,8 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
         }
     }
 
-    @Override
-    protected void acceptField(Field field, OperationMode mode) {
-        try {
-            switch (mode) {
-                case GET:
-                    getHandle = MethodHandles.lookup().unreflectGetter(field);
-                    break;
-                case SET:
-                    setHandle = MethodHandles.lookup().unreflectSetter(field);
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown mode");
-            }
-        } catch (IllegalAccessException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.CREATING_HANDLES), e);
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(Object object, Object value) {
-        try {
-            setHandle.invoke(object, value);
-        } catch (Throwable throwable) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.SETTING_VALUE_WITH, setHandle), throwable);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object getValue(Object object) {
-        try {
-            return getHandle.invoke(object);
-        } catch (Throwable throwable) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.GETTING_VALUE_WITH, getHandle), throwable);
-        }
+    MethodHandleValuePropagation(Property property, JsonbRuntimeContext ctx) {
+        super(property, ctx);
     }
 
 }

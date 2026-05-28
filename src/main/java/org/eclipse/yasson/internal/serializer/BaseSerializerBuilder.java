@@ -56,14 +56,60 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
 
     protected final JsonbRuntimeContext jsonbContext;
 
+    public Customization getCustomization() {
+        return customization;
+    }
+
     /**
-     * Crates a builder.
+     * Model of a class representing current item and instance (if any).
+     * Known collection classes doesn't need such a model.
      *
-     * @param runtimeContext Not null.
+     * @return model of a class
      */
-    public BaseSerializerBuilder(JsonbRuntimeContext runtimeContext) {
-        Objects.requireNonNull(runtimeContext);
-        this.jsonbContext = runtimeContext;
+    public ClassModel getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
+     * Otherwise provided type in type field, or type of field model.
+     *
+     * @return runtime type
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
+     * Wrapper item for this item.
+     *
+     * @return Wrapper item.
+     */
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    /**
+     * Gets or load class model for a class an its superclasses.
+     *
+     * @param targetClass Class to get model for.
+     * @return Class model.
+     */
+    protected ClassModel getClassModel(Class<?> targetClass) {
+        ClassModel typeModel = jsonbContext.getMappingContext().getClassModel(targetClass);
+        if (null == typeModel) {
+            typeModel = jsonbContext.getMappingContext().getOrCreateClassModel(targetClass);
+        }
+        return typeModel;
     }
 
     /**
@@ -91,46 +137,13 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
     }
 
     /**
-     * Gets or load class model for a class an its superclasses.
+     * Crates a builder.
      *
-     * @param targetClass Class to get model for.
-     * @return Class model.
+     * @param runtimeContext Not null.
      */
-    protected ClassModel getClassModel(Class<?> targetClass) {
-        ClassModel typeModel = jsonbContext.getMappingContext().getClassModel(targetClass);
-        if (null == typeModel) {
-            typeModel = jsonbContext.getMappingContext().getOrCreateClassModel(targetClass);
-        }
-        return typeModel;
-    }
-
-    /**
-     * Wrapper item for this item.
-     *
-     * @return Wrapper item.
-     */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    /**
-     * Model of a class representing current item and instance (if any).
-     * Known collection classes doesn't need such a model.
-     *
-     * @return model of a class
-     */
-    public ClassModel getClassModel() {
-        return classModel;
-    }
-
-    /**
-     * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
-     * Otherwise provided type in type field, or type of field model.
-     *
-     * @return runtime type
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
+    public BaseSerializerBuilder(JsonbRuntimeContext runtimeContext) {
+        Objects.requireNonNull(runtimeContext);
+        this.jsonbContext = runtimeContext;
     }
 
     /**
@@ -146,16 +159,4 @@ public class BaseSerializerBuilder<T extends BaseSerializerBuilder> {
         return (T) this;
     }
 
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    public Customization getCustomization() {
-        return customization;
-    }
 }

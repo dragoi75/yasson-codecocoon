@@ -26,6 +26,16 @@ public class SerializerBindingEntry<T> extends AbstractComponentBinding {
     private final JsonbSerializer<T> serializerInstance;
 
     /**
+     * Class of user component.
+     *
+     * @return Component class.
+     */
+    @Override
+    public Class<?> getComponentClass() {
+        return serializerInstance.getClass();
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param boundType Generic type argument of serializer. Not null.
@@ -45,13 +55,4 @@ public class SerializerBindingEntry<T> extends AbstractComponentBinding {
         return serializerInstance;
     }
 
-    /**
-     * Class of user component.
-     *
-     * @return Component class.
-     */
-    @Override
-    public Class<?> getComponentClass() {
-        return serializerInstance.getClass();
-    }
 }

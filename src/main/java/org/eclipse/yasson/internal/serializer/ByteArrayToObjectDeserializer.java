@@ -27,15 +27,6 @@ public class ByteArrayToObjectDeserializer extends AbstractArrayDeserializer<byt
 
     private final List<Byte> byteList = new ArrayList<>();
 
-    protected ByteArrayToObjectDeserializer(JsonbDeserializerBuilder jsonbDeserializerFactory) {
-        super(jsonbDeserializerFactory);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return byteList;
-    }
-
     @Override
     public byte[] getInstance(Unmarshaller unmarshaller) {
         final int length = byteList.size();
@@ -47,4 +38,14 @@ public class ByteArrayToObjectDeserializer extends AbstractArrayDeserializer<byt
         }
         return bytes;
     }
+
+    protected ByteArrayToObjectDeserializer(JsonbDeserializerBuilder jsonbDeserializerFactory) {
+        super(jsonbDeserializerFactory);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return byteList;
+    }
+
 }

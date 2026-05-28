@@ -23,14 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class IntArrayCodec extends AbstractArraySerializer<int[]> {
 
-    protected IntArrayCodec(TypeSerializerBuilder typeSerializer) {
-        super(typeSerializer);
-    }
-
     @Override
     protected void serializeInternal(int[] values, JsonGenerator jsonWriter, SerializationContext ctx) {
         for (int value : values) {
             jsonWriter.write(value);
         }
     }
+
+    protected IntArrayCodec(TypeSerializerBuilder typeSerializer) {
+        super(typeSerializer);
+    }
+
 }

@@ -25,6 +25,11 @@ import java.lang.reflect.Type;
  */
 public class CharacterTypeDeserializer extends BaseValueTypeDeserializer<Character> {
 
+    @Override
+    protected Character deserializeInstance(String value, Unmarshaller unmarshaller, Type rtType) {
+        return value.charAt(0);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,8 +39,4 @@ public class CharacterTypeDeserializer extends BaseValueTypeDeserializer<Charact
         super(Character.class, customization);
     }
 
-    @Override
-    protected Character deserializeInstance(String value, Unmarshaller unmarshaller, Type rtType) {
-        return value.charAt(0);
-    }
 }

@@ -25,6 +25,11 @@ import javax.json.stream.JsonGenerator;
  */
 public class CharacterTypeSerializer extends ConfigurableValueTypeSerializer<Character> {
 
+    @Override
+    protected void serializeValue(Character obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(String.valueOf(obj));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,8 +39,4 @@ public class CharacterTypeSerializer extends ConfigurableValueTypeSerializer<Cha
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(Character obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(String.valueOf(obj));
-    }
 }

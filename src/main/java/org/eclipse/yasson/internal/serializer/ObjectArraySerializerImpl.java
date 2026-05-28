@@ -23,14 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class ObjectArraySerializerImpl<T> extends AbstractArraySerializer<T[]> {
 
-    protected ObjectArraySerializerImpl(TypeSerializerBuilder typeSerializerFactory) {
-        super(typeSerializerFactory);
-    }
-
     @Override
     protected void serializeInternal(T[] elements, JsonGenerator jsonWriter, SerializationContext serializationContext) {
         for (T element : elements) {
             serializeItem(element, jsonWriter, serializationContext);
         }
     }
+
+    protected ObjectArraySerializerImpl(TypeSerializerBuilder typeSerializerFactory) {
+        super(typeSerializerFactory);
+    }
+
 }

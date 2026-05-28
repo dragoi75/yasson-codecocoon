@@ -27,6 +27,11 @@ import java.net.URI;
  */
 public class URITypeDeserializer extends BaseValueTypeDeserializer<URI> {
 
+    @Override
+    protected URI deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        return URI.create(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,8 +41,4 @@ public class URITypeDeserializer extends BaseValueTypeDeserializer<URI> {
         super(URI.class, customization);
     }
 
-    @Override
-    protected URI deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        return URI.create(jsonValue);
-    }
 }

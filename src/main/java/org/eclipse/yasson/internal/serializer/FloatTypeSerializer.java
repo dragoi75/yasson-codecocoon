@@ -25,6 +25,12 @@ import java.math.BigDecimal;
  */
 public class FloatTypeSerializer extends AbstractNumberSerializer<Float> {
 
+    @Override
+    protected void serializeNonFormatted(Float obj, JsonGenerator generator) {
+        //floats lose precision, after upcasting to doubles in jsonp
+        generator.write(new BigDecimal(String.valueOf(obj)));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -40,9 +46,4 @@ public class FloatTypeSerializer extends AbstractNumberSerializer<Float> {
         generator.write(key, new BigDecimal(String.valueOf(obj)));
     }
 
-    @Override
-    protected void serializeNonFormatted(Float obj, JsonGenerator generator) {
-        //floats lose precision, after upcasting to doubles in jsonp
-        generator.write(new BigDecimal(String.valueOf(obj)));
-    }
 }

@@ -32,13 +32,13 @@ import java.util.OptionalInt;
  */
 public class OptionalIntTypeDeserializer extends BaseValueTypeDeserializer<OptionalInt> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalIntTypeDeserializer(Customization customization) {
-        super(OptionalInt.class, customization);
+    @Override
+    protected OptionalInt deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalInt.of(Integer.parseInt(jsonValue));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
+        }
     }
 
     @Override
@@ -51,12 +51,13 @@ public class OptionalIntTypeDeserializer extends BaseValueTypeDeserializer<Optio
         return deserializeInstance(value, (Unmarshaller) ctx, rtType);
     }
 
-    @Override
-    protected OptionalInt deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalInt.of(Integer.parseInt(jsonValue));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalIntTypeDeserializer(Customization customization) {
+        super(OptionalInt.class, customization);
     }
+
 }

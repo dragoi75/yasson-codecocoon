@@ -34,44 +34,6 @@ import java.util.OptionalLong;
  */
 public class ObjectMarshaller<T> extends AbstractContainerSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param typeSerializer Builder to initialize the instance.
-     */
-    public ObjectMarshaller(TypeSerializerBuilder typeSerializer) {
-        super(typeSerializer);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param currentItem wrapped item
-     * @param actualType class type
-     * @param typeModel model of the class
-     */
-    public ObjectMarshaller(CurrentItem<?> currentItem, Type actualType, ClassModel typeModel) {
-        super(currentItem, actualType, typeModel);
-    }
-
-    @Override
-    protected void serializeInternal(T value, JsonGenerator jsonWriter, SerializationContext serializationContext) {
-        final PropertyModel[] properties = ((Marshaller) serializationContext).getMappingContext().getOrCreateClassModel(value.getClass()).getSortedProperties();
-        for (PropertyModel property : properties) {
-            serializeProperty(value, jsonWriter, serializationContext, property);
-        }
-    }
-
-    @Override
-    protected void writeStart(JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String propertyName, JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject(propertyName);
-    }
-
     @SuppressWarnings("unchecked")
     private void serializeProperty(T instance, JsonGenerator jsonWriter, SerializationContext serializationContext, PropertyModel property) {
         Marshaller converter = (Marshaller) serializationContext;
@@ -96,6 +58,27 @@ public class ObjectMarshaller<T> extends AbstractContainerSerializer<T> {
         }
     }
 
+    @Override
+    protected void writeStart(String propertyName, JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject(propertyName);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param currentItem wrapped item
+     * @param actualType class type
+     * @param typeModel model of the class
+     */
+    public ObjectMarshaller(CurrentItem<?> currentItem, Type actualType, ClassModel typeModel) {
+        super(currentItem, actualType, typeModel);
+    }
+
+    @Override
+    protected void writeStart(JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject();
+    }
+
     private boolean isEmptyOptional(Object value) {
         if (!(value instanceof Optional)) {
             if (!(value instanceof OptionalInt)) {
@@ -114,4 +97,22 @@ public class ObjectMarshaller<T> extends AbstractContainerSerializer<T> {
         }
         return false;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param typeSerializer Builder to initialize the instance.
+     */
+    public ObjectMarshaller(TypeSerializerBuilder typeSerializer) {
+        super(typeSerializer);
+    }
+
+    @Override
+    protected void serializeInternal(T value, JsonGenerator jsonWriter, SerializationContext serializationContext) {
+        final PropertyModel[] properties = ((Marshaller) serializationContext).getMappingContext().getOrCreateClassModel(value.getClass()).getSortedProperties();
+        for (PropertyModel property : properties) {
+            serializeProperty(value, jsonWriter, serializationContext, property);
+        }
+    }
+
 }

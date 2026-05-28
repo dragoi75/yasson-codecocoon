@@ -26,6 +26,11 @@ import java.time.Period;
  */
 public class PeriodTypeSerializer extends ConfigurableValueTypeSerializer<Period> {
 
+    @Override
+    protected void serializeValue(Period obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class PeriodTypeSerializer extends ConfigurableValueTypeSerializer<Period
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(Period obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

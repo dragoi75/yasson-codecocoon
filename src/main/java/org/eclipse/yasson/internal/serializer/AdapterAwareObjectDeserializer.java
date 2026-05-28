@@ -40,42 +40,12 @@ public class AdapterAwareObjectDeserializer<A, T> implements CurrentItem<T>, Jso
 
     private final BaseContainerDeserializer<?> containerWrapper;
 
-    /**
-     * Creates decoration instance wrapping real adapted object item.
-     *
-     * @param adapterBinding components type info
-     * @param containerWrapper wrapper item to get instance from
-     */
-    public AdapterAwareObjectDeserializer(TypeAdapterBinding adapterBinding, BaseContainerDeserializer<?> containerWrapper) {
-        this.adapterBinding = adapterBinding;
-        this.containerWrapper = containerWrapper;
-    }
-
-    @Override
-    public ClassModel getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return containerWrapper;
-    }
-
     @Override
     public Type getRuntimeType() {
         if (adaptedDeserializer instanceof BaseContainerDeserializer) {
             return ((BaseContainerDeserializer) adaptedDeserializer).getRuntimeType();
         }
         throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + adaptedDeserializer));
-    }
-
-    /**
-     * Sets adapted item.
-     *
-     * @param adaptedDeserializer Adapted item to set.
-     */
-    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedDeserializer) {
-        this.adaptedDeserializer = adaptedDeserializer;
     }
 
     @Override
@@ -89,4 +59,35 @@ public class AdapterAwareObjectDeserializer<A, T> implements CurrentItem<T>, Jso
             throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.ADAPTER_EXCEPTION, adapterBinding.getBindingType(), adapterBinding.getToType(), adapterBinding.getAdapter().getClass()), ex);
         }
     }
+
+    /**
+     * Sets adapted item.
+     *
+     * @param adaptedDeserializer Adapted item to set.
+     */
+    public void setAdaptedTypeDeserializer(JsonbDeserializer<A> adaptedDeserializer) {
+        this.adaptedDeserializer = adaptedDeserializer;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return containerWrapper;
+    }
+
+    @Override
+    public ClassModel getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates decoration instance wrapping real adapted object item.
+     *
+     * @param adapterBinding components type info
+     * @param containerWrapper wrapper item to get instance from
+     */
+    public AdapterAwareObjectDeserializer(TypeAdapterBinding adapterBinding, BaseContainerDeserializer<?> containerWrapper) {
+        this.adapterBinding = adapterBinding;
+        this.containerWrapper = containerWrapper;
+    }
+
 }

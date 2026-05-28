@@ -26,6 +26,15 @@ public class RuntimeTypeHolder implements RuntimeTypeInfo {
     private final Type runtimeType;
 
     /**
+     * Runtime type of this item.
+     * @return runtime type
+     */
+    @Override
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param wrapper runtime info about class
@@ -45,12 +54,4 @@ public class RuntimeTypeHolder implements RuntimeTypeInfo {
         return wrapper;
     }
 
-    /**
-     * Runtime type of this item.
-     * @return runtime type
-     */
-    @Override
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
 }

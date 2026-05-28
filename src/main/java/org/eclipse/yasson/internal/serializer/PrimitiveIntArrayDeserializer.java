@@ -27,10 +27,6 @@ public class PrimitiveIntArrayDeserializer extends AbstractArrayDeserializer<int
 
     private final List<Integer> elements = new ArrayList<>();
 
-    protected PrimitiveIntArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return elements;
@@ -47,4 +43,9 @@ public class PrimitiveIntArrayDeserializer extends AbstractArrayDeserializer<int
         }
         return values;
     }
+
+    protected PrimitiveIntArrayDeserializer(JsonbDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

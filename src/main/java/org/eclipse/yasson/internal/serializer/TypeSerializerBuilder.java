@@ -38,24 +38,15 @@ public class TypeSerializerBuilder extends BaseSerializerBuilder<TypeSerializerB
 
     private Class<?> targetType;
 
-    /**
-     * Creates a new builder.
-     *
-     * @param runtimeContext JSON-B context.
-     */
-    public TypeSerializerBuilder(JsonbRuntimeContext runtimeContext) {
-        super(runtimeContext);
+    private Type determineRuntimeType() {
+        if (null != genericType && Object.class != genericType) {
+            return genericType;
+        }
+        return targetType;
     }
 
-    /**
-     * Adds object class.
-     *
-     * @param targetType object class
-     * @return Builder.
-     */
-    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
-        this.targetType = targetType;
-        return this;
+    private boolean isByteArray(Class<?> candidateType) {
+        return candidateType.isArray() && Byte.TYPE == candidateType.getComponentType();
     }
 
     /**
@@ -121,10 +112,6 @@ public class TypeSerializerBuilder extends BaseSerializerBuilder<TypeSerializerB
         }
     }
 
-    private boolean isByteArray(Class<?> candidateType) {
-        return candidateType.isArray() && Byte.TYPE == candidateType.getComponentType();
-    }
-
     /**
      * Instance is not created in case of array items, because, we don't know how long it should be
      * till parser ends parsing.
@@ -165,10 +152,24 @@ public class TypeSerializerBuilder extends BaseSerializerBuilder<TypeSerializerB
         return Optional.empty();
     }
 
-    private Type determineRuntimeType() {
-        if (null != genericType && Object.class != genericType) {
-            return genericType;
-        }
-        return targetType;
+    /**
+     * Creates a new builder.
+     *
+     * @param runtimeContext JSON-B context.
+     */
+    public TypeSerializerBuilder(JsonbRuntimeContext runtimeContext) {
+        super(runtimeContext);
     }
+
+    /**
+     * Adds object class.
+     *
+     * @param targetType object class
+     * @return Builder.
+     */
+    public TypeSerializerBuilder setObjectClass(Class<?> targetType) {
+        this.targetType = targetType;
+        return this;
+    }
+
 }

@@ -27,6 +27,11 @@ import java.net.URL;
  */
 public class URLTypeSerializer extends ConfigurableValueTypeSerializer<URL> {
 
+    @Override
+    protected void serializeValue(URL obj, JsonGenerator generator, Marshaller marshaller) {
+        generator.write(obj.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -36,8 +41,4 @@ public class URLTypeSerializer extends ConfigurableValueTypeSerializer<URL> {
         super(customization);
     }
 
-    @Override
-    protected void serializeValue(URL obj, JsonGenerator generator, Marshaller marshaller) {
-        generator.write(obj.toString());
-    }
 }

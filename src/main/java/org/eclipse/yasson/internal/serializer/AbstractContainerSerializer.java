@@ -39,40 +39,28 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
     private Class<?> valueClass;
 
     /**
-     * Create instance of current item with its builder.
-     *
-     * @param builder {@link TypeSerializerBuilder} used to build this instance
+     * Cache a serializer and serialized object class for next use.
+     * @param valueSerializer serializer
+     * @param valueClass class of serializer object
      */
-    protected AbstractContainerSerializer(TypeSerializerBuilder builder) {
-        super(builder);
+    protected void addValueSerializer(JsonbSerializer<?> valueSerializer, Class<?> valueClass) {
+        Objects.requireNonNull(valueSerializer);
+        Objects.requireNonNull(valueClass);
+        this.valueSerializer = valueSerializer;
+        this.valueClass = valueClass;
     }
 
     /**
-     * Creates a new instance.
-     *
-     * @param wrapper Item to serialize.
-     * @param runtimeType Runtime type of the item.
-     * @param classModel Class model.
+     * Return last used serializer if last value class matches.
+     * @param valueClass class of the serialized object
+     * @return cached serializer or null
      */
-    public AbstractContainerSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
-        super(wrapper, runtimeType, classModel);
+    protected JsonbSerializer<?> getValueSerializer(Class<?> valueClass) {
+        if (null != valueSerializer && this.valueClass == valueClass) {
+            return valueSerializer;
+        }
+        return null;
     }
-
-    @Override
-    public final void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
-        writeStart(generator);
-        serializeInternal(obj, generator, ctx);
-        writeEnd(generator);
-    }
-
-    protected abstract void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx);
-
-    /**
-     * Write start object or start array without a key.
-     *
-     * @param generator JSON generator.
-     */
-    protected abstract void writeStart(JsonGenerator generator);
 
     /**
      * Writes end for object or array.
@@ -90,35 +78,6 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
      * @param generator JSON generator.
      */
     protected abstract void writeStart(String key, JsonGenerator generator);
-
-    @SuppressWarnings("unchecked")
-    protected <X> void serializerCaptor(JsonbSerializer<?> serializer, X object, JsonGenerator generator, SerializationContext ctx) {
-        ((JsonbSerializer<X>) serializer).serialize(object, generator, ctx);
-    }
-
-    /**
-     * Return last used serializer if last value class matches.
-     * @param valueClass class of the serialized object
-     * @return cached serializer or null
-     */
-    protected JsonbSerializer<?> getValueSerializer(Class<?> valueClass) {
-        if (null != valueSerializer && this.valueClass == valueClass) {
-            return valueSerializer;
-        }
-        return null;
-    }
-
-    /**
-     * Cache a serializer and serialized object class for next use.
-     * @param valueSerializer serializer
-     * @param valueClass class of serializer object
-     */
-    protected void addValueSerializer(JsonbSerializer<?> valueSerializer, Class<?> valueClass) {
-        Objects.requireNonNull(valueSerializer);
-        Objects.requireNonNull(valueClass);
-        this.valueSerializer = valueSerializer;
-        this.valueClass = valueClass;
-    }
 
     protected void serializeItem(Object item, JsonGenerator generator, SerializationContext ctx) {
         if (null == item) {
@@ -152,6 +111,20 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
         serializerCaptor(serializer, item, generator, ctx);
     }
 
+    protected abstract void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx);
+
+    @Override
+    public final void serialize(T obj, JsonGenerator generator, SerializationContext ctx) {
+        writeStart(generator);
+        serializeInternal(obj, generator, ctx);
+        writeEnd(generator);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <X> void serializerCaptor(JsonbSerializer<?> serializer, X object, JsonGenerator generator, SerializationContext ctx) {
+        ((JsonbSerializer<X>) serializer).serialize(object, generator, ctx);
+    }
+
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
             Optional<Type> runtimeTypeOptional = ReflectionTypeResolver.resolveTypeOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[0]);
@@ -159,4 +132,32 @@ public abstract class AbstractContainerSerializer<T> extends AbstractItem<T> imp
         }
         return Object.class;
     }
+
+    /**
+     * Write start object or start array without a key.
+     *
+     * @param generator JSON generator.
+     */
+    protected abstract void writeStart(JsonGenerator generator);
+
+    /**
+     * Creates a new instance.
+     *
+     * @param wrapper Item to serialize.
+     * @param runtimeType Runtime type of the item.
+     * @param classModel Class model.
+     */
+    public AbstractContainerSerializer(CurrentItem<?> wrapper, Type runtimeType, ClassModel classModel) {
+        super(wrapper, runtimeType, classModel);
+    }
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param builder {@link TypeSerializerBuilder} used to build this instance
+     */
+    protected AbstractContainerSerializer(TypeSerializerBuilder builder) {
+        super(builder);
+    }
+
 }

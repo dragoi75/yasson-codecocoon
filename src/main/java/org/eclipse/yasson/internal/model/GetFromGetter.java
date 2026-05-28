@@ -13,6 +13,11 @@ public class GetFromGetter extends GetValueCommand {
 
     private final Method method;
 
+    @Override
+    Object internalGetValue(Object object) throws IllegalAccessException, InvocationTargetException {
+        return method.invoke(object);
+    }
+
     /**
      * Create instance.
      *
@@ -23,8 +28,4 @@ public class GetFromGetter extends GetValueCommand {
         this.method = method;
     }
 
-    @Override
-    Object internalGetValue(Object object) throws IllegalAccessException, InvocationTargetException {
-        return method.invoke(object);
-    }
 }

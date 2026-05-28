@@ -30,6 +30,18 @@ import java.util.Base64;
  */
 public class ByteArrayToBase64Serializer extends ConfigurableValueTypeSerializer<byte[]> {
 
+    private Base64.Encoder getEncoder(String encodingType) {
+        switch (encodingType) {
+            case BinaryDataStrategy.BASE_64:
+                return Base64.getEncoder();
+            case BinaryDataStrategy.BASE_64_URL:
+                return Base64.getUrlEncoder();
+            default:
+                throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR,
+                        "Invalid strategy: " + encodingType));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,15 +56,4 @@ public class ByteArrayToBase64Serializer extends ConfigurableValueTypeSerializer
         jsonWriter.write(getEncoder(serializer.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(dataBytes));
     }
 
-    private Base64.Encoder getEncoder(String encodingType) {
-        switch (encodingType) {
-            case BinaryDataStrategy.BASE_64:
-                return Base64.getEncoder();
-            case BinaryDataStrategy.BASE_64_URL:
-                return Base64.getUrlEncoder();
-            default:
-                throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR,
-                        "Invalid strategy: " + encodingType));
-        }
-    }
 }

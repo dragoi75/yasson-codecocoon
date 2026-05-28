@@ -34,15 +34,6 @@ import java.util.TimeZone;
  */
 public class TimeZoneTypeDeserializer extends BaseValueTypeDeserializer<TimeZone> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public TimeZoneTypeDeserializer(Customization customization) {
-        super(TimeZone.class, customization);
-    }
-
     @Override
     protected TimeZone deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         try {
@@ -52,6 +43,15 @@ public class TimeZoneTypeDeserializer extends BaseValueTypeDeserializer<TimeZone
         } catch (ZoneRulesException e) {
             throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.ZONE_PARSE_ERROR, jsonValue), e);
         }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public TimeZoneTypeDeserializer(Customization customization) {
+        super(TimeZone.class, customization);
     }
 
 }

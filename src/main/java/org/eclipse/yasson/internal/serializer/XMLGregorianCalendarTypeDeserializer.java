@@ -43,30 +43,6 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
 
     private final LocalTime ZERO_LOCAL_TIME = LocalTime.parse("00:00:00");
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public XMLGregorianCalendarTypeDeserializer(Customization customization) {
-        super(XMLGregorianCalendar.class, customization);
-        this.calendarTemplate = new GregorianCalendar();
-        this.calendarTemplate.clear();
-        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
-        try {
-            this.datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
-        }
-    }
-
-    @Override
-    protected XMLGregorianCalendar fromInstant(Instant instant) {
-        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
-        calendar.setTimeInMillis(instant.toEpochMilli());
-        return datatypeFactory.newXMLGregorianCalendar(calendar);
-    }
-
     @Override
     protected XMLGregorianCalendar parseDefault(String jsonValue, Locale locale) {
         DateTimeFormatter formatter = jsonValue.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
@@ -87,4 +63,29 @@ public class XMLGregorianCalendarTypeDeserializer extends AbstractDateTimeDeseri
         ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
         return datatypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(result));
     }
+
+    @Override
+    protected XMLGregorianCalendar fromInstant(Instant instant) {
+        final GregorianCalendar calendar = (GregorianCalendar) calendarTemplate.clone();
+        calendar.setTimeInMillis(instant.toEpochMilli());
+        return datatypeFactory.newXMLGregorianCalendar(calendar);
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public XMLGregorianCalendarTypeDeserializer(Customization customization) {
+        super(XMLGregorianCalendar.class, customization);
+        this.calendarTemplate = new GregorianCalendar();
+        this.calendarTemplate.clear();
+        this.calendarTemplate.setTimeZone(TimeZone.getTimeZone(UTC));
+        try {
+            this.datatypeFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException e) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.DATATYPE_FACTORY_CREATION_FAILED), e);
+        }
+    }
+
 }

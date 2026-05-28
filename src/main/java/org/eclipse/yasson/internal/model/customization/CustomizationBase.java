@@ -17,6 +17,34 @@ abstract class CustomizationBase implements Customization, ComponentBindingCusto
 
     private final boolean nillable;
 
+
+    /**
+     * Serializer wrapper with resolved generic info.
+     *
+     * @return serializer wrapper
+     */
+    public SerializerBindingEntry getSerializerBinding() {
+        return serializerBinding;
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public DeserializerBinder getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -42,15 +70,6 @@ abstract class CustomizationBase implements Customization, ComponentBindingCusto
     }
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    /**
      * Adapter wrapper class with resolved generic information.
      *
      * @return components wrapper
@@ -58,24 +77,5 @@ abstract class CustomizationBase implements Customization, ComponentBindingCusto
     public TypeAdapterBinding getAdapterBinding() {
         return adapterBinding;
     }
-
-    /**
-     * Serializer wrapper with resolved generic info.
-     *
-     * @return serializer wrapper
-     */
-    public SerializerBindingEntry getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public DeserializerBinder getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
 
 }

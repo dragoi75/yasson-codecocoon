@@ -22,10 +22,6 @@ public class OptionalValueDeserializer implements JsonbDeserializer<Optional<?>>
 
     private final Type optionalType;
 
-    public OptionalValueDeserializer(JsonbDeserializerBuilder jsonbBuilder) {
-        this.itemHolder = jsonbBuilder.getWrapper();
-        this.optionalType = determineOptionalType(jsonbBuilder.getRuntimeType());
-    }
 
     @Override
     public Optional<?> deserialize(JsonParser jsonReader, DeserializationContext deserializationContext, Type rtType) {
@@ -36,11 +32,16 @@ public class OptionalValueDeserializer implements JsonbDeserializer<Optional<?>>
         return Optional.of(valueConverter.deserialize(jsonReader, deserializationContext, optionalType));
     }
 
-
     private Type determineOptionalType(Type resolvedType) {
         if (resolvedType instanceof ParameterizedType) {
             return ((ParameterizedType) resolvedType).getActualTypeArguments()[0];
         }
         return Object.class;
     }
+
+    public OptionalValueDeserializer(JsonbDeserializerBuilder jsonbBuilder) {
+        this.itemHolder = jsonbBuilder.getWrapper();
+        this.optionalType = determineOptionalType(jsonbBuilder.getRuntimeType());
+    }
+
 }

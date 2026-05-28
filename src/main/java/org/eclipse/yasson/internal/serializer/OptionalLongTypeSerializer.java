@@ -26,15 +26,6 @@ import java.util.OptionalLong;
  */
 public class OptionalLongTypeSerializer extends ConfigurableValueTypeSerializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalLongTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeValue(OptionalLong obj, JsonGenerator generator, Marshaller marshaller) {
         if (!obj.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalLongTypeSerializer extends ConfigurableValueTypeSerializer<
             generator.write(obj.getAsLong());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalLongTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

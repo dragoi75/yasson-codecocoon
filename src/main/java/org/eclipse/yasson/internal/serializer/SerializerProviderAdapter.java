@@ -23,17 +23,6 @@ public class SerializerProviderAdapter {
     private IDeserializerProvider deserializerRegistry;
 
     /**
-     * Creates a new instance.
-     *
-     * @param serializerRegistry Serializer provider.
-     * @param deserializerRegistry Deserializer provider.
-     */
-    public SerializerProviderAdapter(ISerializerProvider serializerRegistry, IDeserializerProvider deserializerRegistry) {
-        this.serializerRegistry = serializerRegistry;
-        this.deserializerRegistry = deserializerRegistry;
-    }
-
-    /**
      * Gets serializer provider.
      *
      * @return Serializer provider.
@@ -50,4 +39,16 @@ public class SerializerProviderAdapter {
     public IDeserializerProvider getDeserializerProvider() {
         return deserializerRegistry;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializerRegistry Serializer provider.
+     * @param deserializerRegistry Deserializer provider.
+     */
+    public SerializerProviderAdapter(ISerializerProvider serializerRegistry, IDeserializerProvider deserializerRegistry) {
+        this.serializerRegistry = serializerRegistry;
+        this.deserializerRegistry = deserializerRegistry;
+    }
+
 }

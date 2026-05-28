@@ -37,12 +37,21 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
     private JsonbDateFormatter dateFormatter;
 
     /**
-     * Creates a customization for class properties.
+     * Gets custom constructor or method for user instantiation.
      *
-     * @return A new instance of {@link PropertySerializationConfig}
+     * @return Custom creator.
      */
-    public ClassCustomization buildClassCustomization() {
-        return new ClassCustomization(this);
+    public JsonbCreator getCreator() {
+        return jsonbCreator;
+    }
+
+    /**
+     * Sets custom constructor or method for user instantiation.
+     *
+     * @param jsonbCreator Creator to set.
+     */
+    public void setCreator(JsonbCreator jsonbCreator) {
+        this.jsonbCreator = jsonbCreator;
     }
 
     /**
@@ -52,6 +61,24 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
      */
     public JsonbNumberFormatter getNumberFormatter() {
         return numberFormatter;
+    }
+
+    /**
+     * Creates a customization for class properties.
+     *
+     * @return A new instance of {@link PropertySerializationConfig}
+     */
+    public ClassCustomization buildClassCustomization() {
+        return new ClassCustomization(this);
+    }
+
+    /**
+     * Sets date format for formatting dates.
+     *
+     * @param dateFormatter Date format.
+     */
+    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
+        this.dateFormatter = dateFormatter;
     }
 
     /**
@@ -73,30 +100,4 @@ public class ClassCustomizationBuilder extends CustomizationBuilder {
         return dateFormatter;
     }
 
-    /**
-     * Sets date format for formatting dates.
-     *
-     * @param dateFormatter Date format.
-     */
-    public void setDateFormatter(JsonbDateFormatter dateFormatter) {
-        this.dateFormatter = dateFormatter;
-    }
-
-    /**
-     * Gets custom constructor or method for user instantiation.
-     *
-     * @return Custom creator.
-     */
-    public JsonbCreator getCreator() {
-        return jsonbCreator;
-    }
-
-    /**
-     * Sets custom constructor or method for user instantiation.
-     *
-     * @param jsonbCreator Creator to set.
-     */
-    public void setCreator(JsonbCreator jsonbCreator) {
-        this.jsonbCreator = jsonbCreator;
-    }
 }

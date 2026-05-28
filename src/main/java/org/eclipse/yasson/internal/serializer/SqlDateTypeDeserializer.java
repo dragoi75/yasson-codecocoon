@@ -31,13 +31,15 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlDateTypeDeserializer(Customization customization) {
-        super(Date.class, customization);
+    private Instant getInstant(TemporalAccessor parsed) {
+        LocalDate local = LocalDate.from(parsed);
+        return local.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
+    }
+
+    @Override
+    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
+        return new Date(getInstant(parsed).toEpochMilli());
     }
 
     /**
@@ -58,14 +60,13 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
         return new Date(getInstant(parsed).toEpochMilli());
     }
 
-    @Override
-    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        final TemporalAccessor parsed = getZonedFormatter(formatter).parse(jsonValue);
-        return new Date(getInstant(parsed).toEpochMilli());
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlDateTypeDeserializer(Customization customization) {
+        super(Date.class, customization);
     }
 
-    private Instant getInstant(TemporalAccessor parsed) {
-        LocalDate local = LocalDate.from(parsed);
-        return local.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant();
-    }
 }

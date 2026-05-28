@@ -31,6 +31,25 @@ public class MapTypeSerializer<T extends Map<?, ?>> extends AbstractContainerSer
 
     private final boolean allowsNulls;
 
+    @Override
+    protected void writeStart(JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject();
+    }
+
+    @Override
+    protected Type getValueType(Type elementType) {
+        if (elementType instanceof ParameterizedType) {
+            Optional<Type> runtimeTypeMaybe = ReflectionTypeResolver.resolveTypeOptional(this, ((ParameterizedType) elementType).getActualTypeArguments()[1]);
+            return runtimeTypeMaybe.orElse(Object.class);
+        }
+        return Object.class;
+    }
+
+    @Override
+    protected void writeStart(String identifier, JsonGenerator jsonWriter) {
+        jsonWriter.writeStartObject(identifier);
+    }
+
     protected MapTypeSerializer(TypeSerializerBuilder serializerFactory) {
         super(serializerFactory);
         allowsNulls = serializerFactory.getJsonbContext().getConfigProperties().getConfigNullable();
@@ -52,22 +71,4 @@ public class MapTypeSerializer<T extends Map<?, ?>> extends AbstractContainerSer
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String identifier, JsonGenerator jsonWriter) {
-        jsonWriter.writeStartObject(identifier);
-    }
-
-    @Override
-    protected Type getValueType(Type elementType) {
-        if (elementType instanceof ParameterizedType) {
-            Optional<Type> runtimeTypeMaybe = ReflectionTypeResolver.resolveTypeOptional(this, ((ParameterizedType) elementType).getActualTypeArguments()[1]);
-            return runtimeTypeMaybe.orElse(Object.class);
-        }
-        return Object.class;
-    }
 }

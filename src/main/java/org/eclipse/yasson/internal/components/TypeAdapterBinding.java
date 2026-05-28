@@ -28,18 +28,9 @@ public class TypeAdapterBinding extends AbstractComponentBinding {
 
     private final JsonbAdapter<?,?> jsonbConverter;
 
-    /**
-     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
-     * @param sourceType from not null
-     * @param targetType to not null
-     * @param jsonbConverter components not null
-     */
-    public TypeAdapterBinding(Type sourceType, Type targetType, JsonbAdapter<?, ?> jsonbConverter) {
-        super(sourceType);
-        Objects.requireNonNull(targetType);
-        Objects.requireNonNull(jsonbConverter);
-        this.targetType = targetType;
-        this.jsonbConverter = jsonbConverter;
+    @Override
+    public Class<?> getComponentClass() {
+        return jsonbConverter.getClass();
     }
 
     /**
@@ -55,6 +46,20 @@ public class TypeAdapterBinding extends AbstractComponentBinding {
     }
 
     /**
+     * Adapter info with type to "adapt from", type to "adapt to" and an components itself.
+     * @param sourceType from not null
+     * @param targetType to not null
+     * @param jsonbConverter components not null
+     */
+    public TypeAdapterBinding(Type sourceType, Type targetType, JsonbAdapter<?, ?> jsonbConverter) {
+        super(sourceType);
+        Objects.requireNonNull(targetType);
+        Objects.requireNonNull(jsonbConverter);
+        this.targetType = targetType;
+        this.jsonbConverter = jsonbConverter;
+    }
+
+    /**
      * Get actual components to adapt object value
      * @return components
      */
@@ -62,8 +67,4 @@ public class TypeAdapterBinding extends AbstractComponentBinding {
         return jsonbConverter;
     }
 
-    @Override
-    public Class<?> getComponentClass() {
-        return jsonbConverter.getClass();
-    }
 }

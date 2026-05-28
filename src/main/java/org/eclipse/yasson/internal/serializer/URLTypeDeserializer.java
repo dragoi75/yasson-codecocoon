@@ -28,15 +28,6 @@ import java.net.URL;
  */
 public class URLTypeDeserializer extends BaseValueTypeDeserializer<URL> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public URLTypeDeserializer(Customization customization) {
-        super(URL.class, customization);
-    }
-
     @Override
     protected URL deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         URL url = null;
@@ -47,4 +38,14 @@ public class URLTypeDeserializer extends BaseValueTypeDeserializer<URL> {
         }
         return url;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public URLTypeDeserializer(Customization customization) {
+        super(URL.class, customization);
+    }
+
 }

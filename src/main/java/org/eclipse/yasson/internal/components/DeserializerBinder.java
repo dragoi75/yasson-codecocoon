@@ -25,6 +25,11 @@ public class DeserializerBinder<T> extends AbstractComponentBinding {
 
     private final JsonbDeserializer<T> jsonParser;
 
+    @Override
+    public Class<?> getComponentClass() {
+        return jsonParser.getClass();
+    }
+
     /**
      *Creates a new instance.
      *
@@ -45,8 +50,4 @@ public class DeserializerBinder<T> extends AbstractComponentBinding {
         return jsonParser;
     }
 
-    @Override
-    public Class<?> getComponentClass() {
-        return jsonParser.getClass();
-    }
 }

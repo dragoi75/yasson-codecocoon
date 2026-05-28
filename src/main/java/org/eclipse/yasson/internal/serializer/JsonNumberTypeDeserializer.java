@@ -31,15 +31,6 @@ public class JsonNumberTypeDeserializer extends BaseValueTypeDeserializer<JsonNu
 
     private final static String NUMBER = "number";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public JsonNumberTypeDeserializer(Customization customization) {
-        super(JsonNumber.class, customization);
-    }
-
     @Override
     protected JsonNumber deserializeInstance(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
@@ -68,4 +59,14 @@ public class JsonNumberTypeDeserializer extends BaseValueTypeDeserializer<JsonNu
                 .build();
         return jsonObject.getJsonNumber(NUMBER);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public JsonNumberTypeDeserializer(Customization customization) {
+        super(JsonNumber.class, customization);
+    }
+
 }

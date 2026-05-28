@@ -46,6 +46,39 @@ public class ClassModel {
     private final PropertyNamingStrategy propertyNamingStrategy;
 
     /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return sortedProperties;
+    }
+
+    /**
+     * Class model of parent class if present.
+     * @return class model of a parent
+     */
+    public ClassModel getParentClassModel() {
+        return parentClassModel;
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassCustomization getClassCustomization() {
+        return classCustomization;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    /**
      * Gets a property model by default (non customized) name.
      *
      * @param name A name as parsed from field / getter / setter without annotation customizing.
@@ -53,22 +86,6 @@ public class ClassModel {
      */
     public PropertyModel getPropertyModel(String name) {
         return properties.get(name);
-    }
-
-    /**
-     * Create instance of class model.
-     *
-     * @param clazz Class to model.
-     * @param customization Customization of the class parsed from annotations.
-     * @param parentClassModel Class model of parent class.
-     * @param propertyNamingStrategy Property naming strategy.
-     */
-    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
-        this.clazz = clazz;
-        this.classCustomization = customization;
-        this.parentClassModel = parentClassModel;
-        this.propertyNamingStrategy = propertyNamingStrategy;
-        setProperties(new ArrayList<>());
     }
 
     /**
@@ -80,6 +97,30 @@ public class ClassModel {
     public PropertyModel findPropertyModelByJsonReadName(String jsonReadName) {
         Objects.requireNonNull(jsonReadName);
         return searchProperty(this, jsonReadName);
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedProperties class properties
+     */
+    public void setProperties(List<PropertyModel> parsedProperties) {
+        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
+        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
+    }
+
+    /**
+     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
+        final String propertyReadName = propertyModel.getReadName();
+        if (propertyNamingStrategy instanceof CaseInsensitiveStrategy) {
+            return jsonName.equalsIgnoreCase(propertyReadName);
+        }
+        return jsonName.equals(propertyReadName);
     }
 
     private PropertyModel searchProperty(ClassModel classModel, String jsonReadName) {
@@ -99,26 +140,19 @@ public class ClassModel {
     }
 
     /**
-     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
+     * Create instance of class model.
      *
-     * @return True if names are equal.
+     * @param clazz Class to model.
+     * @param customization Customization of the class parsed from annotations.
+     * @param parentClassModel Class model of parent class.
+     * @param propertyNamingStrategy Property naming strategy.
      */
-    private boolean equalsReadName(String jsonName, PropertyModel propertyModel) {
-        final String propertyReadName = propertyModel.getReadName();
-        if (propertyNamingStrategy instanceof CaseInsensitiveStrategy) {
-            return jsonName.equalsIgnoreCase(propertyReadName);
-        }
-        return jsonName.equals(propertyReadName);
-    }
-
-    /**
-     * Gets customization.
-     *
-     * @return Customization.
-     */
-    public ClassCustomization getCustomization() {
-        return classCustomization;
+    public ClassModel(Class<?> clazz, ClassCustomization customization, ClassModel parentClassModel, PropertyNamingStrategy propertyNamingStrategy) {
+        this.clazz = clazz;
+        this.classCustomization = customization;
+        this.parentClassModel = parentClassModel;
+        this.propertyNamingStrategy = propertyNamingStrategy;
+        setProperties(new ArrayList<>());
     }
 
     /**
@@ -131,45 +165,12 @@ public class ClassModel {
     }
 
     /**
-     * Introspected customization for a class.
+     * Gets customization.
      *
-     * @return Immutable class customization.
+     * @return Customization.
      */
-    public ClassCustomization getClassCustomization() {
+    public ClassCustomization getCustomization() {
         return classCustomization;
     }
 
-    /**
-     * Class model of parent class if present.
-     * @return class model of a parent
-     */
-    public ClassModel getParentClassModel() {
-        return parentClassModel;
-    }
-
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return sortedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedProperties class properties
-     */
-    public void setProperties(List<PropertyModel> parsedProperties) {
-        sortedProperties = parsedProperties.toArray(new PropertyModel[] {});
-        this.properties = parsedProperties.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mod) -> mod));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
 }

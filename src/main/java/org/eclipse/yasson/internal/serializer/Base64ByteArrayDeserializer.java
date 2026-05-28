@@ -30,15 +30,6 @@ import java.util.Base64;
  */
 public class Base64ByteArrayDeserializer extends BaseValueTypeDeserializer<byte[]> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public Base64ByteArrayDeserializer(Customization config) {
-        super(byte[].class, config);
-    }
-
     @Override
     protected byte[] deserializeInstance(String jsonString, Unmarshaller converter, Type rtType) {
         return getDecoder(converter.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonString);
@@ -54,4 +45,14 @@ public class Base64ByteArrayDeserializer extends BaseValueTypeDeserializer<byte[
                 throw new JsonbException(LocalizedMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + decodeMode));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public Base64ByteArrayDeserializer(Customization config) {
+        super(byte[].class, config);
+    }
+
 }
