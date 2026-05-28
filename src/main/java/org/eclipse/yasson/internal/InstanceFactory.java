@@ -29,10 +29,6 @@ public class InstanceFactory {
 
     private static final InstanceFactory DEFAULT_FACTORY = new InstanceFactory();
 
-    static InstanceFactory getSingleton() {
-        return DEFAULT_FACTORY;
-    }
-
     private static final Map<Class, Supplier> CLASS_TO_SUPPLIER_MAP = new HashMap<>();
 
     static {
@@ -68,4 +64,9 @@ public class InstanceFactory {
         }
         return supplier.get();
     }
+
+    static InstanceFactory getSingleton() {
+        return DEFAULT_FACTORY;
+    }
+
 }

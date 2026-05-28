@@ -27,6 +27,20 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T[] getInstance(JsonbDeserializer unmarshaller) {
+        if (null == arrayInstance || items.size() != arrayInstance.length) {
+            arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
+        }
+        return items.toArray(arrayInstance);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
     /**
      * Creates new instance of object array deserializer.
      *
@@ -36,17 +50,4 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
         super(builder);
     }
 
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public T[] getInstance(JsonbDeserializer unmarshaller) {
-        if (null == arrayInstance || items.size() != arrayInstance.length) {
-            arrayInstance = (T[]) Array.newInstance(getComponentClass(), items.size());
-        }
-        return items.toArray(arrayInstance);
-    }
 }

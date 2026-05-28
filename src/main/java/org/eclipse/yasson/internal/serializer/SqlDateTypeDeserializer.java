@@ -26,13 +26,14 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlDateTypeDeserializer(Customization customization) {
-        super(Date.class, customization);
+    @Override
+    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return Date.valueOf(LocalDate.parse(jsonValue, formatter));
+    }
+
+    @Override
+    protected Date parseDefault(String jsonValue, Locale locale) {
+        return Date.valueOf(LocalDate.parse(jsonValue, DEFAULT_FORMATTER));
     }
 
     /**
@@ -42,18 +43,18 @@ public class SqlDateTypeDeserializer extends AbstractDateTimeDeserializer<Date> 
         super(Date.class, null);
     }
 
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlDateTypeDeserializer(Customization customization) {
+        super(Date.class, customization);
+    }
+
     @Override
     protected Date fromInstant(Instant instant) {
         return new Date(instant.toEpochMilli());
     }
 
-    @Override
-    protected Date parseDefault(String jsonValue, Locale locale) {
-        return Date.valueOf(LocalDate.parse(jsonValue, DEFAULT_FORMATTER));
-    }
-
-    @Override
-    protected Date parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return Date.valueOf(LocalDate.parse(jsonValue, formatter));
-    }
 }

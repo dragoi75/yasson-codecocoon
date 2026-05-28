@@ -32,39 +32,6 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     private JsonValue currentValue;
 
-    /**
-     * Creates new array iterator.
-     *
-     * @param jsonArray json array
-     */
-    public JsonArrayIterator(JsonArray jsonArray) {
-        this.valueIterator = jsonArray.iterator();
-    }
-
-    /**
-     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
-     *
-     * @return always true
-     */
-    @Override
-    public boolean hasNext() {
-        return true;
-    }
-
-    @Override
-    public JsonParser.Event next() {
-        if (valueIterator.hasNext()) {
-            currentValue = valueIterator.next();
-            return getValueEvent(currentValue);
-        }
-        return JsonParser.Event.END_ARRAY;
-    }
-
-    @Override
-    JsonValue getValue() {
-        return currentValue;
-    }
-
     @Override
     JsonbException createIncompatibleValueError() {
         return new JsonbException(Messages.getMessage(MessageKeys.NUMBER_INCOMPATIBLE_VALUE_TYPE_ARRAY,
@@ -78,4 +45,38 @@ public class JsonArrayIterator extends JsonStructureIterator {
         }
         return currentValue.toString();
     }
+
+    @Override
+    public JsonParser.Event next() {
+        if (valueIterator.hasNext()) {
+            currentValue = valueIterator.next();
+            return getValueEvent(currentValue);
+        }
+        return JsonParser.Event.END_ARRAY;
+    }
+
+    /**
+     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
+     *
+     * @return always true
+     */
+    @Override
+    public boolean hasNext() {
+        return true;
+    }
+
+    @Override
+    JsonValue getValue() {
+        return currentValue;
+    }
+
+    /**
+     * Creates new array iterator.
+     *
+     * @param jsonArray json array
+     */
+    public JsonArrayIterator(JsonArray jsonArray) {
+        this.valueIterator = jsonArray.iterator();
+    }
+
 }

@@ -52,17 +52,12 @@ public class JsonbDateFormatter {
 
     private final String locale;
 
-    /**
-     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
-     *
-     * @param dateTimeFormatter Reused time formatter.
-     * @param format            Format in string.
-     * @param locale            Locale in string.
-     */
-    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
-        this.dateTimeFormatter = dateTimeFormatter;
-        this.format = format;
-        this.locale = locale;
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
+    }
+
+    public static JsonbDateFormatter getDefault() {
+        return DEFAULT;
     }
 
     /**
@@ -79,12 +74,12 @@ public class JsonbDateFormatter {
     }
 
     /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     * Locale to use with formatter.
      *
-     * @return Formatter instance.
+     * @return Locale.
      */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return dateTimeFormatter;
+    public String getLocale() {
+        return locale;
     }
 
     /**
@@ -99,19 +94,25 @@ public class JsonbDateFormatter {
     }
 
     /**
-     * Locale to use with formatter.
+     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
      *
-     * @return Locale.
+     * @param dateTimeFormatter Reused time formatter.
+     * @param format            Format in string.
+     * @param locale            Locale in string.
      */
-    public String getLocale() {
-        return locale;
+    public JsonbDateFormatter(DateTimeFormatter dateTimeFormatter, String format, String locale) {
+        this.dateTimeFormatter = dateTimeFormatter;
+        this.format = format;
+        this.locale = locale;
     }
 
-    public static JsonbDateFormatter getDefault() {
-        return DEFAULT;
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return dateTimeFormatter;
     }
 
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(format);
-    }
 }

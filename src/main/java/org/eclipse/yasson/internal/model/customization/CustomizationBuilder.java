@@ -32,12 +32,75 @@ public abstract class CustomizationBuilder {
     private String[] propertyOrder;
 
     /**
+     * Gets a deserializer.
+     *
+     * @return Deserializer.
+     */
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
+    /**
+     * Sets a sorted list of property names.
+     *
+     * @param propertyOrder Array containing property names
+     */
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
+    }
+
+    /**
+     * Sets serializer info.
+     *
+     * @param serializerBinding Serializer info to set.
+     */
+    public void setSerializerBinding(SerializerBinding serializerBinding) {
+        this.serializerBinding = serializerBinding;
+    }
+
+    /**
+     * Gets ordered list of property names.
+     *
+     * @return Sorted names of properties.
+     */
+    public String[] getPropertyOrder() {
+        return propertyOrder;
+    }
+
+    /**
+     * Gets meta info for user serializers.
+     *
+     * @return Serializer info
+     */
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinding;
+    }
+
+    /**
      * Returns true if <i>nillable</i> customization is present.
      *
      * @return True if <i>nillable</i> customization is present.
      */
     public boolean isNillable() {
         return nillable;
+    }
+
+    /**
+     * Sets an components.
+     *
+     * @param adapterInfo Adapter.
+     */
+    public void setAdapterInfo(AdapterBinding adapterInfo) {
+        this.adapterInfo = adapterInfo;
+    }
+
+    /**
+     * Sets a deserializer info.
+     *
+     * @param deserializerBinding Deserializer.
+     */
+    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
+        this.deserializerBinding = deserializerBinding;
     }
 
     /**
@@ -58,66 +121,4 @@ public abstract class CustomizationBuilder {
         return adapterInfo;
     }
 
-    /**
-     * Sets an components.
-     *
-     * @param adapterInfo Adapter.
-     */
-    public void setAdapterInfo(AdapterBinding adapterInfo) {
-        this.adapterInfo = adapterInfo;
-    }
-
-    /**
-     * Gets meta info for user serializers.
-     *
-     * @return Serializer info
-     */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Sets serializer info.
-     *
-     * @param serializerBinding Serializer info to set.
-     */
-    public void setSerializerBinding(SerializerBinding serializerBinding) {
-        this.serializerBinding = serializerBinding;
-    }
-
-    /**
-     * Gets a deserializer.
-     *
-     * @return Deserializer.
-     */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
-    /**
-     * Sets a deserializer info.
-     *
-     * @param deserializerBinding Deserializer.
-     */
-    public void setDeserializerBinding(DeserializerBinding deserializerBinding) {
-        this.deserializerBinding = deserializerBinding;
-    }
-
-    /**
-     * Gets ordered list of property names.
-     *
-     * @return Sorted names of properties.
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
-    }
-
-    /**
-     * Sets a sorted list of property names.
-     *
-     * @param propertyOrder Array containing property names
-     */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
-    }
 }

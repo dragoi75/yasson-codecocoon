@@ -36,6 +36,50 @@ public class JsonStructureToParserAdapter implements JsonParser {
 
     private final JsonStructure rootStructure;
 
+    @Override
+    public String getString() {
+        return iterators.peek().getString();
+    }
+
+    private JsonNumber getJsonNumberValue() {
+        JsonStructureIterator iterator = iterators.peek();
+        JsonValue value = iterator.getValue();
+        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
+            throw iterator.createIncompatibleValueError();
+        }
+        return (JsonNumber) value;
+    }
+
+    @Override
+    public int getInt() {
+        return getJsonNumberValue().intValueExact();
+    }
+
+    @Override
+    public JsonLocation getLocation() {
+        throw new JsonbException("Operation not supported");
+    }
+
+    @Override
+    public void close() {
+        //noop
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return getJsonNumberValue().bigDecimalValue();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return iterators.peek().hasNext();
+    }
+
+    @Override
+    public long getLong() {
+        return getJsonNumberValue().longValueExact();
+    }
+
     /**
      * Creates new {@link JsonStructure} parser.
      *
@@ -43,11 +87,6 @@ public class JsonStructureToParserAdapter implements JsonParser {
      */
     public JsonStructureToParserAdapter(JsonStructure structure) {
         this.rootStructure = structure;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return iterators.peek().hasNext();
     }
 
     @Override
@@ -80,46 +119,8 @@ public class JsonStructureToParserAdapter implements JsonParser {
     }
 
     @Override
-    public String getString() {
-        return iterators.peek().getString();
-    }
-
-    @Override
     public boolean isIntegralNumber() {
         return getJsonNumberValue().isIntegral();
     }
 
-    @Override
-    public int getInt() {
-        return getJsonNumberValue().intValueExact();
-    }
-
-    @Override
-    public long getLong() {
-        return getJsonNumberValue().longValueExact();
-    }
-
-    @Override
-    public BigDecimal getBigDecimal() {
-        return getJsonNumberValue().bigDecimalValue();
-    }
-
-    private JsonNumber getJsonNumberValue() {
-        JsonStructureIterator iterator = iterators.peek();
-        JsonValue value = iterator.getValue();
-        if (JsonValue.ValueType.NUMBER != value.getValueType()) {
-            throw iterator.createIncompatibleValueError();
-        }
-        return (JsonNumber) value;
-    }
-
-    @Override
-    public JsonLocation getLocation() {
-        throw new JsonbException("Operation not supported");
-    }
-
-    @Override
-    public void close() {
-        //noop
-    }
 }

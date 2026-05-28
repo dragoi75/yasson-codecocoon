@@ -38,36 +38,48 @@ public abstract class ContainerDeserializerBase<T> extends AbstractWrappedItem<T
     private JsonbRiEventParser.ParsingLevelContext parsingLevel;
 
     /**
-     * Create instance of current item with its builder.
+     * Sets new parser context.
      *
-     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
+     * @param parsingLevel parser context
      */
-    ContainerDeserializerBase(JsonDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
+    void setParserContext(JsonbRiEventParser.ParsingLevelContext parsingLevel) {
+        this.parsingLevel = parsingLevel;
     }
 
     /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
+     * If value is null and property model type is one of {@link Optional}, {@link OptionalDouble},
+     * {@link OptionalInt}, or {@link OptionalLong}, value of corresponding {@code Optional#empty()}
+     * is returned.
      *
-     * @param tokenStream  JSON parser.
-     * @param deserializationEnv Deseriaization context.
-     * @param runtimeType  Runtime type.
-     * @return Instance of a type for this item.
+     * @param fieldType property type
+     * @param item        value to set
+     * @return empty optional if applies
      */
-    @Override
-    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationEnv, Type runtimeType) {
-        JsonbDeserializer elementDeserializer = (JsonbDeserializer) deserializationEnv;
-        deserialize((JsonbNavigator) tokenStream, elementDeserializer);
-        return getInstance((JsonbDeserializer) deserializationEnv);
+    protected Object convertNullToOptional(Type fieldType, Object item) {
+        if (null != item) {
+            return item;
+        }
+        if (!(fieldType instanceof Class)) {
+            fieldType = ReflectionHelper.getRawType(ReflectionHelper.resolveActualType(this, fieldType));
+        }
+        if (Optional.class != fieldType) {
+            if (OptionalInt.class != fieldType) {
+                if (OptionalLong.class != fieldType) {
+                    if (OptionalDouble.class != fieldType) {
+                        return null;
+                    } else {
+                        return OptionalDouble.empty();
+                    }
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
+                return OptionalInt.empty();
+            }
+        } else {
+            return Optional.empty();
+        }
     }
-
-    /**
-     * Creates and initializes an instance of deserializing item.
-     *
-     * @param deserializerInstance Current deserialization context.
-     * @return An instance of deserializing item.
-     */
-    protected abstract T getInstance(JsonbDeserializer deserializerInstance);
 
     /**
      * Deserialize specific item type.
@@ -111,23 +123,6 @@ public abstract class ContainerDeserializerBase<T> extends AbstractWrappedItem<T
     }
 
     /**
-     * Determine class mappings and create an instance of a new deserializer.
-     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
-     *
-     * @param tokenStream  Json parser.
-     * @param deserializationEnv Current unmarshalling context.
-     */
-    protected abstract void deserializeNextValue(JsonParser tokenStream, JsonbDeserializer deserializationEnv);
-
-    /**
-     * Move to first event for current deserializer structure.
-     *
-     * @param tokenStream Json parser.
-     * @return First event.
-     */
-    protected abstract JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator tokenStream);
-
-    /**
      * Returns new deserialization builder for specific item.
      *
      * @param elementDeserializer jsonb context
@@ -136,6 +131,50 @@ public abstract class ContainerDeserializerBase<T> extends AbstractWrappedItem<T
     protected JsonDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext elementDeserializer) {
         return ContainerDeserializerUtils.newUnmarshallerItemBuilder(this, elementDeserializer, parsingLevel.getLastEvent());
     }
+
+    /**
+     * After object is transitively deserialized from JSON, "append" it to its wrapper.
+     * In case of a field set value to field, in case of collections
+     * or other embedded objects use methods provided.
+     *
+     * @param output An instance result of an item.
+     */
+    public abstract void addResult(Object output);
+
+    /**
+     * Creates and initializes an instance of deserializing item.
+     *
+     * @param deserializerInstance Current deserialization context.
+     * @return An instance of deserializing item.
+     */
+    protected abstract T getInstance(JsonbDeserializer deserializerInstance);
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param deserializerFactory {@link JsonDeserializerBuilder} used to build this instance
+     */
+    ContainerDeserializerBase(JsonDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
+    /**
+     * Returns parser context.
+     *
+     * @return parser context
+     */
+    JsonbRiEventParser.ParsingLevelContext getParserContext() {
+        return parsingLevel;
+    }
+
+    /**
+     * Determine class mappings and create an instance of a new deserializer.
+     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
+     *
+     * @param tokenStream  Json parser.
+     * @param deserializationEnv Current unmarshalling context.
+     */
+    protected abstract void deserializeNextValue(JsonParser tokenStream, JsonbDeserializer deserializationEnv);
 
     /**
      * Returns new deserialization builder for specific collection or map.
@@ -149,64 +188,26 @@ public abstract class ContainerDeserializerBase<T> extends AbstractWrappedItem<T
     }
 
     /**
-     * If value is null and property model type is one of {@link Optional}, {@link OptionalDouble},
-     * {@link OptionalInt}, or {@link OptionalLong}, value of corresponding {@code Optional#empty()}
-     * is returned.
+     * Move to first event for current deserializer structure.
      *
-     * @param fieldType property type
-     * @param item        value to set
-     * @return empty optional if applies
+     * @param tokenStream Json parser.
+     * @return First event.
      */
-    protected Object convertNullToOptional(Type fieldType, Object item) {
-        if (null != item) {
-            return item;
-        }
-        if (!(fieldType instanceof Class)) {
-            fieldType = ReflectionHelper.getRawType(ReflectionHelper.resolveActualType(this, fieldType));
-        }
-        if (Optional.class != fieldType) {
-            if (OptionalInt.class != fieldType) {
-                if (OptionalLong.class != fieldType) {
-                    if (OptionalDouble.class != fieldType) {
-                        return null;
-                    } else {
-                        return OptionalDouble.empty();
-                    }
-                } else {
-                    return OptionalLong.empty();
-                }
-            } else {
-                return OptionalInt.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
-    }
+    protected abstract JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator tokenStream);
 
     /**
-     * After object is transitively deserialized from JSON, "append" it to its wrapper.
-     * In case of a field set value to field, in case of collections
-     * or other embedded objects use methods provided.
+     * Drives JSONP {@link JsonParser} to deserialize json document.
      *
-     * @param output An instance result of an item.
+     * @param tokenStream  JSON parser.
+     * @param deserializationEnv Deseriaization context.
+     * @param runtimeType  Runtime type.
+     * @return Instance of a type for this item.
      */
-    public abstract void addResult(Object output);
-
-    /**
-     * Returns parser context.
-     *
-     * @return parser context
-     */
-    JsonbRiEventParser.ParsingLevelContext getParserContext() {
-        return parsingLevel;
+    @Override
+    public final T deserialize(JsonParser tokenStream, DeserializationContext deserializationEnv, Type runtimeType) {
+        JsonbDeserializer elementDeserializer = (JsonbDeserializer) deserializationEnv;
+        deserialize((JsonbNavigator) tokenStream, elementDeserializer);
+        return getInstance((JsonbDeserializer) deserializationEnv);
     }
 
-    /**
-     * Sets new parser context.
-     *
-     * @param parsingLevel parser context
-     */
-    void setParserContext(JsonbRiEventParser.ParsingLevelContext parsingLevel) {
-        this.parsingLevel = parsingLevel;
-    }
 }

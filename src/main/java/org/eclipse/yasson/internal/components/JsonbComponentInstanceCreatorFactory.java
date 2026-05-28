@@ -29,10 +29,6 @@ public class JsonbComponentInstanceCreatorFactory {
 
     private static final Logger LOGGER = Logger.getLogger(JsonbComponentInstanceCreator.class.getName());
 
-    private JsonbComponentInstanceCreatorFactory() {
-        throw new IllegalStateException("This class should never be instantiated");
-    }
-
     /**
      * JNDI bean manager name.
      */
@@ -46,24 +42,11 @@ public class JsonbComponentInstanceCreatorFactory {
     private static final String CDI_SPI_CLASS = "javax.enterprise.inject.spi.CDI";
 
     /**
-     * First check a CDI provider, if available use those.
-     * Try to lookup in a JNDI if no provider is registered.
-     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
-     * or {@link DefaultConstructorCreator} otherwise.
-     *
-     * @param creator Instance creator
-     * @return Component instance creator, either CDI or default constructor.
+     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
      */
-    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceFactory creator) {
-        Object beanManager = getCdiBeanManager();
-        if (null == beanManager) {
-            beanManager = getJndiBeanManager();
-        }
-        if (null == beanManager) {
-            LOGGER.finest(Messages.getMessage(MessageKeys.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
-            return new DefaultConstructorCreator(creator);
-        }
-        return new BeanManagerInstanceCreator(beanManager);
+    private interface BeanManagerProvider {
+
+        Object provide() throws ReflectiveOperationException;
     }
 
     /**
@@ -140,11 +123,29 @@ public class JsonbComponentInstanceCreatorFactory {
         }
     }
 
-    /**
-     * Provides CDI bean manager instance, declares all exceptions thrown with reflective calls.
-     */
-    private interface BeanManagerProvider {
-
-        Object provide() throws ReflectiveOperationException;
+    private JsonbComponentInstanceCreatorFactory() {
+        throw new IllegalStateException("This class should never be instantiated");
     }
+
+    /**
+     * First check a CDI provider, if available use those.
+     * Try to lookup in a JNDI if no provider is registered.
+     * If one of the above is found {@link BeanManagerInstanceCreator} is returned,
+     * or {@link DefaultConstructorCreator} otherwise.
+     *
+     * @param creator Instance creator
+     * @return Component instance creator, either CDI or default constructor.
+     */
+    public static JsonbComponentInstanceCreator getComponentInstanceCreator(InstanceFactory creator) {
+        Object beanManager = getCdiBeanManager();
+        if (null == beanManager) {
+            beanManager = getJndiBeanManager();
+        }
+        if (null == beanManager) {
+            LOGGER.finest(Messages.getMessage(MessageKeys.BEAN_MANAGER_NOT_FOUND_USING_DEFAULT));
+            return new DefaultConstructorCreator(creator);
+        }
+        return new BeanManagerInstanceCreator(beanManager);
+    }
+
 }

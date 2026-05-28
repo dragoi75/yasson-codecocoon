@@ -9,6 +9,14 @@ public class CollectionsData {
 
     private Set<ScalarData> setData;
 
+    public Set<ScalarData> getSetData() {
+        return setData;
+    }
+
+    public void setSetData(Set<ScalarData> setData) {
+        this.setData = setData;
+    }
+
     public List<ScalarData> getListData() {
         return listData;
     }
@@ -17,11 +25,4 @@ public class CollectionsData {
         this.listData = listData;
     }
 
-    public Set<ScalarData> getSetData() {
-        return setData;
-    }
-
-    public void setSetData(Set<ScalarData> setData) {
-        this.setData = setData;
-    }
 }

@@ -20,15 +20,6 @@ public class ContainerCustomization extends ClassCustomization {
     /**
      * Creates a new instance.
      *
-     * @param builder Builder to initialize from.
-     */
-    public ContainerCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
-    }
-
-    /**
-     * Creates a new instance.
-     *
      * @param other Class customization to initialize from.
      */
     public ContainerCustomization(ClassCustomization other) {
@@ -44,4 +35,14 @@ public class ContainerCustomization extends ClassCustomization {
     public final boolean isNillable() {
         return true;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param builder Builder to initialize from.
+     */
+    public ContainerCustomization(ClassCustomizationBuilder builder) {
+        super(builder);
+    }
+
 }

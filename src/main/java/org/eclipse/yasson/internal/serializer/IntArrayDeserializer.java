@@ -22,6 +22,18 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
 
     private final List<Integer> items = new ArrayList<>();
 
+    @Override
+    public int[] getInstance(JsonbDeserializer unmarshaller) {
+        final int size = items.size();
+        final int[] intArray = new int[size];
+        int i = 0;
+        while (size > i) {
+            intArray[i] = items.get(i);
+            i += 1;
+        }
+        return intArray;
+    }
+
     /**
      * Creates new instance of int array deserializer.
      *
@@ -36,15 +48,4 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
         return items;
     }
 
-    @Override
-    public int[] getInstance(JsonbDeserializer unmarshaller) {
-        final int size = items.size();
-        final int[] intArray = new int[size];
-        int i = 0;
-        while (size > i) {
-            intArray[i] = items.get(i);
-            i += 1;
-        }
-        return intArray;
-    }
 }

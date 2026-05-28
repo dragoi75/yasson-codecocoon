@@ -45,7 +45,28 @@ public class YassonConfig extends JsonbConfig {
      * @see #withEagerParsing(Class...)
      */
     public static final String EAGER_PARSE_CLASSES = "yasson.eager-parse-classes";
-    
+
+    /**
+     * Serializer to use when object provided to {@link jakarta.json.bind.Jsonb#toJson(Object)} is {@code null} or an empty
+     * Optional. Must be instance of {@link JsonbSerializer}{@code <Object>}. Its obj value
+     * will be respective parameter.
+     * @param nullSerializer JsonbSerializer instance to use for serializing null root values
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withNullRootSerializer(JsonbSerializer<?> nullSerializer) {
+        setProperty(NULL_ROOT_SERIALIZER, nullSerializer);
+        return this;
+    }
+
+    /**
+     * @param classes A list of classes to eagerly parse upon creation of the Jsonb instance used with this configuration.
+     * @return This YassonConfig instance
+     */
+    public YassonConfig withEagerParsing(Class<?>... classes) {
+        setProperty(EAGER_PARSE_CLASSES, classes);
+        return this;
+    }
+
     /**
      * Property used to specify behaviour on deserialization when JSON document contains properties
      * which doesn't exist in the target class. Default value is 'false'.
@@ -56,17 +77,7 @@ public class YassonConfig extends JsonbConfig {
         setProperty(FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
         return this;
     }
-    
-    /**
-     * User type mapping for map interface to implementation classes.
-     * @param mapping A map of interface to implementation class mappings
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withUserTypeMapping(Map<Class<?>, Class<?>> mapping) {
-        setProperty(USER_TYPE_MAPPING, mapping);
-        return this;
-    }
-    
+
     /**
      * <p>Makes parsing dates defaulting to zero hour, minute and second.
      * This will made available to parse patterns like yyyy.MM.dd to
@@ -82,26 +93,15 @@ public class YassonConfig extends JsonbConfig {
         setProperty(ZERO_TIME_PARSE_DEFAULTING, defaultZeroHour);
         return this;
     }
-    
+
     /**
-     * Serializer to use when object provided to {@link jakarta.json.bind.Jsonb#toJson(Object)} is {@code null} or an empty
-     * Optional. Must be instance of {@link jakarta.json.bind.serializer.JsonbSerializer}{@code <Object>}. Its obj value
-     * will be respective parameter.
-     * @param nullSerializer JsonbSerializer instance to use for serializing null root values
+     * User type mapping for map interface to implementation classes.
+     * @param mapping A map of interface to implementation class mappings
      * @return This YassonConfig instance
      */
-    public YassonConfig withNullRootSerializer(JsonbSerializer<?> nullSerializer) {
-        setProperty(NULL_ROOT_SERIALIZER, nullSerializer);
+    public YassonConfig withUserTypeMapping(Map<Class<?>, Class<?>> mapping) {
+        setProperty(USER_TYPE_MAPPING, mapping);
         return this;
     }
-    
-    /**
-     * @param classes A list of classes to eagerly parse upon creation of the Jsonb instance used with this configuration. 
-     * @return This YassonConfig instance
-     */
-    public YassonConfig withEagerParsing(Class<?>... classes) {
-        setProperty(EAGER_PARSE_CLASSES, classes);
-        return this;
-    }
-    
+
 }

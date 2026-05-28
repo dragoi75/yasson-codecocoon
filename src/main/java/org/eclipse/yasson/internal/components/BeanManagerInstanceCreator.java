@@ -42,16 +42,40 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
     private final ConcurrentMap<Class<?>, CDIManagedBean<?>> injectionTargets = new ConcurrentHashMap<>();
 
     /**
-     * Creates a new instance.
-     *
-     * @param beanManager Bean manager.
+     * Holder for bean instance and its injection target.
      */
-    public BeanManagerInstanceCreator(Object beanManager) {
-        if (!(beanManager instanceof BeanManager)) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
-                                                         "beanManager instance should be of type '" + BeanManager.class + "'"));
+    private static final class CDIManagedBean<T> {
+        private final T instance;
+        private final InjectionTarget<T> injectionTarget;
+        private final CreationalContext<T> creationalContext;
+
+        /**
+         * @return creational context
+         */
+        private CreationalContext<T> getCreationalContext() {
+            return creationalContext;
         }
-        this.beanManager = (BeanManager) beanManager;
+
+        /**
+         * @return managed instance of a bean
+         */
+        private T getInstance() {
+            return instance;
+        }
+
+        /**
+         * @return CDI InjectionTarget
+         */
+        private InjectionTarget<T> getInjectionTarget() {
+            return injectionTarget;
+        }
+
+        CDIManagedBean(T instance, InjectionTarget<T> injectionTarget, CreationalContext<T> creationalContext) {
+            this.instance = instance;
+            this.injectionTarget = injectionTarget;
+            this.creationalContext = creationalContext;
+        }
+
     }
 
     /**
@@ -75,6 +99,12 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
         }).getInstance();
     }
 
+    private <T> void cleanupBean(CDIManagedBean<T> bean) {
+        bean.getInjectionTarget().preDestroy(bean.getInstance());
+        bean.getInjectionTarget().dispose(bean.getInstance());
+        bean.getCreationalContext().release();
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void close() throws IOException {
@@ -82,45 +112,17 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
         injectionTargets.clear();
     }
 
-    private <T> void cleanupBean(CDIManagedBean<T> bean) {
-        bean.getInjectionTarget().preDestroy(bean.getInstance());
-        bean.getInjectionTarget().dispose(bean.getInstance());
-        bean.getCreationalContext().release();
-    }
-
     /**
-     * Holder for bean instance and its injection target.
+     * Creates a new instance.
+     *
+     * @param beanManager Bean manager.
      */
-    private static final class CDIManagedBean<T> {
-        private final T instance;
-        private final InjectionTarget<T> injectionTarget;
-        private final CreationalContext<T> creationalContext;
-
-        CDIManagedBean(T instance, InjectionTarget<T> injectionTarget, CreationalContext<T> creationalContext) {
-            this.instance = instance;
-            this.injectionTarget = injectionTarget;
-            this.creationalContext = creationalContext;
+    public BeanManagerInstanceCreator(Object beanManager) {
+        if (!(beanManager instanceof BeanManager)) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.INTERNAL_ERROR,
+                                                         "beanManager instance should be of type '" + BeanManager.class + "'"));
         }
-
-        /**
-         * @return CDI InjectionTarget
-         */
-        private InjectionTarget<T> getInjectionTarget() {
-            return injectionTarget;
-        }
-
-        /**
-         * @return managed instance of a bean
-         */
-        private T getInstance() {
-            return instance;
-        }
-
-        /**
-         * @return creational context
-         */
-        private CreationalContext<T> getCreationalContext() {
-            return creationalContext;
-        }
+        this.beanManager = (BeanManager) beanManager;
     }
+
 }

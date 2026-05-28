@@ -42,13 +42,31 @@ class CollectionDeserializer<T extends Collection<?>> extends ContainerDeseriali
 
     private T instance;
 
-    /**
-     * @param builder {@link JsonDeserializerBuilder ) used to build this instance
-     */
-    protected CollectionDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveActualType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
-        instance = createInstance(builder);
+    @Override
+    protected JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    @Override
+    public T getInstance(JsonbDeserializer unmarshaller) {
+        return instance;
+    }
+
+    @Override
+    public void addResult(Object result) {
+        appendCaptor(convertNullToOptional(collectionValueType, result));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void appendCaptor(T object) {
+        ((Collection<T>) instance).add(object);
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser parser, JsonbDeserializer context) {
+        final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createCollectionOrMapItem(collectionValueType, context.getJsonbContext());
+        addResult(deserializer.deserialize(parser, context, collectionValueType));
     }
 
     @SuppressWarnings("unchecked")
@@ -90,30 +108,13 @@ class CollectionDeserializer<T extends Collection<?>> extends ContainerDeseriali
         return null;
     }
 
-    @Override
-    public T getInstance(JsonbDeserializer unmarshaller) {
-        return instance;
+    /**
+     * @param builder {@link JsonDeserializerBuilder ) used to build this instance
+     */
+    protected CollectionDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+        collectionValueType = getRuntimeType() instanceof ParameterizedType ? ReflectionHelper.resolveActualType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
+        instance = createInstance(builder);
     }
 
-    @Override
-    public void addResult(Object result) {
-        appendCaptor(convertNullToOptional(collectionValueType, result));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void appendCaptor(T object) {
-        ((Collection<T>) instance).add(object);
-    }
-
-    @Override
-    protected void deserializeNextValue(JsonParser parser, JsonbDeserializer context) {
-        final jakarta.json.bind.serializer.JsonbDeserializer<?> deserializer = createCollectionOrMapItem(collectionValueType, context.getJsonbContext());
-        addResult(deserializer.deserialize(parser, context, collectionValueType));
-    }
-
-    @Override
-    protected JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

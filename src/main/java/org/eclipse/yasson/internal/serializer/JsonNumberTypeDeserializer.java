@@ -29,15 +29,6 @@ public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<Js
 
     private static final String NUMBER = "number";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public JsonNumberTypeDeserializer(Customization customization) {
-        super(JsonNumber.class, customization);
-    }
-
     @Override
     protected JsonNumber deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         final JsonBuilderFactory factory = unmarshaller.getJsonbContext().getJsonProvider().createBuilderFactory(null);
@@ -66,4 +57,14 @@ public class JsonNumberTypeDeserializer extends AbstractValueTypeDeserializer<Js
                 .build();
         return jsonObject.getJsonNumber(NUMBER);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public JsonNumberTypeDeserializer(Customization customization) {
+        super(JsonNumber.class, customization);
+    }
+
 }

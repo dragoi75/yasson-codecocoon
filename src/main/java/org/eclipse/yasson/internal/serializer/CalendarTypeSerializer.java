@@ -26,6 +26,25 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class CalendarTypeSerializer extends AbstractDateTimeSerializer<Calendar> {
 
+    private ZonedDateTime toZonedDateTime(Calendar object) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.getTimeInMillis()),
+                                       object.getTimeZone().toZoneId());
+    }
+
+    @Override
+    protected TemporalAccessor toTemporalAccessor(Calendar object) {
+        return toZonedDateTime(object);
+    }
+
+    @Override
+    protected String formatDefault(Calendar value, Locale locale) {
+        DateTimeFormatter formatter = value.isSet(Calendar.HOUR) || value.isSet(Calendar.HOUR_OF_DAY)
+                ? DateTimeFormatter.ISO_DATE_TIME
+                : DateTimeFormatter.ISO_DATE;
+        return formatter.withZone(value.getTimeZone().toZoneId())
+                .withLocale(locale).format(toTemporalAccessor(value));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -40,22 +59,4 @@ public class CalendarTypeSerializer extends AbstractDateTimeSerializer<Calendar>
         return value.toInstant();
     }
 
-    @Override
-    protected String formatDefault(Calendar value, Locale locale) {
-        DateTimeFormatter formatter = value.isSet(Calendar.HOUR) || value.isSet(Calendar.HOUR_OF_DAY)
-                ? DateTimeFormatter.ISO_DATE_TIME
-                : DateTimeFormatter.ISO_DATE;
-        return formatter.withZone(value.getTimeZone().toZoneId())
-                .withLocale(locale).format(toTemporalAccessor(value));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Calendar object) {
-        return toZonedDateTime(object);
-    }
-
-    private ZonedDateTime toZonedDateTime(Calendar object) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(object.getTimeInMillis()),
-                                       object.getTimeZone().toZoneId());
-    }
 }

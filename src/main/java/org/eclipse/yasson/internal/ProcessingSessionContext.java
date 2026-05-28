@@ -30,12 +30,23 @@ public abstract class ProcessingSessionContext {
     private final Set<Object> processedObjects = new HashSet<>();
 
     /**
-     * Parent instance for marshaller and unmarshaller.
+     * Adds currently processed object to the {@link Set}.
      *
-     * @param runtimeContext context of Jsonb
+     * @param itemToRegister processed object
+     * @return if object was added
      */
-    public ProcessingSessionContext(JsonbRuntimeContext runtimeContext) {
-        this.runtimeContext = runtimeContext;
+    public boolean registerProcessedObject(Object itemToRegister) {
+        return this.processedObjects.add(itemToRegister);
+    }
+
+    /**
+     * Removes processed object from the {@link Set}.
+     *
+     * @param itemToRegister processed object
+     * @return if object was removed
+     */
+    public boolean unregisterProcessedObject(Object itemToRegister) {
+        return processedObjects.remove(itemToRegister);
     }
 
     /**
@@ -57,23 +68,12 @@ public abstract class ProcessingSessionContext {
     }
 
     /**
-     * Adds currently processed object to the {@link Set}.
+     * Parent instance for marshaller and unmarshaller.
      *
-     * @param itemToRegister processed object
-     * @return if object was added
+     * @param runtimeContext context of Jsonb
      */
-    public boolean registerProcessedObject(Object itemToRegister) {
-        return this.processedObjects.add(itemToRegister);
-    }
-
-    /**
-     * Removes processed object from the {@link Set}.
-     *
-     * @param itemToRegister processed object
-     * @return if object was removed
-     */
-    public boolean unregisterProcessedObject(Object itemToRegister) {
-        return processedObjects.remove(itemToRegister);
+    public ProcessingSessionContext(JsonbRuntimeContext runtimeContext) {
+        this.runtimeContext = runtimeContext;
     }
 
 }

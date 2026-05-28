@@ -26,6 +26,16 @@ import org.eclipse.yasson.internal.JsonbRiEventParser;
  */
 public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends ContainerDeserializerBase<T> {
 
+    @Override
+    protected void deserializeNextValue(JsonParser parser, JsonbDeserializer context) {
+        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
+    }
+
+    @Override
+    public void addResult(Object result) {
+        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -41,13 +51,4 @@ public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends Con
         return parser.getCurrentLevel();
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser parser, JsonbDeserializer context) {
-        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
-    }
-
-    @Override
-    public void addResult(Object result) {
-        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
-    }
 }

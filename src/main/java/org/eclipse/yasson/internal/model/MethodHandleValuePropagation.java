@@ -37,28 +37,6 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
 
     private MethodHandle setHandle;
 
-    MethodHandleValuePropagation(Property property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
-        super(property, propertyVisibilityStrategy);
-    }
-
-    @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
-        try {
-            switch (mode) {
-            case GET:
-                getHandle = MethodHandles.lookup().unreflect(method);
-                break;
-            case SET:
-                setHandle = MethodHandles.lookup().unreflect(method);
-                break;
-            default:
-                throw new IllegalStateException("Unknown mode");
-            }
-        } catch (IllegalAccessException e) {
-            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
-        }
-    }
-
     @Override
     protected void acceptField(Field field, OperationMode mode) {
         try {
@@ -98,6 +76,28 @@ class MethodHandleValuePropagation extends PropertyValuePropagation {
             return getHandle.invoke(object);
         } catch (Throwable throwable) {
             throw new JsonbException(Messages.getMessage(MessageKeys.GETTING_VALUE_WITH, getHandle), throwable);
+        }
+    }
+
+    MethodHandleValuePropagation(Property property, PropertyVisibilityStrategy propertyVisibilityStrategy) {
+        super(property, propertyVisibilityStrategy);
+    }
+
+    @Override
+    protected void acceptMethod(Method method, OperationMode mode) {
+        try {
+            switch (mode) {
+            case GET:
+                getHandle = MethodHandles.lookup().unreflect(method);
+                break;
+            case SET:
+                setHandle = MethodHandles.lookup().unreflect(method);
+                break;
+            default:
+                throw new IllegalStateException("Unknown mode");
+            }
+        } catch (IllegalAccessException e) {
+            throw new JsonbException(Messages.getMessage(MessageKeys.CREATING_HANDLES), e);
         }
     }
 

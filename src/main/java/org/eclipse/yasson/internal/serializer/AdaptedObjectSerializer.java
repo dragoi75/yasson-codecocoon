@@ -38,15 +38,14 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
 
     private final AdapterBinding adapterInfo;
 
-    /**
-     * Creates AdapterObjectSerializer.
-     *
-     * @param classModel Class model.
-     * @param adapter    Adapter.
-     */
-    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
-        this.classModel = classModel;
-        this.adapterInfo = adapter;
+    @Override
+    public Type getRuntimeType() {
+        return null;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return null;
     }
 
     @Override
@@ -87,13 +86,15 @@ public class AdaptedObjectSerializer<T, A> implements CurrentItem<T>, JsonbSeria
         return null;
     }
 
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return null;
+    /**
+     * Creates AdapterObjectSerializer.
+     *
+     * @param classModel Class model.
+     * @param adapter    Adapter.
+     */
+    public AdaptedObjectSerializer(ClassModel classModel, AdapterBinding adapter) {
+        this.classModel = classModel;
+        this.adapterInfo = adapter;
     }
 
-    @Override
-    public Type getRuntimeType() {
-        return null;
-    }
 }

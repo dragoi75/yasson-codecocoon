@@ -21,14 +21,12 @@ public class SerializerProviderWrapper {
     private IDeserializerProvider deserializerProvider;
 
     /**
-     * Creates a new instance.
+     * Gets deserializer provider.
      *
-     * @param serializerProvider   Serializer provider.
-     * @param deserializerProvider Deserializer provider.
+     * @return Deserializer provider.
      */
-    public SerializerProviderWrapper(ISerializerProvider serializerProvider, IDeserializerProvider deserializerProvider) {
-        this.serializerProvider = serializerProvider;
-        this.deserializerProvider = deserializerProvider;
+    public IDeserializerProvider getDeserializerProvider() {
+        return deserializerProvider;
     }
 
     /**
@@ -41,11 +39,14 @@ public class SerializerProviderWrapper {
     }
 
     /**
-     * Gets deserializer provider.
+     * Creates a new instance.
      *
-     * @return Deserializer provider.
+     * @param serializerProvider   Serializer provider.
+     * @param deserializerProvider Deserializer provider.
      */
-    public IDeserializerProvider getDeserializerProvider() {
-        return deserializerProvider;
+    public SerializerProviderWrapper(ISerializerProvider serializerProvider, IDeserializerProvider deserializerProvider) {
+        this.serializerProvider = serializerProvider;
+        this.deserializerProvider = deserializerProvider;
     }
+
 }

@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class IntArraySerializer extends AbstractArraySerializer<int[]> {
 
+    @Override
+    protected void serializeInternal(int[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (int obj : arr) {
+            generator.write(obj);
+        }
+    }
+
     /**
      * Creates new instance of int array serializer.
      *
@@ -29,10 +36,4 @@ public class IntArraySerializer extends AbstractArraySerializer<int[]> {
         super(builder);
     }
 
-    @Override
-    protected void serializeInternal(int[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (int obj : arr) {
-            generator.write(obj);
-        }
-    }
 }

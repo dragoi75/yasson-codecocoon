@@ -25,20 +25,6 @@ public class InstantTypeDeserializer extends AbstractDateTimeDeserializer<Instan
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_INSTANT.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public InstantTypeDeserializer(Customization customization) {
-        super(Instant.class, customization);
-    }
-
-    @Override
-    protected Instant fromInstant(Instant instant) {
-        return instant;
-    }
-
     @Override
     protected Instant parseDefault(String jsonValue, Locale locale) {
         return Instant.from(DEFAULT_FORMATTER.withLocale(locale).parse(jsonValue));
@@ -48,4 +34,19 @@ public class InstantTypeDeserializer extends AbstractDateTimeDeserializer<Instan
     protected Instant parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
         return Instant.from(getZonedFormatter(formatter).parse(jsonValue));
     }
+
+    @Override
+    protected Instant fromInstant(Instant instant) {
+        return instant;
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public InstantTypeDeserializer(Customization customization) {
+        super(Instant.class, customization);
+    }
+
 }

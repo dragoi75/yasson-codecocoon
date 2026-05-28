@@ -29,13 +29,13 @@ public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<
     private final Customization customization;
 
     /**
-     * Creates a new instance.
+     * Serializes an object to JSON.
      *
-     * @param customization Model customization.
+     * @param obj        Object to serialize.
+     * @param generator  JSON generator to use.
+     * @param marshaller Marshaller.
      */
-    public AbstractValueTypeSerializer(Customization customization) {
-        this.customization = customization;
-    }
+    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
 
     /**
      * Serializes an object to JSON.
@@ -51,15 +51,6 @@ public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<
     }
 
     /**
-     * Serializes an object to JSON.
-     *
-     * @param obj        Object to serialize.
-     * @param generator  JSON generator to use.
-     * @param marshaller Marshaller.
-     */
-    protected abstract void serialize(T obj, JsonGenerator generator, Marshaller marshaller);
-
-    /**
      * Returns value type customization.
      *
      * @return customization
@@ -67,4 +58,14 @@ public abstract class AbstractValueTypeSerializer<T> implements JsonbSerializer<
     public Customization getCustomization() {
         return customization;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public AbstractValueTypeSerializer(Customization customization) {
+        this.customization = customization;
+    }
+
 }

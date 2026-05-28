@@ -24,15 +24,6 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
 
     private JsonArray jsonArray;
 
-    /**
-     * Create instance.
-     *
-     * @param builder Builder to initialize from.
-     */
-    protected JsonArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected void deserialize(JsonbNavigator parser, JsonbDeserializer context) {
         this.jsonArray = parser.getArray();
@@ -42,4 +33,14 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
     public JsonArray getInstance(JsonbDeserializer unmarshaller) {
         return jsonArray;
     }
+
+    /**
+     * Create instance.
+     *
+     * @param builder Builder to initialize from.
+     */
+    protected JsonArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

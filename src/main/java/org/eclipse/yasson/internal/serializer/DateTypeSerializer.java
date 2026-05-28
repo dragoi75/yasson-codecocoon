@@ -26,6 +26,25 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTimeSerializ
 
     private static final DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
+    @Override
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+        if (!(value instanceof java.sql.Date)) {
+            return getZonedFormatter(formatter).format(toTemporalAccessor(value));
+        } else {
+            return ((java.sql.Date) value).toLocalDate().format(formatter);
+        }
+    }
+
+    @Override
+    protected TemporalAccessor toTemporalAccessor(Date object) {
+        return toInstant(object);
+    }
+
+    @Override
+    protected String formatStrictIJson(Date value) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,17 +52,6 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTimeSerializ
      */
     public DateTypeSerializer(Customization customization) {
         super(customization);
-    }
-
-    @Override
-    protected Instant toInstant(Date value) {
-        if (!(value instanceof java.sql.Date)) {
-            return value.toInstant();
-        } else {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(value.getTime());
-        }
     }
 
     @Override
@@ -57,21 +65,14 @@ public class DateTypeSerializer<T extends Date> extends AbstractDateTimeSerializ
     }
 
     @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+    protected Instant toInstant(Date value) {
         if (!(value instanceof java.sql.Date)) {
-            return getZonedFormatter(formatter).format(toTemporalAccessor(value));
+            return value.toInstant();
         } else {
-            return ((java.sql.Date) value).toLocalDate().format(formatter);
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(value.getTime());
         }
     }
 
-    @Override
-    protected String formatStrictIJson(Date value) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Date object) {
-        return toInstant(object);
-    }
 }

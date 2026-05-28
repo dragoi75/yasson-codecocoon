@@ -39,14 +39,33 @@ public class MappingContext {
     private final ClassParser classParser;
 
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Gets serializer provider for given class.
      *
-     * @param jsonbContext Context. Required.
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
      */
-    public MappingContext(JsonbRuntimeContext jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-        this.classParser = new ClassParser(jsonbContext);
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz              Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param clazz Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassModel getClassModel(Class<?> clazz) {
+        return classes.get(clazz);
     }
 
     /**
@@ -81,6 +100,17 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
+    /**
+     * Create mapping context which is scoped to jsonb runtime.
+     *
+     * @param jsonbContext Context. Required.
+     */
+    public MappingContext(JsonbRuntimeContext jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+        this.classParser = new ClassParser(jsonbContext);
+    }
+
     private static Function<Class<?>, ClassModel> createParseClassModelFunction(ClassModel parentClassModel, ClassParser classParser, JsonbRuntimeContext jsonbContext) {
         return aClass -> {
             JsonbAnnotatedElement<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().collectAnnotations(aClass);
@@ -93,33 +123,4 @@ public class MappingContext {
         };
     }
 
-    /**
-     * Search for class model, without parsing if not found.
-     *
-     * @param clazz Class to search by or parse, not null.
-     * @return Model of a class if found.
-     */
-    public ClassModel getClassModel(Class<?> clazz) {
-        return classes.get(clazz);
-    }
-
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz              Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

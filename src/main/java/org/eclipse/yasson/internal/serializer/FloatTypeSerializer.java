@@ -23,15 +23,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class FloatTypeSerializer extends AbstractNumberSerializer<Float> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public FloatTypeSerializer(Customization customization) {
-        super(customization);
-    }
-
     @Override
     protected void serializeNonFormatted(Float obj, JsonGenerator generator, String key) {
         //floats lose precision, after upcasting to doubles in jsonp
@@ -43,4 +34,14 @@ public class FloatTypeSerializer extends AbstractNumberSerializer<Float> {
         //floats lose precision, after upcasting to doubles in jsonp
         generator.write(new BigDecimal(String.valueOf(obj)));
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public FloatTypeSerializer(Customization customization) {
+        super(customization);
+    }
+
 }

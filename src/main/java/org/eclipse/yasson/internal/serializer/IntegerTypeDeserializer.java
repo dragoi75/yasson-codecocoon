@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public IntegerTypeDeserializer(Customization customization) {
-        super(Integer.class, customization);
-    }
-
     @Override
     protected Integer deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
@@ -48,4 +39,14 @@ public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer>
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public IntegerTypeDeserializer(Customization customization) {
+        super(Integer.class, customization);
+    }
+
 }

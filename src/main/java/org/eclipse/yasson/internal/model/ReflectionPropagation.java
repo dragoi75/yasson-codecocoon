@@ -30,35 +30,6 @@ public class ReflectionPropagation extends PropertyValuePropagation {
     private SetValueCommand setValueCommand;
 
     /**
-     * Creates new instance of reflection propagation.
-     *
-     * @param property target property
-     * @param strategy visibility strategy
-     */
-    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
-        super(property, strategy);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
-        Objects.requireNonNull(method);
-
-        switch (mode) {
-        case GET:
-            getValueCommand = method::invoke;
-            break;
-        case SET:
-            setValueCommand = method::invoke;
-            break;
-        default:
-            throw new IllegalStateException("Unknown mode");
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -74,6 +45,24 @@ public class ReflectionPropagation extends PropertyValuePropagation {
             break;
         default:
             throw new IllegalStateException("Unknown mode");
+        }
+    }
+
+    /**
+     * Get a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method getter}.
+     *
+     * @param object object to invoke get value on, not null.
+     * @return value
+     * @throws JsonbException if reflection fails.
+     */
+    @Override
+    Object getValue(Object object) {
+        Objects.requireNonNull(object);
+
+        try {
+            return getValueCommand.getValue(object);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new JsonbException("Error getting value on: " + object, e);
         }
     }
 
@@ -96,20 +85,32 @@ public class ReflectionPropagation extends PropertyValuePropagation {
     }
 
     /**
-     * Get a value with reflection on {@link java.lang.reflect.Field field} or {@link java.lang.reflect.Method getter}.
-     *
-     * @param object object to invoke get value on, not null.
-     * @return value
-     * @throws JsonbException if reflection fails.
+     * {@inheritDoc}
      */
     @Override
-    Object getValue(Object object) {
-        Objects.requireNonNull(object);
+    protected void acceptMethod(Method method, OperationMode mode) {
+        Objects.requireNonNull(method);
 
-        try {
-            return getValueCommand.getValue(object);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new JsonbException("Error getting value on: " + object, e);
+        switch (mode) {
+        case GET:
+            getValueCommand = method::invoke;
+            break;
+        case SET:
+            setValueCommand = method::invoke;
+            break;
+        default:
+            throw new IllegalStateException("Unknown mode");
         }
     }
+
+    /**
+     * Creates new instance of reflection propagation.
+     *
+     * @param property target property
+     * @param strategy visibility strategy
+     */
+    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
+        super(property, strategy);
+    }
+
 }

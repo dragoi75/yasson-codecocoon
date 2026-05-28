@@ -22,6 +22,18 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
 
     private final List<Byte> items = new ArrayList<>();
 
+    @Override
+    public byte[] getInstance(JsonbDeserializer unmarshaller) {
+        final int size = items.size();
+        final byte[] byteArray = new byte[size];
+        int i = 0;
+        while (size > i) {
+            byteArray[i] = items.get(i);
+            i += 1;
+        }
+        return byteArray;
+    }
+
     /**
      * Creates new instance of byte array deserializer.
      *
@@ -36,15 +48,4 @@ public class ByteArrayDeserializer extends AbstractArrayDeserializer<byte[]> {
         return items;
     }
 
-    @Override
-    public byte[] getInstance(JsonbDeserializer unmarshaller) {
-        final int size = items.size();
-        final byte[] byteArray = new byte[size];
-        int i = 0;
-        while (size > i) {
-            byteArray[i] = items.get(i);
-            i += 1;
-        }
-        return byteArray;
-    }
 }

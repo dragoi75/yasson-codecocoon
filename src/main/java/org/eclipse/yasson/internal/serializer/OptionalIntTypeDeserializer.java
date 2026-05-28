@@ -27,15 +27,6 @@ import org.eclipse.yasson.internal.properties.Messages;
  */
 public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<OptionalInt> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public OptionalIntTypeDeserializer(Customization customization) {
-        super(OptionalInt.class, customization);
-    }
-
     @Override
     public OptionalInt deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         final JsonParser.Event next = ((JsonbNavigator) parser).moveToValue();
@@ -54,4 +45,14 @@ public class OptionalIntTypeDeserializer extends AbstractValueTypeDeserializer<O
             throw new JsonbException(Messages.getMessage(MessageKeys.DESERIALIZE_VALUE_ERROR, OptionalInt.class));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public OptionalIntTypeDeserializer(Customization customization) {
+        super(OptionalInt.class, customization);
+    }
+
 }

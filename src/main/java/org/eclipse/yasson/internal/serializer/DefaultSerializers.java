@@ -57,6 +57,65 @@ public class DefaultSerializers {
 
     private final SerializerProviderWrapper enumProvider;
 
+    /**
+     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
+     *
+     * @param clazz supported type class
+     * @param <T>   Type of serializer
+     * @return serializer if found
+     */
+    public <T> Optional<SerializerProviderWrapper> findValueSerializerProvider(Class<T> clazz) {
+        Class<?> candidate = clazz;
+        do {
+            final SerializerProviderWrapper provider = serializers.get(candidate);
+            if (null != provider) {
+                return Optional.of(provider);
+            }
+            candidate = candidate.getSuperclass();
+        } while (null != candidate);
+        return findByCondition(clazz);
+    }
+
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param clazz class to check
+     * @return true if supported
+     */
+    public boolean isKnownType(Class<?> clazz) {
+        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
+        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
+    }
+
+    /**
+     * Singleton instance.
+     *
+     * @return instance
+     */
+    public static DefaultSerializers getInstance() {
+        return INSTANCE;
+    }
+
+    private <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
+        if (!Enum.class.isAssignableFrom(clazz)) {
+            if (!JsonString.class.isAssignableFrom(clazz)) {
+                if (!JsonNumber.class.isAssignableFrom(clazz)) {
+                    if (JsonValue.class.isAssignableFrom(clazz) && !(JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
+                        return Optional.of(serializers.get(JsonValue.class));
+                    }
+                } else {
+                    return Optional.of(serializers.get(JsonNumber.class));
+                }
+            } else {
+                return Optional.of(serializers.get(JsonString.class));
+            }
+        } else {
+            return Optional.of(enumProvider);
+        }
+        return Optional.empty();
+    }
+
     private DefaultSerializers() {
         if (null != INSTANCE) {
             throw new IllegalStateException("Only one instance of this class can be created!");
@@ -117,62 +176,4 @@ public class DefaultSerializers {
         return Collections.unmodifiableMap(serializers);
     }
 
-    /**
-     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
-     *
-     * @param clazz supported type class
-     * @param <T>   Type of serializer
-     * @return serializer if found
-     */
-    public <T> Optional<SerializerProviderWrapper> findValueSerializerProvider(Class<T> clazz) {
-        Class<?> candidate = clazz;
-        do {
-            final SerializerProviderWrapper provider = serializers.get(candidate);
-            if (null != provider) {
-                return Optional.of(provider);
-            }
-            candidate = candidate.getSuperclass();
-        } while (null != candidate);
-        return findByCondition(clazz);
-    }
-
-    private <T> Optional<SerializerProviderWrapper> findByCondition(Class<T> clazz) {
-        if (!Enum.class.isAssignableFrom(clazz)) {
-            if (!JsonString.class.isAssignableFrom(clazz)) {
-                if (!JsonNumber.class.isAssignableFrom(clazz)) {
-                    if (JsonValue.class.isAssignableFrom(clazz) && !(JsonObject.class.isAssignableFrom(clazz) || JsonArray.class.isAssignableFrom(clazz))) {
-                        return Optional.of(serializers.get(JsonValue.class));
-                    }
-                } else {
-                    return Optional.of(serializers.get(JsonNumber.class));
-                }
-            } else {
-                return Optional.of(serializers.get(JsonString.class));
-            }
-        } else {
-            return Optional.of(enumProvider);
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param clazz class to check
-     * @return true if supported
-     */
-    public boolean isKnownType(Class<?> clazz) {
-        boolean knownContainerValueType = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) || JsonValue.class.isAssignableFrom(clazz) || Optional.class.isAssignableFrom(clazz) || clazz.isArray();
-        return knownContainerValueType || findValueSerializerProvider(clazz).isPresent();
-    }
-
-    /**
-     * Singleton instance.
-     *
-     * @return instance
-     */
-    public static DefaultSerializers getInstance() {
-        return INSTANCE;
-    }
 }

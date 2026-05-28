@@ -18,16 +18,17 @@ import java.util.concurrent.TimeUnit;
 public class TenPropertySerializationTest {
 	private Jsonb json;
 	private TenPropertyData testData;
-	
-	@Setup
-	public void setup() {
-		json = JsonbBuilder.create();
-		testData = new TenPropertyData("prop1", "prop2", 42, 3.14, new String[] {"props", "propsss", "psssss"}, 
-									   List.of(5, 1, 3), "prop7", 800, new int[] {5555, 6666, 7777, 8888}, Long.MAX_VALUE);
-	}
-	
-	@Benchmark
-	public String testSerialize() {
-		return json.toJson(testData);
-	}
+
+    @Benchmark
+    public String testSerialize() {
+        return json.toJson(testData);
+    }
+
+    @Setup
+    public void setup() {
+        json = JsonbBuilder.create();
+        testData = new TenPropertyData("prop1", "prop2", 42, 3.14, new String[] {"props", "propsss", "psssss"},
+                                       List.of(5, 1, 3), "prop7", 800, new int[] {5555, 6666, 7777, 8888}, Long.MAX_VALUE);
+    }
+
 }

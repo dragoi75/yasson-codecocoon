@@ -42,6 +42,23 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends ContainerDeser
 
     private final T element;
 
+    @Override
+    protected JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator jsonReader) {
+        jsonReader.moveTo(JsonParser.Event.START_OBJECT);
+        return jsonReader.getCurrentLevel();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> void putEntry(String entryName, V mappedElement) {
+        ((Map<String, V>) getInstance(null)).put(entryName, mappedElement);
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser jsonReader, JsonbDeserializer deserializationState) {
+        final jakarta.json.bind.serializer.JsonbDeserializer<?> resolvedAdapter = createCollectionOrMapItem(entryValueType, deserializationState.getJsonbContext());
+        addResult(resolvedAdapter.deserialize(jsonReader, deserializationState, entryValueType));
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -57,12 +74,9 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends ContainerDeser
         this.element = createMapInstance(deserializerFactory);
     }
 
-    @SuppressWarnings("unchecked")
-    private T createMapInstance(JsonDeserializerBuilder deserializerFactory) {
-        Class<?> baseClass = ReflectionHelper.getRawType(getRuntimeType());
-        return baseClass.isInterface()
-                ? (T) getMapImpl(baseClass, deserializerFactory)
-                : (T) deserializerFactory.getJsonbContext().getInstanceCreator().newInstance(baseClass);
+    @Override
+    public void addResult(Object output) {
+        putEntry(getParserContext().getLastKeyName(), convertNullToOptional(entryValueType, output));
     }
 
     private Map getMapImpl(Class interfaceClass, JsonDeserializerBuilder deserializerFactory) {
@@ -81,25 +95,12 @@ public class MapInstanceDeserializer<T extends Map<?, ?>> extends ContainerDeser
         return element;
     }
 
-    @Override
-    public void addResult(Object output) {
-        putEntry(getParserContext().getLastKeyName(), convertNullToOptional(entryValueType, output));
-    }
-
     @SuppressWarnings("unchecked")
-    private <V> void putEntry(String entryName, V mappedElement) {
-        ((Map<String, V>) getInstance(null)).put(entryName, mappedElement);
+    private T createMapInstance(JsonDeserializerBuilder deserializerFactory) {
+        Class<?> baseClass = ReflectionHelper.getRawType(getRuntimeType());
+        return baseClass.isInterface()
+                ? (T) getMapImpl(baseClass, deserializerFactory)
+                : (T) deserializerFactory.getJsonbContext().getInstanceCreator().newInstance(baseClass);
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser jsonReader, JsonbDeserializer deserializationState) {
-        final jakarta.json.bind.serializer.JsonbDeserializer<?> resolvedAdapter = createCollectionOrMapItem(entryValueType, deserializationState.getJsonbContext());
-        addResult(resolvedAdapter.deserialize(jsonReader, deserializationState, entryValueType));
-    }
-
-    @Override
-    protected JsonbRiEventParser.ParsingLevelContext moveToStart(JsonbNavigator jsonReader) {
-        jsonReader.moveTo(JsonParser.Event.START_OBJECT);
-        return jsonReader.getCurrentLevel();
-    }
 }

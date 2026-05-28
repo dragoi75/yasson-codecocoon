@@ -24,6 +24,16 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<LocalDateTime> {
 
+    @Override
+    protected LocalDateTime parseDefault(String jsonValue, Locale locale) {
+        return LocalDateTime.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
+    }
+
+    @Override
+    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return LocalDateTime.parse(jsonValue, formatter);
+    }
+
     /**
      * Creates an instance.
      *
@@ -38,13 +48,4 @@ public class LocalDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
         return LocalDateTime.ofInstant(instant, UTC);
     }
 
-    @Override
-    protected LocalDateTime parseDefault(String jsonValue, Locale locale) {
-        return LocalDateTime.parse(jsonValue, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
-    }
-
-    @Override
-    protected LocalDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return LocalDateTime.parse(jsonValue, formatter);
-    }
 }
