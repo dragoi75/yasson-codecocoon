@@ -27,15 +27,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class OptionalLongValueDeserializer extends AbstractValueTypeDeserializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customizer Model customization.
-     */
-    public OptionalLongValueDeserializer(Customization customizer) {
-        super(OptionalLong.class, customizer);
-    }
-
     @Override
     public OptionalLong deserialize(JsonParser tokenStream, DeserializationContext deserializationContext, Type runtimeType) {
         final JsonParser.Event upcomingEvent = ((JsonbParser) tokenStream).moveToValue();
@@ -53,4 +44,14 @@ public class OptionalLongValueDeserializer extends AbstractValueTypeDeserializer
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.DESERIALIZE_VALUE_ERROR, OptionalLong.class));
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customizer Model customization.
+     */
+    public OptionalLongValueDeserializer(Customization customizer) {
+        super(OptionalLong.class, customizer);
+    }
+
 }

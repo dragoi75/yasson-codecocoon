@@ -28,6 +28,21 @@ public class DateSerializer<T extends Date> extends AbstractDateTimeSerializer<T
     
     private static final DateTimeFormatter FALLBACK_DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
+    @Override
+    protected String formatUsingFormatter(Date inputDate, DateTimeFormatter dateTimeFormatter) {
+        return getZonedFormatter(dateTimeFormatter).format(asTemporalAccessor(inputDate));
+    }
+
+    @Override
+    protected TemporalAccessor asTemporalAccessor(Date dateCandidate) {
+        return asInstant(dateCandidate);
+    }
+
+    @Override
+    protected String formatStrictIJson(Date inputDate) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(asTemporalAccessor(inputDate));
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,27 +53,13 @@ public class DateSerializer<T extends Date> extends AbstractDateTimeSerializer<T
     }
 
     @Override
-    protected Instant asInstant(Date inputDate) {
-        return inputDate.toInstant();
-    }
-
-    @Override
     protected String formatWithDefault(Date inputDate, Locale userRegion) {
         return FALLBACK_DATE_FORMATTER.withLocale(userRegion).format(asInstant(inputDate));
     }
 
     @Override
-    protected String formatUsingFormatter(Date inputDate, DateTimeFormatter dateTimeFormatter) {
-        return getZonedFormatter(dateTimeFormatter).format(asTemporalAccessor(inputDate));
+    protected Instant asInstant(Date inputDate) {
+        return inputDate.toInstant();
     }
 
-    @Override
-    protected String formatStrictIJson(Date inputDate) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(asTemporalAccessor(inputDate));
-    }
-
-    @Override
-    protected TemporalAccessor asTemporalAccessor(Date dateCandidate) {
-        return asInstant(dateCandidate);
-    }
 }

@@ -21,15 +21,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class IntegerValueSerializer extends AbstractNumberSerializer<Integer> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public IntegerValueSerializer(Customization customConfig) {
-        super(customConfig);
-    }
-
     @Override
     protected void serializeNonFormatted(Integer intValue, JsonGenerator jsonWriter, String fieldName) {
         jsonWriter.write(fieldName, intValue);
@@ -39,4 +30,14 @@ public class IntegerValueSerializer extends AbstractNumberSerializer<Integer> {
     protected void serializeNonFormatted(Integer intValue, JsonGenerator jsonWriter) {
         jsonWriter.write(intValue);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public IntegerValueSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

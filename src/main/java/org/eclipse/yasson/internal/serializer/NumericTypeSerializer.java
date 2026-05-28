@@ -24,6 +24,12 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class NumericTypeSerializer extends AbstractValueTypeSerializer<Number> {
 
+    @Override
+    protected void serialize(Number numberValue, JsonGenerator jsonWriter, Marshaller marshaller) {
+        BigDecimal decimalValue = new BigDecimal(String.valueOf(numberValue));
+        jsonWriter.write(decimalValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,9 +39,4 @@ public class NumericTypeSerializer extends AbstractValueTypeSerializer<Number> {
         super(configOptions);
     }
 
-    @Override
-    protected void serialize(Number numberValue, JsonGenerator jsonWriter, Marshaller marshaller) {
-        BigDecimal decimalValue = new BigDecimal(String.valueOf(numberValue));
-        jsonWriter.write(decimalValue);
-    }
 }

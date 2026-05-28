@@ -21,6 +21,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ShortSerializer extends AbstractNumberSerializer<Short> {
 
+    @Override
+    protected void serializeNonFormatted(Short shortValue, JsonGenerator jsonWriter) {
+        jsonWriter.write(shortValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class ShortSerializer extends AbstractNumberSerializer<Short> {
         jsonWriter.write(propertyName, shortValue);
     }
 
-    @Override
-    protected void serializeNonFormatted(Short shortValue, JsonGenerator jsonWriter) {
-        jsonWriter.write(shortValue);
-    }
 }

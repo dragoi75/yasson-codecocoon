@@ -34,16 +34,19 @@ public class CalendarTypeParser extends AbstractDateTimeDeserializer<Calendar> {
 
     private final Calendar calendarPrototype;
 
-    /**
-     * Creates an instance.
-     *
-     * @param customOptions Model customization.
-     */
-    public CalendarTypeParser(Customization customOptions) {
-        super(Calendar.class, customOptions);
-        this.calendarPrototype = new GregorianCalendar();
-        this.calendarPrototype.clear();
-        this.calendarPrototype.setTimeZone(TimeZone.getTimeZone(UTC));
+    @Override
+    protected Calendar parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFmt) {
+        final TemporalAccessor temporalAccessor = dateTimeFmt.parse(jsonText);
+        LocalTime moment = temporalAccessor.query(TemporalQueries.localTime());
+        ZoneId tz = temporalAccessor.query(TemporalQueries.zone());
+        if (null == tz) {
+            tz = UTC;
+        }
+        if (null == moment) {
+            moment = MIDNIGHT;
+        }
+        ZonedDateTime zonedDateTime = LocalDate.from(temporalAccessor).atTime(moment).atZone(tz);
+        return GregorianCalendar.from(zonedDateTime);
     }
 
     @Override
@@ -59,18 +62,16 @@ public class CalendarTypeParser extends AbstractDateTimeDeserializer<Calendar> {
         return parseWithFormatter(jsonText, dateTimeFmt.withLocale(region));
     }
 
-    @Override
-    protected Calendar parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFmt) {
-        final TemporalAccessor temporalAccessor = dateTimeFmt.parse(jsonText);
-        LocalTime moment = temporalAccessor.query(TemporalQueries.localTime());
-        ZoneId tz = temporalAccessor.query(TemporalQueries.zone());
-        if (null == tz) {
-            tz = UTC;
-        }
-        if (null == moment) {
-            moment = MIDNIGHT;
-        }
-        ZonedDateTime zonedDateTime = LocalDate.from(temporalAccessor).atTime(moment).atZone(tz);
-        return GregorianCalendar.from(zonedDateTime);
+    /**
+     * Creates an instance.
+     *
+     * @param customOptions Model customization.
+     */
+    public CalendarTypeParser(Customization customOptions) {
+        super(Calendar.class, customOptions);
+        this.calendarPrototype = new GregorianCalendar();
+        this.calendarPrototype.clear();
+        this.calendarPrototype.setTimeZone(TimeZone.getTimeZone(UTC));
     }
+
 }

@@ -36,26 +36,6 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
     private final MapSerializer<K, V> serializer;
 
     /**
-     * Creates an instance of {@link Map} serialization to {@code JsonObject}.
-     *
-     * @param serializer reference to {@link Map} serialization entry point
-     */
-    protected MapToObjectSerializer(MapSerializer<K, V> serializer) {
-        this.serializer = serializer;
-    }
-
-    /**
-     * Write start of {@link Map} serialization.
-     * Opens {@code JsonObject} block.
-     *
-     * @param generator JSON format generator
-     */
-    @Override
-    public void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    /**
      * Write start of {@link Map} serialization.
      * Opens {@code JsonObject} block.
      *
@@ -97,4 +77,25 @@ public class MapToObjectSerializer<K, V> implements MapSerializer.Delegate<K, V>
             serializer.serializeItem(value, generator, ctx);
         }
     }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Opens {@code JsonObject} block.
+     *
+     * @param generator JSON format generator
+     */
+    @Override
+    public void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    /**
+     * Creates an instance of {@link Map} serialization to {@code JsonObject}.
+     *
+     * @param serializer reference to {@link Map} serialization entry point
+     */
+    protected MapToObjectSerializer(MapSerializer<K, V> serializer) {
+        this.serializer = serializer;
+    }
+
 }

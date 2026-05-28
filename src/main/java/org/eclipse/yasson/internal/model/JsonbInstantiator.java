@@ -29,14 +29,37 @@ public class JsonbInstantiator {
     private final CreatorProfile[] creatorProfiles;
 
     /**
-     * Creates a new instance.
+     * True if param name is one of creator params.
      *
-     * @param callableMember    Executable.
-     * @param creatorProfiles Parameters.
+     * @param parameterName Param name to check.
+     * @return True if found.
      */
-    public JsonbInstantiator(Executable callableMember, CreatorProfile[] creatorProfiles) {
-        this.callableMember = callableMember;
-        this.creatorProfiles = creatorProfiles;
+    public boolean contains(String parameterName) {
+        return null != findParameterByName(parameterName);
+    }
+
+    /**
+     * Parameters of this creator.
+     *
+     * @return Parameters.
+     */
+    public CreatorProfile[] getParams() {
+        return creatorProfiles;
+    }
+
+    /**
+     * Find creator parameter by name.
+     *
+     * @param parameterName parameter name as it appear in json document.
+     * @return Creator parameter.
+     */
+    public CreatorProfile findParameterByName(String parameterName) {
+        for (CreatorProfile creatorProfile : creatorProfiles) {
+            if (creatorProfile.getName().equals(parameterName)) {
+                return creatorProfile;
+            }
+        }
+        return null;
     }
 
     /**
@@ -61,36 +84,14 @@ public class JsonbInstantiator {
     }
 
     /**
-     * True if param name is one of creator params.
+     * Creates a new instance.
      *
-     * @param parameterName Param name to check.
-     * @return True if found.
+     * @param callableMember    Executable.
+     * @param creatorProfiles Parameters.
      */
-    public boolean contains(String parameterName) {
-        return null != findParameterByName(parameterName);
+    public JsonbInstantiator(Executable callableMember, CreatorProfile[] creatorProfiles) {
+        this.callableMember = callableMember;
+        this.creatorProfiles = creatorProfiles;
     }
 
-    /**
-     * Find creator parameter by name.
-     *
-     * @param parameterName parameter name as it appear in json document.
-     * @return Creator parameter.
-     */
-    public CreatorProfile findParameterByName(String parameterName) {
-        for (CreatorProfile creatorProfile : creatorProfiles) {
-            if (creatorProfile.getName().equals(parameterName)) {
-                return creatorProfile;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Parameters of this creator.
-     *
-     * @return Parameters.
-     */
-    public CreatorProfile[] getParams() {
-        return creatorProfiles;
-    }
 }

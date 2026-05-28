@@ -22,6 +22,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class CharacterDeserializer extends AbstractValueTypeDeserializer<Character> {
 
+    @Override
+    protected Character deserialize(String inputText, Unmarshaller unmarshaller, Type rtType) {
+        return inputText.charAt(0);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -31,8 +36,4 @@ public class CharacterDeserializer extends AbstractValueTypeDeserializer<Charact
         super(Character.class, customConfig);
     }
 
-    @Override
-    protected Character deserialize(String inputText, Unmarshaller unmarshaller, Type rtType) {
-        return inputText.charAt(0);
-    }
 }

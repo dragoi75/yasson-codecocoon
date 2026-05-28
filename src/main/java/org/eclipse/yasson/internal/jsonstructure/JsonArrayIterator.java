@@ -32,32 +32,12 @@ public class JsonArrayIterator extends JsonStructureIterator {
 
     private JsonValue currentValue;
 
-    /**
-     * Creates new array iterator.
-     *
-     * @param jsonArray json array
-     */
-    public JsonArrayIterator(JsonArray jsonArray) {
-        this.valueIterator = jsonArray.iterator();
-    }
-
-    /**
-     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
-     *
-     * @return always true
-     */
     @Override
-    public boolean hasNext() {
-        return true;
-    }
-
-    @Override
-    public JsonParser.Event next() {
-        if (valueIterator.hasNext()) {
-            currentValue = valueIterator.next();
-            return getValueEvent(currentValue);
+    String getString() {
+        if (currentValue instanceof JsonString) {
+            return ((JsonString) currentValue).getString();
         }
-        return JsonParser.Event.END_ARRAY;
+        return currentValue.toString();
     }
 
     @Override
@@ -71,11 +51,32 @@ public class JsonArrayIterator extends JsonStructureIterator {
                                                       getValue().getValueType()));
     }
 
-    @Override
-    String getString() {
-        if (currentValue instanceof JsonString) {
-            return ((JsonString) currentValue).getString();
-        }
-        return currentValue.toString();
+    /**
+     * Creates new array iterator.
+     *
+     * @param jsonArray json array
+     */
+    public JsonArrayIterator(JsonArray jsonArray) {
+        this.valueIterator = jsonArray.iterator();
     }
+
+    @Override
+    public JsonParser.Event next() {
+        if (valueIterator.hasNext()) {
+            currentValue = valueIterator.next();
+            return getValueEvent(currentValue);
+        }
+        return JsonParser.Event.END_ARRAY;
+    }
+
+    /**
+     * After {@link JsonParser.Event} END_ARRAY is returned from next() iterator is removed from the stack.
+     *
+     * @return always true
+     */
+    @Override
+    public boolean hasNext() {
+        return true;
+    }
+
 }

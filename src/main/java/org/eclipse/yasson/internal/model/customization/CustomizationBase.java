@@ -30,6 +30,24 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     private final boolean nillable;
 
     /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
+    /**
      * Copies properties from builder an creates immutable instance.
      *
      * @param builder not null
@@ -39,31 +57,6 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         this.adapterBinding = builder.getAdapterInfo();
         this.serializerBinding = builder.getSerializerBinding();
         this.deserializerBinding = builder.getDeserializerBinding();
-    }
-
-    /**
-     * Copy constructor.
-     *
-     * @param other other customization instance
-     */
-    CustomizationBase(CustomizationBase other) {
-        this.nillable = other.isNillable();
-        this.adapterBinding = other.getSerializeAdapterBinding();
-        this.serializerBinding = other.getSerializerBinding();
-        this.deserializerBinding = other.getDeserializerBinding();
-    }
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    public AdapterBinding getSerializeAdapterBinding() {
-        return adapterBinding;
     }
 
     @Override
@@ -81,12 +74,19 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
     }
 
     /**
-     * Deserializer wrapper with resolved generic info.
+     * Copy constructor.
      *
-     * @return deserializer wrapper
+     * @param other other customization instance
      */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
+    CustomizationBase(CustomizationBase other) {
+        this.nillable = other.isNillable();
+        this.adapterBinding = other.getSerializeAdapterBinding();
+        this.serializerBinding = other.getSerializerBinding();
+        this.deserializerBinding = other.getDeserializerBinding();
+    }
+
+    public AdapterBinding getSerializeAdapterBinding() {
+        return adapterBinding;
     }
 
 }

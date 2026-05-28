@@ -22,6 +22,12 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class EnumValueDeserializer extends AbstractValueTypeDeserializer<Enum> {
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected Enum deserialize(String jsonText, Unmarshaller unmarshaller, Type runtimeType) {
+        return Enum.valueOf((Class<Enum>) runtimeType, jsonText);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -31,9 +37,4 @@ public class EnumValueDeserializer extends AbstractValueTypeDeserializer<Enum> {
         super(Enum.class, configuration);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Enum deserialize(String jsonText, Unmarshaller unmarshaller, Type runtimeType) {
-        return Enum.valueOf((Class<Enum>) runtimeType, jsonText);
-    }
 }

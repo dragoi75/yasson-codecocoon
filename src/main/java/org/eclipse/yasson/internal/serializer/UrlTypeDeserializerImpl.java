@@ -24,15 +24,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class UrlTypeDeserializerImpl extends AbstractValueTypeDeserializer<URL> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public UrlTypeDeserializerImpl(Customization customConfig) {
-        super(URL.class, customConfig);
-    }
-
     @Override
     protected URL deserialize(String jsonString, Unmarshaller unmarshaller, Type rtType) {
         URL parsedUri = null;
@@ -43,4 +34,14 @@ public class UrlTypeDeserializerImpl extends AbstractValueTypeDeserializer<URL> 
         }
         return parsedUri;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public UrlTypeDeserializerImpl(Customization customConfig) {
+        super(URL.class, customConfig);
+    }
+
 }

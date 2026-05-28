@@ -42,6 +42,34 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
 
     private final DatatypeFactory typeFactory;
 
+    @Override
+    protected XMLGregorianCalendar parseWithFormatter(String jsonStr, DateTimeFormatter dateFormat) {
+        final TemporalAccessor temporalResult = dateFormat.parse(jsonStr);
+        LocalTime timeOfDay = temporalResult.query(TemporalQueries.localTime());
+        ZoneId zoneId = temporalResult.query(TemporalQueries.zone());
+        if (null == zoneId) {
+            zoneId = UTC;
+        }
+        if (null == timeOfDay) {
+            timeOfDay = MIDNIGHT_LOCAL_TIME;
+        }
+        ZonedDateTime zonedDateTime = LocalDate.from(temporalResult).atTime(timeOfDay).atZone(zoneId);
+        return typeFactory.newXMLGregorianCalendar(GregorianCalendar.from(zonedDateTime));
+    }
+
+    @Override
+    protected XMLGregorianCalendar parseDefault(String jsonStr, Locale region) {
+        DateTimeFormatter dateFormat = jsonStr.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
+        return parseWithFormatter(jsonStr, dateFormat.withLocale(region));
+    }
+
+    @Override
+    protected XMLGregorianCalendar fromInstant(Instant timestamp) {
+        final GregorianCalendar gregorianInstance = (GregorianCalendar) calendarPrototype.clone();
+        gregorianInstance.setTimeInMillis(timestamp.toEpochMilli());
+        return typeFactory.newXMLGregorianCalendar(gregorianInstance);
+    }
+
     /**
      * Creates an instance.
      *
@@ -59,31 +87,4 @@ public class XMLGregorianCalendarDeserializer extends AbstractDateTimeDeserializ
         }
     }
 
-    @Override
-    protected XMLGregorianCalendar fromInstant(Instant timestamp) {
-        final GregorianCalendar gregorianInstance = (GregorianCalendar) calendarPrototype.clone();
-        gregorianInstance.setTimeInMillis(timestamp.toEpochMilli());
-        return typeFactory.newXMLGregorianCalendar(gregorianInstance);
-    }
-
-    @Override
-    protected XMLGregorianCalendar parseDefault(String jsonStr, Locale region) {
-        DateTimeFormatter dateFormat = jsonStr.contains("T") ? DateTimeFormatter.ISO_DATE_TIME : DateTimeFormatter.ISO_DATE;
-        return parseWithFormatter(jsonStr, dateFormat.withLocale(region));
-    }
-
-    @Override
-    protected XMLGregorianCalendar parseWithFormatter(String jsonStr, DateTimeFormatter dateFormat) {
-        final TemporalAccessor temporalResult = dateFormat.parse(jsonStr);
-        LocalTime timeOfDay = temporalResult.query(TemporalQueries.localTime());
-        ZoneId zoneId = temporalResult.query(TemporalQueries.zone());
-        if (null == zoneId) {
-            zoneId = UTC;
-        }
-        if (null == timeOfDay) {
-            timeOfDay = MIDNIGHT_LOCAL_TIME;
-        }
-        ZonedDateTime zonedDateTime = LocalDate.from(temporalResult).atTime(timeOfDay).atZone(zoneId);
-        return typeFactory.newXMLGregorianCalendar(GregorianCalendar.from(zonedDateTime));
-    }
 }

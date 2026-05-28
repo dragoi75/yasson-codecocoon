@@ -33,54 +33,12 @@ public class PropertyDescriptor {
     private JsonbAnnotatedMember<Method> mutatorMethodMember;
 
     /**
-     * Create instance of property.
+     * Element with setter and its annotations.
      *
-     * @param label                not null
-     * @param declaringTypeModel Class model for a class declaring property.
+     * @return setter with annotations
      */
-    public PropertyDescriptor(String label, JsonbAnnotatedMember<Class<?>> declaringTypeModel) {
-        this.label = label;
-        this.declaringTypeMember = declaringTypeModel;
-    }
-
-    /**
-     * Name of a property, java bean convention.
-     *
-     * @return name
-     */
-    public String getName() {
-        return label;
-    }
-
-    /**
-     * {@link Field} representing property if any.
-     *
-     * @return field if present
-     */
-    public Field getField() {
-        if (null == memberVariable) {
-            return null;
-        }
-        return memberVariable.getElement();
-    }
-
-    /**
-     * @param memberVariable field not null
-     */
-    public void setField(Field memberVariable) {
-        this.memberVariable = new JsonbAnnotatedMember<>(memberVariable);
-    }
-
-    /**
-     * {@link Method} representing getter of a property if any.
-     *
-     * @return getter if present
-     */
-    public Method getGetter() {
-        if (null == accessorMethodMember) {
-            return null;
-        }
-        return accessorMethodMember.getElement();
+    public JsonbAnnotatedMember<Method> getSetterElement() {
+        return mutatorMethodMember;
     }
 
     /**
@@ -90,23 +48,12 @@ public class PropertyDescriptor {
         this.accessorMethodMember = new JsonbAnnotatedMember<>(accessor);
     }
 
-    /**
-     * {@link Method} representing setter of a property if any.
-     *
-     * @return setter if present
-     */
-    public Method getSetter() {
-        if (null == mutatorMethodMember) {
-            return null;
+    Type getSetterType() {
+        Type[] typeArguments = getSetter().getGenericParameterTypes();
+        if (1 != typeArguments.length) {
+            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
         }
-        return mutatorMethodMember.getElement();
-    }
-
-    /**
-     * @param mutator setter not null
-     */
-    public void setSetter(Method mutator) {
-        this.mutatorMethodMember = new JsonbAnnotatedMember<>(mutator);
+        return typeArguments[0];
     }
 
     /**
@@ -117,6 +64,15 @@ public class PropertyDescriptor {
      */
     public JsonbAnnotatedMember<Class<?>> getDeclaringClassElement() {
         return declaringTypeMember;
+    }
+
+    /**
+     * Element with field and its annotations.
+     *
+     * @return field with annotations
+     */
+    public JsonbAnnotatedMember<Field> getFieldElement() {
+        return memberVariable;
     }
 
     /**
@@ -140,30 +96,6 @@ public class PropertyDescriptor {
         throw new JsonbException("Empty property: " + label);
     }
 
-    Type getGetterType() {
-        if (null != getGetter()) {
-            return getGetter().getGenericReturnType();
-        }
-        return null;
-    }
-
-    Type getSetterType() {
-        Type[] typeArguments = getSetter().getGenericParameterTypes();
-        if (1 != typeArguments.length) {
-            throw new JsonbException("Invalid count of arguments for setter: " + getSetter());
-        }
-        return typeArguments[0];
-    }
-
-    /**
-     * Element with field and its annotations.
-     *
-     * @return field with annotations
-     */
-    public JsonbAnnotatedMember<Field> getFieldElement() {
-        return memberVariable;
-    }
-
     /**
      * Element with getter and its annotations.
      *
@@ -174,11 +106,80 @@ public class PropertyDescriptor {
     }
 
     /**
-     * Element with setter and its annotations.
+     * {@link Field} representing property if any.
      *
-     * @return setter with annotations
+     * @return field if present
      */
-    public JsonbAnnotatedMember<Method> getSetterElement() {
-        return mutatorMethodMember;
+    public Field getField() {
+        if (null == memberVariable) {
+            return null;
+        }
+        return memberVariable.getElement();
     }
+
+    /**
+     * @param memberVariable field not null
+     */
+    public void setField(Field memberVariable) {
+        this.memberVariable = new JsonbAnnotatedMember<>(memberVariable);
+    }
+
+    Type getGetterType() {
+        if (null != getGetter()) {
+            return getGetter().getGenericReturnType();
+        }
+        return null;
+    }
+
+    /**
+     * Name of a property, java bean convention.
+     *
+     * @return name
+     */
+    public String getName() {
+        return label;
+    }
+
+    /**
+     * Create instance of property.
+     *
+     * @param label                not null
+     * @param declaringTypeModel Class model for a class declaring property.
+     */
+    public PropertyDescriptor(String label, JsonbAnnotatedMember<Class<?>> declaringTypeModel) {
+        this.label = label;
+        this.declaringTypeMember = declaringTypeModel;
+    }
+
+    /**
+     * {@link Method} representing getter of a property if any.
+     *
+     * @return getter if present
+     */
+    public Method getGetter() {
+        if (null == accessorMethodMember) {
+            return null;
+        }
+        return accessorMethodMember.getElement();
+    }
+
+    /**
+     * @param mutator setter not null
+     */
+    public void setSetter(Method mutator) {
+        this.mutatorMethodMember = new JsonbAnnotatedMember<>(mutator);
+    }
+
+    /**
+     * {@link Method} representing setter of a property if any.
+     *
+     * @return setter if present
+     */
+    public Method getSetter() {
+        if (null == mutatorMethodMember) {
+            return null;
+        }
+        return mutatorMethodMember.getElement();
+    }
+
 }

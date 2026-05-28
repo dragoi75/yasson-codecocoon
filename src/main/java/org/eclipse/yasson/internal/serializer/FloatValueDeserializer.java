@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class FloatValueDeserializer extends AbstractNumberDeserializer<Float> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customSettings Model customization.
-     */
-    public FloatValueDeserializer(Customization customSettings) {
-        super(Float.class, customSettings);
-    }
-
     @Override
     protected Float deserialize(String jsonString, Unmarshaller objectParser, Type rtType) {
         return deserializeFormatted(jsonString, false, objectParser.getJsonbContext())
@@ -47,4 +38,14 @@ public class FloatValueDeserializer extends AbstractNumberDeserializer<Float> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customSettings Model customization.
+     */
+    public FloatValueDeserializer(Customization customSettings) {
+        super(Float.class, customSettings);
+    }
+
 }

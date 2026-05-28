@@ -30,21 +30,9 @@ class ConstructorPropertiesAnnotationIntrospector {
 
     private final AnnotationFinder constructorProperties;
 
-    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContextManager jsonbContext) {
-        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
-    }
-
-    /**
-     * Only for testing and internal purposes.
-     * <p>
-     * Please use static factory methods e.g. {@link #forContext(JsonbContextManager)}.
-     *
-     * @param context          {@link JsonbContextManager}
-     * @param annotationFinder {@link AnnotationFinder}
-     */
-    protected ConstructorPropertiesAnnotationIntrospector(JsonbContextManager context, AnnotationFinder annotationFinder) {
-        this.jsonbContext = context;
-        this.constructorProperties = annotationFinder;
+    @Override
+    public String toString() {
+        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
     }
 
     public JsonbInstantiator getCreator(Constructor<?>[] constructors) {
@@ -85,8 +73,21 @@ class ConstructorPropertiesAnnotationIntrospector {
         return new JsonbInstantiator(executable, creatorModels);
     }
 
-    @Override
-    public String toString() {
-        return "ConstructorPropertiesAnnotationIntrospector [jsonbContext=" + jsonbContext + ", constructorProperties=" + constructorProperties + "]";
+    /**
+     * Only for testing and internal purposes.
+     * <p>
+     * Please use static factory methods e.g. {@link #forContext(JsonbContextManager)}.
+     *
+     * @param context          {@link JsonbContextManager}
+     * @param annotationFinder {@link AnnotationFinder}
+     */
+    protected ConstructorPropertiesAnnotationIntrospector(JsonbContextManager context, AnnotationFinder annotationFinder) {
+        this.jsonbContext = context;
+        this.constructorProperties = annotationFinder;
     }
+
+    public static final ConstructorPropertiesAnnotationIntrospector forContext(JsonbContextManager jsonbContext) {
+        return new ConstructorPropertiesAnnotationIntrospector(jsonbContext, AnnotationFinder.findConstructorProperties());
+    }
+
 }

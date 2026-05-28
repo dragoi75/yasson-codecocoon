@@ -59,6 +59,39 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
     private final String valueEntryName;
 
     /**
+     * Serialize content of provided {@link Map}.
+     * Content of provided {@link Map} is written into {@code JsonArray} of {@code JsonObject}s representing individual
+     * map entries.
+     *
+     * @param obj       {@link Map} to be serialized
+     * @param generator JSON format generator
+     * @param ctx       JSON serialization context
+     */
+    @Override
+    public void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx) {
+        obj.forEach((key, value) -> {
+            generator.writeStartObject();
+            generator.writeKey(keyEntryName);
+            serializer.serializeItem(key, generator, ctx);
+            generator.writeKey(valueEntryName);
+            serializer.serializeItem(value, generator, ctx);
+            generator.writeEnd();
+        });
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Opens {@code JsonArray} block.
+     *
+     * @param key       JSON key name
+     * @param generator JSON format generator
+     */
+    @Override
+    public void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartArray();
+    }
+
+    /**
      * Creates new map to entries array serializer.
      *
      * @param serializer map serializer
@@ -78,39 +111,6 @@ public class MapToEntriesArraySerializer<K, V> implements MapSerializer.Delegate
     @Override
     public void writeStart(JsonGenerator generator) {
         generator.writeStartArray();
-    }
-
-    /**
-     * Write start of {@link Map} serialization.
-     * Opens {@code JsonArray} block.
-     *
-     * @param key       JSON key name
-     * @param generator JSON format generator
-     */
-    @Override
-    public void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    /**
-     * Serialize content of provided {@link Map}.
-     * Content of provided {@link Map} is written into {@code JsonArray} of {@code JsonObject}s representing individual
-     * map entries.
-     *
-     * @param obj       {@link Map} to be serialized
-     * @param generator JSON format generator
-     * @param ctx       JSON serialization context
-     */
-    @Override
-    public void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx) {
-        obj.forEach((key, value) -> {
-            generator.writeStartObject();
-            generator.writeKey(keyEntryName);
-            serializer.serializeItem(key, generator, ctx);
-            generator.writeKey(valueEntryName);
-            serializer.serializeItem(value, generator, ctx);
-            generator.writeEnd();
-        });
     }
 
 }

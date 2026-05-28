@@ -34,25 +34,16 @@ public class JsonbAnnotatedMember<T extends AnnotatedElement> {
     private final T memberValue;
 
     /**
-     * Creates a new instance.
+     * Adds annotation.
      *
-     * @param memberValue Element.
+     * @param ann Annotation to add.
      */
-    public JsonbAnnotatedMember(T memberValue) {
-        for (Annotation annotation : memberValue.getAnnotations()) {
-            annotationMap.put(annotation.annotationType(), annotation);
+    public void addAnnotation(Annotation ann) {
+        if (annotationMap.containsKey(ann.annotationType())) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
+                                                         "Annotation already present: " + ann));
         }
-
-        this.memberValue = memberValue;
-    }
-
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return memberValue;
+        annotationMap.put(ann.annotationType(), ann);
     }
 
     /**
@@ -70,15 +61,25 @@ public class JsonbAnnotatedMember<T extends AnnotatedElement> {
     }
 
     /**
-     * Adds annotation.
+     * Gets element.
      *
-     * @param ann Annotation to add.
+     * @return Element.
      */
-    public void addAnnotation(Annotation ann) {
-        if (annotationMap.containsKey(ann.annotationType())) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR,
-                                                         "Annotation already present: " + ann));
-        }
-        annotationMap.put(ann.annotationType(), ann);
+    public T getElement() {
+        return memberValue;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param memberValue Element.
+     */
+    public JsonbAnnotatedMember(T memberValue) {
+        for (Annotation annotation : memberValue.getAnnotations()) {
+            annotationMap.put(annotation.annotationType(), annotation);
+        }
+
+        this.memberValue = memberValue;
+    }
+
 }

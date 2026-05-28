@@ -39,61 +39,12 @@ public class PropertyCustomization extends CustomizationBase {
     private final Class<?> implementationClass;
 
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Implementation class if property is interface type.
      *
-     * @param builder not null
+     * @return class implementing property interface
      */
-    public PropertyCustomization(PropertyCustomizationBuilder builder) {
-        super(builder);
-        this.serializeAdapter = builder.getSerializeAdapter();
-        this.deserializeAdapter = builder.getDeserializeAdapter();
-        this.jsonReadName = builder.getJsonReadName();
-        this.jsonWriteName = builder.getJsonWriteName();
-        this.serializeNumberFormatter = builder.getSerializeNumberFormatter();
-        this.deserializeNumberFormatter = builder.getDeserializeNumberFormatter();
-        this.serializeDateFormatter = builder.getSerializeDateFormatter();
-        this.deserializeDateFormatter = builder.getDeserializeDateFormatter();
-        this.readTransient = builder.isReadTransient();
-        this.writeTransient = builder.isWriteTransient();
-        this.implementationClass = builder.getImplementationClass();
-    }
-
-    /**
-     * Name if specified for property setter with {@link jakarta.json.bind.annotation.JsonbProperty}.
-     *
-     * @return read name
-     */
-    public String getJsonReadName() {
-        return jsonReadName;
-    }
-
-    /**
-     * Name if specified for property getter with {@link jakarta.json.bind.annotation.JsonbProperty}.
-     *
-     * @return write name
-     */
-    public String getJsonWriteName() {
-        return jsonWriteName;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return serializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return deserializeNumberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return serializeDateFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return deserializeDateFormatter;
+    public Class<?> getImplementationClass() {
+        return implementationClass;
     }
 
     /**
@@ -118,13 +69,19 @@ public class PropertyCustomization extends CustomizationBase {
         return writeTransient;
     }
 
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class<?> getImplementationClass() {
-        return implementationClass;
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return serializeDateFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return deserializeDateFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return deserializeNumberFormatter;
     }
 
     @Override
@@ -132,9 +89,52 @@ public class PropertyCustomization extends CustomizationBase {
         return deserializeAdapter;
     }
 
+    /**
+     * Name if specified for property setter with {@link jakarta.json.bind.annotation.JsonbProperty}.
+     *
+     * @return read name
+     */
+    public String getJsonReadName() {
+        return jsonReadName;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    public PropertyCustomization(PropertyCustomizationBuilder builder) {
+        super(builder);
+        this.serializeAdapter = builder.getSerializeAdapter();
+        this.deserializeAdapter = builder.getDeserializeAdapter();
+        this.jsonReadName = builder.getJsonReadName();
+        this.jsonWriteName = builder.getJsonWriteName();
+        this.serializeNumberFormatter = builder.getSerializeNumberFormatter();
+        this.deserializeNumberFormatter = builder.getDeserializeNumberFormatter();
+        this.serializeDateFormatter = builder.getSerializeDateFormatter();
+        this.deserializeDateFormatter = builder.getDeserializeDateFormatter();
+        this.readTransient = builder.isReadTransient();
+        this.writeTransient = builder.isWriteTransient();
+        this.implementationClass = builder.getImplementationClass();
+    }
+
+    /**
+     * Name if specified for property getter with {@link jakarta.json.bind.annotation.JsonbProperty}.
+     *
+     * @return write name
+     */
+    public String getJsonWriteName() {
+        return jsonWriteName;
+    }
+
     @Override
     public AdapterBinding getSerializeAdapterBinding() {
         return serializeAdapter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return serializeNumberFormatter;
     }
 
 }

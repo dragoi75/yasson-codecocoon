@@ -39,6 +39,26 @@ public class MappingContext {
     private final ClassIntrospector classParser;
 
     /**
+     * Adds given serializer provider for given class.
+     *
+     * @param clazz              Class to add serializer provider for.
+     * @param serializerProvider Serializer provider to add.
+     */
+    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
+        serializers.putIfAbsent(clazz, serializerProvider);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param clazz Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
+        return serializers.get(clazz);
+    }
+
+    /**
      * Create mapping context which is scoped to jsonb runtime.
      *
      * @param jsonbContext Context. Required.
@@ -47,6 +67,18 @@ public class MappingContext {
         Objects.requireNonNull(jsonbContext);
         this.jsonbContext = jsonbContext;
         this.classParser = new ClassIntrospector(jsonbContext);
+    }
+
+    private static Function<Class<?>, ClassDescriptor> createParseClassModelFunction(ClassDescriptor parentClassModel, ClassIntrospector classParser, JsonbContextManager jsonbContext) {
+        return aClass -> {
+            JsonbAnnotatedMember<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().gatherAnnotations(aClass);
+            ClassConfiguration customization = jsonbContext.getAnnotationIntrospector().buildClassCustomization(clsElement);
+            ClassDescriptor newClassModel = new ClassDescriptor(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+            if (!StandardSerializerRegistry.isKnownType(aClass)) {
+                classParser.collectProperties(newClassModel, clsElement);
+            }
+            return newClassModel;
+        };
     }
 
     /**
@@ -81,18 +113,6 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
-    private static Function<Class<?>, ClassDescriptor> createParseClassModelFunction(ClassDescriptor parentClassModel, ClassIntrospector classParser, JsonbContextManager jsonbContext) {
-        return aClass -> {
-            JsonbAnnotatedMember<Class<?>> clsElement = jsonbContext.getAnnotationIntrospector().gatherAnnotations(aClass);
-            ClassConfiguration customization = jsonbContext.getAnnotationIntrospector().buildClassCustomization(clsElement);
-            ClassDescriptor newClassModel = new ClassDescriptor(aClass, customization, parentClassModel, jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-            if (!StandardSerializerRegistry.isKnownType(aClass)) {
-                classParser.collectProperties(newClassModel, clsElement);
-            }
-            return newClassModel;
-        };
-    }
-
     /**
      * Search for class model, without parsing if not found.
      *
@@ -103,23 +123,4 @@ public class MappingContext {
         return classes.get(clazz);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param clazz Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> clazz) {
-        return serializers.get(clazz);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param clazz              Class to add serializer provider for.
-     * @param serializerProvider Serializer provider to add.
-     */
-    public void addSerializerProvider(Class<?> clazz, ContainerSerializerProvider serializerProvider) {
-        serializers.putIfAbsent(clazz, serializerProvider);
-    }
 }

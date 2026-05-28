@@ -22,6 +22,18 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
 
     private final List<Short> items = new ArrayList<>();
 
+    @Override
+    public short[] getInstance(Unmarshaller unmarshaller) {
+        final int size = items.size();
+        final short[] shortArray = new short[size];
+        int i = 0;
+        while (size > i) {
+            shortArray[i] = items.get(i);
+            i += 1;
+        }
+        return shortArray;
+    }
+
     /**
      * Creates new short array deserializer.
      *
@@ -36,15 +48,4 @@ public class ShortArrayDeserializer extends AbstractArrayDeserializer<short[]> {
         return items;
     }
 
-    @Override
-    public short[] getInstance(Unmarshaller unmarshaller) {
-        final int size = items.size();
-        final short[] shortArray = new short[size];
-        int i = 0;
-        while (size > i) {
-            shortArray[i] = items.get(i);
-            i += 1;
-        }
-        return shortArray;
-    }
 }

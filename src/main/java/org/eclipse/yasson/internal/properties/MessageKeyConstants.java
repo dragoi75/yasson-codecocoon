@@ -315,6 +315,15 @@ public enum MessageKeyConstants {
     private final String messageIdentifier;
 
     /**
+     * Returns message bundle key.
+     *
+     * @return message bundle key
+     */
+    public String getKey() {
+        return messageIdentifier;
+    }
+
+    /**
      * Creates an instance of message bundle key.
      *
      * @param messageIdentifier Message key from bundle.
@@ -323,12 +332,4 @@ public enum MessageKeyConstants {
         this.messageIdentifier = messageIdentifier;
     }
 
-    /**
-     * Returns message bundle key.
-     *
-     * @return message bundle key
-     */
-    public String getKey() {
-        return messageIdentifier;
-    }
 }

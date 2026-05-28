@@ -22,6 +22,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class ObjectArraySerializer<T> extends AbstractArraySerializer<T[]> {
 
+    @Override
+    protected void serializeInternal(T[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (T obj : arr) {
+            serializeItem(obj, generator, ctx);
+        }
+    }
+
     /**
      * Creates new Object array serializer.
      *
@@ -29,13 +36,6 @@ public class ObjectArraySerializer<T> extends AbstractArraySerializer<T[]> {
      */
     protected ObjectArraySerializer(SerializerBuilder builder) {
         super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(T[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (T obj : arr) {
-            serializeItem(obj, generator, ctx);
-        }
     }
 
 }

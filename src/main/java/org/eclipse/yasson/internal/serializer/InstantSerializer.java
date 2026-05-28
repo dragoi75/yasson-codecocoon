@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class InstantSerializer extends AbstractDateTimeSerializer<Instant> {
 
+    @Override
+    protected String formatWithFormatter(Instant instant, DateTimeFormatter dateTimeFormat) {
+        return dateTimeFormat.withZone(UTC).format(instant);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,6 +38,11 @@ public class InstantSerializer extends AbstractDateTimeSerializer<Instant> {
     }
 
     @Override
+    protected String formatStrictIJson(Instant instant) {
+        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(instant);
+    }
+
+    @Override
     protected Instant toInstant(Instant instant) {
         return instant;
     }
@@ -40,16 +50,6 @@ public class InstantSerializer extends AbstractDateTimeSerializer<Instant> {
     @Override
     protected String formatDefault(Instant instant, Locale region) {
         return DateTimeFormatter.ISO_INSTANT.withLocale(region).format(instant);
-    }
-
-    @Override
-    protected String formatWithFormatter(Instant instant, DateTimeFormatter dateTimeFormat) {
-        return dateTimeFormat.withZone(UTC).format(instant);
-    }
-
-    @Override
-    protected String formatStrictIJson(Instant instant) {
-        return JsonbDateFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(instant);
     }
 
 }

@@ -27,15 +27,6 @@ import org.eclipse.yasson.internal.properties.LocalizedMessages;
  */
 public class BigIntegerDeserializer extends AbstractNumberDeserializer<BigInteger> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public BigIntegerDeserializer(Customization customConfig) {
-        super(BigInteger.class, customConfig);
-    }
-
     @Override
     public BigInteger deserialize(String rawJson, Unmarshaller parser, Type rtType) {
         return deserializeFormatted(rawJson, true, parser.getJsonbContext())
@@ -49,4 +40,14 @@ public class BigIntegerDeserializer extends AbstractNumberDeserializer<BigIntege
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public BigIntegerDeserializer(Customization customConfig) {
+        super(BigInteger.class, customConfig);
+    }
+
 }

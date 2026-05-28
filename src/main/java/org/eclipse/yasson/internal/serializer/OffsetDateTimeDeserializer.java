@@ -29,13 +29,14 @@ public class OffsetDateTimeDeserializer extends AbstractDateTimeDeserializer<Off
 
     private static final Logger LOG = Logger.getLogger(OffsetDateTimeDeserializer.class.getName());
 
-    /**
-     * Creates an instance.
-     *
-     * @param customizer Model customization.
-     */
-    public OffsetDateTimeDeserializer(Customization customizer) {
-        super(OffsetDateTime.class, customizer);
+    @Override
+    protected OffsetDateTime parseDefault(String jsonText, Locale region) {
+        return OffsetDateTime.parse(jsonText, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(region));
+    }
+
+    @Override
+    protected OffsetDateTime parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
+        return OffsetDateTime.parse(jsonText, dateTimeFormat);
     }
 
     /**
@@ -48,13 +49,13 @@ public class OffsetDateTimeDeserializer extends AbstractDateTimeDeserializer<Off
         return OffsetDateTime.ofInstant(timestamp, UTC);
     }
 
-    @Override
-    protected OffsetDateTime parseDefault(String jsonText, Locale region) {
-        return OffsetDateTime.parse(jsonText, DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(region));
+    /**
+     * Creates an instance.
+     *
+     * @param customizer Model customization.
+     */
+    public OffsetDateTimeDeserializer(Customization customizer) {
+        super(OffsetDateTime.class, customizer);
     }
 
-    @Override
-    protected OffsetDateTime parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
-        return OffsetDateTime.parse(jsonText, dateTimeFormat);
-    }
 }

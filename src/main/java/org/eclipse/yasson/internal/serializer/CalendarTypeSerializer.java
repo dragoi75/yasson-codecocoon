@@ -26,18 +26,9 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class CalendarTypeSerializer extends AbstractDateTimeSerializer<Calendar> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param config Model customization.
-     */
-    public CalendarTypeSerializer(Customization config) {
-        super(config);
-    }
-
-    @Override
-    protected Instant toInstant(Calendar calendar) {
-        return calendar.toInstant();
+    private ZonedDateTime asZonedDateTime(Calendar calendar) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()),
+                                       calendar.getTimeZone().toZoneId());
     }
 
     @Override
@@ -50,12 +41,22 @@ public class CalendarTypeSerializer extends AbstractDateTimeSerializer<Calendar>
     }
 
     @Override
+    protected Instant toInstant(Calendar calendar) {
+        return calendar.toInstant();
+    }
+
+    @Override
     protected TemporalAccessor toTemporalAccessor(Calendar calendar) {
         return asZonedDateTime(calendar);
     }
 
-    private ZonedDateTime asZonedDateTime(Calendar calendar) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()),
-                                       calendar.getTimeZone().toZoneId());
+    /**
+     * Creates a new instance.
+     *
+     * @param config Model customization.
+     */
+    public CalendarTypeSerializer(Customization config) {
+        super(config);
     }
+
 }

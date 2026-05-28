@@ -22,20 +22,6 @@ public class BooleanArrayDeserializer extends AbstractArrayDeserializer<boolean[
 
     private final List<Boolean> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of boolean array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected BooleanArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return items;
-    }
-
     @Override
     public boolean[] getInstance(Unmarshaller unmarshaller) {
         final int size = items.size();
@@ -47,4 +33,19 @@ public class BooleanArrayDeserializer extends AbstractArrayDeserializer<boolean[
         }
         return byteArray;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return items;
+    }
+
+    /**
+     * Creates new instance of boolean array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected BooleanArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

@@ -25,35 +25,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
 abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
 
     /**
-     * Get current {@link JsonValue}, that the parser is pointing on.
-     *
-     * @return JsonValue result.
-     */
-    abstract JsonValue getValue();
-
-    /**
-     * Creates an exception for throwing in case of current value type is not compatible with
-     * called getter return type.
-     *
-     * @return JsonbException with error description.
-     */
-    abstract JsonbException createIncompatibleValueError();
-
-    /**
-     * Check the type of current  {@link JsonValue} and return a string representing a value.
-     *
-     * @return String value for current JsonValue
-     */
-    String getString() {
-        JsonValue value = getValue();
-        if (!(value instanceof JsonString)) {
-            return value.toString();
-        } else {
-            return ((JsonString) value).getString();
-        }
-    }
-
-    /**
      * Convert {@link JsonValue} type to {@link JsonParser.Event}.
      *
      * @param value JsonValue
@@ -77,4 +48,34 @@ abstract class JsonStructureIterator implements Iterator<JsonParser.Event> {
                 throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "unknown json value: " + value.getValueType()));
         }
     }
+
+    /**
+     * Get current {@link JsonValue}, that the parser is pointing on.
+     *
+     * @return JsonValue result.
+     */
+    abstract JsonValue getValue();
+
+    /**
+     * Check the type of current  {@link JsonValue} and return a string representing a value.
+     *
+     * @return String value for current JsonValue
+     */
+    String getString() {
+        JsonValue value = getValue();
+        if (!(value instanceof JsonString)) {
+            return value.toString();
+        } else {
+            return ((JsonString) value).getString();
+        }
+    }
+
+    /**
+     * Creates an exception for throwing in case of current value type is not compatible with
+     * called getter return type.
+     *
+     * @return JsonbException with error description.
+     */
+    abstract JsonbException createIncompatibleValueError();
+
 }

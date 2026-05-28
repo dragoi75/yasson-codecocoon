@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ConfigurablePeriodTypeDeserializer extends AbstractValueTypeDeserializer<Period> {
 
+    @Override
+    protected Period deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
+        return Period.parse(jsonText);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class ConfigurablePeriodTypeDeserializer extends AbstractValueTypeDeseria
         super(Period.class, customConfig);
     }
 
-    @Override
-    protected Period deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
-        return Period.parse(jsonText);
-    }
 }

@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class DoubleArraySerializer extends AbstractArraySerializer<double[]> {
 
+    @Override
+    protected void serializeInternal(double[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (double obj : arr) {
+            generator.write(obj);
+        }
+    }
+
     /**
      * Creates new instance of double array serializer.
      *
@@ -29,10 +36,4 @@ public class DoubleArraySerializer extends AbstractArraySerializer<double[]> {
         super(builder);
     }
 
-    @Override
-    protected void serializeInternal(double[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (double obj : arr) {
-            generator.write(obj);
-        }
-    }
 }

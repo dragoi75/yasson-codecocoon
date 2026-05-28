@@ -24,12 +24,19 @@ public interface ComponentBoundCustomization {
     /**
      * @return Adapter wrapper class with resolved generic information.
      */
-    AdapterBinding getSerializeAdapterBinding();
+    AdapterBinding getDeserializeAdapterBinding();
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    DeserializerBinding getDeserializerBinding();
 
     /**
      * @return Adapter wrapper class with resolved generic information.
      */
-    AdapterBinding getDeserializeAdapterBinding();
+    AdapterBinding getSerializeAdapterBinding();
 
     /**
      * Serializer wrapper with resolved generic info.
@@ -38,10 +45,4 @@ public interface ComponentBoundCustomization {
      */
     SerializerBinding getSerializerBinding();
 
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    DeserializerBinding getDeserializerBinding();
 }

@@ -22,15 +22,6 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
 
     private final List<Integer> items = new ArrayList<>();
 
-    /**
-     * Creates new instance of int array deserializer.
-     *
-     * @param builder deserializer builder
-     */
-    protected IntArrayDeserializer(DeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +38,14 @@ public class IntArrayDeserializer extends AbstractArrayDeserializer<int[]> {
         }
         return intArray;
     }
+
+    /**
+     * Creates new instance of int array deserializer.
+     *
+     * @param builder deserializer builder
+     */
+    protected IntArrayDeserializer(DeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

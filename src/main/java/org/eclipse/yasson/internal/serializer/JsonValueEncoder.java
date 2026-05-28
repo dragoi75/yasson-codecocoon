@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class JsonValueEncoder extends AbstractValueTypeSerializer<JsonValue> {
 
+    @Override
+    protected void serialize(JsonValue jsonValue, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class JsonValueEncoder extends AbstractValueTypeSerializer<JsonValue> {
         super(customizer);
     }
 
-    @Override
-    protected void serialize(JsonValue jsonValue, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(jsonValue);
-    }
 }

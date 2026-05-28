@@ -38,15 +38,19 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
      */
     private final ClassDescriptor classModel;
 
-    /**
-     * Creates and populates an instance from given builder.
-     *
-     * @param builder Builder to initialize from.
-     */
-    protected AbstractItem(AbstractSerializerBuilder builder) {
-        this.wrapper = builder.getWrapper();
-        this.classModel = builder.getClassModel();
-        this.runtimeType = builder.getRuntimeType();
+    @Override
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    @Override
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
     }
 
     /**
@@ -62,19 +66,15 @@ public abstract class AbstractItem<T> implements CurrentItem<T> {
         this.classModel = classModel;
     }
 
-    @Override
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    @Override
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return runtimeType;
+    /**
+     * Creates and populates an instance from given builder.
+     *
+     * @param builder Builder to initialize from.
+     */
+    protected AbstractItem(AbstractSerializerBuilder builder) {
+        this.wrapper = builder.getWrapper();
+        this.classModel = builder.getClassModel();
+        this.runtimeType = builder.getRuntimeType();
     }
 
 }

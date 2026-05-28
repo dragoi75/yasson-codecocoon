@@ -57,61 +57,12 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     private final JsonbContextManager jsonbContext;
 
     /**
-     * Crates a builder.
-     *
-     * @param jsonbContext Not null.
-     */
-    public AbstractSerializerBuilder(JsonbContextManager jsonbContext) {
-        Objects.requireNonNull(jsonbContext);
-        this.jsonbContext = jsonbContext;
-    }
-
-    /**
      * Wrapper item for this item.
      *
-     * @param wrapper not null.
-     * @return Builder instance for call chaining.
+     * @return Wrapper item.
      */
-    @SuppressWarnings("unchecked")
-    public T withWrapper(CurrentItem<?> wrapper) {
-        this.wrapper = wrapper;
-        return (T) this;
-    }
-
-    /**
-     * Customization of the class.
-     *
-     * @param customization Class customization
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withCustomization(Customization customization) {
-        this.customization = customization;
-        return (T) this;
-    }
-
-    /**
-     * Class model for this item.
-     *
-     * @param classModel class model
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withClassModel(ClassDescriptor classModel) {
-        this.classModel = classModel;
-        return (T) this;
-    }
-
-    /**
-     * Runtime type for this item.
-     *
-     * @param runtimeType runtime type
-     * @return Builder instance for call chaining.
-     */
-    @SuppressWarnings("unchecked")
-    public T withRuntimeType(Type runtimeType) {
-        this.runtimeType = runtimeType;
-        return (T) this;
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
     }
 
     /**
@@ -129,12 +80,12 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Wrapper item for this item.
+     * Generic type of the item.
      *
-     * @return Wrapper item.
+     * @return generic type
      */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
+    public Type getGenericType() {
+        return genericType;
     }
 
     /**
@@ -148,6 +99,18 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
+     * Wrapper item for this item.
+     *
+     * @param wrapper not null.
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T withWrapper(CurrentItem<?> wrapper) {
+        this.wrapper = wrapper;
+        return (T) this;
+    }
+
+    /**
      * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or
      * {@link java.lang.reflect.WildcardType}.
      * Otherwise provided type in type field, or type of field model.
@@ -156,6 +119,15 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
      */
     public Type getRuntimeType() {
         return runtimeType;
+    }
+
+    /**
+     * Type customization.
+     *
+     * @return customization
+     */
+    public Customization getCustomization() {
+        return customization;
     }
 
     /**
@@ -172,6 +144,18 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
+     * Class model for this item.
+     *
+     * @param classModel class model
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T withClassModel(ClassDescriptor classModel) {
+        this.classModel = classModel;
+        return (T) this;
+    }
+
+    /**
      * Jsonb runtime context.
      *
      * @return jsonb context
@@ -181,20 +165,37 @@ public class AbstractSerializerBuilder<T extends AbstractSerializerBuilder> {
     }
 
     /**
-     * Type customization.
+     * Runtime type for this item.
      *
-     * @return customization
+     * @param runtimeType runtime type
+     * @return Builder instance for call chaining.
      */
-    public Customization getCustomization() {
-        return customization;
+    @SuppressWarnings("unchecked")
+    public T withRuntimeType(Type runtimeType) {
+        this.runtimeType = runtimeType;
+        return (T) this;
     }
 
     /**
-     * Generic type of the item.
+     * Customization of the class.
      *
-     * @return generic type
+     * @param customization Class customization
+     * @return Builder instance for call chaining.
      */
-    public Type getGenericType() {
-        return genericType;
+    @SuppressWarnings("unchecked")
+    public T withCustomization(Customization customization) {
+        this.customization = customization;
+        return (T) this;
     }
+
+    /**
+     * Crates a builder.
+     *
+     * @param jsonbContext Not null.
+     */
+    public AbstractSerializerBuilder(JsonbContextManager jsonbContext) {
+        Objects.requireNonNull(jsonbContext);
+        this.jsonbContext = jsonbContext;
+    }
+
 }

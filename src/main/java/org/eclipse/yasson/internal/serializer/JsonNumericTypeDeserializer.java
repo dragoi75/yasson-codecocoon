@@ -29,15 +29,6 @@ public class JsonNumericTypeDeserializer extends AbstractValueTypeDeserializer<J
 
     private static final String NUMERIC_LITERAL = "number";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param configuration Model customization.
-     */
-    public JsonNumericTypeDeserializer(Customization configuration) {
-        super(JsonNumber.class, configuration);
-    }
-
     @Override
     protected JsonNumber deserialize(String valueString, Unmarshaller converter, Type rtType) {
         final JsonBuilderFactory jsonBuilder = converter.getJsonbContext().getJsonProvider().createBuilderFactory(null);
@@ -66,4 +57,14 @@ public class JsonNumericTypeDeserializer extends AbstractValueTypeDeserializer<J
                 .build();
         return objectNode.getJsonNumber(NUMERIC_LITERAL);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param configuration Model customization.
+     */
+    public JsonNumericTypeDeserializer(Customization configuration) {
+        super(JsonNumber.class, configuration);
+    }
+
 }

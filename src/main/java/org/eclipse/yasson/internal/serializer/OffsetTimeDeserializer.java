@@ -28,20 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class OffsetTimeDeserializer extends AbstractDateTimeDeserializer<OffsetTime> {
 
-    /**
-     * Creates an instance.
-     *
-     * @param customOptions Model customization.
-     */
-    public OffsetTimeDeserializer(Customization customOptions) {
-        super(OffsetTime.class, customOptions);
-    }
-
-    @Override
-    protected OffsetTime fromInstant(Instant instant) {
-        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
-    }
-
     @Override
     protected OffsetTime parseDefault(String rawJson, Locale culture) {
         return OffsetTime.parse(rawJson, DateTimeFormatter.ISO_OFFSET_TIME.withLocale(culture));
@@ -51,4 +37,19 @@ public class OffsetTimeDeserializer extends AbstractDateTimeDeserializer<OffsetT
     protected OffsetTime parseWithFormatter(String rawJson, DateTimeFormatter dateTimeFormat) {
         return OffsetTime.parse(rawJson, dateTimeFormat);
     }
+
+    @Override
+    protected OffsetTime fromInstant(Instant instant) {
+        throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customOptions Model customization.
+     */
+    public OffsetTimeDeserializer(Customization customOptions) {
+        super(OffsetTime.class, customOptions);
+    }
+
 }

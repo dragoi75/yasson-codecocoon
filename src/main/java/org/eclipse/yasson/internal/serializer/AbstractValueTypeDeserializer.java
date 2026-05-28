@@ -31,14 +31,33 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     private final Customization customization;
 
     /**
-     * Creates a new instance.
+     * Returns customization of object.
      *
-     * @param clazz         Class to work with.
-     * @param customization Model customization.
+     * @return object customization
      */
-    public AbstractValueTypeDeserializer(Class<T> clazz, Customization customization) {
-        this.clazz = clazz;
-        this.customization = customization;
+    public Customization getCustomization() {
+        return customization;
+    }
+
+    /**
+     * Convert string value to object.
+     *
+     * @param jsonValue    Json value.
+     * @param unmarshaller Unmarshaller instance.
+     * @param rtType       Runtime type.
+     * @return Deserialized object.
+     */
+    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
+        throw new UnsupportedOperationException("Operation not supported in " + getClass());
+    }
+
+    /**
+     * Type of a property or creator parameter which is deserialized.
+     *
+     * @return property type.
+     */
+    protected Class<T> getPropertyType() {
+        return clazz;
     }
 
     /**
@@ -61,32 +80,14 @@ public abstract class AbstractValueTypeDeserializer<T> implements JsonbDeseriali
     }
 
     /**
-     * Convert string value to object.
+     * Creates a new instance.
      *
-     * @param jsonValue    Json value.
-     * @param unmarshaller Unmarshaller instance.
-     * @param rtType       Runtime type.
-     * @return Deserialized object.
+     * @param clazz         Class to work with.
+     * @param customization Model customization.
      */
-    protected T deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
-        throw new UnsupportedOperationException("Operation not supported in " + getClass());
+    public AbstractValueTypeDeserializer(Class<T> clazz, Customization customization) {
+        this.clazz = clazz;
+        this.customization = customization;
     }
 
-    /**
-     * Returns customization of object.
-     *
-     * @return object customization
-     */
-    public Customization getCustomization() {
-        return customization;
-    }
-
-    /**
-     * Type of a property or creator parameter which is deserialized.
-     *
-     * @return property type.
-     */
-    protected Class<T> getPropertyType() {
-        return clazz;
-    }
 }

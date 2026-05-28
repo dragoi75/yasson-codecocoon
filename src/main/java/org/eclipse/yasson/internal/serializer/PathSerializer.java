@@ -20,12 +20,14 @@ import org.eclipse.yasson.internal.Marshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 public class PathSerializer extends AbstractValueTypeSerializer<Path> {
-    public PathSerializer(Customization customConfig) {
-        super(customConfig);
-    }
 
     @Override
     protected void serialize(Path pathValue, JsonGenerator jsonWriter, Marshaller marshaller) {
         jsonWriter.write(pathValue.toString());
     }
+
+    public PathSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ZonedDateTimeSerializer extends AbstractDateTimeSerializer<ZonedDateTime> {
 
+    @Override
+    protected String formatDefault(ZonedDateTime zonedDateTime, Locale userRegion) {
+        return DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(userRegion).format(zonedDateTime);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -38,8 +43,4 @@ public class ZonedDateTimeSerializer extends AbstractDateTimeSerializer<ZonedDat
         return zonedDateTime.toInstant();
     }
 
-    @Override
-    protected String formatDefault(ZonedDateTime zonedDateTime, Locale userRegion) {
-        return DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(userRegion).format(zonedDateTime);
-    }
 }

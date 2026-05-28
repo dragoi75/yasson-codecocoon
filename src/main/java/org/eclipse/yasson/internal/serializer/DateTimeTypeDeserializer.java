@@ -31,34 +31,6 @@ public class DateTimeTypeDeserializer extends AbstractDateTimeDeserializer<Date>
     private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
     /**
-     * Creates an instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public DateTimeTypeDeserializer(Customization customConfig) {
-        super(Date.class, customConfig);
-    }
-
-    @Override
-    protected Date fromInstant(Instant epochMoment) {
-        return new Date(epochMoment.toEpochMilli());
-    }
-
-    @Override
-    protected Date parseDefault(String jsonText, Locale userRegion) {
-        TemporalAccessor temporalAccessor = parseWithOptionalZone(jsonText, ISO_DATE_TIME_FORMAT.withLocale(userRegion), UTC);
-
-        return new Date(Instant.from(temporalAccessor).toEpochMilli());
-    }
-
-    @Override
-    protected Date parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFmt) {
-        TemporalAccessor temporalAccessor = parseWithOptionalZone(jsonText, dateTimeFmt, UTC);
-
-        return new Date(Instant.from(temporalAccessor).toEpochMilli());
-    }
-
-    /**
      * Parses the jsonValue as a java.time.ZonedDateTime that can later be use to be converted into a java.util.Date.<br>
      * At first the Json-Date is parsed with an Offset/Zone.<br>
      * If no Offset/Zone is present and the parsing fails, it will be parsed again with the fixed Zone that was passed as
@@ -79,4 +51,33 @@ public class DateTimeTypeDeserializer extends AbstractDateTimeDeserializer<Date>
             return ZonedDateTime.parse(jsonText, dateTimeFmt.withZone(targetZone));
         }
     }
+
+    @Override
+    protected Date parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFmt) {
+        TemporalAccessor temporalAccessor = parseWithOptionalZone(jsonText, dateTimeFmt, UTC);
+
+        return new Date(Instant.from(temporalAccessor).toEpochMilli());
+    }
+
+    @Override
+    protected Date parseDefault(String jsonText, Locale userRegion) {
+        TemporalAccessor temporalAccessor = parseWithOptionalZone(jsonText, ISO_DATE_TIME_FORMAT.withLocale(userRegion), UTC);
+
+        return new Date(Instant.from(temporalAccessor).toEpochMilli());
+    }
+
+    @Override
+    protected Date fromInstant(Instant epochMoment) {
+        return new Date(epochMoment.toEpochMilli());
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public DateTimeTypeDeserializer(Customization customConfig) {
+        super(Date.class, customConfig);
+    }
+
 }

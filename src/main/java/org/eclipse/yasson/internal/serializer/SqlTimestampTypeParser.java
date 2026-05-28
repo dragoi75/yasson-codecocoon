@@ -29,13 +29,15 @@ public class SqlTimestampTypeParser extends AbstractDateTimeDeserializer<Timesta
 
     private static final DateTimeFormatter TIMESTAMP_PATTERN = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param configOptions Model customization.
-     */
-    public SqlTimestampTypeParser(Customization configOptions) {
-        super(Timestamp.class, configOptions);
+    @Override
+    protected Timestamp parseDefault(String jsonText, Locale region) {
+        final TemporalAccessor temporalAccessor = TIMESTAMP_PATTERN.withLocale(region).parse(jsonText);
+        return Timestamp.from(getInstant(temporalAccessor));
+    }
+
+    private Instant getInstant(TemporalAccessor temporalAccessor) {
+        LocalDateTime dateTime = LocalDateTime.from(temporalAccessor);
+        return dateTime.atZone(ZoneId.of("UTC")).toInstant();
     }
 
     /**
@@ -46,25 +48,23 @@ public class SqlTimestampTypeParser extends AbstractDateTimeDeserializer<Timesta
     }
 
     @Override
-    protected Timestamp fromInstant(Instant moment) {
-        return Timestamp.from(moment);
-    }
-
-    @Override
-    protected Timestamp parseDefault(String jsonText, Locale region) {
-        final TemporalAccessor temporalAccessor = TIMESTAMP_PATTERN.withLocale(region).parse(jsonText);
-        return Timestamp.from(getInstant(temporalAccessor));
-    }
-
-    @Override
     protected Timestamp parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFmt) {
         final TemporalAccessor temporalAccessor = getZonedFormatter(dateTimeFmt).parse(jsonText);
         return Timestamp.from(getInstant(temporalAccessor));
     }
 
-    private Instant getInstant(TemporalAccessor temporalAccessor) {
-        LocalDateTime dateTime = LocalDateTime.from(temporalAccessor);
-        return dateTime.atZone(ZoneId.of("UTC")).toInstant();
+    @Override
+    protected Timestamp fromInstant(Instant moment) {
+        return Timestamp.from(moment);
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param configOptions Model customization.
+     */
+    public SqlTimestampTypeParser(Customization configOptions) {
+        super(Timestamp.class, configOptions);
     }
 
 }

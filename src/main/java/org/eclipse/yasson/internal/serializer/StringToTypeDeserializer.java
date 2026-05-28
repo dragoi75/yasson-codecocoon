@@ -28,15 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class StringToTypeDeserializer extends AbstractValueTypeDeserializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param configOptions Model customization.
-     */
-    public StringToTypeDeserializer(Customization configOptions) {
-        super(String.class, configOptions);
-    }
-
     @Override
     protected String deserialize(String jsonText, Unmarshaller dataConverter, Type rtType) {
         if ((boolean) dataConverter.getJsonbContext().getConfig().getProperty(JsonbConfig.STRICT_IJSON).orElse(false)) {
@@ -51,4 +42,14 @@ public class StringToTypeDeserializer extends AbstractValueTypeDeserializer<Stri
         }
         return jsonText;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param configOptions Model customization.
+     */
+    public StringToTypeDeserializer(Customization configOptions) {
+        super(String.class, configOptions);
+    }
+
 }

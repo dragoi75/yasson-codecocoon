@@ -26,6 +26,15 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class JsonStringToTypeDeserializer extends AbstractValueTypeDeserializer<JsonString> {
 
+    @Override
+    protected JsonString deserialize(String jsonText, Unmarshaller dataDeserializer, Type rtType) {
+        final JsonBuilderFactory jsonBuilder = dataDeserializer.getJsonbContext().getJsonProvider().createBuilderFactory(null);
+        final JsonObject parsedObject = jsonBuilder.createObjectBuilder()
+                .add("json", jsonText)
+                .build();
+        return parsedObject.getJsonString("json");
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,12 +44,4 @@ public class JsonStringToTypeDeserializer extends AbstractValueTypeDeserializer<
         super(JsonString.class, customConfig);
     }
 
-    @Override
-    protected JsonString deserialize(String jsonText, Unmarshaller dataDeserializer, Type rtType) {
-        final JsonBuilderFactory jsonBuilder = dataDeserializer.getJsonbContext().getJsonProvider().createBuilderFactory(null);
-        final JsonObject parsedObject = jsonBuilder.createObjectBuilder()
-                .add("json", jsonText)
-                .build();
-        return parsedObject.getJsonString("json");
-    }
 }

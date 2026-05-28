@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class IntegerValueDeserializer extends AbstractNumberDeserializer<Integer> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public IntegerValueDeserializer(Customization customConfig) {
-        super(Integer.class, customConfig);
-    }
-
     @Override
     protected Integer deserialize(String rawJson, Unmarshaller dataParser, Type rtType) {
         return deserializeFormatted(rawJson, true, dataParser.getJsonbContext())
@@ -48,4 +39,14 @@ public class IntegerValueDeserializer extends AbstractNumberDeserializer<Integer
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public IntegerValueDeserializer(Customization customConfig) {
+        super(Integer.class, customConfig);
+    }
+
 }

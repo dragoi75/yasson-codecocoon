@@ -29,13 +29,9 @@ import org.eclipse.yasson.internal.properties.LocalizedMessages;
  */
 public class StringTypeJsonSerializer extends AbstractValueTypeSerializer<String> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param settings Model customization.
-     */
-    public StringTypeJsonSerializer(Customization settings) {
-        super(settings);
+    @Override
+    protected void serialize(String textValue, JsonGenerator jsonWriter, Marshaller serializer) {
+        jsonWriter.write(toJsonString(textValue, serializer.getJsonbContext()));
     }
 
     private String toJsonString(String text, JsonbContextManager contextManager) {
@@ -52,8 +48,13 @@ public class StringTypeJsonSerializer extends AbstractValueTypeSerializer<String
         return text;
     }
 
-    @Override
-    protected void serialize(String textValue, JsonGenerator jsonWriter, Marshaller serializer) {
-        jsonWriter.write(toJsonString(textValue, serializer.getJsonbContext()));
+    /**
+     * Creates a new instance.
+     *
+     * @param settings Model customization.
+     */
+    public StringTypeJsonSerializer(Customization settings) {
+        super(settings);
     }
+
 }

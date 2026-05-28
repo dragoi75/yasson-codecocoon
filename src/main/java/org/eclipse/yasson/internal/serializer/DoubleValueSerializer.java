@@ -21,6 +21,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class DoubleValueSerializer extends AbstractNumberSerializer<Double> {
 
+    @Override
+    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter) {
+        jsonWriter.write(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class DoubleValueSerializer extends AbstractNumberSerializer<Double> {
         jsonWriter.write(fieldName, value);
     }
 
-    @Override
-    protected void serializeNonFormatted(Double value, JsonGenerator jsonWriter) {
-        jsonWriter.write(value);
-    }
 }

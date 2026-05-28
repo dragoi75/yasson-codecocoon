@@ -32,15 +32,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class TimeZoneTypeConverter extends AbstractValueTypeDeserializer<TimeZone> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public TimeZoneTypeConverter(Customization customConfig) {
-        super(TimeZone.class, customConfig);
-    }
-
     @Override
     protected TimeZone deserialize(String jsonStr, Unmarshaller unmarshaller, Type rtType) {
         try {
@@ -50,6 +41,15 @@ public class TimeZoneTypeConverter extends AbstractValueTypeDeserializer<TimeZon
         } catch (ZoneRulesException zoneRulesEx) {
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.ZONE_PARSE_ERROR, jsonStr), zoneRulesEx);
         }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public TimeZoneTypeConverter(Customization customConfig) {
+        super(TimeZone.class, customConfig);
     }
 
 }

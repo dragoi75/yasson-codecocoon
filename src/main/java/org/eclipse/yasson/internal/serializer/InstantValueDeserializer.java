@@ -25,6 +25,16 @@ public class InstantValueDeserializer extends AbstractDateTimeDeserializer<Insta
 
     private static final DateTimeFormatter ISO_INSTANT_FORMAT = DateTimeFormatter.ISO_INSTANT.withZone(UTC);
 
+    @Override
+    protected Instant parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
+        return Instant.from(getZonedFormatter(dateTimeFormat).parse(jsonText));
+    }
+
+    @Override
+    protected Instant parseDefault(String jsonText, Locale region) {
+        return Instant.from(ISO_INSTANT_FORMAT.withLocale(region).parse(jsonText));
+    }
+
     /**
      * Creates an instance.
      *
@@ -39,13 +49,4 @@ public class InstantValueDeserializer extends AbstractDateTimeDeserializer<Insta
         return timePoint;
     }
 
-    @Override
-    protected Instant parseDefault(String jsonText, Locale region) {
-        return Instant.from(ISO_INSTANT_FORMAT.withLocale(region).parse(jsonText));
-    }
-
-    @Override
-    protected Instant parseWithFormatter(String jsonText, DateTimeFormatter dateTimeFormat) {
-        return Instant.from(getZonedFormatter(dateTimeFormat).parse(jsonText));
-    }
 }

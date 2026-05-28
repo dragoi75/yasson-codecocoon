@@ -30,15 +30,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class JsonValueDecoder extends AbstractValueTypeDeserializer<JsonValue> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public JsonValueDecoder(Customization customConfig) {
-        super(JsonValue.class, customConfig);
-    }
-
     @Override
     public JsonValue deserialize(JsonParser jsonReader, DeserializationContext ctx, Type rtType) {
         final JsonParser.Event followingEvent = ((JsonbRiParser) jsonReader).getLastEvent();
@@ -61,4 +52,14 @@ public class JsonValueDecoder extends AbstractValueTypeDeserializer<JsonValue> {
     protected JsonValue deserialize(String jsonValue, Unmarshaller unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public JsonValueDecoder(Customization customConfig) {
+        super(JsonValue.class, customConfig);
+    }
+
 }

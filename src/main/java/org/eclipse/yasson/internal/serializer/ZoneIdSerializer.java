@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ZoneIdSerializer extends AbstractValueTypeSerializer<ZoneId> {
 
+    @Override
+    protected void serialize(ZoneId zoneId, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(zoneId.getId());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class ZoneIdSerializer extends AbstractValueTypeSerializer<ZoneId> {
         super(config);
     }
 
-    @Override
-    protected void serialize(ZoneId zoneId, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(zoneId.getId());
-    }
 }

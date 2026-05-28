@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class LongValueDeserializer extends AbstractNumberDeserializer<Long> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public LongValueDeserializer(Customization customConfig) {
-        super(Long.class, customConfig);
-    }
-
     @Override
     protected Long deserialize(String jsonString, Unmarshaller valueParser, Type rtType) {
         return deserializeFormatted(jsonString, true, valueParser.getJsonbContext())
@@ -47,4 +38,14 @@ public class LongValueDeserializer extends AbstractNumberDeserializer<Long> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public LongValueDeserializer(Customization customConfig) {
+        super(Long.class, customConfig);
+    }
+
 }

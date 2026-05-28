@@ -55,7 +55,44 @@ public class StandardSerializerRegistry {
 
     private static final SerializerProviderAdapter ENUM_SERIALIZER_ADAPTER = new SerializerProviderAdapter(EnumValueSerializer::new, EnumValueDeserializer::new);
 
-    private StandardSerializerRegistry() {
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param targetType class to check
+     * @return true if supported
+     */
+    public static boolean isKnownType(Class<?> targetType) {
+        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
+        return isContainerValueKnown || locateValueSerializerProvider(targetType).isPresent();
+    }
+
+    /**
+     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
+     *
+     * @param targetType supported type class
+     * @param <T>   Type of serializer
+     * @return serializer if found
+     */
+    public static <T> Optional<SerializerProviderAdapter> locateValueSerializerProvider(Class<T> targetType) {
+        Class<?> potentialClass = targetType;
+        do {
+            final SerializerProviderAdapter serializerAdapter = SERIALIZER_PROVIDERS.get(potentialClass);
+            if (null != serializerAdapter) {
+                return Optional.of(serializerAdapter);
+            }
+            potentialClass = potentialClass.getSuperclass();
+        } while (null != potentialClass);
+        return findProviderByCondition(targetType);
+    }
+
+    private static boolean isClassAvailable(String typeName) {
+        try {
+            Class.forName(typeName);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
     }
 
     private static Map<Class<?>, SerializerProviderAdapter> initializeSerializers() {
@@ -115,23 +152,7 @@ public class StandardSerializerRegistry {
         return serializerMap;
     }
 
-    /**
-     * Look for a provider for a supported value type. These serializers are basically singleton stateless shared instances.
-     *
-     * @param targetType supported type class
-     * @param <T>   Type of serializer
-     * @return serializer if found
-     */
-    public static <T> Optional<SerializerProviderAdapter> locateValueSerializerProvider(Class<T> targetType) {
-        Class<?> potentialClass = targetType;
-        do {
-            final SerializerProviderAdapter serializerAdapter = SERIALIZER_PROVIDERS.get(potentialClass);
-            if (null != serializerAdapter) {
-                return Optional.of(serializerAdapter);
-            }
-            potentialClass = potentialClass.getSuperclass();
-        } while (null != potentialClass);
-        return findProviderByCondition(targetType);
+    private StandardSerializerRegistry() {
     }
 
     private static <T> Optional<SerializerProviderAdapter> findProviderByCondition(Class<T> targetType) {
@@ -153,24 +174,4 @@ public class StandardSerializerRegistry {
         return Optional.empty();
     }
 
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param targetType class to check
-     * @return true if supported
-     */
-    public static boolean isKnownType(Class<?> targetType) {
-        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
-        return isContainerValueKnown || locateValueSerializerProvider(targetType).isPresent();
-    }
-
-    private static boolean isClassAvailable(String typeName) {
-        try {
-            Class.forName(typeName);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
-    }
 }

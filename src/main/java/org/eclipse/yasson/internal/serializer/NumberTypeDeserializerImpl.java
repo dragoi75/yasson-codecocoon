@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class NumberTypeDeserializerImpl extends AbstractValueTypeDeserializer<Number> {
 
+    @Override
+    protected Number deserialize(String jsonContent, Unmarshaller unmarshaller, Type rtType) {
+        return new BigDecimal(jsonContent);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class NumberTypeDeserializerImpl extends AbstractValueTypeDeserializer<Nu
         super(Number.class, customConfig);
     }
 
-    @Override
-    protected Number deserialize(String jsonContent, Unmarshaller unmarshaller, Type rtType) {
-        return new BigDecimal(jsonContent);
-    }
 }

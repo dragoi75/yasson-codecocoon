@@ -22,6 +22,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class EnumValueSerializer extends AbstractValueTypeSerializer<Enum> {
 
+    @Override
+    protected void serialize(Enum enumValue, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(enumValue.name());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -31,8 +36,4 @@ public class EnumValueSerializer extends AbstractValueTypeSerializer<Enum> {
         super(customConfig);
     }
 
-    @Override
-    protected void serialize(Enum enumValue, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(enumValue.name());
-    }
 }

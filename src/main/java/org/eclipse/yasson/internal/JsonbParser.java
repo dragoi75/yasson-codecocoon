@@ -20,25 +20,11 @@ import jakarta.json.stream.JsonParser;
 public interface JsonbParser extends JsonParser {
 
     /**
-     * Moves parser to required event, if current event is equal to required does nothing.
-     *
-     * @param event Required event.
-     */
-    void moveTo(JsonParser.Event event);
-
-    /**
      * Moves parser cursor to any JSON value.
      *
      * @return Event.
      */
     Event moveToValue();
-
-    /**
-     * Moves parser cursor to START_OBJECT or START_ARRAY.
-     *
-     * @return Event.
-     */
-    Event moveToStartStructure();
 
     /**
      * Current level of JsonbRiParser.
@@ -52,4 +38,19 @@ public interface JsonbParser extends JsonParser {
      * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
      */
     void skipJsonStructure();
+
+    /**
+     * Moves parser to required event, if current event is equal to required does nothing.
+     *
+     * @param event Required event.
+     */
+    void moveTo(Event event);
+
+    /**
+     * Moves parser cursor to START_OBJECT or START_ARRAY.
+     *
+     * @return Event.
+     */
+    Event moveToStartStructure();
+
 }

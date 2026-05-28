@@ -25,20 +25,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class LocalDateTimeJsonSerializer extends AbstractDateTimeSerializer<LocalDateTime> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public LocalDateTimeJsonSerializer(Customization customConfig) {
-        super(customConfig);
-    }
-
-    @Override
-    protected Instant toInstant(LocalDateTime localDateTime) {
-        return localDateTime.atZone(UTC).toInstant();
-    }
-
     @Override
     protected String formatDefault(LocalDateTime localDateTime, Locale languageTag) {
         return DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(languageTag).format(localDateTime);
@@ -54,4 +40,19 @@ public class LocalDateTimeJsonSerializer extends AbstractDateTimeSerializer<Loca
         final ZonedDateTime zonedTime = localDateTime.atZone(UTC);
         return JsonbDateFormatter.IJSON_DATE_FORMATTER.format(zonedTime);
     }
+
+    @Override
+    protected Instant toInstant(LocalDateTime localDateTime) {
+        return localDateTime.atZone(UTC).toInstant();
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public LocalDateTimeJsonSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

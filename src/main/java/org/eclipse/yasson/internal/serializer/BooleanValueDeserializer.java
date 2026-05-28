@@ -28,15 +28,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class BooleanValueDeserializer extends AbstractValueTypeDeserializer<Boolean> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public BooleanValueDeserializer(Customization customConfig) {
-        super(Boolean.class, customConfig);
-    }
-
     @Override
     public Boolean deserialize(JsonParser jsonReader, DeserializationContext ctx, Type rtType) {
         JsonParser.Event occurrence = ((JsonbParser) jsonReader).moveToValue();
@@ -50,6 +41,15 @@ public class BooleanValueDeserializer extends AbstractValueTypeDeserializer<Bool
         default:
             throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Unknown JSON value: " + occurrence));
         }
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public BooleanValueDeserializer(Customization customConfig) {
+        super(Boolean.class, customConfig);
     }
 
 }

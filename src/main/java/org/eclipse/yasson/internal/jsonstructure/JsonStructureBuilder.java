@@ -24,11 +24,65 @@ import jakarta.json.JsonValue;
 abstract class JsonStructureBuilder {
 
     /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(String value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(BigInteger value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(int value);
+
+    /**
+     * Write null into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     */
+    abstract void writeNull();
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(boolean value);
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(double value);
+
+    /**
      * Build and get constructed {@link JsonStructure}.
      *
      * @return JsonStructure result.
      */
     abstract JsonStructure build();
+
+    /**
+     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
+     * by {@link JsonObjectBuilder#writeKey(String)} is used.
+     *
+     * @param value A value to write.
+     */
+    abstract void write(BigDecimal value);
 
     /**
      * Puts another {@link JsonStructure} into current. If current is {@link jakarta.json.JsonObject} than last written
@@ -52,59 +106,6 @@ abstract class JsonStructureBuilder {
      *
      * @param value A value to write.
      */
-    abstract void write(String value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(BigDecimal value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(BigInteger value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(int value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
     abstract void write(long value);
 
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(double value);
-
-    /**
-     * Write a value into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     *
-     * @param value A value to write.
-     */
-    abstract void write(boolean value);
-
-    /**
-     * Write null into current {@link JsonStructure}. If current is {@link jakarta.json.JsonObject}, last stored key
-     * by {@link JsonObjectBuilder#writeKey(String)} is used.
-     */
-    abstract void writeNull();
 }

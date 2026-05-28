@@ -23,23 +23,12 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class SqlDateSerializer<T extends Date> extends DateSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public SqlDateSerializer(Customization customConfig) {
-        super(customConfig);
-    }
-
     @Override
-    protected Instant asInstant(Date date) {
+    protected String formatUsingFormatter(Date date, DateTimeFormatter dateTimeFormat) {
         if (!(date instanceof java.sql.Date)) {
-            return super.asInstant(date);
+            return super.formatUsingFormatter(date, dateTimeFormat);
         } else {
-            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
-            // In the future (at a breaking change boundary) we should probably reject this code path
-            return Instant.ofEpochMilli(date.getTime());
+            return ((java.sql.Date) date).toLocalDate().format(dateTimeFormat);
         }
     }
 
@@ -54,11 +43,23 @@ public class SqlDateSerializer<T extends Date> extends DateSerializer<T> {
     }
 
     @Override
-    protected String formatUsingFormatter(Date date, DateTimeFormatter dateTimeFormat) {
+    protected Instant asInstant(Date date) {
         if (!(date instanceof java.sql.Date)) {
-            return super.formatUsingFormatter(date, dateTimeFormat);
+            return super.asInstant(date);
         } else {
-            return ((java.sql.Date) date).toLocalDate().format(dateTimeFormat);
+            // java.sql.Date doesn't have a time component, so do our best if TIME_IN_MILLIS is requested
+            // In the future (at a breaking change boundary) we should probably reject this code path
+            return Instant.ofEpochMilli(date.getTime());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public SqlDateSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

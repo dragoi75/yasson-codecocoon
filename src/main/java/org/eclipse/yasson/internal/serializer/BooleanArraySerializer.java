@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class BooleanArraySerializer extends AbstractArraySerializer<boolean[]> {
 
+    @Override
+    protected void serializeInternal(boolean[] obj, JsonGenerator generator, SerializationContext ctx) {
+        for (boolean b : obj) {
+            generator.write(b);
+        }
+    }
+
     /**
      * Creates new instance of boolean array serializer.
      *
@@ -27,13 +34,6 @@ public class BooleanArraySerializer extends AbstractArraySerializer<boolean[]> {
      */
     protected BooleanArraySerializer(SerializerBuilder builder) {
         super(builder);
-    }
-
-    @Override
-    protected void serializeInternal(boolean[] obj, JsonGenerator generator, SerializationContext ctx) {
-        for (boolean b : obj) {
-            generator.write(b);
-        }
     }
 
 }

@@ -30,23 +30,38 @@ class JsonObjectBuilder extends JsonStructureBuilder {
 
     private String nextKey;
 
+    private String getNextKey() {
+        if (null == nextKey) {
+            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Can't write a value without key name"));
+        }
+        String key = nextKey;
+        nextKey = null;
+        return key;
+    }
+
+    @Override
+    void write(String value) {
+        builder.add(getNextKey(), value);
+    }
+
+    @Override
+    void writeNull() {
+        builder.addNull(getNextKey());
+    }
+
     /**
-     * Create instance with cached provider.
+     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
      *
-     * @param provider Json provider to create JsonObjectBuilder on.
+     * @param name  Key name to write value with.
+     * @param value A value to write.
      */
-    JsonObjectBuilder(JsonProvider provider) {
-        this.builder = provider.createObjectBuilder();
+    void write(String name, double value) {
+        builder.add(name, value);
     }
 
     @Override
-    JsonStructure build() {
-        return builder.build();
-    }
-
-    @Override
-    void put(JsonStructure structure) {
-        builder.add(getNextKey(), structure);
+    void write(int value) {
+        builder.add(getNextKey(), value);
     }
 
     /**
@@ -59,49 +74,53 @@ class JsonObjectBuilder extends JsonStructureBuilder {
         builder.add(name, structure);
     }
 
-    @Override
-    void write(JsonValue value) {
-        builder.add(getNextKey(), value);
+    /**
+     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
+     *
+     * @param name  Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, int value) {
+        builder.add(name, value);
     }
 
     @Override
-    void write(String value) {
-        builder.add(getNextKey(), value);
+    JsonStructure build() {
+        return builder.build();
     }
 
-    @Override
-    void write(BigDecimal value) {
-        builder.add(getNextKey(), value);
+    /**
+     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
+     *
+     * @param name  Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, boolean value) {
+        builder.add(name, value);
     }
 
-    @Override
-    void write(BigInteger value) {
-        builder.add(getNextKey(), value);
+    /**
+     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
+     *
+     * @param name  Key name to write value with.
+     * @param value A value to write.
+     */
+    void write(String name, BigInteger value) {
+        builder.add(name, value);
     }
 
-    @Override
-    void write(int value) {
-        builder.add(getNextKey(), value);
+    /**
+     * Write a null into current {@link jakarta.json.JsonObject} with a given key.
+     *
+     * @param name Key name to write null with.
+     */
+    void writeNull(String name) {
+        builder.addNull(name);
     }
 
     @Override
     void write(long value) {
         builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(double value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void write(boolean value) {
-        builder.add(getNextKey(), value);
-    }
-
-    @Override
-    void writeNull() {
-        builder.addNull(getNextKey());
     }
 
     /**
@@ -130,48 +149,32 @@ class JsonObjectBuilder extends JsonStructureBuilder {
      * @param name  Key name to write value with.
      * @param value A value to write.
      */
-    void write(String name, BigDecimal value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
-     *
-     * @param name  Key name to write value with.
-     * @param value A value to write.
-     */
-    void write(String name, BigInteger value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
-     *
-     * @param name  Key name to write value with.
-     * @param value A value to write.
-     */
-    void write(String name, int value) {
-        builder.add(name, value);
-    }
-
-    /**
-     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
-     *
-     * @param name  Key name to write value with.
-     * @param value A value to write.
-     */
     void write(String name, long value) {
         builder.add(name, value);
     }
 
+    @Override
+    void put(JsonStructure structure) {
+        builder.add(getNextKey(), structure);
+    }
+
+    @Override
+    void write(JsonValue value) {
+        builder.add(getNextKey(), value);
+    }
+
     /**
-     * Write a key-value pair into current {@link jakarta.json.JsonObject}.
+     * Create instance with cached provider.
      *
-     * @param name  Key name to write value with.
-     * @param value A value to write.
+     * @param provider Json provider to create JsonObjectBuilder on.
      */
-    void write(String name, double value) {
-        builder.add(name, value);
+    JsonObjectBuilder(JsonProvider provider) {
+        this.builder = provider.createObjectBuilder();
+    }
+
+    @Override
+    void write(boolean value) {
+        builder.add(getNextKey(), value);
     }
 
     /**
@@ -180,17 +183,13 @@ class JsonObjectBuilder extends JsonStructureBuilder {
      * @param name  Key name to write value with.
      * @param value A value to write.
      */
-    void write(String name, boolean value) {
+    void write(String name, BigDecimal value) {
         builder.add(name, value);
     }
 
-    /**
-     * Write a null into current {@link jakarta.json.JsonObject} with a given key.
-     *
-     * @param name Key name to write null with.
-     */
-    void writeNull(String name) {
-        builder.addNull(name);
+    @Override
+    void write(BigDecimal value) {
+        builder.add(getNextKey(), value);
     }
 
     /**
@@ -202,12 +201,14 @@ class JsonObjectBuilder extends JsonStructureBuilder {
         this.nextKey = key;
     }
 
-    private String getNextKey() {
-        if (null == nextKey) {
-            throw new JsonbException(LocalizedMessages.getMessage(MessageKeyConstants.INTERNAL_ERROR, "Can't write a value without key name"));
-        }
-        String key = nextKey;
-        nextKey = null;
-        return key;
+    @Override
+    void write(double value) {
+        builder.add(getNextKey(), value);
     }
+
+    @Override
+    void write(BigInteger value) {
+        builder.add(getNextKey(), value);
+    }
+
 }

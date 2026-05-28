@@ -26,17 +26,35 @@ public class CreatorCustomizer extends CustomizationBase {
 
     private BeanPropertyModel beanPropertyDescriptor;
 
+    @Override
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        if (null == temporalFormatter) {
+            if (null != beanPropertyDescriptor) {
+                return beanPropertyDescriptor.getCustomization().getDeserializeDateFormatter();
+            }
+        } else {
+            return temporalFormatter;
+        }
+        return null;
+    }
+
     /**
-     * Creates new creator customization instance.
+     * Set property referenced model.
      *
-     * @param customBuilder   builder of the customization
-     * @param numericFormatter number formatter
-     * @param temporalFormatter   date formatter
+     * @param beanPropertyDescriptor referenced property model
      */
-    public CreatorCustomizer(CustomizationBuilder customBuilder, JsonbNumberFormatter numericFormatter, JsonbDateFormatter temporalFormatter) {
-        super(customBuilder);
-        this.numericFormatter = numericFormatter;
-        this.temporalFormatter = temporalFormatter;
+    public void setPropertyModel(BeanPropertyModel beanPropertyDescriptor) {
+        this.beanPropertyDescriptor = beanPropertyDescriptor;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
     @Override
@@ -56,34 +74,17 @@ public class CreatorCustomizer extends CustomizationBase {
         return null;
     }
 
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        if (null == temporalFormatter) {
-            if (null != beanPropertyDescriptor) {
-                return beanPropertyDescriptor.getCustomization().getDeserializeDateFormatter();
-            }
-        } else {
-            return temporalFormatter;
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
-    }
-
     /**
-     * Set property referenced model.
+     * Creates new creator customization instance.
      *
-     * @param beanPropertyDescriptor referenced property model
+     * @param customBuilder   builder of the customization
+     * @param numericFormatter number formatter
+     * @param temporalFormatter   date formatter
      */
-    public void setPropertyModel(BeanPropertyModel beanPropertyDescriptor) {
-        this.beanPropertyDescriptor = beanPropertyDescriptor;
+    public CreatorCustomizer(CustomizationBuilder customBuilder, JsonbNumberFormatter numericFormatter, JsonbDateFormatter temporalFormatter) {
+        super(customBuilder);
+        this.numericFormatter = numericFormatter;
+        this.temporalFormatter = temporalFormatter;
     }
+
 }

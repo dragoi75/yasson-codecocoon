@@ -27,6 +27,25 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class XMLGregorianCalendarSerializer extends AbstractDateTimeSerializer<XMLGregorianCalendar> {
 
+    @Override
+    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar calendar) {
+        return toZonedDateTimeFromXmlGregorianCalendar(calendar);
+    }
+
+    @Override
+    protected String formatDefault(XMLGregorianCalendar xmlCalendar, Locale region) {
+        DateTimeFormatter formatPattern = DateTimeFormatter.ISO_DATE_TIME;
+        return formatPattern
+                .withLocale(region)
+                .withZone(xmlCalendar.toGregorianCalendar().getTimeZone().toZoneId())
+                .format(toTemporalAccessor(xmlCalendar));
+    }
+
+    private ZonedDateTime toZonedDateTimeFromXmlGregorianCalendar(XMLGregorianCalendar calendar) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.toGregorianCalendar().getTimeInMillis()),
+                                       calendar.toGregorianCalendar().getTimeZone().toZoneId());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -41,22 +60,4 @@ public class XMLGregorianCalendarSerializer extends AbstractDateTimeSerializer<X
         return Instant.ofEpochMilli(xmlCalendar.toGregorianCalendar().getTimeInMillis());
     }
 
-    @Override
-    protected String formatDefault(XMLGregorianCalendar xmlCalendar, Locale region) {
-        DateTimeFormatter formatPattern = DateTimeFormatter.ISO_DATE_TIME;
-        return formatPattern
-                .withLocale(region)
-                .withZone(xmlCalendar.toGregorianCalendar().getTimeZone().toZoneId())
-                .format(toTemporalAccessor(xmlCalendar));
-    }
-
-    @Override
-    protected TemporalAccessor toTemporalAccessor(XMLGregorianCalendar calendar) {
-        return toZonedDateTimeFromXmlGregorianCalendar(calendar);
-    }
-
-    private ZonedDateTime toZonedDateTimeFromXmlGregorianCalendar(XMLGregorianCalendar calendar) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(calendar.toGregorianCalendar().getTimeInMillis()),
-                                       calendar.toGregorianCalendar().getTimeZone().toZoneId());
-    }
 }

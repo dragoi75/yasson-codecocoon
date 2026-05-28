@@ -30,15 +30,6 @@ public class DoubleValueDeserializer extends AbstractNumberDeserializer<Double> 
     private static final String INFINITY_NEGATIVE = "NEGATIVE_INFINITY";
     private static final String NOT_A_NUMBER = "NaN";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customizer Model customization.
-     */
-    DoubleValueDeserializer(Customization customizer) {
-        super(Double.class, customizer);
-    }
-
     @Override
     protected Double deserialize(String jsonString, Unmarshaller unmarshalHandler, Type rtType) {
         switch (jsonString) {
@@ -61,4 +52,14 @@ public class DoubleValueDeserializer extends AbstractNumberDeserializer<Double> 
                     });
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customizer Model customization.
+     */
+    DoubleValueDeserializer(Customization customizer) {
+        super(Double.class, customizer);
+    }
+
 }

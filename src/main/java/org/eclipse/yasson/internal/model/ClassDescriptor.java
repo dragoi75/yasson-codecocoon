@@ -52,59 +52,6 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
-     *
-     * @param propName A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
-     */
-    public BeanPropertyModel getPropertyModel(String propName) {
-        return propertyMap.get(propName);
-    }
-
-    /**
-     * Create instance of class model.
-     *
-     * @param describedClass                  Class to model.
-     * @param config          Customization of the class parsed from annotations.
-     * @param parentDescriptor       Class model of parent class.
-     * @param namingStrategy Property naming strategy.
-     */
-    public ClassDescriptor(Class<?> describedClass, ClassConfiguration config, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
-        this.describedClass = describedClass;
-        this.classConfig = config;
-        this.parentDescriptor = parentDescriptor;
-        this.namingStrategy = namingStrategy;
-        setProperties(new ArrayList<>());
-    }
-
-    /**
-     * Search for field in this class model and superclasses of its class.
-     *
-     * @param jsonNameKey name as it appears in JSON during reading.
-     * @return PropertyModel if found.
-     */
-    public BeanPropertyModel getPropertyModelByJsonReadName(String jsonNameKey) {
-        Objects.requireNonNull(jsonNameKey);
-        return findProperty(this, jsonNameKey);
-    }
-
-    private BeanPropertyModel findProperty(ClassDescriptor descriptor, String jsonNameKey) {
-        //Standard javabean properties without overridden name (most of the cases)
-        final BeanPropertyModel foundProperty = descriptor.getPropertyModel(jsonNameKey);
-        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
-            return foundProperty;
-        }
-        //Search for overridden name on setter with @JsonbProperty annotation
-        for (BeanPropertyModel candidateProperty : propertyMap.values()) {
-            if (isReadNameEqual(jsonNameKey, candidateProperty)) {
-                return candidateProperty;
-            }
-        }
-        //property not found
-        return null;
-    }
-
-    /**
      * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
      * User can provide own strategy implementation, cast to custom interface is not an option.
      *
@@ -125,24 +72,6 @@ public class ClassDescriptor {
      */
     public Class<?> getType() {
         return describedClass;
-    }
-
-    /**
-     * Introspected customization for a class.
-     *
-     * @return Immutable class customization.
-     */
-    public ClassConfiguration getClassCustomization() {
-        return classConfig;
-    }
-
-    /**
-     * Class model of parent class if present.
-     *
-     * @return class model of a parent
-     */
-    public ClassDescriptor getParentClassModel() {
-        return parentDescriptor;
     }
 
     /**
@@ -174,6 +103,52 @@ public class ClassDescriptor {
     }
 
     /**
+     * Class model of parent class if present.
+     *
+     * @return class model of a parent
+     */
+    public ClassDescriptor getParentClassModel() {
+        return parentDescriptor;
+    }
+
+    /**
+     * Search for field in this class model and superclasses of its class.
+     *
+     * @param jsonNameKey name as it appears in JSON during reading.
+     * @return PropertyModel if found.
+     */
+    public BeanPropertyModel getPropertyModelByJsonReadName(String jsonNameKey) {
+        Objects.requireNonNull(jsonNameKey);
+        return findProperty(this, jsonNameKey);
+    }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param propName A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public BeanPropertyModel getPropertyModel(String propName) {
+        return propertyMap.get(propName);
+    }
+
+    private BeanPropertyModel findProperty(ClassDescriptor descriptor, String jsonNameKey) {
+        //Standard javabean properties without overridden name (most of the cases)
+        final BeanPropertyModel foundProperty = descriptor.getPropertyModel(jsonNameKey);
+        if (null != foundProperty && foundProperty.getPropertyName().equals(foundProperty.getReadName())) {
+            return foundProperty;
+        }
+        //Search for overridden name on setter with @JsonbProperty annotation
+        for (BeanPropertyModel candidateProperty : propertyMap.values()) {
+            if (isReadNameEqual(jsonNameKey, candidateProperty)) {
+                return candidateProperty;
+            }
+        }
+        //property not found
+        return null;
+    }
+
+    /**
      * Default no argument constructor of the class used for deserialization.
      *
      * @return default constructor
@@ -188,4 +163,30 @@ public class ClassDescriptor {
         }
         return noArgConstructor;
     }
+
+    /**
+     * Create instance of class model.
+     *
+     * @param describedClass                  Class to model.
+     * @param config          Customization of the class parsed from annotations.
+     * @param parentDescriptor       Class model of parent class.
+     * @param namingStrategy Property naming strategy.
+     */
+    public ClassDescriptor(Class<?> describedClass, ClassConfiguration config, ClassDescriptor parentDescriptor, PropertyNamingStrategy namingStrategy) {
+        this.describedClass = describedClass;
+        this.classConfig = config;
+        this.parentDescriptor = parentDescriptor;
+        this.namingStrategy = namingStrategy;
+        setProperties(new ArrayList<>());
+    }
+
+    /**
+     * Introspected customization for a class.
+     *
+     * @return Immutable class customization.
+     */
+    public ClassConfiguration getClassCustomization() {
+        return classConfig;
+    }
+
 }

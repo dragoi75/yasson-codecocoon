@@ -21,6 +21,15 @@ public class SerializerProviderAdapter {
     private IDeserializerProvider deserializerFactory;
 
     /**
+     * Gets deserializer provider.
+     *
+     * @return Deserializer provider.
+     */
+    public IDeserializerProvider getDeserializerProvider() {
+        return deserializerFactory;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param serializerFactory   Serializer provider.
@@ -40,12 +49,4 @@ public class SerializerProviderAdapter {
         return serializerFactory;
     }
 
-    /**
-     * Gets deserializer provider.
-     *
-     * @return Deserializer provider.
-     */
-    public IDeserializerProvider getDeserializerProvider() {
-        return deserializerFactory;
-    }
 }

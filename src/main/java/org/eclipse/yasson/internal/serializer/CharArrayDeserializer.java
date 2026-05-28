@@ -22,6 +22,18 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
 
     private final List<Character> items = new ArrayList<>();
 
+    @Override
+    public char[] getInstance(Unmarshaller unmarshaller) {
+        final int size = items.size();
+        final char[] charArray = new char[size];
+        int i = 0;
+        while (size > i) {
+            charArray[i] = items.get(i);
+            i += 1;
+        }
+        return charArray;
+    }
+
     /**
      * Creates new instance of char array deserializer.
      *
@@ -36,15 +48,4 @@ public class CharArrayDeserializer extends AbstractArrayDeserializer<char[]> {
         return items;
     }
 
-    @Override
-    public char[] getInstance(Unmarshaller unmarshaller) {
-        final int size = items.size();
-        final char[] charArray = new char[size];
-        int i = 0;
-        while (size > i) {
-            charArray[i] = items.get(i);
-            i += 1;
-        }
-        return charArray;
-    }
 }

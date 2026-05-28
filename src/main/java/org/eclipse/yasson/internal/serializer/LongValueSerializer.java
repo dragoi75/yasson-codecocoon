@@ -21,6 +21,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class LongValueSerializer extends AbstractNumberSerializer<Long> {
 
+    @Override
+    protected void serializeNonFormatted(Long longValue, JsonGenerator jsonWriter) {
+        jsonWriter.write(longValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -35,8 +40,4 @@ public class LongValueSerializer extends AbstractNumberSerializer<Long> {
         jsonWriter.write(fieldName, longValue);
     }
 
-    @Override
-    protected void serializeNonFormatted(Long longValue, JsonGenerator jsonWriter) {
-        jsonWriter.write(longValue);
-    }
 }

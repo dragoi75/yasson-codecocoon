@@ -24,6 +24,16 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
 
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
+    }
+
     /**
      * Creates new instance of json object serializer.
      *
@@ -40,13 +50,4 @@ public class JsonObjectSerializer extends AbstractJsonpSerializer<JsonObject> {
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
 }

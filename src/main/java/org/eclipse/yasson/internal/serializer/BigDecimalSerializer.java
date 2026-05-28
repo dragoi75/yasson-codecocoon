@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class BigDecimalSerializer extends AbstractNumberSerializer<BigDecimal> {
 
+    @Override
+    protected void serializeNonFormatted(BigDecimal value, JsonGenerator jsonWriter) {
+        jsonWriter.write(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -37,8 +42,4 @@ public class BigDecimalSerializer extends AbstractNumberSerializer<BigDecimal> {
         jsonWriter.write(propertyName, value);
     }
 
-    @Override
-    protected void serializeNonFormatted(BigDecimal value, JsonGenerator jsonWriter) {
-        jsonWriter.write(value);
-    }
 }

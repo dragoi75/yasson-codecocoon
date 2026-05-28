@@ -20,6 +20,13 @@ import jakarta.json.stream.JsonGenerator;
  */
 public class LongArraySerializer extends AbstractArraySerializer<long[]> {
 
+    @Override
+    protected void serializeInternal(long[] arr, JsonGenerator generator, SerializationContext ctx) {
+        for (long obj : arr) {
+            generator.write(obj);
+        }
+    }
+
     /**
      * Creates new array of long array serializer.
      *
@@ -29,10 +36,4 @@ public class LongArraySerializer extends AbstractArraySerializer<long[]> {
         super(builder);
     }
 
-    @Override
-    protected void serializeInternal(long[] arr, JsonGenerator generator, SerializationContext ctx) {
-        for (long obj : arr) {
-            generator.write(obj);
-        }
-    }
 }

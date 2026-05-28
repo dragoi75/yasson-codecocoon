@@ -20,12 +20,14 @@ import org.eclipse.yasson.internal.Unmarshaller;
 import org.eclipse.yasson.internal.model.customization.Customization;
 
 public class PathTypeConverter extends AbstractValueTypeDeserializer<Path> {
-    public PathTypeConverter(Customization configuration) {
-        super(Path.class, configuration);
-    }
-    
+
     @Override
     protected Path deserialize(String jsonString, Unmarshaller unmarshaller, Type rtType) {
         return Paths.get(jsonString);
     }
+
+    public PathTypeConverter(Customization configuration) {
+        super(Path.class, configuration);
+    }
+
 }

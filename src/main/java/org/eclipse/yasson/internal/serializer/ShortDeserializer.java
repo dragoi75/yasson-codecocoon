@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class ShortDeserializer extends AbstractNumberDeserializer<Short> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public ShortDeserializer(Customization customConfig) {
-        super(Short.class, customConfig);
-    }
-
     @Override
     protected Short deserialize(String jsonString, Unmarshaller parser, Type rtType) {
         return deserializeFormatted(jsonString, true, parser.getJsonbContext())
@@ -47,4 +38,14 @@ public class ShortDeserializer extends AbstractNumberDeserializer<Short> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public ShortDeserializer(Customization customConfig) {
+        super(Short.class, customConfig);
+    }
+
 }

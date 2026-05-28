@@ -23,6 +23,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ZoneIdDeserializer extends AbstractValueTypeDeserializer<ZoneId> {
 
+    @Override
+    protected ZoneId deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
+        return ZoneId.of(jsonText);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -32,8 +37,4 @@ public class ZoneIdDeserializer extends AbstractValueTypeDeserializer<ZoneId> {
         super(ZoneId.class, customConfig);
     }
 
-    @Override
-    protected ZoneId deserialize(String jsonText, Unmarshaller unmarshaller, Type rtType) {
-        return ZoneId.of(jsonText);
-    }
 }

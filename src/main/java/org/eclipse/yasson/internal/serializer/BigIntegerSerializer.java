@@ -23,15 +23,6 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class BigIntegerSerializer extends AbstractNumberSerializer<BigInteger> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public BigIntegerSerializer(Customization customConfig) {
-        super(customConfig);
-    }
-
     @Override
     protected void serializeNonFormatted(BigInteger value, JsonGenerator jsonWriter, String propertyName) {
         jsonWriter.write(propertyName, value);
@@ -41,4 +32,14 @@ public class BigIntegerSerializer extends AbstractNumberSerializer<BigInteger> {
     protected void serializeNonFormatted(BigInteger value, JsonGenerator jsonWriter) {
         jsonWriter.write(value);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public BigIntegerSerializer(Customization customConfig) {
+        super(customConfig);
+    }
+
 }

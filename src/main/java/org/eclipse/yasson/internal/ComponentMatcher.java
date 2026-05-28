@@ -45,15 +45,136 @@ public class ComponentMatcher {
     private final ConcurrentMap<Type, ComponentBindings> userComponents;
 
     /**
-     * Create component matcher.
-     *
-     * @param context mandatory
+     * If runtimeType to adapt is a ParametrizedType, check all type args to match against components args.
      */
-    ComponentMatcher(JsonbContextManager context) {
-        Objects.requireNonNull(context);
-        this.jsonbContext = context;
-        userComponents = new ConcurrentHashMap<>();
-        init();
+    private boolean matchTypeArguments(ParameterizedType requiredType, ParameterizedType componentBound) {
+        final Type[] requiredTypeArguments = requiredType.getActualTypeArguments();
+        final Type[] adapterBoundTypeArguments = componentBound.getActualTypeArguments();
+        if (adapterBoundTypeArguments.length != requiredTypeArguments.length) {
+            return false;
+        }
+        int i = 0;
+        while (requiredTypeArguments.length > i) {
+            Type adapterTypeArgument = adapterBoundTypeArguments[i];
+            if (!requiredTypeArguments[i].equals(adapterTypeArgument)) {
+                return false;
+            }
+            i += 1;
+        }
+        return true;
+    }
+
+    private ComponentBindings getBindingInfo(Type type) {
+        return userComponents.compute(type, (type1, bindingInfo) -> null != bindingInfo ? bindingInfo : new ComponentBindings(type1));
+    }
+
+    private <T> Optional<T> getMatchingBinding(Type runtimeType, ComponentBindings binding, Function<ComponentBindings, T> supplier) {
+        final T component = supplier.apply(binding);
+        if (null != component && matches(runtimeType, binding.getBindingType())) {
+            return Optional.of(component);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Introspect components generic information and put resolved types into metadata wrapper.
+     *
+     * @param adapterClass class of an components
+     * @param instance     components instance
+     * @return introspected info with resolved typevar types.
+     */
+    AdapterBinding introspectAdapterBinding(Class<? extends JsonbAdapter> adapterClass, JsonbAdapter instance) {
+        final ParameterizedType adapterRuntimeType = ReflectionUtils.findParameterizedType(adapterClass, JsonbAdapter.class);
+        final Type[] adapterTypeArguments = adapterRuntimeType.getActualTypeArguments();
+        Type adaptFromType = resolveTypeArg(adapterTypeArguments[0], adapterClass);
+        Type adaptToType = resolveTypeArg(adapterTypeArguments[1], adapterClass);
+        final ComponentBindings componentBindings = getBindingInfo(adaptFromType);
+        if (null != componentBindings.getAdapterInfo() && componentBindings.getAdapterInfo().getAdapter().getClass().equals(adapterClass)) {
+            return componentBindings.getAdapterInfo();
+        }
+        JsonbAdapter newAdapter = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(adapterClass);
+        return new AdapterBinding(adaptFromType, adaptToType, newAdapter);
+    }
+
+    private void addDeserializer(Type bindingType, DeserializerBinding deserializer) {
+        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
+            if (null != bindings.getDeserializer()) {
+                return bindings;
+            }
+            registerGeneric(bindingType);
+            return new ComponentBindings(bindingType, bindings.getSerializer(), deserializer, bindings.getAdapterInfo());
+        });
+    }
+
+    /**
+     * If an instance of deserializerClass is present in context and is bound for same type, return that instance.
+     * Otherwise create new instance and set it to context.
+     *
+     * @param deserializerClass class of deserializer
+     * @param instance          instance to use if not cached already
+     * @return wrapper used in property models
+     */
+    @SuppressWarnings("unchecked")
+    DeserializerBinding introspectDeserializerBinding(Class<? extends JsonbDeserializer> deserializerClass, JsonbDeserializer instance) {
+        final ParameterizedType deserializerRuntimeType = ReflectionUtils.findParameterizedType(deserializerClass, JsonbDeserializer.class);
+        Type deserializerBindingType = resolveTypeArg(deserializerRuntimeType.getActualTypeArguments()[0], deserializerClass);
+        final ComponentBindings componentBindings = getBindingInfo(deserializerBindingType);
+        if (null == componentBindings.getDeserializer() || !componentBindings.getDeserializer().getClass().equals(deserializerClass)) {
+            JsonbDeserializer deserializer = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(deserializerClass);
+            return new DeserializerBinding(deserializerBindingType, deserializer);
+        } else {
+            return componentBindings.getDeserializer();
+        }
+    }
+
+    private boolean matches(Type runtimeType, Type componentBindingType) {
+        if (componentBindingType.equals(runtimeType)) {
+            return true;
+        }
+        if (componentBindingType instanceof Class && runtimeType instanceof Class) {
+            return ((Class<?>) componentBindingType).isAssignableFrom((Class) runtimeType);
+        }
+        //don't try to runtime generic scan if not needed
+        if (!genericComponents) {
+            return false;
+        }
+        return runtimeType instanceof ParameterizedType && componentBindingType instanceof ParameterizedType && ReflectionUtils.getRawType(componentBindingType).isAssignableFrom(ReflectionUtils.getRawType(runtimeType)) && matchTypeArguments((ParameterizedType) runtimeType, (ParameterizedType) componentBindingType);
+    }
+
+    private Type resolveTypeArg(Type adapterTypeArg, Type adapterType) {
+        if (!(adapterTypeArg instanceof ParameterizedType)) {
+            if (!(adapterTypeArg instanceof TypeVariable)) {
+                return adapterTypeArg;
+            } else {
+                return ReflectionUtils.resolveItemVariableType(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg, true);
+            }
+        } else {
+            return ReflectionUtils.resolveTypeArguments((ParameterizedType) adapterTypeArg, adapterType);
+        }
+    }
+
+    private void addAdapter(Type bindingType, AdapterBinding adapter) {
+        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
+            if (null != bindings.getAdapterInfo()) {
+                return bindings;
+            }
+            registerGeneric(bindingType);
+            return new ComponentBindings(bindingType, bindings.getSerializer(), bindings.getDeserializer(), adapter);
+        });
+    }
+
+    /**
+     * Lookup deserializer binding for a given property runtime type.
+     *
+     * @param propertyRuntimeType runtime type of a property
+     * @param customization       customization with component info
+     * @return serializer optional
+     */
+    public Optional<DeserializerBinding<?>> getDeserializerBinding(Type propertyRuntimeType, ComponentBoundCustomization customization) {
+        if (null == customization || null == customization.getDeserializerBinding()) {
+            return searchComponentBinding(propertyRuntimeType, ComponentBindings::getDeserializer);
+        }
+        return Optional.of(customization.getDeserializerBinding());
     }
 
     /**
@@ -77,51 +198,6 @@ public class ComponentMatcher {
         }
     }
 
-    private ComponentBindings getBindingInfo(Type type) {
-        return userComponents.compute(type, (type1, bindingInfo) -> null != bindingInfo ? bindingInfo : new ComponentBindings(type1));
-    }
-
-    private void addSerializer(Type bindingType, SerializerBinding serializer) {
-        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
-            if (null != bindings.getSerializer()) {
-                return bindings;
-            }
-            registerGeneric(bindingType);
-            return new ComponentBindings(bindingType, serializer, bindings.getDeserializer(), bindings.getAdapterInfo());
-        });
-    }
-
-    private void addDeserializer(Type bindingType, DeserializerBinding deserializer) {
-        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
-            if (null != bindings.getDeserializer()) {
-                return bindings;
-            }
-            registerGeneric(bindingType);
-            return new ComponentBindings(bindingType, bindings.getSerializer(), deserializer, bindings.getAdapterInfo());
-        });
-    }
-
-    private void addAdapter(Type bindingType, AdapterBinding adapter) {
-        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
-            if (null != bindings.getAdapterInfo()) {
-                return bindings;
-            }
-            registerGeneric(bindingType);
-            return new ComponentBindings(bindingType, bindings.getSerializer(), bindings.getDeserializer(), adapter);
-        });
-    }
-
-    /**
-     * If type is not parametrized runtime component resolution doesn't has to happen.
-     *
-     * @param bindingType component binding type
-     */
-    private void registerGeneric(Type bindingType) {
-        if (bindingType instanceof ParameterizedType && !genericComponents) {
-            genericComponents = true;
-        }
-    }
-
     /**
      * Lookup serializer binding for a given property runtime type.
      *
@@ -137,17 +213,51 @@ public class ComponentMatcher {
     }
 
     /**
-     * Lookup deserializer binding for a given property runtime type.
+     * If type is not parametrized runtime component resolution doesn't has to happen.
      *
-     * @param propertyRuntimeType runtime type of a property
-     * @param customization       customization with component info
-     * @return serializer optional
+     * @param bindingType component binding type
      */
-    public Optional<DeserializerBinding<?>> getDeserializerBinding(Type propertyRuntimeType, ComponentBoundCustomization customization) {
-        if (null == customization || null == customization.getDeserializerBinding()) {
-            return searchComponentBinding(propertyRuntimeType, ComponentBindings::getDeserializer);
+    private void registerGeneric(Type bindingType) {
+        if (bindingType instanceof ParameterizedType && !genericComponents) {
+            genericComponents = true;
         }
-        return Optional.of(customization.getDeserializerBinding());
+    }
+
+    private void addSerializer(Type bindingType, SerializerBinding serializer) {
+        userComponents.computeIfPresent(bindingType, (type, bindings) -> {
+            if (null != bindings.getSerializer()) {
+                return bindings;
+            }
+            registerGeneric(bindingType);
+            return new ComponentBindings(bindingType, serializer, bindings.getDeserializer(), bindings.getAdapterInfo());
+        });
+    }
+
+    /**
+     * Get components from property model (if declared by annotation and runtime type matches),
+     * or return components searched by runtime type.
+     *
+     * @param propertyRuntimeType runtime type not null
+     * @param customization       customization with component info
+     * @return components info if present
+     */
+    public Optional<AdapterBinding> getDeserializeAdapterBinding(Type propertyRuntimeType, ComponentBoundCustomization customization) {
+        if (null == customization || null == customization.getDeserializeAdapterBinding()) {
+            return searchComponentBinding(propertyRuntimeType, ComponentBindings::getAdapterInfo);
+        }
+        return Optional.of(customization.getDeserializeAdapterBinding());
+    }
+
+    /**
+     * Create component matcher.
+     *
+     * @param context mandatory
+     */
+    ComponentMatcher(JsonbContextManager context) {
+        Objects.requireNonNull(context);
+        this.jsonbContext = context;
+        userComponents = new ConcurrentHashMap<>();
+        init();
     }
 
     /**
@@ -166,18 +276,24 @@ public class ComponentMatcher {
     }
 
     /**
-     * Get components from property model (if declared by annotation and runtime type matches),
-     * or return components searched by runtime type.
+     * If an instance of serializerClass is present in context and is bound for same type, return that instance.
+     * Otherwise create new instance and set it to context.
      *
-     * @param propertyRuntimeType runtime type not null
-     * @param customization       customization with component info
-     * @return components info if present
+     * @param serializerClass class of deserializer
+     * @param instance        instance to use if not cached
+     * @return wrapper used in property models
      */
-    public Optional<AdapterBinding> getDeserializeAdapterBinding(Type propertyRuntimeType, ComponentBoundCustomization customization) {
-        if (null == customization || null == customization.getDeserializeAdapterBinding()) {
-            return searchComponentBinding(propertyRuntimeType, ComponentBindings::getAdapterInfo);
+    @SuppressWarnings("unchecked")
+    SerializerBinding introspectSerializerBinding(Class<? extends JsonbSerializer> serializerClass, JsonbSerializer instance) {
+        final ParameterizedType serializerRuntimeType = ReflectionUtils.findParameterizedType(serializerClass, JsonbSerializer.class);
+        Type serBindingType = resolveTypeArg(serializerRuntimeType.getActualTypeArguments()[0], serializerClass.getClass());
+        final ComponentBindings componentBindings = getBindingInfo(serBindingType);
+        if (null == componentBindings.getSerializer() || !componentBindings.getSerializer().getClass().equals(serializerClass)) {
+            JsonbSerializer serializer = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(serializerClass);
+            return new SerializerBinding(serBindingType, serializer);
+        } else {
+            return componentBindings.getSerializer();
         }
-        return Optional.of(customization.getDeserializeAdapterBinding());
     }
 
     private <T extends AbstractComponentBinding> Optional<T> searchComponentBinding(Type runtimeType, Function<ComponentBindings, T> supplier) {
@@ -213,119 +329,4 @@ public class ComponentMatcher {
         return Optional.empty();
     }
 
-    private <T> Optional<T> getMatchingBinding(Type runtimeType, ComponentBindings binding, Function<ComponentBindings, T> supplier) {
-        final T component = supplier.apply(binding);
-        if (null != component && matches(runtimeType, binding.getBindingType())) {
-            return Optional.of(component);
-        }
-        return Optional.empty();
-    }
-
-    private boolean matches(Type runtimeType, Type componentBindingType) {
-        if (componentBindingType.equals(runtimeType)) {
-            return true;
-        }
-        if (componentBindingType instanceof Class && runtimeType instanceof Class) {
-            return ((Class<?>) componentBindingType).isAssignableFrom((Class) runtimeType);
-        }
-        //don't try to runtime generic scan if not needed
-        if (!genericComponents) {
-            return false;
-        }
-        return runtimeType instanceof ParameterizedType && componentBindingType instanceof ParameterizedType && ReflectionUtils.getRawType(componentBindingType).isAssignableFrom(ReflectionUtils.getRawType(runtimeType)) && matchTypeArguments((ParameterizedType) runtimeType, (ParameterizedType) componentBindingType);
-    }
-
-    /**
-     * If runtimeType to adapt is a ParametrizedType, check all type args to match against components args.
-     */
-    private boolean matchTypeArguments(ParameterizedType requiredType, ParameterizedType componentBound) {
-        final Type[] requiredTypeArguments = requiredType.getActualTypeArguments();
-        final Type[] adapterBoundTypeArguments = componentBound.getActualTypeArguments();
-        if (adapterBoundTypeArguments.length != requiredTypeArguments.length) {
-            return false;
-        }
-        int i = 0;
-        while (requiredTypeArguments.length > i) {
-            Type adapterTypeArgument = adapterBoundTypeArguments[i];
-            if (!requiredTypeArguments[i].equals(adapterTypeArgument)) {
-                return false;
-            }
-            i += 1;
-        }
-        return true;
-    }
-
-    /**
-     * Introspect components generic information and put resolved types into metadata wrapper.
-     *
-     * @param adapterClass class of an components
-     * @param instance     components instance
-     * @return introspected info with resolved typevar types.
-     */
-    AdapterBinding introspectAdapterBinding(Class<? extends JsonbAdapter> adapterClass, JsonbAdapter instance) {
-        final ParameterizedType adapterRuntimeType = ReflectionUtils.findParameterizedType(adapterClass, JsonbAdapter.class);
-        final Type[] adapterTypeArguments = adapterRuntimeType.getActualTypeArguments();
-        Type adaptFromType = resolveTypeArg(adapterTypeArguments[0], adapterClass);
-        Type adaptToType = resolveTypeArg(adapterTypeArguments[1], adapterClass);
-        final ComponentBindings componentBindings = getBindingInfo(adaptFromType);
-        if (null != componentBindings.getAdapterInfo() && componentBindings.getAdapterInfo().getAdapter().getClass().equals(adapterClass)) {
-            return componentBindings.getAdapterInfo();
-        }
-        JsonbAdapter newAdapter = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(adapterClass);
-        return new AdapterBinding(adaptFromType, adaptToType, newAdapter);
-    }
-
-    /**
-     * If an instance of deserializerClass is present in context and is bound for same type, return that instance.
-     * Otherwise create new instance and set it to context.
-     *
-     * @param deserializerClass class of deserializer
-     * @param instance          instance to use if not cached already
-     * @return wrapper used in property models
-     */
-    @SuppressWarnings("unchecked")
-    DeserializerBinding introspectDeserializerBinding(Class<? extends JsonbDeserializer> deserializerClass, JsonbDeserializer instance) {
-        final ParameterizedType deserializerRuntimeType = ReflectionUtils.findParameterizedType(deserializerClass, JsonbDeserializer.class);
-        Type deserializerBindingType = resolveTypeArg(deserializerRuntimeType.getActualTypeArguments()[0], deserializerClass);
-        final ComponentBindings componentBindings = getBindingInfo(deserializerBindingType);
-        if (null == componentBindings.getDeserializer() || !componentBindings.getDeserializer().getClass().equals(deserializerClass)) {
-            JsonbDeserializer deserializer = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(deserializerClass);
-            return new DeserializerBinding(deserializerBindingType, deserializer);
-        } else {
-            return componentBindings.getDeserializer();
-        }
-    }
-
-    /**
-     * If an instance of serializerClass is present in context and is bound for same type, return that instance.
-     * Otherwise create new instance and set it to context.
-     *
-     * @param serializerClass class of deserializer
-     * @param instance        instance to use if not cached
-     * @return wrapper used in property models
-     */
-    @SuppressWarnings("unchecked")
-    SerializerBinding introspectSerializerBinding(Class<? extends JsonbSerializer> serializerClass, JsonbSerializer instance) {
-        final ParameterizedType serializerRuntimeType = ReflectionUtils.findParameterizedType(serializerClass, JsonbSerializer.class);
-        Type serBindingType = resolveTypeArg(serializerRuntimeType.getActualTypeArguments()[0], serializerClass.getClass());
-        final ComponentBindings componentBindings = getBindingInfo(serBindingType);
-        if (null == componentBindings.getSerializer() || !componentBindings.getSerializer().getClass().equals(serializerClass)) {
-            JsonbSerializer serializer = null != instance ? instance : jsonbContext.getComponentInstanceCreator().getOrCreateComponent(serializerClass);
-            return new SerializerBinding(serBindingType, serializer);
-        } else {
-            return componentBindings.getSerializer();
-        }
-    }
-
-    private Type resolveTypeArg(Type adapterTypeArg, Type adapterType) {
-        if (!(adapterTypeArg instanceof ParameterizedType)) {
-            if (!(adapterTypeArg instanceof TypeVariable)) {
-                return adapterTypeArg;
-            } else {
-                return ReflectionUtils.resolveItemVariableType(new RuntimeTypeHolder(null, adapterType), (TypeVariable<?>) adapterTypeArg, true);
-            }
-        } else {
-            return ReflectionUtils.resolveTypeArguments((ParameterizedType) adapterTypeArg, adapterType);
-        }
-    }
 }

@@ -21,6 +21,16 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class ByteSerializer extends AbstractNumberSerializer<Byte> {
 
+    @Override
+    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter) {
+        jsonWriter.write(byteValue);
+    }
+
+    @Override
+    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter, String fieldName) {
+        jsonWriter.write(fieldName, byteValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -30,13 +40,4 @@ public class ByteSerializer extends AbstractNumberSerializer<Byte> {
         super(serializerConfig);
     }
 
-    @Override
-    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter, String fieldName) {
-        jsonWriter.write(fieldName, byteValue);
-    }
-
-    @Override
-    protected void serializeNonFormatted(Byte byteValue, JsonGenerator jsonWriter) {
-        jsonWriter.write(byteValue);
-    }
 }

@@ -41,6 +41,56 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
     private final ConcurrentMap<Class<?>, CDIManagedBean<?>> injectionTargets = new ConcurrentHashMap<>();
 
     /**
+     * Holder for bean instance and its injection target.
+     */
+    private static final class CDIManagedBean<T> {
+        private final T instance;
+        private final InjectionTarget<T> injectionTarget;
+        private final CreationalContext<T> creationalContext;
+
+        /**
+         * @return creational context
+         */
+        private CreationalContext<T> getCreationalContext() {
+            return creationalContext;
+        }
+
+        /**
+         * @return managed instance of a bean
+         */
+        private T getInstance() {
+            return instance;
+        }
+
+        CDIManagedBean(T instance, InjectionTarget<T> injectionTarget, CreationalContext<T> creationalContext) {
+            this.instance = instance;
+            this.injectionTarget = injectionTarget;
+            this.creationalContext = creationalContext;
+        }
+
+        /**
+         * @return CDI InjectionTarget
+         */
+        private InjectionTarget<T> getInjectionTarget() {
+            return injectionTarget;
+        }
+
+    }
+
+    private <T> void cleanupBean(CDIManagedBean<T> bean) {
+        bean.getInjectionTarget().preDestroy(bean.getInstance());
+        bean.getInjectionTarget().dispose(bean.getInstance());
+        bean.getCreationalContext().release();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void close() throws IOException {
+        injectionTargets.forEach((clazz, target) -> cleanupBean(target));
+        injectionTargets.clear();
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param beanManager Bean manager.
@@ -74,52 +124,4 @@ public class BeanManagerInstanceCreator implements JsonbComponentInstanceCreator
         }).getInstance();
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void close() throws IOException {
-        injectionTargets.forEach((clazz, target) -> cleanupBean(target));
-        injectionTargets.clear();
-    }
-
-    private <T> void cleanupBean(CDIManagedBean<T> bean) {
-        bean.getInjectionTarget().preDestroy(bean.getInstance());
-        bean.getInjectionTarget().dispose(bean.getInstance());
-        bean.getCreationalContext().release();
-    }
-
-    /**
-     * Holder for bean instance and its injection target.
-     */
-    private static final class CDIManagedBean<T> {
-        private final T instance;
-        private final InjectionTarget<T> injectionTarget;
-        private final CreationalContext<T> creationalContext;
-
-        CDIManagedBean(T instance, InjectionTarget<T> injectionTarget, CreationalContext<T> creationalContext) {
-            this.instance = instance;
-            this.injectionTarget = injectionTarget;
-            this.creationalContext = creationalContext;
-        }
-
-        /**
-         * @return CDI InjectionTarget
-         */
-        private InjectionTarget<T> getInjectionTarget() {
-            return injectionTarget;
-        }
-
-        /**
-         * @return managed instance of a bean
-         */
-        private T getInstance() {
-            return instance;
-        }
-
-        /**
-         * @return creational context
-         */
-        private CreationalContext<T> getCreationalContext() {
-            return creationalContext;
-        }
-    }
 }

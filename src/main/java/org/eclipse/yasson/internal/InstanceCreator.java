@@ -30,10 +30,6 @@ public class InstanceCreator {
 
     private static final InstanceCreator INSTANCE = new InstanceCreator();
 
-    static InstanceCreator getSingleton() {
-        return INSTANCE;
-    }
-
     private static final Map<Class, Supplier> CREATORS = new HashMap<>();
 
     static {
@@ -43,12 +39,6 @@ public class InstanceCreator {
         CREATORS.put(TreeSet.class, TreeSet::new);
         CREATORS.put(HashMap.class, HashMap::new);
         CREATORS.put(TreeMap.class, TreeMap::new);
-    }
-
-    private InstanceCreator() {
-        if (null != INSTANCE) {
-            throw new IllegalStateException("This class should never be instantiated");
-        }
     }
 
     /**
@@ -69,4 +59,15 @@ public class InstanceCreator {
         }
         return creator.get();
     }
+
+    private InstanceCreator() {
+        if (null != INSTANCE) {
+            throw new IllegalStateException("This class should never be instantiated");
+        }
+    }
+
+    static InstanceCreator getSingleton() {
+        return INSTANCE;
+    }
+
 }

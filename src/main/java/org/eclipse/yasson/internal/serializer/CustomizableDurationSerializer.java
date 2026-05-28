@@ -24,6 +24,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class CustomizableDurationSerializer extends AbstractValueTypeSerializer<Duration> {
 
+    @Override
+    protected void serialize(Duration duration, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(duration.toString());
+    }
+
     /**
      * Creates a new instance.
      *
@@ -33,8 +38,4 @@ public class CustomizableDurationSerializer extends AbstractValueTypeSerializer<
         super(settings);
     }
 
-    @Override
-    protected void serialize(Duration duration, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(duration.toString());
-    }
 }

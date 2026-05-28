@@ -34,6 +34,53 @@ public class ClassConfiguration extends CustomizationBase {
     private final PropertyVisibilityStrategy visibilityStrategy;
 
     /**
+     * Property visibility strategy for this class model.
+     *
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return visibilityStrategy;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormat;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numericFormatter;
+    }
+
+    /**
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
+     */
+    public String[] getPropertyOrder() {
+        return propertySequence;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numericFormatter;
+    }
+
+    /**
+     * Returns instance of {@link JsonbInstantiator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbInstantiator getCreator() {
+        return instantiator;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormat;
+    }
+
+    /**
      * Copies properties from builder an creates immutable instance.
      *
      * @param customizationFactory not null
@@ -62,59 +109,12 @@ public class ClassConfiguration extends CustomizationBase {
     }
 
     /**
-     * Returns instance of {@link JsonbInstantiator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbInstantiator getCreator() {
-        return instantiator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertySequence;
-    }
-
-    /**
      * Sets sorted properties.
      *
      * @param propertySequence sorted names of properties
      */
     public void setPropertyOrder(String[] propertySequence) {
         this.propertySequence = propertySequence;
-    }
-
-    /**
-     * Property visibility strategy for this class model.
-     *
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return visibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numericFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numericFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormat;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormat;
     }
 
 }

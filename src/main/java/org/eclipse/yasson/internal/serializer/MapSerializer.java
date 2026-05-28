@@ -33,12 +33,21 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
     interface Delegate<K, V> {
 
         /**
-         * Process container before serialization begins.
-         * Does nothing by default.
+         * Serialize content of provided container.
          *
-         * @param obj item to be serialized
+         * @param obj       container to be serialized
+         * @param generator JSON format generator
+         * @param ctx       JSON serialization context
          */
-        default void beforeSerialize(Map<K, V> obj) {
+        void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx);
+
+        /**
+         * Writes end of an object or an array.
+         *
+         * @param generator JSON format generator
+         */
+        default void writeEnd(JsonGenerator generator) {
+            generator.writeEnd();
         }
 
         /**
@@ -57,22 +66,14 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
         void writeStart(String key, JsonGenerator generator);
 
         /**
-         * Writes end of an object or an array.
+         * Process container before serialization begins.
+         * Does nothing by default.
          *
-         * @param generator JSON format generator
+         * @param obj item to be serialized
          */
-        default void writeEnd(JsonGenerator generator) {
-            generator.writeEnd();
+        default void beforeSerialize(Map<K, V> obj) {
         }
 
-        /**
-         * Serialize content of provided container.
-         *
-         * @param obj       container to be serialized
-         * @param generator JSON format generator
-         * @param ctx       JSON serialization context
-         */
-        void serializeContainer(Map<K, V> obj, JsonGenerator generator, SerializationContext ctx);
     }
 
     /**
@@ -86,14 +87,46 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
     private Delegate<K, V> serializer;
 
     /**
-     * Creates an instance of {@link Map} serialization.
+     * Return an information whether to serialize {@code null} values too.
      *
-     * @param builder current instance of {@link SerializerBuilder}
+     * @return {@code null} values shall be serialized too when {@code true}
      */
-    protected MapSerializer(SerializerBuilder builder) {
-        super(builder);
-        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
-        serializer = null;
+    protected boolean isNullable() {
+        return nullable;
+    }
+
+    /**
+     * Write end of {@link Map} serialization.
+     * Passing execution to delegate instance.
+     *
+     * @param generator JSON format generator
+     */
+    @Override
+    protected void writeEnd(JsonGenerator generator) {
+        serializer.writeEnd(generator);
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Passing execution to delegate instance.
+     *
+     * @param generator JSON format generator
+     */
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        serializer.writeStart(generator);
+    }
+
+    /**
+     * Write start of {@link Map} serialization.
+     * Passing execution to delegate instance.
+     *
+     * @param key       JSON key name
+     * @param generator JSON format generator
+     */
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        serializer.writeStart(key, generator);
     }
 
     /**
@@ -158,45 +191,14 @@ public class MapSerializer<K, V> extends AbstractContainerSerializer<Map<K, V>> 
     }
 
     /**
-     * Write start of {@link Map} serialization.
-     * Passing execution to delegate instance.
+     * Creates an instance of {@link Map} serialization.
      *
-     * @param generator JSON format generator
+     * @param builder current instance of {@link SerializerBuilder}
      */
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        serializer.writeStart(generator);
+    protected MapSerializer(SerializerBuilder builder) {
+        super(builder);
+        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
+        serializer = null;
     }
 
-    /**
-     * Write start of {@link Map} serialization.
-     * Passing execution to delegate instance.
-     *
-     * @param key       JSON key name
-     * @param generator JSON format generator
-     */
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        serializer.writeStart(key, generator);
-    }
-
-    /**
-     * Write end of {@link Map} serialization.
-     * Passing execution to delegate instance.
-     *
-     * @param generator JSON format generator
-     */
-    @Override
-    protected void writeEnd(JsonGenerator generator) {
-        serializer.writeEnd(generator);
-    }
-
-    /**
-     * Return an information whether to serialize {@code null} values too.
-     *
-     * @return {@code null} values shall be serialized too when {@code true}
-     */
-    protected boolean isNullable() {
-        return nullable;
-    }
 }

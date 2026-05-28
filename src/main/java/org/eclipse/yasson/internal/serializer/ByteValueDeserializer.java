@@ -26,15 +26,6 @@ import org.eclipse.yasson.internal.properties.LocalizedMessages;
  */
 public class ByteValueDeserializer extends AbstractNumberDeserializer<Byte> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customConfig Model customization.
-     */
-    public ByteValueDeserializer(Customization customConfig) {
-        super(Byte.class, customConfig);
-    }
-
     @Override
     protected Byte deserialize(String text, Unmarshaller xmlParser, Type rtType) {
         return deserializeFormatted(text, true, xmlParser.getJsonbContext())
@@ -47,4 +38,14 @@ public class ByteValueDeserializer extends AbstractNumberDeserializer<Byte> {
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customConfig Model customization.
+     */
+    public ByteValueDeserializer(Customization customConfig) {
+        super(Byte.class, customConfig);
+    }
+
 }

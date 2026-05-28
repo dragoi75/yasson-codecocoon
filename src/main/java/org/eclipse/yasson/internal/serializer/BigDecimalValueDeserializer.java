@@ -27,15 +27,6 @@ import org.eclipse.yasson.internal.properties.MessageKeyConstants;
  */
 public class BigDecimalValueDeserializer extends AbstractNumberDeserializer<BigDecimal> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param configOptions Model customization.
-     */
-    public BigDecimalValueDeserializer(Customization configOptions) {
-        super(BigDecimal.class, configOptions);
-    }
-
     @Override
     public BigDecimal deserialize(String jsonString, Unmarshaller deserializer, Type rtType) {
         return deserializeFormatted(jsonString, false, deserializer.getJsonbContext())
@@ -49,4 +40,14 @@ public class BigDecimalValueDeserializer extends AbstractNumberDeserializer<BigD
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param configOptions Model customization.
+     */
+    public BigDecimalValueDeserializer(Customization configOptions) {
+        super(BigDecimal.class, configOptions);
+    }
+
 }

@@ -22,6 +22,11 @@ import org.eclipse.yasson.internal.model.customization.Customization;
  */
 public class BooleanValueSerializer extends AbstractValueTypeSerializer<Boolean> {
 
+    @Override
+    protected void serialize(Boolean value, JsonGenerator jsonWriter, Marshaller marshaller) {
+        jsonWriter.write(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -31,8 +36,4 @@ public class BooleanValueSerializer extends AbstractValueTypeSerializer<Boolean>
         super(settings);
     }
 
-    @Override
-    protected void serialize(Boolean value, JsonGenerator jsonWriter, Marshaller marshaller) {
-        jsonWriter.write(value);
-    }
 }

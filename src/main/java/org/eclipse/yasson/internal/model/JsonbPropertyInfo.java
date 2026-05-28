@@ -31,35 +31,6 @@ public class JsonbPropertyInfo {
     private CurrentItem<?> wrapper;
 
     /**
-     * Gets context.
-     *
-     * @return Context.
-     */
-    public JsonbContextManager getContext() {
-        return context;
-    }
-
-    /**
-     * Sets context.
-     *
-     * @param context Context to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyInfo setContext(JsonbContextManager context) {
-        this.context = context;
-        return this;
-    }
-
-    /**
-     * Gets runtime type.
-     *
-     * @return Runtime type.
-     */
-    public Type getRuntimeType() {
-        return runtimeType;
-    }
-
-    /**
      * Sets runtime type.
      *
      * @param runtimeType Runtime type to set.
@@ -68,15 +39,6 @@ public class JsonbPropertyInfo {
     public JsonbPropertyInfo withRuntimeType(Type runtimeType) {
         this.runtimeType = runtimeType;
         return this;
-    }
-
-    /**
-     * Gets class model.
-     *
-     * @return Class model.
-     */
-    public ClassDescriptor getClassModel() {
-        return classModel;
     }
 
     /**
@@ -91,15 +53,6 @@ public class JsonbPropertyInfo {
     }
 
     /**
-     * Gets wrapper.
-     *
-     * @return Wrapper.
-     */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    /**
      * Sets wrapper.
      *
      * @param wrapper Wrapper to set.
@@ -109,4 +62,52 @@ public class JsonbPropertyInfo {
         this.wrapper = wrapper;
         return this;
     }
+
+    /**
+     * Gets context.
+     *
+     * @return Context.
+     */
+    public JsonbContextManager getContext() {
+        return context;
+    }
+
+    /**
+     * Gets wrapper.
+     *
+     * @return Wrapper.
+     */
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
+    }
+
+    /**
+     * Gets class model.
+     *
+     * @return Class model.
+     */
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Gets runtime type.
+     *
+     * @return Runtime type.
+     */
+    public Type getRuntimeType() {
+        return runtimeType;
+    }
+
+    /**
+     * Sets context.
+     *
+     * @param context Context to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyInfo setContext(JsonbContextManager context) {
+        this.context = context;
+        return this;
+    }
+
 }

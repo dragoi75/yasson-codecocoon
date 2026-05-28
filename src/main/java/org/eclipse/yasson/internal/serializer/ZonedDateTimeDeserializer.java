@@ -29,13 +29,14 @@ public class ZonedDateTimeDeserializer extends AbstractDateTimeDeserializer<Zone
 
     private static final Logger DESERIALIZER_LOG = Logger.getLogger(ZonedDateTimeDeserializer.class.getName());
 
-    /**
-     * Creates an instance.
-     *
-     * @param config Model customization.
-     */
-    public ZonedDateTimeDeserializer(Customization config) {
-        super(ZonedDateTime.class, config);
+    @Override
+    protected ZonedDateTime parseWithFormatter(String value, DateTimeFormatter format) {
+        return ZonedDateTime.parse(value, getZonedFormatter(format));
+    }
+
+    @Override
+    protected ZonedDateTime parseDefault(String value, Locale languageTag) {
+        return ZonedDateTime.parse(value, DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(languageTag));
     }
 
     /**
@@ -48,13 +49,13 @@ public class ZonedDateTimeDeserializer extends AbstractDateTimeDeserializer<Zone
         return ZonedDateTime.ofInstant(timestamp, UTC);
     }
 
-    @Override
-    protected ZonedDateTime parseDefault(String value, Locale languageTag) {
-        return ZonedDateTime.parse(value, DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(languageTag));
+    /**
+     * Creates an instance.
+     *
+     * @param config Model customization.
+     */
+    public ZonedDateTimeDeserializer(Customization config) {
+        super(ZonedDateTime.class, config);
     }
 
-    @Override
-    protected ZonedDateTime parseWithFormatter(String value, DateTimeFormatter format) {
-        return ZonedDateTime.parse(value, getZonedFormatter(format));
-    }
 }
