@@ -27,10 +27,6 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
 
     private final List<Float> items = new ArrayList<>();
 
-    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +43,9 @@ public class FloatArrayDeserializer extends AbstractArrayDeserializer<float[]> {
         }
         return floatArray;
     }
+
+    protected FloatArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

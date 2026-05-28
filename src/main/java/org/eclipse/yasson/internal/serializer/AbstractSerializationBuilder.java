@@ -57,25 +57,30 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     protected final JsonbRuntimeContext jsonbContext;
 
     /**
-     * Crates a builder.
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
      *
-     * @param jsonbRuntime Not null.
+     * @param valueType type of instance not null
+     * @return builder instance for call chaining
      */
-    public AbstractSerializationBuilder(JsonbRuntimeContext jsonbRuntime) {
-        Objects.requireNonNull(jsonbRuntime);
-        this.jsonbContext = jsonbRuntime;
+    @SuppressWarnings("unchecked")
+    public T setType(Type valueType) {
+        this.genericType = valueType;
+        return (T) this;
+    }
+
+    public Customization getCustomization() {
+        return customization;
     }
 
     /**
-     * Wrapper item for this item.
+     * Model of a class representing current item and instance (if any).
+     * Known collection classes doesn't need such a model.
      *
-     * @param currentItem not null.
-     * @return Builder instance for call chaining.
+     * @return model of a class
      */
-    @SuppressWarnings("unchecked")
-    public T setWrapper(CurrentItem<?> currentItem) {
-        this.wrapper = currentItem;
-        return (T) this;
+    public ClassDescriptor getClassModel() {
+        return classModel;
     }
 
     /**
@@ -88,6 +93,25 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     public T setCustomization(Customization customConfig) {
         this.customization = customConfig;
         return (T) this;
+    }
+
+    /**
+     * Jsonb runtime context.
+     *
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    /**
+     * Crates a builder.
+     *
+     * @param jsonbRuntime Not null.
+     */
+    public AbstractSerializationBuilder(JsonbRuntimeContext jsonbRuntime) {
+        Objects.requireNonNull(jsonbRuntime);
+        this.jsonbContext = jsonbRuntime;
     }
 
     /**
@@ -105,25 +129,6 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
-     * Wrapper item for this item.
-     *
-     * @return Wrapper item.
-     */
-    public CurrentItem<?> getWrapper() {
-        return wrapper;
-    }
-
-    /**
-     * Model of a class representing current item and instance (if any).
-     * Known collection classes doesn't need such a model.
-     *
-     * @return model of a class
-     */
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    /**
      * Resolved runtime type for instance in case of {@link java.lang.reflect.TypeVariable} or {@link java.lang.reflect.WildcardType}
      * Otherwise provided type in type field, or type of field model.
      *
@@ -134,28 +139,24 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     * Wrapper item for this item.
      *
-     * @param valueType type of instance not null
-     * @return builder instance for call chaining
+     * @return Wrapper item.
      */
-    @SuppressWarnings("unchecked")
-    public T setType(Type valueType) {
-        this.genericType = valueType;
-        return (T) this;
+    public CurrentItem<?> getWrapper() {
+        return wrapper;
     }
 
     /**
-     * Jsonb runtime context.
+     * Wrapper item for this item.
      *
-     * @return jsonb context
+     * @param currentItem not null.
+     * @return Builder instance for call chaining.
      */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
+    @SuppressWarnings("unchecked")
+    public T setWrapper(CurrentItem<?> currentItem) {
+        this.wrapper = currentItem;
+        return (T) this;
     }
 
-    public Customization getCustomization() {
-        return customization;
-    }
 }

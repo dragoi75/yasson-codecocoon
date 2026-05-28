@@ -30,20 +30,6 @@ import java.util.Locale;
  */
 public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<OffsetTime> {
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public OffsetTimeTypeDeserializer(Customization customization) {
-        super(OffsetTime.class, customization);
-    }
-
-    @Override
-    protected OffsetTime fromInstant(Instant instant) {
-        throw new JsonbException(MessageBundle.getMessage(MessageKey.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
-    }
-
     @Override
     protected OffsetTime parseDefault(String jsonValue, Locale locale) {
         return OffsetTime.parse(jsonValue, DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
@@ -53,4 +39,19 @@ public class OffsetTimeTypeDeserializer extends AbstractDateTimeDeserializer<Off
     protected OffsetTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
         return OffsetTime.parse(jsonValue, formatter);
     }
+
+    @Override
+    protected OffsetTime fromInstant(Instant instant) {
+        throw new JsonbException(MessageBundle.getMessage(MessageKey.TIME_TO_EPOCH_MILLIS_ERROR, OffsetTime.class.getSimpleName()));
+    }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public OffsetTimeTypeDeserializer(Customization customization) {
+        super(OffsetTime.class, customization);
+    }
+
 }

@@ -37,11 +37,6 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
 
     private final Type optionalValueType;
 
-    public OptionalObjectDeserializer(JsonDeserializerBuilder deserializerBuilder) {
-        this.wrapper = deserializerBuilder.getWrapper();
-        this.optionalValueType = resolveOptionalType(deserializerBuilder.getRuntimeType());
-    }
-
     @Override
     public Optional<?> deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         JsonbRuntimeContext jsonbContext = ((ProcessingContext) ctx).getJsonbContext();
@@ -59,4 +54,10 @@ public class OptionalObjectDeserializer implements JsonbDeserializer<Optional<?>
         }
         return Object.class;
     }
+
+    public OptionalObjectDeserializer(JsonDeserializerBuilder deserializerBuilder) {
+        this.wrapper = deserializerBuilder.getWrapper();
+        this.optionalValueType = resolveOptionalType(deserializerBuilder.getRuntimeType());
+    }
+
 }

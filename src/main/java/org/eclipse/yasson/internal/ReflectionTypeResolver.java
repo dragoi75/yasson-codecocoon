@@ -45,95 +45,46 @@ public class ReflectionTypeResolver {
     private static final Logger LOG_OUTPUT = Logger.getLogger(ReflectionTypeResolver.class.getName());
 
     /**
-     * Get raw type by type.
-     * Only for ParametrizedTypes, GenericArrayTypes and Classes.
+     * Check if type needs resolution. If type is a class or a parametrized type with all type arguments as classes
+     * than it is considered resolved. If any of types is type variable or wildcard type is not resolved.
      *
-     * Empty optional is returned if raw type cannot be resolved.
-     *
-     * @param target Type to get class information from, not null.
-     * @return Class of a type.
+     * @param target Type to check.
+     * @return True if resolved
      */
-    public static Optional<Class<?>> getOptionalRawType(Type target) {
-        if (!(target instanceof Class)) {
-            if (!(target instanceof ParameterizedType)) {
-                if (target instanceof GenericArrayType) {
-                    return Optional.of(((GenericArrayType) target).getClass());
+    public static boolean isResolvedType(Type target) {
+        if (target instanceof ParameterizedType) {
+            for (Type argument : ((ParameterizedType) target).getActualTypeArguments()) {
+                if (!isResolvedType(argument)) {
+                    return false;
                 }
-            } else {
-                return Optional.of((Class<?>) ((ParameterizedType) target).getRawType());
             }
-        } else {
-            return Optional.of((Class<?>) target);
+            return true;
         }
-        return Optional.empty();
+        return target instanceof Class<?>;
     }
 
-    /**
-     * Get raw type by type.
-     * Resolves only ParametrizedTypes, GenericArrayTypes and Classes.
-     *
-     * Exception is thrown if raw type cannot be resolved.
-     *
-     * @param target Type to get class information from, not null.
-     * @return Class of a raw type.
-     */
-    public static Class<?> getRawType(Type target) {
-        return getOptionalRawType(target).orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKey.TYPE_RESOLUTION_ERROR, target)));
+    private static Class<?> getMostSpecificBound(RuntimeTypeInfo elementInfo, Class<?> resolvedClass, Type typeConstraint) {
+        if (Object.class == typeConstraint) {
+            return resolvedClass;
+        }
+        //if bound is type variable search recursively for wrapper generic expansion
+        Type resolvedType = typeConstraint instanceof TypeVariable ? resolveActualType(elementInfo, typeConstraint) : typeConstraint;
+        Class<?> rawType = getRawType(resolvedType);
+        //resolved class is a subclass of a result candidate
+        if (resolvedClass.isAssignableFrom(rawType)) {
+            resolvedClass = rawType;
+        }
+        return resolvedClass;
     }
 
-    /**
-     * Get a raw type of any type.
-     * If type is a {@link TypeVariable} recursively search {@link BaseItem} for resolution of typevar.
-     * If type is a {@link WildcardType} find most specific upper / lower bound, which can be used. If most specific
-     * bound is a {@link TypeVariable}, perform typevar resolution.
-     *
-     * @param elementInfo item containing wrapper class of a type field, not null.
-     * @param target type to resolve, typically field type or generic bound, not null.
-     * @return resolved raw class
-     */
-    public static Class<?> resolveRawClass(RuntimeTypeInfo elementInfo, Type target) {
+    private static ParameterizedType findParameterizedSuperClass(Type target) {
+        if (null == target || target instanceof ParameterizedType) {
+            return (ParameterizedType) target;
+        }
         if (!(target instanceof Class)) {
-            if (!(target instanceof ParameterizedType)) {
-                return getRawType(resolveActualType(elementInfo, target));
-            } else {
-                return (Class<?>) ((ParameterizedType) target).getRawType();
-            }
-        } else {
-            return (Class<?>) target;
+            throw new JsonbException("Can't resolve ParameterizedType superclass for: " + target);
         }
-    }
-
-    /**
-     * Resolve a type by item.
-     * If type is a {@link TypeVariable} recursively search {@link BaseItem} for resolution of typevar.
-     * If type is a {@link WildcardType} find most specific upper / lower bound, which can be used. If most specific
-     * bound is a {@link TypeVariable}, perform typevar resolution.
-     *
-     * @param elementInfo item containing wrapper class of a type field, not null.
-     * @param target type to resolve, typically field type or generic bound, not null.
-     * @return resolved type
-     */
-    public static Type resolveActualType(RuntimeTypeInfo elementInfo, Type target) {
-        if (!(target instanceof WildcardType)) {
-            if (!(target instanceof TypeVariable)) {
-                if (target instanceof ParameterizedType && null != elementInfo) {
-                    return resolveTypeParameters((ParameterizedType) target, elementInfo.getRuntimeType());
-                }
-            } else {
-                return resolveItemTypeVariable(elementInfo, (TypeVariable<?>) target);
-            }
-        } else {
-            return determineMostSpecificBound(elementInfo, (WildcardType) target);
-        }
-        return target;
-    }
-
-    public static Optional<Type> resolveTypeOptional(RuntimeTypeInfo runtimeData, Type target) {
-        try {
-            return Optional.of(resolveActualType(runtimeData, target));
-        } catch (RuntimeException e) {
-            return Optional.empty();
-        }
+        return findParameterizedSuperClass(((Class) target).getGenericSuperclass());
     }
 
     /**
@@ -168,6 +119,111 @@ public class ReflectionTypeResolver {
     }
 
     /**
+     * Get default no argument constructor of the class.
+     * @param targetClass Class to get constructor from
+     * @param <T> Class generic type
+     * @return constructor
+     */
+    public static <T> Constructor<T> getDefaultConstructor(Class<T> targetClass, boolean mandatory) {
+        Objects.requireNonNull(targetClass);
+        return AccessController.doPrivileged((PrivilegedAction<Constructor<T>>) () -> {
+            try {
+                final Constructor<T> foundCtor = targetClass.getDeclaredConstructor();
+                if (Modifier.PROTECTED == foundCtor.getModifiers()) {
+                    foundCtor.setAccessible(true);
+                }
+                return foundCtor;
+            } catch (NoSuchMethodException cause) {
+                if (mandatory) {
+                    throw new JsonbException(MessageBundle.getMessage(MessageKey.NO_DEFAULT_CONSTRUCTOR, targetClass), cause);
+                }
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Get a raw type of any type.
+     * If type is a {@link TypeVariable} recursively search {@link BaseItem} for resolution of typevar.
+     * If type is a {@link WildcardType} find most specific upper / lower bound, which can be used. If most specific
+     * bound is a {@link TypeVariable}, perform typevar resolution.
+     *
+     * @param elementInfo item containing wrapper class of a type field, not null.
+     * @param target type to resolve, typically field type or generic bound, not null.
+     * @return resolved raw class
+     */
+    public static Class<?> resolveRawClass(RuntimeTypeInfo elementInfo, Type target) {
+        if (!(target instanceof Class)) {
+            if (!(target instanceof ParameterizedType)) {
+                return getRawType(resolveActualType(elementInfo, target));
+            } else {
+                return (Class<?>) ((ParameterizedType) target).getRawType();
+            }
+        } else {
+            return (Class<?>) target;
+        }
+    }
+
+    /**
+     * Resolves a wildcard most specific upper or lower bound.
+     *
+     * @param elementInfo Type.
+     * @param wildcardDesc Wildcard type.
+     * @return The most specific type.
+     */
+    private static Type determineMostSpecificBound(RuntimeTypeInfo elementInfo, WildcardType wildcardDesc) {
+        Class<?> resolvedClass = Object.class;
+        for (Type upper : wildcardDesc.getUpperBounds()) {
+            resolvedClass = getMostSpecificBound(elementInfo, resolvedClass, upper);
+        }
+        for (Type lower : wildcardDesc.getLowerBounds()) {
+            resolvedClass = getMostSpecificBound(elementInfo, resolvedClass, lower);
+        }
+        return resolvedClass;
+    }
+
+    /**
+     * Create instance with constructor.
+     *
+     * @param ctor const not null
+     * @param <T> type of instance
+     * @return instance
+     */
+    public static <T> T createNoArgInstance(Constructor<T> ctor) {
+        Objects.requireNonNull(ctor);
+        try {
+            return ctor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException cause) {
+            throw new JsonbException("Can't create instance", cause);
+        }
+    }
+
+    /**
+     * Resolve a type by item.
+     * If type is a {@link TypeVariable} recursively search {@link BaseItem} for resolution of typevar.
+     * If type is a {@link WildcardType} find most specific upper / lower bound, which can be used. If most specific
+     * bound is a {@link TypeVariable}, perform typevar resolution.
+     *
+     * @param elementInfo item containing wrapper class of a type field, not null.
+     * @param target type to resolve, typically field type or generic bound, not null.
+     * @return resolved type
+     */
+    public static Type resolveActualType(RuntimeTypeInfo elementInfo, Type target) {
+        if (!(target instanceof WildcardType)) {
+            if (!(target instanceof TypeVariable)) {
+                if (target instanceof ParameterizedType && null != elementInfo) {
+                    return resolveTypeParameters((ParameterizedType) target, elementInfo.getRuntimeType());
+                }
+            } else {
+                return resolveItemTypeVariable(elementInfo, (TypeVariable<?>) target);
+            }
+        } else {
+            return determineMostSpecificBound(elementInfo, (WildcardType) target);
+        }
+        return target;
+    }
+
+    /**
      * Resolves {@link TypeVariable} arguments of generic types.
      *
      * @param toResolve type to resolve
@@ -196,44 +252,12 @@ public class ReflectionTypeResolver {
         return Arrays.equals(finalArgs, pendingArgs) ? toResolve : new ResolvedParameterizedType(toResolve, finalArgs);
     }
 
-    /**
-     * Create instance with constructor.
-     *
-     * @param ctor const not null
-     * @param <T> type of instance
-     * @return instance
-     */
-    public static <T> T createNoArgInstance(Constructor<T> ctor) {
-        Objects.requireNonNull(ctor);
+    public static Optional<Type> resolveTypeOptional(RuntimeTypeInfo runtimeData, Type target) {
         try {
-            return ctor.newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException cause) {
-            throw new JsonbException("Can't create instance", cause);
+            return Optional.of(resolveActualType(runtimeData, target));
+        } catch (RuntimeException e) {
+            return Optional.empty();
         }
-    }
-
-    /**
-     * Get default no argument constructor of the class.
-     * @param targetClass Class to get constructor from
-     * @param <T> Class generic type
-     * @return constructor
-     */
-    public static <T> Constructor<T> getDefaultConstructor(Class<T> targetClass, boolean mandatory) {
-        Objects.requireNonNull(targetClass);
-        return AccessController.doPrivileged((PrivilegedAction<Constructor<T>>) () -> {
-            try {
-                final Constructor<T> foundCtor = targetClass.getDeclaredConstructor();
-                if (Modifier.PROTECTED == foundCtor.getModifiers()) {
-                    foundCtor.setAccessible(true);
-                }
-                return foundCtor;
-            } catch (NoSuchMethodException cause) {
-                if (mandatory) {
-                    throw new JsonbException(MessageBundle.getMessage(MessageKey.NO_DEFAULT_CONSTRUCTOR, targetClass), cause);
-                }
-                return null;
-            }
-        });
     }
 
     /**
@@ -266,63 +290,40 @@ public class ReflectionTypeResolver {
     }
 
     /**
-     * Check if type needs resolution. If type is a class or a parametrized type with all type arguments as classes
-     * than it is considered resolved. If any of types is type variable or wildcard type is not resolved.
+     * Get raw type by type.
+     * Resolves only ParametrizedTypes, GenericArrayTypes and Classes.
      *
-     * @param target Type to check.
-     * @return True if resolved
+     * Exception is thrown if raw type cannot be resolved.
+     *
+     * @param target Type to get class information from, not null.
+     * @return Class of a raw type.
      */
-    public static boolean isResolvedType(Type target) {
-        if (target instanceof ParameterizedType) {
-            for (Type argument : ((ParameterizedType) target).getActualTypeArguments()) {
-                if (!isResolvedType(argument)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return target instanceof Class<?>;
-    }
-
-    private static ParameterizedType findParameterizedSuperClass(Type target) {
-        if (null == target || target instanceof ParameterizedType) {
-            return (ParameterizedType) target;
-        }
-        if (!(target instanceof Class)) {
-            throw new JsonbException("Can't resolve ParameterizedType superclass for: " + target);
-        }
-        return findParameterizedSuperClass(((Class) target).getGenericSuperclass());
+    public static Class<?> getRawType(Type target) {
+        return getOptionalRawType(target).orElseThrow(() -> new JsonbException(MessageBundle.getMessage(MessageKey.TYPE_RESOLUTION_ERROR, target)));
     }
 
     /**
-     * Resolves a wildcard most specific upper or lower bound.
+     * Get raw type by type.
+     * Only for ParametrizedTypes, GenericArrayTypes and Classes.
      *
-     * @param elementInfo Type.
-     * @param wildcardDesc Wildcard type.
-     * @return The most specific type.
+     * Empty optional is returned if raw type cannot be resolved.
+     *
+     * @param target Type to get class information from, not null.
+     * @return Class of a type.
      */
-    private static Type determineMostSpecificBound(RuntimeTypeInfo elementInfo, WildcardType wildcardDesc) {
-        Class<?> resolvedClass = Object.class;
-        for (Type upper : wildcardDesc.getUpperBounds()) {
-            resolvedClass = getMostSpecificBound(elementInfo, resolvedClass, upper);
+    public static Optional<Class<?>> getOptionalRawType(Type target) {
+        if (!(target instanceof Class)) {
+            if (!(target instanceof ParameterizedType)) {
+                if (target instanceof GenericArrayType) {
+                    return Optional.of(((GenericArrayType) target).getClass());
+                }
+            } else {
+                return Optional.of((Class<?>) ((ParameterizedType) target).getRawType());
+            }
+        } else {
+            return Optional.of((Class<?>) target);
         }
-        for (Type lower : wildcardDesc.getLowerBounds()) {
-            resolvedClass = getMostSpecificBound(elementInfo, resolvedClass, lower);
-        }
-        return resolvedClass;
+        return Optional.empty();
     }
 
-    private static Class<?> getMostSpecificBound(RuntimeTypeInfo elementInfo, Class<?> resolvedClass, Type typeConstraint) {
-        if (Object.class == typeConstraint) {
-            return resolvedClass;
-        }
-        //if bound is type variable search recursively for wrapper generic expansion
-        Type resolvedType = typeConstraint instanceof TypeVariable ? resolveActualType(elementInfo, typeConstraint) : typeConstraint;
-        Class<?> rawType = getRawType(resolvedType);
-        //resolved class is a subclass of a result candidate
-        if (resolvedClass.isAssignableFrom(rawType)) {
-            resolvedClass = rawType;
-        }
-        return resolvedClass;
-    }
 }

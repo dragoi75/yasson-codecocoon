@@ -31,6 +31,16 @@ import java.util.logging.Logger;
 public class ZonedDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<ZonedDateTime> {
     private static final Logger log = Logger.getLogger(ZonedDateTimeTypeDeserializer.class.getName());
 
+    @Override
+    protected ZonedDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
+        return ZonedDateTime.parse(jsonValue, getZonedFormatter(formatter));
+    }
+
+    @Override
+    protected ZonedDateTime parseDefault(String jsonValue, Locale locale) {
+        return ZonedDateTime.parse(jsonValue, DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale));
+    }
+
     /**
      * Creates an instance.
      *
@@ -50,13 +60,4 @@ public class ZonedDateTimeTypeDeserializer extends AbstractDateTimeDeserializer<
         return ZonedDateTime.ofInstant(instant, UTC);
     }
 
-    @Override
-    protected ZonedDateTime parseDefault(String jsonValue, Locale locale) {
-        return ZonedDateTime.parse(jsonValue, DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale));
-    }
-
-    @Override
-    protected ZonedDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
-        return ZonedDateTime.parse(jsonValue, getZonedFormatter(formatter));
-    }
 }

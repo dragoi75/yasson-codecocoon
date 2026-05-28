@@ -30,10 +30,6 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
 
     private T[] arrayInstance;
 
-    protected ObjectArrayDeserializer(JsonDeserializerBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected List<?> getItems() {
         return items;
@@ -47,4 +43,9 @@ public class ObjectArrayDeserializer<T> extends AbstractArrayDeserializer<T[]> {
         }
         return items.toArray(arrayInstance);
     }
+
+    protected ObjectArrayDeserializer(JsonDeserializerBuilder builder) {
+        super(builder);
+    }
+
 }

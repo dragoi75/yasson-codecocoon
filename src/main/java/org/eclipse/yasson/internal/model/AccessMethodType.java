@@ -23,11 +23,12 @@ public class AccessMethodType {
 
     private final Type methodType;
 
+    public Type getMethodType() {
+        return methodType;
+    }
+
     public AccessMethodType(Type methodType) {
         this.methodType = methodType;
     }
 
-    public Type getMethodType() {
-        return methodType;
-    }
 }

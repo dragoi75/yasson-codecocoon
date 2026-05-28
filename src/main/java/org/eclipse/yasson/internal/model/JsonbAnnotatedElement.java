@@ -25,6 +25,15 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> extends JsonbAnno
     private final T element;
 
     /**
+     * Gets element.
+     *
+     * @return Element.
+     */
+    public T getElement() {
+        return element;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param element Element.
@@ -34,12 +43,4 @@ public class JsonbAnnotatedElement<T extends AnnotatedElement> extends JsonbAnno
         this.element = element;
     }
 
-    /**
-     * Gets element.
-     *
-     * @return Element.
-     */
-    public T getElement() {
-        return element;
-    }
 }

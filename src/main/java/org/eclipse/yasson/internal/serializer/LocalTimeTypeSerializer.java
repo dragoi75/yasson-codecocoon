@@ -30,6 +30,11 @@ import java.util.Locale;
  */
 public class LocalTimeTypeSerializer extends AbstractDateTimeSerializer<LocalTime> {
 
+    @Override
+    protected String formatDefault(LocalTime value, Locale locale) {
+        return DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format(value);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,8 +49,4 @@ public class LocalTimeTypeSerializer extends AbstractDateTimeSerializer<LocalTim
         throw new JsonbException(MessageBundle.getMessage(MessageKey.TIME_TO_EPOCH_MILLIS_ERROR, LocalTime.class.getSimpleName()));
     }
 
-    @Override
-    protected String formatDefault(LocalTime value, Locale locale) {
-        return DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format(value);
-    }
 }

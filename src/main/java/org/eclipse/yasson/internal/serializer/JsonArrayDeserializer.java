@@ -27,6 +27,11 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
 
     private JsonArray jsonArray;
 
+    @Override
+    public JsonArray getInstance(JsonbDeserializer unmarshaller) {
+        return jsonArray;
+    }
+
     /**
      * Create instance.
      *
@@ -41,8 +46,4 @@ public class JsonArrayDeserializer extends AbstractJsonpDeserializer<JsonArray> 
         this.jsonArray = parser.getArray();
     }
 
-    @Override
-    public JsonArray getInstance(JsonbDeserializer unmarshaller) {
-        return jsonArray;
-    }
 }

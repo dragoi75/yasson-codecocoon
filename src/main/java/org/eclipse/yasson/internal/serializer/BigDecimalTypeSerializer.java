@@ -25,13 +25,13 @@ import java.math.BigDecimal;
  */
 public class BigDecimalTypeSerializer extends AbstractNumberSerializer<BigDecimal> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public BigDecimalTypeSerializer(Customization customization) {
-        super(customization);
+    @Override
+    protected void serializeNonFormatted(BigDecimal obj, JsonGenerator generator) {
+        if (!BigNumberUtil.isIEEE754(obj)) {
+            generator.write(obj.toString());
+        } else {
+            generator.write(obj);
+        }
     }
 
     @Override
@@ -43,12 +43,13 @@ public class BigDecimalTypeSerializer extends AbstractNumberSerializer<BigDecima
         }
     }
 
-    @Override
-    protected void serializeNonFormatted(BigDecimal obj, JsonGenerator generator) {
-        if (!BigNumberUtil.isIEEE754(obj)) {
-            generator.write(obj.toString());
-        } else {
-            generator.write(obj);
-        }
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public BigDecimalTypeSerializer(Customization customization) {
+        super(customization);
     }
+
 }

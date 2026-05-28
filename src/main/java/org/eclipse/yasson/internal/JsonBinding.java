@@ -37,141 +37,10 @@ public class JsonBinding implements YassonJsonb {
 
     private final JsonbRuntimeContext jsonbContext;
 
-    JsonBinding(JsonBindingBuilder builder) {
-        this.jsonbContext = new JsonbRuntimeContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
-    }
-
-    private <T> T deserialize(final Type type, final JsonParser parser, final JsonbDeserializer unmarshaller) {
-        return unmarshaller.deserialize(type, parser);
-    }
-
-    @Override
-    public <T> T fromJson(String str, Class<T> type) throws JsonbException {
-        final JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
-        final JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(type, parser, unmarshaller);
-    }
-
-    @Override
-    public <T> T fromJson(String str, Type type) throws JsonbException {
-        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(type, parser, unmarshaller);
-    }
-
-    @Override
-    public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
-        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(type, parser, unmarshaller);
-    }
-
-    @Override
-    public <T> T fromJson(Reader reader, Type type) throws JsonbException {
-        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(type, parser, unmarshaller);
-    }
-
-    @Override
-    public <T> T fromJson(InputStream stream, Class<T> clazz) throws JsonbException {
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(clazz, inputStreamParser(stream), unmarshaller);
-    }
-
-    @Override
-    public <T> T fromJson(InputStream stream, Type type) throws JsonbException {
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return deserialize(type, inputStreamParser(stream), unmarshaller);
-    }
-
-    private JsonParser inputStreamParser(InputStream stream) {
-        return new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParserFactory(createJsonpProperties(jsonbContext.getConfig()))
-                .createParser(stream,
-                        Charset.forName((String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8"))));
-    }
-
-    @Override
-    public String toJson(Object object) throws JsonbException {
-        StringWriter writer = new StringWriter();
-        final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext).marshall(object, generator);
-        return writer.toString();
-    }
-
-    @Override
-    public String toJson(Object object, Type type) throws JsonbException {
-        StringWriter writer = new StringWriter();
-        final JsonGenerator generator = writerGenerator(writer);
-        new Marshaller(jsonbContext, type).marshall(object, generator);
-        return writer.toString();
-    }
-
-    @Override
-    public void toJson(Object object, Writer writer) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, writerGenerator(writer));
-    }
-
     @Override
     public void toJson(Object object, Type type, Writer writer) throws JsonbException {
         final Marshaller marshaller = new Marshaller(jsonbContext, type);
         marshaller.marshall(object, writerGenerator(writer));
-    }
-
-    private JsonGenerator writerGenerator(Writer writer) {
-        Map<String, ?> factoryProperties = createJsonpProperties(jsonbContext.getConfig());
-        if (factoryProperties.isEmpty()) {
-            return jsonbContext.getJsonProvider().createGenerator(writer);
-        }
-        return jsonbContext.getJsonProvider().createGeneratorFactory(factoryProperties).createGenerator(writer);
-    }
-
-    @Override
-    public void toJson(Object object, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshall(object, streamGenerator(stream));
-    }
-
-    @Override
-    public void toJson(Object object, Type type, OutputStream stream) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, type);
-        marshaller.marshall(object, streamGenerator(stream));
-    }
-
-    @Override
-    public <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException {
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return unmarshaller.deserialize(type, new JsonbRiStreamParser(jsonParser));
-    }
-
-    @Override
-    public <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException {
-        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
-        return unmarshaller.deserialize(runtimeType, new JsonbRiStreamParser(jsonParser));
-    }
-
-    @Override
-    public void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
-    }
-
-    @Override
-    public void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException {
-        final Marshaller marshaller = new Marshaller(jsonbContext, runtimeType);
-        marshaller.marshallWithoutClose(object, jsonGenerator);
-    }
-
-    private JsonGenerator streamGenerator(OutputStream stream) {
-        Map<String, ?> factoryProperties = createJsonpProperties(jsonbContext.getConfig());
-        final String encoding = (String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8");
-        return jsonbContext.getJsonProvider().createGeneratorFactory(factoryProperties).createGenerator(stream, Charset.forName(encoding));
-    }
-
-    @Override
-    public void close() throws Exception {
-        jsonbContext.getComponentInstanceCreator().close();
     }
 
     /**
@@ -196,4 +65,136 @@ public class JsonBinding implements YassonJsonb {
         }
         return factoryProperties;
     }
+
+    @Override
+    public void close() throws Exception {
+        jsonbContext.getComponentInstanceCreator().close();
+    }
+
+    @Override
+    public void toJson(Object object, Type type, OutputStream stream) throws JsonbException {
+        final Marshaller marshaller = new Marshaller(jsonbContext, type);
+        marshaller.marshall(object, streamGenerator(stream));
+    }
+
+    private JsonParser inputStreamParser(InputStream stream) {
+        return new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParserFactory(createJsonpProperties(jsonbContext.getConfig()))
+                .createParser(stream,
+                        Charset.forName((String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8"))));
+    }
+
+    @Override
+    public void toJson(Object object, JsonGenerator jsonGenerator) throws JsonbException {
+        final Marshaller marshaller = new Marshaller(jsonbContext);
+        marshaller.marshallWithoutClose(object, jsonGenerator);
+    }
+
+    @Override
+    public void toJson(Object object, Writer writer) throws JsonbException {
+        final Marshaller marshaller = new Marshaller(jsonbContext);
+        marshaller.marshall(object, writerGenerator(writer));
+    }
+
+    @Override
+    public String toJson(Object object, Type type) throws JsonbException {
+        StringWriter writer = new StringWriter();
+        final JsonGenerator generator = writerGenerator(writer);
+        new Marshaller(jsonbContext, type).marshall(object, generator);
+        return writer.toString();
+    }
+
+    private JsonGenerator writerGenerator(Writer writer) {
+        Map<String, ?> factoryProperties = createJsonpProperties(jsonbContext.getConfig());
+        if (factoryProperties.isEmpty()) {
+            return jsonbContext.getJsonProvider().createGenerator(writer);
+        }
+        return jsonbContext.getJsonProvider().createGeneratorFactory(factoryProperties).createGenerator(writer);
+    }
+
+    @Override
+    public void toJson(Object object, Type runtimeType, JsonGenerator jsonGenerator) throws JsonbException {
+        final Marshaller marshaller = new Marshaller(jsonbContext, runtimeType);
+        marshaller.marshallWithoutClose(object, jsonGenerator);
+    }
+
+    @Override
+    public <T> T fromJson(JsonParser jsonParser, Type runtimeType) throws JsonbException {
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return unmarshaller.deserialize(runtimeType, new JsonbRiStreamParser(jsonParser));
+    }
+
+    private <T> T deserialize(final Type type, final JsonParser parser, final JsonbDeserializer unmarshaller) {
+        return unmarshaller.deserialize(type, parser);
+    }
+
+    @Override
+    public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(type, parser, unmarshaller);
+    }
+
+    @Override
+    public void toJson(Object object, OutputStream stream) throws JsonbException {
+        final Marshaller marshaller = new Marshaller(jsonbContext);
+        marshaller.marshall(object, streamGenerator(stream));
+    }
+
+    @Override
+    public <T> T fromJson(InputStream stream, Type type) throws JsonbException {
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(type, inputStreamParser(stream), unmarshaller);
+    }
+
+    @Override
+    public <T> T fromJson(String str, Type type) throws JsonbException {
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(type, parser, unmarshaller);
+    }
+
+    private JsonGenerator streamGenerator(OutputStream stream) {
+        Map<String, ?> factoryProperties = createJsonpProperties(jsonbContext.getConfig());
+        final String encoding = (String) jsonbContext.getConfig().getProperty(JsonbConfig.ENCODING).orElse("UTF-8");
+        return jsonbContext.getJsonProvider().createGeneratorFactory(factoryProperties).createGenerator(stream, Charset.forName(encoding));
+    }
+
+    @Override
+    public String toJson(Object object) throws JsonbException {
+        StringWriter writer = new StringWriter();
+        final JsonGenerator generator = writerGenerator(writer);
+        new Marshaller(jsonbContext).marshall(object, generator);
+        return writer.toString();
+    }
+
+    @Override
+    public <T> T fromJson(Reader reader, Type type) throws JsonbException {
+        JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(reader));
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(type, parser, unmarshaller);
+    }
+
+    @Override
+    public <T> T fromJson(String str, Class<T> type) throws JsonbException {
+        final JsonParser parser = new JsonbRiStreamParser(jsonbContext.getJsonProvider().createParser(new StringReader(str)));
+        final JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(type, parser, unmarshaller);
+    }
+
+    @Override
+    public <T> T fromJson(InputStream stream, Class<T> clazz) throws JsonbException {
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return deserialize(clazz, inputStreamParser(stream), unmarshaller);
+    }
+
+    JsonBinding(JsonBindingBuilder builder) {
+        this.jsonbContext = new JsonbRuntimeContext(builder.getConfig(), builder.getProvider().orElseGet(JsonProvider::provider));
+    }
+
+    @Override
+    public <T> T fromJson(JsonParser jsonParser, Class<T> type) throws JsonbException {
+        JsonbDeserializer unmarshaller = new JsonbDeserializer(jsonbContext);
+        return unmarshaller.deserialize(type, new JsonbRiStreamParser(jsonParser));
+    }
+
 }

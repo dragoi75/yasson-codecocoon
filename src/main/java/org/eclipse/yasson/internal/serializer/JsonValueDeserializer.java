@@ -32,15 +32,6 @@ import java.lang.reflect.Type;
  */
 public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonValue> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public JsonValueDeserializer(Customization customization) {
-        super(JsonValue.class, customization);
-    }
-
     @Override
     public JsonValue deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         final JsonParser.Event next = ((JsonbRiStreamParser)parser).getLastEvent();
@@ -63,4 +54,14 @@ public class JsonValueDeserializer extends AbstractValueTypeDeserializer<JsonVal
     protected JsonValue deserialize(String jsonValue, JsonbDeserializer unmarshaller, Type rtType) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public JsonValueDeserializer(Customization customization) {
+        super(JsonValue.class, customization);
+    }
+
 }

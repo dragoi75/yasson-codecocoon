@@ -35,13 +35,23 @@ public class JsonbDeserializer extends ProcessingContext implements Deserializat
 
     private static final Logger JSONB_LOG = Logger.getLogger(JsonbDeserializer.class.getName());
 
+    @Override
+    public <T> T deserialize(Type valueType, JsonParser jsonStream) {
+        return deserializeValue(valueType, jsonStream);
+    }
+
     /**
-     * Creates instance of unmarshaller.
-     *
-     * @param runtimeContext context to use
+     * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
+     * custom user deserializer.
      */
-    public JsonbDeserializer(JsonbRuntimeContext runtimeContext) {
-        super(runtimeContext);
+    private JsonParser.Event getRootEvent(JsonParser jsonStream) {
+        JsonbRiStreamParser.ParsingLevelContext levelContext = ((JsonbStructureNavigator) jsonStream).getCurrentLevel();
+        //Wrapper parser is at start
+        if (null == levelContext.getParent()) {
+            return jsonStream.next();
+        }
+        final JsonParser.Event rootEvent = levelContext.getLastEvent();
+        return JsonParser.Event.KEY_NAME == rootEvent ? jsonStream.next() : rootEvent;
     }
 
     @Override
@@ -49,9 +59,13 @@ public class JsonbDeserializer extends ProcessingContext implements Deserializat
         return deserializeValue(targetClass, jsonStream);
     }
 
-    @Override
-    public <T> T deserialize(Type valueType, JsonParser jsonStream) {
-        return deserializeValue(valueType, jsonStream);
+    /**
+     * Creates instance of unmarshaller.
+     *
+     * @param runtimeContext context to use
+     */
+    public JsonbDeserializer(JsonbRuntimeContext runtimeContext) {
+        super(runtimeContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -73,17 +87,4 @@ public class JsonbDeserializer extends ProcessingContext implements Deserializat
         }
     }
 
-    /**
-     * Get root value event, either for new deserialization process, or deserialization sub-process invoked from
-     * custom user deserializer.
-     */
-    private JsonParser.Event getRootEvent(JsonParser jsonStream) {
-        JsonbRiStreamParser.ParsingLevelContext levelContext = ((JsonbStructureNavigator) jsonStream).getCurrentLevel();
-        //Wrapper parser is at start
-        if (null == levelContext.getParent()) {
-            return jsonStream.next();
-        }
-        final JsonParser.Event rootEvent = levelContext.getLastEvent();
-        return JsonParser.Event.KEY_NAME == rootEvent ? jsonStream.next() : rootEvent;
-    }
 }

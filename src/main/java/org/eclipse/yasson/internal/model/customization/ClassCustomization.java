@@ -37,17 +37,49 @@ public class ClassCustomization extends CustomizationBase {
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Returns instance of {@link JsonbCreator}.
      *
-     * @param builder not null
+     * @return instance of creator
      */
-    ClassCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
-        this.creator = builder.getCreator();
-        this.propertyOrder = builder.getPropertyOrder();
-        this.numberFormatter = builder.getNumberFormatter();
-        this.dateTimeFormatter = builder.getDateFormatter();
-        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
+    public JsonbCreator getCreator() {
+        return creator;
+    }
+
+    @Override
+    public JsonbDateFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    @Override
+    public JsonbDateFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
+     * Property visibility strategy for this class model.
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    /**
+     * Sets sorted properties.
+     *
+     * @param propertyOrder sorted names of properties
+     */
+    public void setPropertyOrder(String[] propertyOrder) {
+        this.propertyOrder = propertyOrder;
     }
 
     /**
@@ -65,12 +97,17 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Returns instance of {@link JsonbCreator}.
+     * Copies properties from builder an creates immutable instance.
      *
-     * @return instance of creator
+     * @param builder not null
      */
-    public JsonbCreator getCreator() {
-        return creator;
+    ClassCustomization(ClassCustomizationBuilder builder) {
+        super(builder);
+        this.creator = builder.getCreator();
+        this.propertyOrder = builder.getPropertyOrder();
+        this.numberFormatter = builder.getNumberFormatter();
+        this.dateTimeFormatter = builder.getDateFormatter();
+        this.propertyVisibilityStrategy = builder.getPropertyVisibilityStrategy();
     }
 
     /**
@@ -80,43 +117,6 @@ public class ClassCustomization extends CustomizationBase {
      */
     public String[] getPropertyOrder() {
         return propertyOrder;
-    }
-
-    /**
-     * Sets sorted properties.
-     *
-     * @param propertyOrder sorted names of properties
-     */
-    public void setPropertyOrder(String[] propertyOrder) {
-        this.propertyOrder = propertyOrder;
-    }
-
-    /**
-     * Property visibility strategy for this class model.
-     * @return visibility strategy
-     */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
-    }
-
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
     }
 
 }

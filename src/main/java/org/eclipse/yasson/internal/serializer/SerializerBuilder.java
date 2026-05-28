@@ -38,13 +38,19 @@ public class SerializerBuilder extends AbstractSerializationBuilder<SerializerBu
 
     private Class<?> objectClass;
 
-    /**
-     * Creates a new builder.
-     *
-     * @param jsonbContext JSON-B context.
-     */
-    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
-        super(jsonbContext);
+    private Type resolveRuntimeType() {
+        if (null != genericType && Object.class != genericType) {
+            return genericType;
+        }
+        return objectClass;
+    }
+
+    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
+        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializerRegistry.getInstance().getValueSerializerProvider(rawType);
+        if (supportedTypeSerializerOptional.isPresent()) {
+            return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(customization));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -121,10 +127,6 @@ public class SerializerBuilder extends AbstractSerializationBuilder<SerializerBu
         }
     }
 
-    private boolean isByteArray(Class<?> rawType) {
-        return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
-    }
-
     /**
      * Instance is not created in case of array items, because, we don't know how long it should be
      * till parser ends parsing.
@@ -161,18 +163,17 @@ public class SerializerBuilder extends AbstractSerializationBuilder<SerializerBu
         }
     }
 
-    private Optional<AbstractValueTypeSerializer<?>> getSupportedTypeSerializer(Class<?> rawType) {
-        final Optional<? extends SerializerProviderWrapper> supportedTypeSerializerOptional = DefaultSerializerRegistry.getInstance().getValueSerializerProvider(rawType);
-        if (supportedTypeSerializerOptional.isPresent()) {
-            return Optional.of(supportedTypeSerializerOptional.get().getSerializerProvider().provideSerializer(customization));
-        }
-        return Optional.empty();
+    private boolean isByteArray(Class<?> rawType) {
+        return rawType.isArray() && Byte.TYPE == rawType.getComponentType();
     }
 
-    private Type resolveRuntimeType() {
-        if (null != genericType && Object.class != genericType) {
-            return genericType;
-        }
-        return objectClass;
+    /**
+     * Creates a new builder.
+     *
+     * @param jsonbContext JSON-B context.
+     */
+    public SerializerBuilder(JsonbRuntimeContext jsonbContext) {
+        super(jsonbContext);
     }
+
 }

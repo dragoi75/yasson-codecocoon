@@ -23,27 +23,6 @@ import javax.json.stream.JsonParser;
 public interface JsonbStructureNavigator extends JsonParser {
 
     /**
-     * Moves parser to required event, if current event is equal to required does nothing.
-     *
-     * @param occurrence Required event.
-     */
-    void moveTo(JsonParser.Event occurrence);
-
-    /**
-     * Moves parser cursor to any JSON value.
-     *
-     * @return Event.
-     */
-    Event moveToValue();
-
-    /**
-     * Moves parser cursor to START_OBJECT or START_ARRAY.
-     *
-     * @return Event.
-     */
-    Event moveToStartStructure();
-
-    /**
      * Current level of JsonbRiParser.
      *
      * @return Current level.
@@ -55,4 +34,26 @@ public interface JsonbStructureNavigator extends JsonParser {
      * If current event is START_ARRAY or START_OBJECT, whole structure is skipped to end.
      */
     void skipJsonStructure();
+
+    /**
+     * Moves parser cursor to START_OBJECT or START_ARRAY.
+     *
+     * @return Event.
+     */
+    Event moveToStartStructure();
+
+    /**
+     * Moves parser cursor to any JSON value.
+     *
+     * @return Event.
+     */
+    Event moveToValue();
+
+    /**
+     * Moves parser to required event, if current event is equal to required does nothing.
+     *
+     * @param occurrence Required event.
+     */
+    void moveTo(Event occurrence);
+
 }

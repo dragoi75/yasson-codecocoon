@@ -43,12 +43,6 @@ public class ClassModelRegistry {
 
         private JsonbRuntimeContext jsonbRuntime;
 
-        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser typeParser, JsonbRuntimeContext jsonbRuntime) {
-            this.parentDescriptor = parentDescriptor;
-            this.typeParser = typeParser;
-            this.jsonbRuntime = jsonbRuntime;
-        }
-
         @Override
         public ClassDescriptor apply(Class targetType) {
             final JsonbAnnotatedElement<Class<?>> typeAnnotatedElement = jsonbRuntime.getAnnotationIntrospector().collectAnnotations(targetType);
@@ -57,6 +51,13 @@ public class ClassModelRegistry {
             typeParser.parseProperties(createdDescriptor, typeAnnotatedElement);
             return createdDescriptor;
         }
+
+        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser typeParser, JsonbRuntimeContext jsonbRuntime) {
+            this.parentDescriptor = parentDescriptor;
+            this.typeParser = typeParser;
+            this.jsonbRuntime = jsonbRuntime;
+        }
+
     }
 
     private final JsonbRuntimeContext jsonbRuntime;
@@ -66,6 +67,26 @@ public class ClassModelRegistry {
     private final ConcurrentHashMap<Class<?>, ContainerSerializerProvider> serializerProviderMap = new ConcurrentHashMap<>();
 
     private final ClassParser typeParser;
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param typeKey Class to add serializer provider for.
+     * @param providerInstance Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> typeKey, ContainerSerializerProvider providerInstance) {
+        serializerProviderMap.putIfAbsent(typeKey, providerInstance);
+    }
+
+    /**
+     * Gets serializer provider for given class.
+     *
+     * @param typeKey Class to get serializer provider for.
+     * @return Serializer provider.
+     */
+    public ContainerSerializerProvider getSerializerProvider(Class<?> typeKey) {
+        return serializerProviderMap.get(typeKey);
+    }
 
     /**
      * Create mapping context which is scoped to jsonb runtime.
@@ -147,23 +168,4 @@ public class ClassModelRegistry {
         return classDescriptorMap.get(typeKey);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param typeKey Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerProvider getSerializerProvider(Class<?> typeKey) {
-        return serializerProviderMap.get(typeKey);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param typeKey Class to add serializer provider for.
-     * @param providerInstance Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> typeKey, ContainerSerializerProvider providerInstance) {
-        serializerProviderMap.putIfAbsent(typeKey, providerInstance);
-    }
 }

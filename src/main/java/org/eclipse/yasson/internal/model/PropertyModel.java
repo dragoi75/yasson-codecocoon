@@ -83,23 +83,201 @@ public class PropertyModel implements Comparable<PropertyModel> {
     private final AccessMethodType setterMethodType;
 
     /**
-     * Creates an instance.
+     * Returns which type should be used to serialization
      *
-     * @param classModel Class model of declaring class.
-     * @param property Property.
-     * @param jsonbContext Context.
+     * @return serialization type
      */
-    public PropertyModel(ClassDescriptor classModel, Property property, JsonbRuntimeContext jsonbContext) {
-        this.classModel = classModel;
-        this.propertyName = property.getName();
-        this.propertyType = property.getPropertyType();
-        this.propagation = new ReflectionPropagation(property, classModel.getClassCustomization().getPropertyVisibilityStrategy());
-        this.getterMethodType = propagation.isGetterVisible() ? new AccessMethodType(property.getGetterType()) : null;
-        this.setterMethodType = propagation.isSetterVisible() ? new AccessMethodType(property.getSetterType()) : null;
-        this.customization = introspectCustomization(property, jsonbContext);
-        this.readName = calculateReadWriteName(customization.getJsonReadName(), jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-        this.writeName = calculateReadWriteName(customization.getJsonWriteName(), jsonbContext.getConfigProperties().getPropertyNamingStrategy());
-        this.propertySerializer = resolveCachedSerializer();
+    public Type getPropertySerializationType() {
+        return null == getterMethodType ? propertyType : getterMethodType.getMethodType();
+    }
+
+    public String getWriteName() {
+        return writeName;
+    }
+
+    /**
+     * Gets a name of JSON document property to read this property from.
+     *
+     * @return Name of JSON document property.
+     */
+    public String getReadName() {
+        return readName;
+    }
+
+    /**
+     * Default property name according to Field / Getter / Setter method names.
+     * This name is use for identifying properties, for JSON serialization is used customized name
+     * which may be derived from default name.
+     * @return default name
+     */
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    /**
+     * Gets property's value.
+     *
+     * @param object object to read property from
+     * @return property's value
+     */
+    public Object getValue(Object object) {
+        return propagation.getValue(object);
+    }
+
+    /**
+     * Wrapper object of {@code java.lang.reflect} representations of this javabean property.
+     *
+     * @return Property model
+     */
+    public PropertyValuePropagation getPropagation() {
+        return propagation;
+    }
+
+    /**
+     * Sets a property.
+     *
+     * If not writable (final, transient, static), ignores property.
+     *
+     * @param object Object to set value in.
+     * @param value  Value to set.
+     */
+    public void setValue(Object object, Object value) {
+        if (!isWritable()) {
+            return;
+        }
+        propagation.setValue(object, value);
+    }
+
+    /**
+     * Pull result for most significant scope defined by order of annotation targets.
+     *
+     * @param collectedAnnotations all targets
+     * @param targets ordered target types by scope
+     */
+    private <T> T getTargetForMostPreciseScope(Map<AnnotationTarget, T> collectedAnnotations, AnnotationTarget... targets) {
+        for (AnnotationTarget target : targets) {
+            final T result = collectedAnnotations.get(target);
+            if (null != result) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * If customized by JsonbPropertyAnnotation, than is used, otherwise use strategy to translate.
+     * Since this is cached for performance reasons strategy has to be consistent
+     * with calculated values for same input.
+     */
+    private String calculateReadWriteName(String readWriteName, PropertyNamingStrategy strategy) {
+        return null != readWriteName ? readWriteName : strategy.translateName(propertyName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(propertyName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (null == o || o.getClass() != getClass())
+            return false;
+        PropertyModel that = (PropertyModel) o;
+        return Objects.equals(propertyName, that.propertyName);
+    }
+
+    private void introspectNumberFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder) {
+        /*
+         * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
+         * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
+         * If @JsonbNumberFormat is placed on field implementation must use this format on serialization and deserialization.
+         *
+         * Priority from high to low is getter / setter > field > class > package > global configuration
+         */
+        Map<AnnotationTarget, JsonbNumberFormatter> jsonNumberFormatCategorized = introspector.getJsonNumberFormatter(property);
+        if (!builder.isReadTransient()) {
+            builder.setSerializeNumberFormatter(getTargetForMostPreciseScope(jsonNumberFormatCategorized, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        }
+        if (!builder.isWriteTransient()) {
+            builder.setDeserializeNumberFormatter(getTargetForMostPreciseScope(jsonNumberFormatCategorized, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
+        }
+    }
+
+    /**
+     * Returns which type should be used to deserialization
+     *
+     * @return deserialization type
+     */
+    public Type getPropertyDeserializationType() {
+        return null == setterMethodType ? propertyType : setterMethodType.getMethodType();
+    }
+
+    /**
+     * Model of declaring class of this property.
+     * @return class model
+     */
+    public ClassDescriptor getClassModel() {
+        return classModel;
+    }
+
+    /**
+     * Introspected customization of a property.
+     * @return immutable property customization
+     */
+    public PropertyCustomization getCustomization() {
+        return customization;
+    }
+
+    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbRuntimeContext jsonbContext) {
+        final SerializerBinding serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
+        if (null != serializerBinding) {
+            return serializerBinding;
+        }
+        return jsonbContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
+    }
+
+    private AdapterBinding getUserAdapterBinding(Property property, JsonbRuntimeContext jsonbContext) {
+        final AdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
+        if (null != adapterBinding) {
+            return adapterBinding;
+        }
+        return jsonbContext.getComponentMatcher().getAdapterBinding(propertyType, null).orElse(null);
+    }
+
+    /**
+     * Gets serializer.
+     *
+     * @return Serializer.
+     */
+    public JsonbSerializer<?> getPropertySerializer() {
+        return propertySerializer;
+    }
+
+    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbRuntimeContext jsonbContext) {
+        /*
+         * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
+         * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
+         * If @JsonbDateFormat is placed on field implementation must use this format on serialization and deserialization.
+         *
+         * Priority from high to low is getter / setter > field > class > package > global configuration
+         */
+        Map<AnnotationTarget, JsonbDateFormatter> jsonDateFormatCategorized = introspector.getJsonbDateFormatCategorized(property);
+        final JsonbDateFormatter configDateFormatter = jsonbContext.getConfigProperties().getConfigDateFormatter();
+        if (!builder.isReadTransient()) {
+            final JsonbDateFormatter dateFormatter = getTargetForMostPreciseScope(jsonDateFormatCategorized, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            builder.setSerializeDateFormatter(null != dateFormatter ? dateFormatter : configDateFormatter);
+        }
+        if (!builder.isWriteTransient()) {
+            final JsonbDateFormatter dateFormatter = getTargetForMostPreciseScope(jsonDateFormatCategorized, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
+            builder.setDeserializeDateFormatter(null != dateFormatter ? dateFormatter : configDateFormatter);
+        }
+    }
+
+    @Override
+    public int compareTo(PropertyModel o) {
+        return propertyName.compareTo(o.getPropertyName());
     }
 
     /**
@@ -128,37 +306,20 @@ public class PropertyModel implements Comparable<PropertyModel> {
     }
 
     /**
-     * Returns which type should be used to deserialization
+     * Runtime type of a property. May be a TypeVariable or WildcardType.
      *
-     * @return deserialization type
+     * @return type of a property
      */
-    public Type getPropertyDeserializationType() {
-        return null == setterMethodType ? propertyType : setterMethodType.getMethodType();
+    public Type getPropertyType() {
+        return propertyType;
     }
 
     /**
-     * Returns which type should be used to serialization
-     *
-     * @return serialization type
+     * Property is writable. Based on access policy and java field modifiers.
+     * @return true if can be deserialized from JSON
      */
-    public Type getPropertySerializationType() {
-        return null == getterMethodType ? propertyType : getterMethodType.getMethodType();
-    }
-
-    private AdapterBinding getUserAdapterBinding(Property property, JsonbRuntimeContext jsonbContext) {
-        final AdapterBinding adapterBinding = jsonbContext.getAnnotationIntrospector().getAdapterBinding(property);
-        if (null != adapterBinding) {
-            return adapterBinding;
-        }
-        return jsonbContext.getComponentMatcher().getAdapterBinding(propertyType, null).orElse(null);
-    }
-
-    private SerializerBinding<?> getUserSerializerBinding(Property property, JsonbRuntimeContext jsonbContext) {
-        final SerializerBinding serializerBinding = jsonbContext.getAnnotationIntrospector().getSerializerBinding(property);
-        if (null != serializerBinding) {
-            return serializerBinding;
-        }
-        return jsonbContext.getComponentMatcher().getSerializerBinding(getPropertySerializationType(), null).orElse(null);
+    public boolean isWritable() {
+        return !customization.isWriteTransient() && propagation.isWritable();
     }
 
     private PropertyCustomization introspectCustomization(Property property, JsonbRuntimeContext jsonbContext) {
@@ -202,84 +363,6 @@ public class PropertyModel implements Comparable<PropertyModel> {
         return builder.buildPropertyCustomization();
     }
 
-    private void introspectDateFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder, JsonbRuntimeContext jsonbContext) {
-        /*
-         * If @JsonbDateFormat is placed on getter implementation must use this format on serialization.
-         * If @JsonbDateFormat is placed on setter implementation must use this format on deserialization.
-         * If @JsonbDateFormat is placed on field implementation must use this format on serialization and deserialization.
-         *
-         * Priority from high to low is getter / setter > field > class > package > global configuration
-         */
-        Map<AnnotationTarget, JsonbDateFormatter> jsonDateFormatCategorized = introspector.getJsonbDateFormatCategorized(property);
-        final JsonbDateFormatter configDateFormatter = jsonbContext.getConfigProperties().getConfigDateFormatter();
-        if (!builder.isReadTransient()) {
-            final JsonbDateFormatter dateFormatter = getTargetForMostPreciseScope(jsonDateFormatCategorized, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
-            builder.setSerializeDateFormatter(null != dateFormatter ? dateFormatter : configDateFormatter);
-        }
-        if (!builder.isWriteTransient()) {
-            final JsonbDateFormatter dateFormatter = getTargetForMostPreciseScope(jsonDateFormatCategorized, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS);
-            builder.setDeserializeDateFormatter(null != dateFormatter ? dateFormatter : configDateFormatter);
-        }
-    }
-
-    private void introspectNumberFormatter(Property property, AnnotationIntrospector introspector, PropertyCustomizationBuilder builder) {
-        /*
-         * If @JsonbNumberFormat is placed on getter implementation must use this format on serialization.
-         * If @JsonbNumberFormat is placed on setter implementation must use this format on deserialization.
-         * If @JsonbNumberFormat is placed on field implementation must use this format on serialization and deserialization.
-         *
-         * Priority from high to low is getter / setter > field > class > package > global configuration
-         */
-        Map<AnnotationTarget, JsonbNumberFormatter> jsonNumberFormatCategorized = introspector.getJsonNumberFormatter(property);
-        if (!builder.isReadTransient()) {
-            builder.setSerializeNumberFormatter(getTargetForMostPreciseScope(jsonNumberFormatCategorized, AnnotationTarget.GETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
-        }
-        if (!builder.isWriteTransient()) {
-            builder.setDeserializeNumberFormatter(getTargetForMostPreciseScope(jsonNumberFormatCategorized, AnnotationTarget.SETTER, AnnotationTarget.PROPERTY, AnnotationTarget.CLASS));
-        }
-    }
-
-    /**
-     * Pull result for most significant scope defined by order of annotation targets.
-     *
-     * @param collectedAnnotations all targets
-     * @param targets ordered target types by scope
-     */
-    private <T> T getTargetForMostPreciseScope(Map<AnnotationTarget, T> collectedAnnotations, AnnotationTarget... targets) {
-        for (AnnotationTarget target : targets) {
-            final T result = collectedAnnotations.get(target);
-            if (null != result) {
-                return result;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets property's value.
-     *
-     * @param object object to read property from
-     * @return property's value
-     */
-    public Object getValue(Object object) {
-        return propagation.getValue(object);
-    }
-
-    /**
-     * Sets a property.
-     *
-     * If not writable (final, transient, static), ignores property.
-     *
-     * @param object Object to set value in.
-     * @param value  Value to set.
-     */
-    public void setValue(Object object, Object value) {
-        if (!isWritable()) {
-            return;
-        }
-        propagation.setValue(object, value);
-    }
-
     /**
      * Property is readable. Based on access policy and java field modifiers.
      * @return true if can be serialized to JSON
@@ -289,105 +372,23 @@ public class PropertyModel implements Comparable<PropertyModel> {
     }
 
     /**
-     * Property is writable. Based on access policy and java field modifiers.
-     * @return true if can be deserialized from JSON
-     */
-    public boolean isWritable() {
-        return !customization.isWriteTransient() && propagation.isWritable();
-    }
-
-    /**
-     * Default property name according to Field / Getter / Setter method names.
-     * This name is use for identifying properties, for JSON serialization is used customized name
-     * which may be derived from default name.
-     * @return default name
-     */
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    /**
-     * Runtime type of a property. May be a TypeVariable or WildcardType.
+     * Creates an instance.
      *
-     * @return type of a property
+     * @param classModel Class model of declaring class.
+     * @param property Property.
+     * @param jsonbContext Context.
      */
-    public Type getPropertyType() {
-        return propertyType;
+    public PropertyModel(ClassDescriptor classModel, Property property, JsonbRuntimeContext jsonbContext) {
+        this.classModel = classModel;
+        this.propertyName = property.getName();
+        this.propertyType = property.getPropertyType();
+        this.propagation = new ReflectionPropagation(property, classModel.getClassCustomization().getPropertyVisibilityStrategy());
+        this.getterMethodType = propagation.isGetterVisible() ? new AccessMethodType(property.getGetterType()) : null;
+        this.setterMethodType = propagation.isSetterVisible() ? new AccessMethodType(property.getSetterType()) : null;
+        this.customization = introspectCustomization(property, jsonbContext);
+        this.readName = calculateReadWriteName(customization.getJsonReadName(), jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+        this.writeName = calculateReadWriteName(customization.getJsonWriteName(), jsonbContext.getConfigProperties().getPropertyNamingStrategy());
+        this.propertySerializer = resolveCachedSerializer();
     }
 
-    /**
-     * Model of declaring class of this property.
-     * @return class model
-     */
-    public ClassDescriptor getClassModel() {
-        return classModel;
-    }
-
-    /**
-     * Introspected customization of a property.
-     * @return immutable property customization
-     */
-    public PropertyCustomization getCustomization() {
-        return customization;
-    }
-
-    @Override
-    public int compareTo(PropertyModel o) {
-        return propertyName.compareTo(o.getPropertyName());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (null == o || o.getClass() != getClass())
-            return false;
-        PropertyModel that = (PropertyModel) o;
-        return Objects.equals(propertyName, that.propertyName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(propertyName);
-    }
-
-    /**
-     * Gets a name of JSON document property to read this property from.
-     *
-     * @return Name of JSON document property.
-     */
-    public String getReadName() {
-        return readName;
-    }
-
-    public String getWriteName() {
-        return writeName;
-    }
-
-    /**
-     * Gets serializer.
-     *
-     * @return Serializer.
-     */
-    public JsonbSerializer<?> getPropertySerializer() {
-        return propertySerializer;
-    }
-
-    /**
-     * If customized by JsonbPropertyAnnotation, than is used, otherwise use strategy to translate.
-     * Since this is cached for performance reasons strategy has to be consistent
-     * with calculated values for same input.
-     */
-    private String calculateReadWriteName(String readWriteName, PropertyNamingStrategy strategy) {
-        return null != readWriteName ? readWriteName : strategy.translateName(propertyName);
-    }
-
-    /**
-     * Wrapper object of {@code java.lang.reflect} representations of this javabean property.
-     *
-     * @return Property model
-     */
-    public PropertyValuePropagation getPropagation() {
-        return propagation;
-    }
 }

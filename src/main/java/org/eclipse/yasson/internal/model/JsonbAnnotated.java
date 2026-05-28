@@ -33,24 +33,15 @@ public class JsonbAnnotated implements AnnotatedElement {
     protected final Map<Class<? extends Annotation>, Annotation> annotations;
 
     /**
-     * Creates a new instance.
+     * Adds annotation.
      *
-     * @param initialAnnotations Annotations to initialize from.
+     * @param annotation Annotation to add.
      */
-    public JsonbAnnotated(Annotation[] initialAnnotations) {
-        this.annotations = new HashMap<>();
-        addInitialAnnotations(initialAnnotations);
-    }
-
-    private void addInitialAnnotations(Annotation[] initialAnnotations) {
-        for (Annotation ann : initialAnnotations) {
-            annotations.put(ann.annotationType(), ann);
+    public void putAnnotation(Annotation annotation) {
+        if (annotations.containsKey(annotation.annotationType())) {
+            throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR, "Annotation already present: " + annotation));
         }
-    }
-
-    @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return annotationClass.cast(annotations.get(annotationClass));
+        annotations.put(annotation.annotationType(), annotation);
     }
 
     @Override
@@ -64,15 +55,25 @@ public class JsonbAnnotated implements AnnotatedElement {
         throw new UnsupportedOperationException("Jsonb elements don't track declared annotations");
     }
 
-    /**
-     * Adds annotation.
-     *
-     * @param annotation Annotation to add.
-     */
-    public void putAnnotation(Annotation annotation) {
-        if (annotations.containsKey(annotation.annotationType())) {
-            throw new JsonbException(MessageBundle.getMessage(MessageKey.INTERNAL_ERROR, "Annotation already present: " + annotation));
+    private void addInitialAnnotations(Annotation[] initialAnnotations) {
+        for (Annotation ann : initialAnnotations) {
+            annotations.put(ann.annotationType(), ann);
         }
-        annotations.put(annotation.annotationType(), annotation);
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param initialAnnotations Annotations to initialize from.
+     */
+    public JsonbAnnotated(Annotation[] initialAnnotations) {
+        this.annotations = new HashMap<>();
+        addInitialAnnotations(initialAnnotations);
+    }
+
+    @Override
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return annotationClass.cast(annotations.get(annotationClass));
+    }
+
 }

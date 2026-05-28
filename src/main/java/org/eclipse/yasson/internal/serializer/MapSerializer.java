@@ -31,27 +31,6 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
 
     private final boolean nullable;
 
-    protected MapSerializer(SerializerBuilder builder) {
-        super(builder);
-        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
-    }
-
-    @Override
-    protected void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx) {
-        for (Map.Entry<?, ?> entry : obj.entrySet()) {
-            final String keysString = String.valueOf(entry.getKey());
-            final Object value = entry.getValue();
-            if (null == value) {
-                if (nullable) {
-                    generator.writeNull(keysString);
-                }
-                continue;
-            }
-            generator.writeKey(keysString);
-            serializeItem(value, generator, ctx);
-        }
-    }
-
     @Override
     protected void writeStart(JsonGenerator generator) {
         generator.writeStartObject();
@@ -70,4 +49,26 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
         }
         return Object.class;
     }
+
+    @Override
+    protected void serializeInternal(T obj, JsonGenerator generator, SerializationContext ctx) {
+        for (Map.Entry<?, ?> entry : obj.entrySet()) {
+            final String keysString = String.valueOf(entry.getKey());
+            final Object value = entry.getValue();
+            if (null == value) {
+                if (nullable) {
+                    generator.writeNull(keysString);
+                }
+                continue;
+            }
+            generator.writeKey(keysString);
+            serializeItem(value, generator, ctx);
+        }
+    }
+
+    protected MapSerializer(SerializerBuilder builder) {
+        super(builder);
+        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
+    }
+
 }

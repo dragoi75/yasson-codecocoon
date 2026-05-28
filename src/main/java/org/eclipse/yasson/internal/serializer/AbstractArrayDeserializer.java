@@ -37,6 +37,20 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractCollectionDes
 
     protected final ClassDescriptor componentClassModel;
 
+    @Override
+    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
+        final javax.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).buildDeserializer();
+        appendValueToResult(deserializer.deserialize(parser, context, componentClass));
+    }
+
+    @Override
+    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_ARRAY);
+        return parser.getCurrentLevel();
+    }
+
+    protected abstract List<?> getItems();
+
     protected AbstractArrayDeserializer(JsonDeserializerBuilder builder) {
         super(builder);
         if (!(getRuntimeType() instanceof GenericArrayType)) {
@@ -61,17 +75,4 @@ public abstract class AbstractArrayDeserializer<T> extends AbstractCollectionDes
         ((List<X>) getItems()).add(value);
     }
 
-    @Override
-    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
-        final javax.json.bind.serializer.JsonbDeserializer<?> deserializer = createUnmarshallerItemBuilder(context.getJsonbContext()).setType(componentClass).setCustomization(null == componentClassModel ? null : componentClassModel.getCustomization()).buildDeserializer();
-        appendValueToResult(deserializer.deserialize(parser, context, componentClass));
-    }
-
-    protected abstract List<?> getItems();
-
-    @Override
-    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_ARRAY);
-        return parser.getCurrentLevel();
-    }
 }

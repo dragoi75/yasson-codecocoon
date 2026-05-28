@@ -43,6 +43,33 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractCollectionDeser
 
     private final T instance;
 
+    @Override
+    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
+        final javax.json.bind.serializer.JsonbDeserializer<?> deserializer = createCollectionOrMapItemDeserializer(mapValueRuntimeType, context.getJsonbContext());
+        appendValueToResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
+    }
+
+    @Override
+    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
+        parser.moveTo(JsonParser.Event.START_OBJECT);
+        return parser.getCurrentLevel();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> void appendCaptor(String key, V value) {
+        ((Map<String, V>) getInstance(null)).put(key, value);
+    }
+
+    @Override
+    public void appendValueToResult(Object result) {
+        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
+    }
+
+    @Override
+    public T getInstance(JsonbDeserializer unmarshaller) {
+        return instance;
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -58,13 +85,6 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractCollectionDeser
         this.instance = createInstance(builder);
     }
 
-    @SuppressWarnings("unchecked")
-    private T createInstance(JsonDeserializerBuilder builder) {
-        Class<?> rawType = ReflectionTypeResolver.getRawType(getRuntimeType());
-        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
-                : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
-    }
-
     private Map getMapImpl(Class ifcType, JsonDeserializerBuilder builder) {
         // SortedMap, NavigableMap
         if (SortedMap.class.isAssignableFrom(ifcType)) {
@@ -76,30 +96,11 @@ public class MapDeserializer<T extends Map<?,?>> extends AbstractCollectionDeser
         return new HashMap<>();
     }
 
-    @Override
-    public T getInstance(JsonbDeserializer unmarshaller) {
-        return instance;
-    }
-
-    @Override
-    public void appendValueToResult(Object result) {
-        appendCaptor(parserContext.getLastKeyName(), convertNullToEmptyOptional(mapValueRuntimeType, result));
-    }
-
     @SuppressWarnings("unchecked")
-    private <V> void appendCaptor(String key, V value) {
-        ((Map<String, V>) getInstance(null)).put(key, value);
+    private T createInstance(JsonDeserializerBuilder builder) {
+        Class<?> rawType = ReflectionTypeResolver.getRawType(getRuntimeType());
+        return rawType.isInterface() ? (T) getMapImpl(rawType, builder)
+                : (T) builder.getJsonbContext().getInstanceCreator().createInstance(rawType);
     }
 
-    @Override
-    protected void deserializeItem(JsonParser parser, JsonbDeserializer context) {
-        final javax.json.bind.serializer.JsonbDeserializer<?> deserializer = createCollectionOrMapItemDeserializer(mapValueRuntimeType, context.getJsonbContext());
-        appendValueToResult(deserializer.deserialize(parser, context, mapValueRuntimeType));
-    }
-
-    @Override
-    protected JsonbRiStreamParser.ParsingLevelContext moveToFirstElement(JsonbStructureNavigator parser) {
-        parser.moveTo(JsonParser.Event.START_OBJECT);
-        return parser.getCurrentLevel();
-    }
 }

@@ -36,6 +36,35 @@ public class ResolvedParameterizedType implements ParameterizedType {
      */
     private final Type[] resolvedTypeArgs;
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (null == o || !(o instanceof ParameterizedType))
+            return false;
+        final ParameterizedType that = (ParameterizedType) o;
+        return this.getRawType().equals(that.getRawType()) && Objects.equals(this.getOwnerType(), that.getOwnerType()) && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(original.toString());
+        if (null != resolvedTypeArgs && 0 < resolvedTypeArgs.length) {
+            sb.append(" resolved arguments: [");
+            for (Type typeArg : resolvedTypeArgs) {
+                sb.append(String.valueOf(typeArg));
+            }
+            sb.append("]");
+        }
+        return sb.toString();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -58,41 +87,13 @@ public class ResolvedParameterizedType implements ParameterizedType {
     }
 
     @Override
-    public Type getRawType() {
-        return original.getRawType();
-    }
-
-    @Override
     public Type getOwnerType() {
         return original.getOwnerType();
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(original.toString());
-        if (null != resolvedTypeArgs && 0 < resolvedTypeArgs.length) {
-            sb.append(" resolved arguments: [");
-            for (Type typeArg : resolvedTypeArgs) {
-                sb.append(String.valueOf(typeArg));
-            }
-            sb.append("]");
-        }
-        return sb.toString();
+    public Type getRawType() {
+        return original.getRawType();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (null == o || !(o instanceof ParameterizedType))
-            return false;
-        final ParameterizedType that = (ParameterizedType) o;
-        return this.getRawType().equals(that.getRawType()) && Objects.equals(this.getOwnerType(), that.getOwnerType()) && Arrays.equals(resolvedTypeArgs, that.getActualTypeArguments());
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(resolvedTypeArgs) ^ (null == getOwnerType() ? 0 : getOwnerType().hashCode()) ^ (null == getRawType() ? 0 : getRawType().hashCode());
-    }
 }

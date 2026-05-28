@@ -25,6 +25,15 @@ import java.math.BigInteger;
  */
 public class BigIntegerTypeSerializer extends AbstractNumberSerializer<BigInteger> {
 
+    @Override
+    protected void serializeNonFormatted(BigInteger obj, JsonGenerator generator) {
+        if (!BigNumberUtil.isIEEE754(obj)) {
+            generator.write(obj.toString());
+        } else {
+            generator.write(obj);
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -43,12 +52,4 @@ public class BigIntegerTypeSerializer extends AbstractNumberSerializer<BigIntege
         }
     }
 
-    @Override
-    protected void serializeNonFormatted(BigInteger obj, JsonGenerator generator) {
-        if (!BigNumberUtil.isIEEE754(obj)) {
-            generator.write(obj.toString());
-        } else {
-            generator.write(obj);
-        }
-    }
 }

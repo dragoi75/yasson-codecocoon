@@ -17,6 +17,43 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
 
     private final boolean nillable;
 
+
+    /**
+     * Serializer wrapper with resolved generic info.
+     *
+     * @return serializer wrapper
+     */
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinding;
+    }
+
+    /**
+     * Deserializer wrapper with resolved generic info.
+     *
+     * @return deserializer wrapper
+     */
+    public DeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
+    /**
+     * Returns true if <i>nillable</i> customization is present.
+     *
+     * @return True if <i>nillable</i> customization is present.
+     */
+    public boolean isNillable() {
+        return nillable;
+    }
+
+    /**
+     * Adapter wrapper class with resolved generic information.
+     *
+     * @return components wrapper
+     */
+    public AdapterBinding getAdapterBinding() {
+        return adapterBinding;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -40,42 +77,5 @@ abstract class CustomizationBase implements Customization, ComponentBoundCustomi
         this.serializerBinding = other.getSerializerBinding();
         this.deserializerBinding = other.getDeserializerBinding();
     }
-
-    /**
-     * Returns true if <i>nillable</i> customization is present.
-     *
-     * @return True if <i>nillable</i> customization is present.
-     */
-    public boolean isNillable() {
-        return nillable;
-    }
-
-    /**
-     * Adapter wrapper class with resolved generic information.
-     *
-     * @return components wrapper
-     */
-    public AdapterBinding getAdapterBinding() {
-        return adapterBinding;
-    }
-
-    /**
-     * Serializer wrapper with resolved generic info.
-     *
-     * @return serializer wrapper
-     */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
-    }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public DeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
 
 }

@@ -30,11 +30,6 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
 
     protected final Type arrayValType;
 
-    protected AbstractArraySerializer(SerializerBuilder builder) {
-        super(builder);
-        arrayValType = resolveArrayType();
-    }
-
     private Type resolveArrayType() {
         if (null != getRuntimeType() && Object.class != getRuntimeType()) {
             if (!(getRuntimeType() instanceof ParameterizedType)) {
@@ -60,4 +55,10 @@ public abstract class AbstractArraySerializer<T> extends AbstractContainerSerial
     protected void writeStart(String key, JsonGenerator generator) {
         generator.writeStartArray(key);
     }
+
+    protected AbstractArraySerializer(SerializerBuilder builder) {
+        super(builder);
+        arrayValType = resolveArrayType();
+    }
+
 }
