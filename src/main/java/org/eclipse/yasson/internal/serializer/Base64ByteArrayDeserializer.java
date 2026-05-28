@@ -30,6 +30,17 @@ import java.util.Base64;
  */
 public class Base64ByteArrayDeserializer extends BaseValueTypeDeserializer<byte[]> {
 
+    private Base64.Decoder getDecoder(String decodingMode) {
+        switch (decodingMode) {
+            case BinaryDataStrategy.BASE_64:
+                return Base64.getDecoder();
+            case BinaryDataStrategy.BASE_64_URL:
+                return Base64.getUrlDecoder();
+            default:
+                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + decodingMode));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,14 +55,4 @@ public class Base64ByteArrayDeserializer extends BaseValueTypeDeserializer<byte[
         return getDecoder(jsonbParser.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).decode(jsonString);
     }
 
-    private Base64.Decoder getDecoder(String decodingMode) {
-        switch (decodingMode) {
-            case BinaryDataStrategy.BASE_64:
-                return Base64.getDecoder();
-            case BinaryDataStrategy.BASE_64_URL:
-                return Base64.getUrlDecoder();
-            default:
-                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Invalid strategy: " + decodingMode));
-        }
-    }
 }

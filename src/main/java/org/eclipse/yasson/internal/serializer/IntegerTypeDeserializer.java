@@ -28,15 +28,6 @@ import java.lang.reflect.Type;
  */
 public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public IntegerTypeDeserializer(SerializationCustomization customization) {
-        super(Integer.class, customization);
-    }
-
     @Override
     protected Integer deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
         return deserializeFormatted(jsonValue, true, unmarshaller.getJsonbContext())
@@ -50,4 +41,14 @@ public class IntegerTypeDeserializer extends AbstractNumberDeserializer<Integer>
                     }
                 });
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public IntegerTypeDeserializer(SerializationCustomization customization) {
+        super(Integer.class, customization);
+    }
+
 }

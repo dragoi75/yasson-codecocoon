@@ -15,6 +15,24 @@ public class CreatorCustomization extends CustomizationBase {
 
     private PropertyModel propertyModel;
 
+    @Override
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
+        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
+    }
+
+    /**
+     * Set property referenced model.
+     * @param propertyModel referenced property model
+     */
+    public void setPropertyModel(PropertyModel propertyModel) {
+        this.propertyModel = propertyModel;
+    }
+
+    @Override
+    public boolean isNillable() {
+        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    }
+
     public CreatorCustomization(CustomizationBuilder customization, JsonbNumberFormatter numberFormatter, JsonbDateTimeFormatter dateFormatter) {
         super(customization);
         this.numberFormatter = numberFormatter;
@@ -23,23 +41,6 @@ public class CreatorCustomization extends CustomizationBase {
 
     @Override
     public JsonbNumberFormatter getSerializeNumberFormatter() {
-        throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        if (null == numberFormatter) {
-            if (null != propertyModel) {
-                return propertyModel.getCustomization().getDeserializeNumberFormatter();
-            }
-        } else {
-            return numberFormatter;
-        }
-        return null;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getSerializeDateFormatter() {
         throw new UnsupportedOperationException("Serialization is not supported for creator parameters.");
     }
 
@@ -56,15 +57,15 @@ public class CreatorCustomization extends CustomizationBase {
     }
 
     @Override
-    public boolean isNillable() {
-        throw new UnsupportedOperationException("Not supported for creator parameters.");
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        if (null == numberFormatter) {
+            if (null != propertyModel) {
+                return propertyModel.getCustomization().getDeserializeNumberFormatter();
+            }
+        } else {
+            return numberFormatter;
+        }
+        return null;
     }
 
-    /**
-     * Set property referenced model.
-     * @param propertyModel referenced property model
-     */
-    public void setPropertyModel(PropertyModel propertyModel) {
-        this.propertyModel = propertyModel;
-    }
 }

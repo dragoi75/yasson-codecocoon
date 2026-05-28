@@ -50,13 +50,39 @@ public class ClassDescriptor {
     private final PropertyNamingStrategy namingStrategy;
 
     /**
-     * Gets a property model by default (non customized) name.
+     * Gets type.
      *
-     * @param propertyKey A name as parsed from field / getter / setter without annotation customizing.
-     * @return Property model.
+     * @return Type.
      */
-    public PropertyModel getPropertyModel(String propertyKey) {
-        return propertyMap.get(propertyKey);
+    public Class<?> getType() {
+        return targetClass;
+    }
+
+    /**
+     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return class properties.
+     */
+    public Map<String, PropertyModel> getProperties() {
+        return Collections.unmodifiableMap(propertyMap);
+    }
+
+    /**
+     * Gets customization.
+     *
+     * @return Customization.
+     */
+    public ClassCustomization getCustomization() {
+        return typeCustomization;
+    }
+
+    /**
+     * Sets parsed properties of the class.
+     *
+     * @param parsedPropertyList class properties
+     */
+    public void setProperties(List<PropertyModel> parsedPropertyList) {
+        orderedProperties = parsedPropertyList.toArray(new PropertyModel[] {});
+        this.propertyMap = parsedPropertyList.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mapper) -> mapper));
     }
 
     /**
@@ -74,6 +100,54 @@ public class ClassDescriptor {
         this.namingStrategy = namingStrategy;
         this.noArgConstructor = ReflectiveTypeUtils.getDefaultConstructor(targetClass, false);
         setProperties(new ArrayList<>());
+    }
+
+    /**
+     * Default no argument constructor of the class used for deserialization.
+     * @return default constructor
+     */
+    public Constructor<?> getDefaultConstructor() {
+        return noArgConstructor;
+    }
+
+    /**
+     * Class model of parent class if present.
+     * @return class model of a parent
+     */
+    public ClassDescriptor getParentClassModel() {
+        return parentDescriptor;
+    }
+
+    /**
+     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
+     * User can provide own strategy implementation, cast to custom interface is not an option.
+     *
+     * @return True if names are equal.
+     */
+    private boolean isReadNameEqual(String jsonField, PropertyModel propModel) {
+        final String readJsonKey = propModel.getReadName();
+        if (namingStrategy instanceof CaseInsensitiveStrategy) {
+            return jsonField.equalsIgnoreCase(readJsonKey);
+        }
+        return jsonField.equals(readJsonKey);
+    }
+
+    /**
+     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
+     * @return sorted class properties.
+     */
+    public PropertyModel[] getSortedProperties() {
+        return orderedProperties;
+    }
+
+    /**
+     * Gets a property model by default (non customized) name.
+     *
+     * @param propertyKey A name as parsed from field / getter / setter without annotation customizing.
+     * @return Property model.
+     */
+    public PropertyModel getPropertyModel(String propertyKey) {
+        return propertyMap.get(propertyKey);
     }
 
     /**
@@ -104,38 +178,6 @@ public class ClassDescriptor {
     }
 
     /**
-     * Check if name is equal according to property strategy. In case of {@link CaseInsensitiveStrategy} ignore case.
-     * User can provide own strategy implementation, cast to custom interface is not an option.
-     *
-     * @return True if names are equal.
-     */
-    private boolean isReadNameEqual(String jsonField, PropertyModel propModel) {
-        final String readJsonKey = propModel.getReadName();
-        if (namingStrategy instanceof CaseInsensitiveStrategy) {
-            return jsonField.equalsIgnoreCase(readJsonKey);
-        }
-        return jsonField.equals(readJsonKey);
-    }
-
-    /**
-     * Gets customization.
-     *
-     * @return Customization.
-     */
-    public ClassCustomization getCustomization() {
-        return typeCustomization;
-    }
-
-    /**
-     * Gets type.
-     *
-     * @return Type.
-     */
-    public Class<?> getType() {
-        return targetClass;
-    }
-
-    /**
      * Introspected customization for a class.
      *
      * @return Immutable class customization.
@@ -144,45 +186,4 @@ public class ClassDescriptor {
         return typeCustomization;
     }
 
-    /**
-     * Class model of parent class if present.
-     * @return class model of a parent
-     */
-    public ClassDescriptor getParentClassModel() {
-        return parentDescriptor;
-    }
-
-    /**
-     * Get sorted class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return sorted class properties.
-     */
-    public PropertyModel[] getSortedProperties() {
-        return orderedProperties;
-    }
-
-    /**
-     * Sets parsed properties of the class.
-     *
-     * @param parsedPropertyList class properties
-     */
-    public void setProperties(List<PropertyModel> parsedPropertyList) {
-        orderedProperties = parsedPropertyList.toArray(new PropertyModel[] {});
-        this.propertyMap = parsedPropertyList.stream().collect(Collectors.toMap(PropertyModel::getPropertyName, (mapper) -> mapper));
-    }
-
-    /**
-     * Get class properties copy, combination of field and its getter / setter, javabeans alike.
-     * @return class properties.
-     */
-    public Map<String, PropertyModel> getProperties() {
-        return Collections.unmodifiableMap(propertyMap);
-    }
-
-    /**
-     * Default no argument constructor of the class used for deserialization.
-     * @return default constructor
-     */
-    public Constructor<?> getDefaultConstructor() {
-        return noArgConstructor;
-    }
 }

@@ -41,6 +41,40 @@ public class PropertySerializationCustomization extends CustomizationBase {
 
     private final Class concreteClass;
 
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberOutputFormatter;
+    }
+
+    /**
+     * Implementation class if property is interface type.
+     *
+     * @return class implementing property interface
+     */
+    public Class getImplementationClass() {
+        return concreteClass;
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
+     */
+    public boolean isReadTransient() {
+        return transientOnRead;
+    }
+
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberInputFormatter;
+    }
+
+    @Override
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
+        return dateOutputFormatter;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -57,6 +91,15 @@ public class PropertySerializationCustomization extends CustomizationBase {
         this.transientOnRead = propertyCustomizer.isReadTransient();
         this.transientOnWrite = propertyCustomizer.isWriteTransient();
         this.concreteClass = propertyCustomizer.getImplementationClass();
+    }
+
+    /**
+     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
+     *
+     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
+     */
+    public boolean isWriteTransient() {
+        return transientOnWrite;
     }
 
     /**
@@ -78,51 +121,8 @@ public class PropertySerializationCustomization extends CustomizationBase {
     }
 
     @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberOutputFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberInputFormatter;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getSerializeDateFormatter() {
-        return dateOutputFormatter;
-    }
-
-    @Override
     public JsonbDateTimeFormatter getDeserializeDateFormatter() {
         return dateInputFormatter;
-    }
-
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during serialization process or not.
-     *
-     * @return true indicates that the underlying type/property should be included in serialization process and false indicates it should not
-     */
-    public boolean isReadTransient() {
-        return transientOnRead;
-    }
-
-    /**
-     * The flag indicating whether the value of the underlying type/property should be processed during deserialization process or not.
-     *
-     * @return true indicates that the underlying type/property should be included in deserialization process and false indicates it should not
-     */
-    public boolean isWriteTransient() {
-        return transientOnWrite;
-    }
-
-    /**
-     * Implementation class if property is interface type.
-     *
-     * @return class implementing property interface
-     */
-    public Class getImplementationClass() {
-        return concreteClass;
     }
 
 }

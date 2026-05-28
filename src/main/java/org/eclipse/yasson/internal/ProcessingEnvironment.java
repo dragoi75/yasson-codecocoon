@@ -32,13 +32,13 @@ public abstract class ProcessingEnvironment {
      */
     private final Set<Object> processedObjects = new HashSet<>();
 
-    /**
-     * Parent instance for marshaller and unmarshaller.
-     *
-     * @param jsonbRuntimeContext context of Jsonb
-     */
-    public ProcessingEnvironment(JsonbRuntimeContext jsonbRuntimeContext) {
-        this.jsonbContext = jsonbRuntimeContext;
+
+    public boolean registerProcessedObject(Object processedEntity) {
+        return this.processedObjects.add(processedEntity);
+    }
+
+    public boolean unregisterProcessedObject(Object processedEntity) {
+        return processedObjects.remove(processedEntity);
     }
 
     /**
@@ -59,13 +59,13 @@ public abstract class ProcessingEnvironment {
         return getJsonbContext().getMappingContext();
     }
 
-
-    public boolean registerProcessedObject(Object processedEntity) {
-        return this.processedObjects.add(processedEntity);
-    }
-
-    public boolean unregisterProcessedObject(Object processedEntity) {
-        return processedObjects.remove(processedEntity);
+    /**
+     * Parent instance for marshaller and unmarshaller.
+     *
+     * @param jsonbRuntimeContext context of Jsonb
+     */
+    public ProcessingEnvironment(JsonbRuntimeContext jsonbRuntimeContext) {
+        this.jsonbContext = jsonbRuntimeContext;
     }
 
 }

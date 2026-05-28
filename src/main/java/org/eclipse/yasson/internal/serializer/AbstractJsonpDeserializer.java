@@ -27,6 +27,22 @@ import javax.json.stream.JsonParser;
  */
 public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends BaseContainerDeserializer<T> {
 
+    @Override
+    public void addResult(Object result) {
+        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser parser, JsonbUnmarshaller context) {
+        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
+    }
+
+    @Override
+    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor parser) {
+        parser.moveToStartStructure();
+        return parser.getCurrentLevel();
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -36,19 +52,4 @@ public abstract class AbstractJsonpDeserializer<T extends JsonValue> extends Bas
         super(builder);
     }
 
-    @Override
-    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor parser) {
-        parser.moveToStartStructure();
-        return parser.getCurrentLevel();
-    }
-
-    @Override
-    protected void deserializeNextValue(JsonParser parser, JsonbUnmarshaller context) {
-        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
-    }
-
-    @Override
-    public void addResult(Object result) {
-        throw new UnsupportedOperationException("Inner json structures are deserialized by JsonParser.");
-    }
 }

@@ -24,11 +24,9 @@ public class ScalarDataTest {
 
     private String json;
 
-    @Setup(Level.Trial)
-    public void setUp() {
-        this.jsonb = JsonbBuilder.create();
-        this.data = new ScalarData();
-        this.json = "{\"integerValue\":10,\"stringValue\":\"Short string\"}";
+    @Benchmark
+    public ScalarData testDeserialize() {
+        return jsonb.fromJson(json, ScalarData.class);
     }
 
     @Benchmark
@@ -36,9 +34,11 @@ public class ScalarDataTest {
         return jsonb.toJson(data);
     }
 
-    @Benchmark
-    public ScalarData testDeserialize() {
-        return jsonb.fromJson(json, ScalarData.class);
+    @Setup(Level.Trial)
+    public void setUp() {
+        this.jsonb = JsonbBuilder.create();
+        this.data = new ScalarData();
+        this.json = "{\"integerValue\":10,\"stringValue\":\"Short string\"}";
     }
 
 }

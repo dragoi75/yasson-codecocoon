@@ -31,9 +31,9 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
 
     private final boolean nullable;
 
-    protected MapSerializer(SerializationBuilder builder) {
-        super(builder);
-        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartObject(key);
     }
 
     @Override
@@ -53,16 +53,6 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
     }
 
     @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartObject();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartObject(key);
-    }
-
-    @Override
     protected Type getValueType(Type valueType) {
         if (valueType instanceof ParameterizedType) {
             Optional<Type> runtimeTypeOptional = ReflectiveTypeUtils.resolveTypeOptional(this, ((ParameterizedType) valueType).getActualTypeArguments()[1]);
@@ -70,4 +60,15 @@ public class MapSerializer<T extends Map<?, ?>> extends AbstractContainerSeriali
         }
         return Object.class;
     }
+
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartObject();
+    }
+
+    protected MapSerializer(SerializationBuilder builder) {
+        super(builder);
+        nullable = builder.getJsonbContext().getConfigProperties().getConfigNullable();
+    }
+
 }

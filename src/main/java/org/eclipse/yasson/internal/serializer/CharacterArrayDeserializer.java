@@ -27,10 +27,6 @@ public class CharacterArrayDeserializer extends AbstractArrayDeserializer<char[]
 
     private final List<Character> characters = new ArrayList<>();
 
-    protected CharacterArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return characters;
@@ -47,4 +43,9 @@ public class CharacterArrayDeserializer extends AbstractArrayDeserializer<char[]
         }
         return chars;
     }
+
+    protected CharacterArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

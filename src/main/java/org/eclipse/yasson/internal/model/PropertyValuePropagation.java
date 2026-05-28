@@ -61,6 +61,165 @@ public abstract class PropertyValuePropagation {
 
     private final boolean setterVisible;
 
+    private static final class DefaultVisibilityStrategy implements PropertyVisibilityStrategy {
+
+        private final Field field;
+
+        private final Method method;
+
+        @Override
+        public boolean isVisible(Method method) {
+            return Modifier.isPublic(method.getModifiers());
+        }
+
+        @Override
+        public boolean isVisible(Field field) {
+            //don't check field if getter is not visible (forced by spec)
+            if (null != method && !isVisible(method)) {
+                return false;
+            }
+            return Modifier.isPublic(field.getModifiers());
+        }
+
+        public DefaultVisibilityStrategy(Field field, Method method) {
+            this.field = field;
+            this.method = method;
+        }
+
+    }
+
+    /**
+     * Property is writable. Based on access policy and java field modifiers.
+     * @return true if can be deserialized from JSON
+     */
+    public boolean isWritable() {
+        return writable;
+    }
+
+    /**
+     * Property is readable. Based on access policy and java field modifiers.
+     * @return true if can be serialized to JSON
+     */
+    public boolean isReadable() {
+        return readable;
+    }
+
+    /**
+     * Accept a {@link Method} to use value propagation.
+     * @param method method
+     * @param mode read or write
+     */
+    protected abstract void acceptMethod(Method method, OperationMode mode);
+
+    public boolean isGetterVisible() {
+        return getterVisible;
+    }
+
+    /**
+     * Getter of a javabean property.
+     *
+     * @return {@link Method setter}
+     */
+    public Method getSetter() {
+        return setter;
+    }
+
+    /**
+     * Gets a value of a field. Based on policy invokes a getter or gets directly from a field.
+     *
+     * @param object object to get from
+     */
+    abstract Object getValue(Object object);
+
+    /**
+     * Set a value to a field. Based on policy invokes a setter or sets directly to a field.
+     *
+     * @param object object to set value in
+     * @param value value to set, null is valid
+     */
+    abstract void setValue(Object object, Object value);
+
+    /**
+     * Field of a javabean property.
+     *
+     * @return {@link Field field}
+     */
+    public Field getField() {
+        return field;
+    }
+
+    public boolean isSetterVisible() {
+        return setterVisible;
+    }
+
+    /**
+     * Setter of a javabean property.
+     *
+     * @return {@link Method getter}
+     */
+    public Method getGetter() {
+        return getter;
+    }
+
+    private boolean isFieldVisible(Field field, Method method) {
+        if (null == field) {
+            return false;
+        }
+        Boolean accessible = isVisible(strategy -> strategy.isVisible(field), field, method);
+        //overridden by strategy, or anonymous class (readable by spec)
+        if (accessible && (!Modifier.isPublic(field.getModifiers()) || field.getDeclaringClass().isAnonymousClass())) {
+            overrideAccessible(field);
+        }
+        return accessible;
+    }
+
+    /**
+     * Accept a {@link Field} to use for value propagation.
+     * @param field field
+     * @param mode mod
+     */
+    protected abstract void acceptField(Field field, OperationMode mode);
+
+    private void initWritable(Field field, Method setter) {
+        final boolean fieldWritable = null == field || 0 == (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
+        if (!fieldWritable) {
+            writable = false;
+            return;
+        }
+        if (null == setter || !setterVisible || setter.getDeclaringClass().isAnonymousClass()) {
+            if (isFieldVisible(field, setter) && !field.getDeclaringClass().isAnonymousClass()) {
+                acceptField(field, OperationMode.SET);
+                writable = true;
+            }
+        } else {
+            acceptMethod(setter, OperationMode.SET);
+            writable = true;
+        }
+    }
+
+    private boolean isMethodVisible(Field field, Method method) {
+        if (null == method || Modifier.isStatic(method.getModifiers())) {
+            return false;
+        }
+        Boolean accessible = isVisible(strategy -> strategy.isVisible(method), field, method);
+        //overridden by strategy, anonymous class, or lambda
+        if (accessible && (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isAnonymousClass() || method.getDeclaringClass().isSynthetic())) {
+            overrideAccessible(method);
+        }
+        return accessible;
+    }
+
+    /**
+     * Look up class and package level @JsonbVisibility, or global config PropertyVisibilityStrategy.
+     * If any is found it is used for resolving visibility by calling provided visibilityCheckFunction.
+     *
+     * @param visibilityCheckFunction function declaring visibility check
+     * @return Optional with result of visibility check, or empty optional if no strategy is found
+     */
+    private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityCheckFunction, Field field, Method method) {
+        return null != propertyVisibilityStrategy ? visibilityCheckFunction.apply(propertyVisibilityStrategy) : visibilityCheckFunction.apply(new DefaultVisibilityStrategy(field, method));
+    }
+
     /**
      * Construct a property propagation.
      *
@@ -94,47 +253,6 @@ public abstract class PropertyValuePropagation {
         }
     }
 
-    private void initWritable(Field field, Method setter) {
-        final boolean fieldWritable = null == field || 0 == (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL));
-        if (!fieldWritable) {
-            writable = false;
-            return;
-        }
-        if (null == setter || !setterVisible || setter.getDeclaringClass().isAnonymousClass()) {
-            if (isFieldVisible(field, setter) && !field.getDeclaringClass().isAnonymousClass()) {
-                acceptField(field, OperationMode.SET);
-                writable = true;
-            }
-        } else {
-            acceptMethod(setter, OperationMode.SET);
-            writable = true;
-        }
-    }
-
-    private boolean isFieldVisible(Field field, Method method) {
-        if (null == field) {
-            return false;
-        }
-        Boolean accessible = isVisible(strategy -> strategy.isVisible(field), field, method);
-        //overridden by strategy, or anonymous class (readable by spec)
-        if (accessible && (!Modifier.isPublic(field.getModifiers()) || field.getDeclaringClass().isAnonymousClass())) {
-            overrideAccessible(field);
-        }
-        return accessible;
-    }
-
-    private boolean isMethodVisible(Field field, Method method) {
-        if (null == method || Modifier.isStatic(method.getModifiers())) {
-            return false;
-        }
-        Boolean accessible = isVisible(strategy -> strategy.isVisible(method), field, method);
-        //overridden by strategy, anonymous class, or lambda
-        if (accessible && (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isAnonymousClass() || method.getDeclaringClass().isSynthetic())) {
-            overrideAccessible(method);
-        }
-        return accessible;
-    }
-
     private void overrideAccessible(AccessibleObject accessibleObject) {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             accessibleObject.setAccessible(true);
@@ -142,120 +260,4 @@ public abstract class PropertyValuePropagation {
         });
     }
 
-    /**
-     * Look up class and package level @JsonbVisibility, or global config PropertyVisibilityStrategy.
-     * If any is found it is used for resolving visibility by calling provided visibilityCheckFunction.
-     *
-     * @param visibilityCheckFunction function declaring visibility check
-     * @return Optional with result of visibility check, or empty optional if no strategy is found
-     */
-    private Boolean isVisible(Function<PropertyVisibilityStrategy, Boolean> visibilityCheckFunction, Field field, Method method) {
-        return null != propertyVisibilityStrategy ? visibilityCheckFunction.apply(propertyVisibilityStrategy) : visibilityCheckFunction.apply(new DefaultVisibilityStrategy(field, method));
-    }
-
-    /**
-     * Accept a {@link Method} to use value propagation.
-     * @param method method
-     * @param mode read or write
-     */
-    protected abstract void acceptMethod(Method method, OperationMode mode);
-
-    /**
-     * Accept a {@link Field} to use for value propagation.
-     * @param field field
-     * @param mode mod
-     */
-    protected abstract void acceptField(Field field, OperationMode mode);
-
-    /**
-     * Set a value to a field. Based on policy invokes a setter or sets directly to a field.
-     *
-     * @param object object to set value in
-     * @param value value to set, null is valid
-     */
-    abstract void setValue(Object object, Object value);
-
-    /**
-     * Gets a value of a field. Based on policy invokes a getter or gets directly from a field.
-     *
-     * @param object object to get from
-     */
-    abstract Object getValue(Object object);
-
-    /**
-     * Property is writable. Based on access policy and java field modifiers.
-     * @return true if can be deserialized from JSON
-     */
-    public boolean isWritable() {
-        return writable;
-    }
-
-    /**
-     * Property is readable. Based on access policy and java field modifiers.
-     * @return true if can be serialized to JSON
-     */
-    public boolean isReadable() {
-        return readable;
-    }
-
-    /**
-     * Field of a javabean property.
-     *
-     * @return {@link Field field}
-     */
-    public Field getField() {
-        return field;
-    }
-
-    /**
-     * Setter of a javabean property.
-     *
-     * @return {@link Method getter}
-     */
-    public Method getGetter() {
-        return getter;
-    }
-
-    /**
-     * Getter of a javabean property.
-     *
-     * @return {@link Method setter}
-     */
-    public Method getSetter() {
-        return setter;
-    }
-
-    public boolean isGetterVisible() {
-        return getterVisible;
-    }
-
-    public boolean isSetterVisible() {
-        return setterVisible;
-    }
-
-    private static final class DefaultVisibilityStrategy implements PropertyVisibilityStrategy {
-
-        private final Field field;
-
-        private final Method method;
-
-        public DefaultVisibilityStrategy(Field field, Method method) {
-            this.field = field;
-            this.method = method;
-        }
-
-        @Override
-        public boolean isVisible(Field field) {
-            //don't check field if getter is not visible (forced by spec)
-            if (null != method && !isVisible(method)) {
-                return false;
-            }
-            return Modifier.isPublic(field.getModifiers());
-        }
-
-        @Override
-        public boolean isVisible(Method method) {
-            return Modifier.isPublic(method.getModifiers());
-        }
-    }
 }

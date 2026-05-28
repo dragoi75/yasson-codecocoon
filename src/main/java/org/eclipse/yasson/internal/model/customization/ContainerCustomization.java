@@ -20,12 +20,13 @@ package org.eclipse.yasson.internal.model.customization;
 public class ContainerCustomization extends ClassCustomization {
 
     /**
-     * Creates a new instance.
+     * Containers (types mapped to JsonArray) are always nillable by spec.
      *
-     * @param builder Builder to initialize from.
+     * @return always true
      */
-    public ContainerCustomization(ClassCustomizationBuilder builder) {
-        super(builder);
+    @Override
+    public final boolean isNillable() {
+        return true;
     }
 
     /**
@@ -38,12 +39,12 @@ public class ContainerCustomization extends ClassCustomization {
     }
 
     /**
-     * Containers (types mapped to JsonArray) are always nillable by spec.
+     * Creates a new instance.
      *
-     * @return always true
+     * @param builder Builder to initialize from.
      */
-    @Override
-    public final boolean isNillable() {
-        return true;
+    public ContainerCustomization(ClassCustomizationBuilder builder) {
+        super(builder);
     }
+
 }

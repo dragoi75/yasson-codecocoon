@@ -38,6 +38,22 @@ class CollectionValueDeserializer<T extends Collection<?>> extends BaseContainer
 
     private T element;
 
+    @SuppressWarnings("unchecked")
+    private <T> void addToCollection(T element) {
+        ((Collection<T>) this.element).add(element);
+    }
+
+    @Override
+    public void addResult(Object addedValue) {
+        addToCollection(nullToOptionalEmpty(elementType, addedValue));
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser jsonStream, JsonbUnmarshaller jsonbState) {
+        final JsonbDeserializer<?> valueReader = createCollectionOrMapItemDeserializer(elementType, jsonbState.getJsonbContext());
+        addResult(valueReader.deserialize(jsonStream, jsonbState, elementType));
+    }
+
     /**
      * @param deserializerCreator {@link JsonValueDeserializerBuilder ) used to build this instance
      */
@@ -45,6 +61,12 @@ class CollectionValueDeserializer<T extends Collection<?>> extends BaseContainer
         super(deserializerCreator);
         elementType = getRuntimeType() instanceof ParameterizedType ? ReflectiveTypeUtils.resolveGenericType(this, ((ParameterizedType) getRuntimeType()).getActualTypeArguments()[0]) : Object.class;
         element = instantiate(deserializerCreator);
+    }
+
+    @Override
+    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor jsonStream) {
+        jsonStream.moveTo(JsonParser.Event.START_ARRAY);
+        return jsonStream.getCurrentLevel();
     }
 
     @SuppressWarnings("unchecked")
@@ -86,25 +108,4 @@ class CollectionValueDeserializer<T extends Collection<?>> extends BaseContainer
         return element;
     }
 
-    @Override
-    public void addResult(Object addedValue) {
-        addToCollection(nullToOptionalEmpty(elementType, addedValue));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void addToCollection(T element) {
-        ((Collection<T>) this.element).add(element);
-    }
-
-    @Override
-    protected void deserializeNextValue(JsonParser jsonStream, JsonbUnmarshaller jsonbState) {
-        final JsonbDeserializer<?> valueReader = createCollectionOrMapItemDeserializer(elementType, jsonbState.getJsonbContext());
-        addResult(valueReader.deserialize(jsonStream, jsonbState, elementType));
-    }
-
-    @Override
-    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor jsonStream) {
-        jsonStream.moveTo(JsonParser.Event.START_ARRAY);
-        return jsonStream.getCurrentLevel();
-    }
 }

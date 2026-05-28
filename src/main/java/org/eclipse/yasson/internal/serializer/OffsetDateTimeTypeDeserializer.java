@@ -32,15 +32,6 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
     private static final Logger log = Logger.getLogger(OffsetDateTimeTypeDeserializer.class.getName());
 
     /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public OffsetDateTimeTypeDeserializer(SerializationCustomization customization) {
-        super(OffsetDateTime.class, customization);
-    }
-
-    /**
      * fromInstant is called only in case {@link javax.json.bind.annotation.JsonbDateFormat} is TIME_IN_MILLIS,
      * which doesn't make much sense for usage with OffsetDateTime.
      */
@@ -59,4 +50,14 @@ public class OffsetDateTimeTypeDeserializer extends AbstractDateTimeDeserializer
     protected OffsetDateTime parseWithFormatter(String jsonValue, DateTimeFormatter formatter) {
         return OffsetDateTime.parse(jsonValue, formatter);
     }
+
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public OffsetDateTimeTypeDeserializer(SerializationCustomization customization) {
+        super(OffsetDateTime.class, customization);
+    }
+
 }

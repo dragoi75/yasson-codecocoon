@@ -30,15 +30,6 @@ public class ObjectArrayDeserializerImpl<T> extends AbstractArrayDeserializer<T[
 
     private T[] elementsArray;
 
-    protected ObjectArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return elements;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public T[] getInstance(JsonbUnmarshaller unmarshaller) {
@@ -47,4 +38,14 @@ public class ObjectArrayDeserializerImpl<T> extends AbstractArrayDeserializer<T[
         }
         return elements.toArray(elementsArray);
     }
+
+    @Override
+    protected List<?> getItems() {
+        return elements;
+    }
+
+    protected ObjectArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

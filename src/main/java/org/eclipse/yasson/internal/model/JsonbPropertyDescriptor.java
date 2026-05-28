@@ -33,32 +33,14 @@ public class JsonbPropertyDescriptor {
     private CurrentItemWrapper<?> currentItemHolder;
 
     /**
-     * Gets context.
+     * Sets wrapper.
      *
-     * @return Context.
-     */
-    public JsonbRuntimeContext getContext() {
-        return jsonbRuntime;
-    }
-
-    /**
-     * Sets context.
-     *
-     * @param jsonbRuntime Context to set.
+     * @param currentItemHolder Wrapper to set.
      * @return Updated object.
      */
-    public JsonbPropertyDescriptor setContext(JsonbRuntimeContext jsonbRuntime) {
-        this.jsonbRuntime = jsonbRuntime;
+    public JsonbPropertyDescriptor setWrapper(CurrentItemWrapper<?> currentItemHolder) {
+        this.currentItemHolder = currentItemHolder;
         return this;
-    }
-
-    /**
-     * Gets runtime type.
-     *
-     * @return Runtime type.
-     */
-    public Type getRuntimeType() {
-        return resolvedType;
     }
 
     /**
@@ -82,6 +64,44 @@ public class JsonbPropertyDescriptor {
     }
 
     /**
+     * Gets wrapper.
+     *
+     * @return Wrapper.
+     */
+    public CurrentItemWrapper<?> getWrapper() {
+        return currentItemHolder;
+    }
+
+    /**
+     * Sets context.
+     *
+     * @param jsonbRuntime Context to set.
+     * @return Updated object.
+     */
+    public JsonbPropertyDescriptor setContext(JsonbRuntimeContext jsonbRuntime) {
+        this.jsonbRuntime = jsonbRuntime;
+        return this;
+    }
+
+    /**
+     * Gets context.
+     *
+     * @return Context.
+     */
+    public JsonbRuntimeContext getContext() {
+        return jsonbRuntime;
+    }
+
+    /**
+     * Gets runtime type.
+     *
+     * @return Runtime type.
+     */
+    public Type getRuntimeType() {
+        return resolvedType;
+    }
+
+    /**
      * Sets class model.
      *
      * @param classDescriptor Class model to set.
@@ -92,23 +112,4 @@ public class JsonbPropertyDescriptor {
         return this;
     }
 
-    /**
-     * Gets wrapper.
-     *
-     * @return Wrapper.
-     */
-    public CurrentItemWrapper<?> getWrapper() {
-        return currentItemHolder;
-    }
-
-    /**
-     * Sets wrapper.
-     *
-     * @param currentItemHolder Wrapper to set.
-     * @return Updated object.
-     */
-    public JsonbPropertyDescriptor setWrapper(CurrentItemWrapper<?> currentItemHolder) {
-        this.currentItemHolder = currentItemHolder;
-        return this;
-    }
 }

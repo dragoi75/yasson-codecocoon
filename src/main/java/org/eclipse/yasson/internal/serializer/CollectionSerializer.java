@@ -28,6 +28,16 @@ public class CollectionSerializer<T extends Collection> extends AbstractContaine
 
     protected final JsonbRuntimeContext jsonbContext;
 
+    @Override
+    protected void writeStart(JsonGenerator generator) {
+        generator.writeStartArray();
+    }
+
+    @Override
+    protected void writeStart(String key, JsonGenerator generator) {
+        generator.writeStartArray(key);
+    }
+
     protected CollectionSerializer(SerializationBuilder builder) {
         super(builder);
         this.jsonbContext = builder.getJsonbContext();
@@ -40,13 +50,4 @@ public class CollectionSerializer<T extends Collection> extends AbstractContaine
         }
     }
 
-    @Override
-    protected void writeStart(JsonGenerator generator) {
-        generator.writeStartArray();
-    }
-
-    @Override
-    protected void writeStart(String key, JsonGenerator generator) {
-        generator.writeStartArray(key);
-    }
 }

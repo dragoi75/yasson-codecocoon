@@ -27,18 +27,11 @@ import java.util.Locale;
  */
 public abstract class AbstractDateTypeSerializer<T extends Date> extends AbstractDateTimeSerializer<T> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param customization Model customization.
-     */
-    public AbstractDateTypeSerializer(SerializationCustomization customization) {
-        super(customization);
-    }
+    protected abstract DateTimeFormatter getDefaultFormatter();
 
     @Override
-    protected Instant toInstant(Date value) {
-        return Instant.ofEpochMilli(value.getTime());
+    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
+        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
     }
 
     @Override
@@ -52,8 +45,22 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
     }
 
     @Override
-    protected String formatWithFormatter(Date value, DateTimeFormatter formatter) {
-        return getZonedFormatter(formatter).format(toTemporalAccessor(value));
+    protected TemporalAccessor toTemporalAccessor(Date object) {
+        return toInstant(object);
+    }
+
+    @Override
+    protected Instant toInstant(Date value) {
+        return Instant.ofEpochMilli(value.getTime());
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param customization Model customization.
+     */
+    public AbstractDateTypeSerializer(SerializationCustomization customization) {
+        super(customization);
     }
 
     @Override
@@ -61,10 +68,4 @@ public abstract class AbstractDateTypeSerializer<T extends Date> extends Abstrac
         return JsonbDateTimeFormatter.IJSON_DATE_FORMATTER.withZone(UTC).format(toTemporalAccessor(value));
     }
 
-    @Override
-    protected TemporalAccessor toTemporalAccessor(Date object) {
-        return toInstant(object);
-    }
-
-    protected abstract DateTimeFormatter getDefaultFormatter();
 }

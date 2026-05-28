@@ -27,10 +27,6 @@ public class ByteArrayDeserializerImpl extends AbstractArrayDeserializer<byte[]>
 
     private final List<Byte> byteList = new ArrayList<>();
 
-    protected ByteArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return byteList;
@@ -47,4 +43,9 @@ public class ByteArrayDeserializerImpl extends AbstractArrayDeserializer<byte[]>
         }
         return bytes;
     }
+
+    protected ByteArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

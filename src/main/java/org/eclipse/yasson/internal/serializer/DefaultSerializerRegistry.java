@@ -48,9 +48,24 @@ public class DefaultSerializerRegistry {
 
     private final SerializationProviderAdapter enumAdapter;
 
-    private DefaultSerializerRegistry() {
-        this.providerMap = initializeSerializers();
-        enumAdapter = new SerializationProviderAdapter(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+    /**
+     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
+     * should be introspected with reflection.
+     *
+     * @param targetType class to check
+     * @return true if supported
+     */
+    public boolean isKnownType(Class<?> targetType) {
+        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
+        return isContainerValueKnown || findSerializerProvider(targetType).isPresent();
+    }
+
+    /**
+     * Singleton instance.
+     * @return instance
+     */
+    public static DefaultSerializerRegistry getInstance() {
+        return DEFAULT_SERIALIZER_REGISTRY;
     }
 
     private Map<Class<?>, SerializationProviderAdapter> initializeSerializers() {
@@ -124,6 +139,11 @@ public class DefaultSerializerRegistry {
         return findProviderByCondition(targetType);
     }
 
+    private DefaultSerializerRegistry() {
+        this.providerMap = initializeSerializers();
+        enumAdapter = new SerializationProviderAdapter(EnumTypeSerializer::new, EnumTypeDeserializer::new);
+    }
+
     private <T> Optional<SerializationProviderAdapter> findProviderByCondition(Class<T> targetType) {
         if (!Enum.class.isAssignableFrom(targetType)) {
             if (!JsonString.class.isAssignableFrom(targetType)) {
@@ -143,23 +163,4 @@ public class DefaultSerializerRegistry {
         return Optional.empty();
     }
 
-    /**
-     * Checks a class if it is supported by Yasson builtin serializers/deserializers in order to decide if it
-     * should be introspected with reflection.
-     *
-     * @param targetType class to check
-     * @return true if supported
-     */
-    public boolean isKnownType(Class<?> targetType) {
-        boolean isContainerValueKnown = Collection.class.isAssignableFrom(targetType) || Map.class.isAssignableFrom(targetType) || JsonValue.class.isAssignableFrom(targetType) || Optional.class.isAssignableFrom(targetType) || targetType.isArray();
-        return isContainerValueKnown || findSerializerProvider(targetType).isPresent();
-    }
-
-    /**
-     * Singleton instance.
-     * @return instance
-     */
-    public static DefaultSerializerRegistry getInstance() {
-        return DEFAULT_SERIALIZER_REGISTRY;
-    }
 }

@@ -27,15 +27,6 @@ public class PrimitiveFloatArrayDeserializer extends AbstractArrayDeserializer<f
 
     private final List<Float> floatValues = new ArrayList<>();
 
-    protected PrimitiveFloatArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return floatValues;
-    }
-
     @Override
     public float[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int length = floatValues.size();
@@ -47,4 +38,14 @@ public class PrimitiveFloatArrayDeserializer extends AbstractArrayDeserializer<f
         }
         return primitiveFloats;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return floatValues;
+    }
+
+    protected PrimitiveFloatArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

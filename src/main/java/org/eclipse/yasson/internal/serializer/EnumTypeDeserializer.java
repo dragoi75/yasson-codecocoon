@@ -25,6 +25,12 @@ import java.lang.reflect.Type;
  */
 public class EnumTypeDeserializer extends BaseValueTypeDeserializer<Enum> {
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected Enum deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        return Enum.valueOf((Class<Enum>) rtType, jsonValue);
+    }
+
     /**
      * Creates a new instance.
      *
@@ -34,9 +40,4 @@ public class EnumTypeDeserializer extends BaseValueTypeDeserializer<Enum> {
         super(Enum.class, customization);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Enum deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
-        return Enum.valueOf((Class<Enum>) rtType, jsonValue);
-    }
 }

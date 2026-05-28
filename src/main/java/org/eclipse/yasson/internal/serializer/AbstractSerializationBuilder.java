@@ -56,38 +56,40 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
 
     protected final JsonbRuntimeContext jsonbContext;
 
-    /**
-     * Crates a builder.
-     *
-     * @param runtimeContext Not null.
-     */
-    public AbstractSerializationBuilder(JsonbRuntimeContext runtimeContext) {
-        Objects.requireNonNull(runtimeContext);
-        this.jsonbContext = runtimeContext;
+    public SerializationCustomization getCustomization() {
+        return customization;
     }
 
     /**
-     * Wrapper item for this item.
+     * Jsonb runtime context.
      *
-     * @param currentItemHolder not null.
-     * @return Builder instance for call chaining.
+     * @return jsonb context
+     */
+    public JsonbRuntimeContext getJsonbContext() {
+        return jsonbContext;
+    }
+
+    /**
+     * Type for underlying instance to be created from.
+     * In case of type variable or wildcard, will be resolved recursively from parent items.
+     *
+     * @param declaredType type of instance not null
+     * @return builder instance for call chaining
      */
     @SuppressWarnings("unchecked")
-    public T setWrapper(CurrentItemWrapper<?> currentItemHolder) {
-        this.wrapper = currentItemHolder;
+    public T setType(Type declaredType) {
+        this.genericType = declaredType;
         return (T) this;
     }
 
     /**
-     * Customization of the class
+     * Model of a class representing current item and instance (if any).
+     * Known collection classes doesn't need such a model.
      *
-     * @param serializationOptions Class customization
-     * @return Builder instance for call chaining.
+     * @return model of a class
      */
-    @SuppressWarnings("unchecked")
-    public T setCustomization(SerializationCustomization serializationOptions) {
-        this.customization = serializationOptions;
-        return (T) this;
+    public ClassDescriptor getClassModel() {
+        return classModel;
     }
 
     /**
@@ -105,6 +107,28 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
+     * Customization of the class
+     *
+     * @param serializationOptions Class customization
+     * @return Builder instance for call chaining.
+     */
+    @SuppressWarnings("unchecked")
+    public T setCustomization(SerializationCustomization serializationOptions) {
+        this.customization = serializationOptions;
+        return (T) this;
+    }
+
+    /**
+     * Crates a builder.
+     *
+     * @param runtimeContext Not null.
+     */
+    public AbstractSerializationBuilder(JsonbRuntimeContext runtimeContext) {
+        Objects.requireNonNull(runtimeContext);
+        this.jsonbContext = runtimeContext;
+    }
+
+    /**
      * Wrapper item for this item.
      *
      * @return Wrapper item.
@@ -114,13 +138,15 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
     }
 
     /**
-     * Model of a class representing current item and instance (if any).
-     * Known collection classes doesn't need such a model.
+     * Wrapper item for this item.
      *
-     * @return model of a class
+     * @param currentItemHolder not null.
+     * @return Builder instance for call chaining.
      */
-    public ClassDescriptor getClassModel() {
-        return classModel;
+    @SuppressWarnings("unchecked")
+    public T setWrapper(CurrentItemWrapper<?> currentItemHolder) {
+        this.wrapper = currentItemHolder;
+        return (T) this;
     }
 
     /**
@@ -133,29 +159,4 @@ public class AbstractSerializationBuilder<T extends AbstractSerializationBuilder
         return runtimeType;
     }
 
-    /**
-     * Type for underlying instance to be created from.
-     * In case of type variable or wildcard, will be resolved recursively from parent items.
-     *
-     * @param declaredType type of instance not null
-     * @return builder instance for call chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T setType(Type declaredType) {
-        this.genericType = declaredType;
-        return (T) this;
-    }
-
-    /**
-     * Jsonb runtime context.
-     *
-     * @return jsonb context
-     */
-    public JsonbRuntimeContext getJsonbContext() {
-        return jsonbContext;
-    }
-
-    public SerializationCustomization getCustomization() {
-        return customization;
-    }
 }

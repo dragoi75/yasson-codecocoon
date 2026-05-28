@@ -23,14 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class IntArraySerializer extends AbstractArraySerializer<int[]> {
 
-    protected IntArraySerializer(SerializationBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected void serializeInternal(int[] arr, JsonGenerator generator, SerializationContext ctx) {
         for (int obj : arr) {
             generator.write(obj);
         }
     }
+
+    protected IntArraySerializer(SerializationBuilder builder) {
+        super(builder);
+    }
+
 }

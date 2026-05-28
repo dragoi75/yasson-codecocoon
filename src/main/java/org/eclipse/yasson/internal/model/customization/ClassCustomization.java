@@ -36,6 +36,29 @@ public class ClassCustomization extends CustomizationBase {
 
     private final PropertyVisibilityStrategy propertyVisibilityStrategy;
 
+    @Override
+    public JsonbNumberFormatter getDeserializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    @Override
+    public JsonbNumberFormatter getSerializeNumberFormatter() {
+        return numberFormatter;
+    }
+
+    /**
+     * Property visibility strategy for this class model.
+     * @return visibility strategy
+     */
+    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
+        return propertyVisibilityStrategy;
+    }
+
+    @Override
+    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
+        return dateTimeFormatter;
+    }
+
     /**
      * Copies properties from builder an creates immutable instance.
      *
@@ -64,22 +87,9 @@ public class ClassCustomization extends CustomizationBase {
         this.propertyVisibilityStrategy = other.getPropertyVisibilityStrategy();
     }
 
-    /**
-     * Returns instance of {@link JsonbCreator}.
-     *
-     * @return instance of creator
-     */
-    public JsonbCreator getCreator() {
-        return creator;
-    }
-
-    /**
-     * Names of properties to sort with.
-     *
-     * @return sorted names of properties
-     */
-    public String[] getPropertyOrder() {
-        return propertyOrder;
+    @Override
+    public JsonbDateTimeFormatter getSerializeDateFormatter() {
+        return dateTimeFormatter;
     }
 
     /**
@@ -92,31 +102,21 @@ public class ClassCustomization extends CustomizationBase {
     }
 
     /**
-     * Property visibility strategy for this class model.
-     * @return visibility strategy
+     * Names of properties to sort with.
+     *
+     * @return sorted names of properties
      */
-    public PropertyVisibilityStrategy getPropertyVisibilityStrategy() {
-        return propertyVisibilityStrategy;
+    public String[] getPropertyOrder() {
+        return propertyOrder;
     }
 
-    @Override
-    public JsonbNumberFormatter getSerializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbNumberFormatter getDeserializeNumberFormatter() {
-        return numberFormatter;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getSerializeDateFormatter() {
-        return dateTimeFormatter;
-    }
-
-    @Override
-    public JsonbDateTimeFormatter getDeserializeDateFormatter() {
-        return dateTimeFormatter;
+    /**
+     * Returns instance of {@link JsonbCreator}.
+     *
+     * @return instance of creator
+     */
+    public JsonbCreator getCreator() {
+        return creator;
     }
 
 }

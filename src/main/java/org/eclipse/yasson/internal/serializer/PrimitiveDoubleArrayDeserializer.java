@@ -27,15 +27,6 @@ public class PrimitiveDoubleArrayDeserializer extends AbstractArrayDeserializer<
 
     private final List<Double> doubleValues = new ArrayList<>();
 
-    protected PrimitiveDoubleArrayDeserializer(JsonValueDeserializerBuilder deserializerCreator) {
-        super(deserializerCreator);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return doubleValues;
-    }
-
     @Override
     public double[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int length = doubleValues.size();
@@ -47,4 +38,14 @@ public class PrimitiveDoubleArrayDeserializer extends AbstractArrayDeserializer<
         }
         return doubles;
     }
+
+    @Override
+    protected List<?> getItems() {
+        return doubleValues;
+    }
+
+    protected PrimitiveDoubleArrayDeserializer(JsonValueDeserializerBuilder deserializerCreator) {
+        super(deserializerCreator);
+    }
+
 }

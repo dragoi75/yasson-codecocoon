@@ -28,12 +28,13 @@ import static java.util.stream.Collectors.toList;
 public class ReversePropertyOrderStrategy extends PropertyOrderStrategy implements Comparator<PropertyModel> {
 
     @Override
+    public int compare(PropertyModel firstProperty, PropertyModel secondProperty) {
+        return secondProperty.getWriteName().compareTo(firstProperty.getWriteName());
+    }
+
+    @Override
     public List<PropertyModel> orderProperties(Collection<PropertyModel> propertyModels) {
         return propertyModels.stream().sorted(this).collect(toList());
     }
 
-    @Override
-    public int compare(PropertyModel firstProperty, PropertyModel secondProperty) {
-        return secondProperty.getWriteName().compareTo(firstProperty.getWriteName());
-    }
 }

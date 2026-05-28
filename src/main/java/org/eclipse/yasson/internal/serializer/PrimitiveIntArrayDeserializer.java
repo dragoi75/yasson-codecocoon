@@ -27,15 +27,6 @@ public class PrimitiveIntArrayDeserializer extends AbstractArrayDeserializer<int
 
     private final List<Integer> values = new ArrayList<>();
 
-    protected PrimitiveIntArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return values;
-    }
-
     @Override
     public int[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int length = values.size();
@@ -47,4 +38,14 @@ public class PrimitiveIntArrayDeserializer extends AbstractArrayDeserializer<int
         }
         return valuesArray;
     }
+
+    protected PrimitiveIntArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return values;
+    }
+
 }

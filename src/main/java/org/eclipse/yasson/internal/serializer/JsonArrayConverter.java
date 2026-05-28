@@ -27,15 +27,6 @@ public class JsonArrayConverter extends AbstractJsonpDeserializer<JsonArray> {
 
     private JsonArray elements;
 
-    /**
-     * Create instance.
-     *
-     * @param deserializerFactory Builder to initialize from.
-     */
-    protected JsonArrayConverter(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected void deserializeContainer(JsonbCursor cursor, JsonbUnmarshaller context) {
         this.elements = cursor.getArray();
@@ -45,4 +36,14 @@ public class JsonArrayConverter extends AbstractJsonpDeserializer<JsonArray> {
     public JsonArray getInstance(JsonbUnmarshaller unmarshaller) {
         return elements;
     }
+
+    /**
+     * Create instance.
+     *
+     * @param deserializerFactory Builder to initialize from.
+     */
+    protected JsonArrayConverter(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }

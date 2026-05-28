@@ -28,12 +28,13 @@ import static java.util.stream.Collectors.toList;
 public class LexicographicalPropertyOrderStrategy extends PropertyOrderStrategy implements Comparator<PropertyModel> {
 
     @Override
+    public int compare(PropertyModel firstModel, PropertyModel secondModel) {
+        return firstModel.getWriteName().compareTo(secondModel.getWriteName());
+    }
+
+    @Override
     public List<PropertyModel> orderProperties(Collection<PropertyModel> attributeModels) {
         return attributeModels.stream().sorted(this).collect(toList());
     }
 
-    @Override
-    public int compare(PropertyModel firstModel, PropertyModel secondModel) {
-        return firstModel.getWriteName().compareTo(secondModel.getWriteName());
-    }
 }

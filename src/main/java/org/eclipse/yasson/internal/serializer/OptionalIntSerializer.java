@@ -26,15 +26,6 @@ import java.util.OptionalInt;
  */
 public class OptionalIntSerializer extends ConfigurableValueTypeSerializer<OptionalInt> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializationOptions Model customization.
-     */
-    public OptionalIntSerializer(SerializationCustomization serializationOptions) {
-        super(serializationOptions);
-    }
-
     @Override
     protected void serializeValue(OptionalInt optionalInt, JsonGenerator jsonWriter, JsonbMarshaller marshaller) {
         if (!optionalInt.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalIntSerializer extends ConfigurableValueTypeSerializer<Optio
             jsonWriter.write(optionalInt.getAsInt());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializationOptions Model customization.
+     */
+    public OptionalIntSerializer(SerializationCustomization serializationOptions) {
+        super(serializationOptions);
+    }
+
 }

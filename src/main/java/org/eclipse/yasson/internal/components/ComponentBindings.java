@@ -30,11 +30,28 @@ public class ComponentBindings {
     private final AdapterBindingDescriptor adapterInfo;
 
     /**
-     * Construct empty bindings for a given type.
-     * @param bindingType type components are bound to
+     * Type to which components are bound.
+     *
+     * @return Bound type.
      */
-    public ComponentBindings(Type bindingType) {
-        this(bindingType, null, null, null);
+    public Type getBindingType() {
+        return bindingType;
+    }
+
+    /**
+     * Serializer if any.
+     * @return serializer
+     */
+    public SerializerBinding getSerializer() {
+        return serializer;
+    }
+
+    /**
+     * Adapter info if any.
+     * @return adapterInfo
+     */
+    public AdapterBindingDescriptor getAdapterInfo() {
+        return adapterInfo;
     }
 
     /**
@@ -53,20 +70,11 @@ public class ComponentBindings {
     }
 
     /**
-     * Type to which components are bound.
-     *
-     * @return Bound type.
+     * Construct empty bindings for a given type.
+     * @param bindingType type components are bound to
      */
-    public Type getBindingType() {
-        return bindingType;
-    }
-
-    /**
-     * Serializer if any.
-     * @return serializer
-     */
-    public SerializerBinding getSerializer() {
-        return serializer;
+    public ComponentBindings(Type bindingType) {
+        this(bindingType, null, null, null);
     }
 
     /**
@@ -75,14 +83,6 @@ public class ComponentBindings {
      */
     public JsonbDeserializerBinding getDeserializer() {
         return deserializer;
-    }
-
-    /**
-     * Adapter info if any.
-     * @return adapterInfo
-     */
-    public AdapterBindingDescriptor getAdapterInfo() {
-        return adapterInfo;
     }
 
 }

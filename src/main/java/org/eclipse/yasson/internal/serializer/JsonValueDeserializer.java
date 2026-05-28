@@ -32,6 +32,11 @@ import java.lang.reflect.Type;
  */
 public class JsonValueDeserializer extends BaseValueTypeDeserializer<JsonValue> {
 
+    @Override
+    protected JsonValue deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Creates a new instance.
      *
@@ -59,8 +64,4 @@ public class JsonValueDeserializer extends BaseValueTypeDeserializer<JsonValue> 
         }
     }
 
-    @Override
-    protected JsonValue deserializeValue(String jsonValue, JsonbUnmarshaller unmarshaller, Type rtType) {
-        throw new UnsupportedOperationException();
-    }
 }

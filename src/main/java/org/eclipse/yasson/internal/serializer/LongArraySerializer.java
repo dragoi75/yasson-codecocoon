@@ -23,14 +23,15 @@ import javax.json.stream.JsonGenerator;
  */
 public class LongArraySerializer extends AbstractArraySerializer<long[]> {
 
-    protected LongArraySerializer(SerializationBuilder builder) {
-        super(builder);
-    }
-
     @Override
     protected void serializeInternal(long[] arr, JsonGenerator generator, SerializationContext ctx) {
         for (long obj : arr) {
             generator.write(obj);
         }
     }
+
+    protected LongArraySerializer(SerializationBuilder builder) {
+        super(builder);
+    }
+
 }

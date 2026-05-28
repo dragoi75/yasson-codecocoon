@@ -34,16 +34,6 @@ public class PropertyOrderManager {
     private PropertyOrderStrategy orderStrategy;
 
     /**
-     * Creates a new instance.
-     *
-     * @param orderStrategy Property order strategy. Must be not null.
-     */
-    public PropertyOrderManager(PropertyOrderStrategy orderStrategy) {
-        Objects.requireNonNull(orderStrategy);
-        this.orderStrategy = orderStrategy;
-    }
-
-    /**
      * Sorts class properties either, by class {@link javax.json.bind.annotation.JsonbPropertyOrder} annotation,
      * or by {@link javax.json.bind.config.PropertyOrderStrategy} if set in {@link JsonbConfig}.
      *
@@ -77,4 +67,15 @@ public class PropertyOrderManager {
     public PropertyOrderStrategy getPropertyOrderStrategy() {
         return orderStrategy;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param orderStrategy Property order strategy. Must be not null.
+     */
+    public PropertyOrderManager(PropertyOrderStrategy orderStrategy) {
+        Objects.requireNonNull(orderStrategy);
+        this.orderStrategy = orderStrategy;
+    }
+
 }

@@ -32,6 +32,15 @@ import java.util.OptionalDouble;
  */
 public class OptionalDoubleDeserializer extends BaseValueTypeDeserializer<OptionalDouble> {
 
+    @Override
+    protected OptionalDouble deserializeValue(String jsonString, JsonbUnmarshaller unmarshaller, Type rtType) {
+        try {
+            return OptionalDouble.of(Double.parseDouble(jsonString));
+        } catch (NumberFormatException e) {
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -51,12 +60,4 @@ public class OptionalDoubleDeserializer extends BaseValueTypeDeserializer<Option
         return deserializeValue(text, (JsonbUnmarshaller) deserializationContext, runtimeType);
     }
 
-    @Override
-    protected OptionalDouble deserializeValue(String jsonString, JsonbUnmarshaller unmarshaller, Type rtType) {
-        try {
-            return OptionalDouble.of(Double.parseDouble(jsonString));
-        } catch (NumberFormatException e) {
-            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.DESERIALIZE_VALUE_ERROR, OptionalDouble.class));
-        }
-    }
 }

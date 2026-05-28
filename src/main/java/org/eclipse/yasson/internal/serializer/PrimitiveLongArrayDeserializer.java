@@ -27,15 +27,6 @@ public class PrimitiveLongArrayDeserializer extends AbstractArrayDeserializer<lo
 
     private final List<Long> longValues = new ArrayList<>();
 
-    protected PrimitiveLongArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    @Override
-    protected List<?> getItems() {
-        return longValues;
-    }
-
     @Override
     public long[] getInstance(JsonbUnmarshaller unmarshaller) {
         final int length = longValues.size();
@@ -47,4 +38,14 @@ public class PrimitiveLongArrayDeserializer extends AbstractArrayDeserializer<lo
         }
         return resultArray;
     }
+
+    protected PrimitiveLongArrayDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
+    @Override
+    protected List<?> getItems() {
+        return longValues;
+    }
+
 }

@@ -39,84 +39,12 @@ public abstract class BaseContainerDeserializer<T> extends AbstractItem<T> imple
     protected JsonbStreamingParser.LevelParseContext parserContext;
 
     /**
-     * Create instance of current item with its builder.
-     *
-     * @param deserializerFactory {@link JsonValueDeserializerBuilder} used to build this instance
-     */
-    protected BaseContainerDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
-    /**
-     * Drives JSONP {@link JsonParser} to deserialize json document.
-     *
-     * @param jsonReader JSON parser.
-     * @param deserializationEnv Deseriaization context.
-     * @param runtimeType Runtime type.
-     * @return Instance of a type for this item.
-     */
-    @Override
-    public final T deserialize(JsonParser jsonReader, DeserializationContext deserializationEnv, Type runtimeType) {
-        JsonbUnmarshaller unmarshalContext = (JsonbUnmarshaller) deserializationEnv;
-        deserializeContainer((JsonbCursor) jsonReader, unmarshalContext);
-        return getInstance((JsonbUnmarshaller) deserializationEnv);
-    }
-
-    /**
-     * Creates and initializes an instance of deserializing item.
-     *
-     * @param jsonbHandler Current deserialization context.
-     * @return An instance of deserializing item.
-     */
-    protected abstract T getInstance(JsonbUnmarshaller jsonbHandler);
-
-    protected void deserializeContainer(JsonbCursor jsonReader, JsonbUnmarshaller deserializationEnv) {
-        parserContext = moveToFirstToken(jsonReader);
-        while (jsonReader.hasNext()) {
-            final JsonParser.Event currentToken = jsonReader.next();
-            switch(currentToken) {
-                case START_OBJECT:
-                case START_ARRAY:
-                case VALUE_STRING:
-                case VALUE_NUMBER:
-                case VALUE_FALSE:
-                case VALUE_TRUE:
-                    deserializeNextValue(jsonReader, deserializationEnv);
-                    break;
-                case KEY_NAME:
-                    break;
-                case VALUE_NULL:
-                    addResult(null);
-                    break;
-                case END_OBJECT:
-                case END_ARRAY:
-                    return;
-                default:
-                    throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.NOT_VALUE_TYPE, currentToken));
-            }
-        }
-    }
-
-    /**
-     * Determine class mappings and create an instance of a new deserializer.
-     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
-     *
-     * @param jsonReader Json parser.
-     * @param deserializationEnv Current unmarshalling context.
-     */
-    protected abstract void deserializeNextValue(JsonParser jsonReader, JsonbUnmarshaller deserializationEnv);
-
-    /**
      * Move to first event for current deserializer structure.
      *
      * @param jsonReader Json parser.
      * @return First event.
      */
     protected abstract JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor jsonReader);
-
-    protected JsonValueDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext unmarshalContext) {
-        return new JsonValueDeserializerBuilder(unmarshalContext).setWrapper(this).withJsonEvent(parserContext.getLastEvent());
-    }
 
     protected JsonbDeserializer<?> createCollectionOrMapItemDeserializer(Type elementType, JsonbRuntimeContext unmarshalContext) {
         //TODO needs performance optimization on not to create deserializer each time
@@ -166,6 +94,32 @@ public abstract class BaseContainerDeserializer<T> extends AbstractItem<T> imple
     }
 
     /**
+     * Determine class mappings and create an instance of a new deserializer.
+     * Currently processed deserializer is pushed to stack, for waiting till new object is finished.
+     *
+     * @param jsonReader Json parser.
+     * @param deserializationEnv Current unmarshalling context.
+     */
+    protected abstract void deserializeNextValue(JsonParser jsonReader, JsonbUnmarshaller deserializationEnv);
+
+    /**
+     * Create instance of current item with its builder.
+     *
+     * @param deserializerFactory {@link JsonValueDeserializerBuilder} used to build this instance
+     */
+    protected BaseContainerDeserializer(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
+    /**
+     * Creates and initializes an instance of deserializing item.
+     *
+     * @param jsonbHandler Current deserialization context.
+     * @return An instance of deserializing item.
+     */
+    protected abstract T getInstance(JsonbUnmarshaller jsonbHandler);
+
+    /**
      * After object is transitively deserialized from JSON, "append" it to its wrapper.
      * In case of a field set value to field, in case of collections
      * or other embedded objects use methods provided.
@@ -173,4 +127,51 @@ public abstract class BaseContainerDeserializer<T> extends AbstractItem<T> imple
      * @param entry An instance result of an item.
      */
     public abstract void addResult(Object entry);
+
+    protected void deserializeContainer(JsonbCursor jsonReader, JsonbUnmarshaller deserializationEnv) {
+        parserContext = moveToFirstToken(jsonReader);
+        while (jsonReader.hasNext()) {
+            final JsonParser.Event currentToken = jsonReader.next();
+            switch(currentToken) {
+                case START_OBJECT:
+                case START_ARRAY:
+                case VALUE_STRING:
+                case VALUE_NUMBER:
+                case VALUE_FALSE:
+                case VALUE_TRUE:
+                    deserializeNextValue(jsonReader, deserializationEnv);
+                    break;
+                case KEY_NAME:
+                    break;
+                case VALUE_NULL:
+                    addResult(null);
+                    break;
+                case END_OBJECT:
+                case END_ARRAY:
+                    return;
+                default:
+                    throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.NOT_VALUE_TYPE, currentToken));
+            }
+        }
+    }
+
+    protected JsonValueDeserializerBuilder createUnmarshallerItemBuilder(JsonbRuntimeContext unmarshalContext) {
+        return new JsonValueDeserializerBuilder(unmarshalContext).setWrapper(this).withJsonEvent(parserContext.getLastEvent());
+    }
+
+    /**
+     * Drives JSONP {@link JsonParser} to deserialize json document.
+     *
+     * @param jsonReader JSON parser.
+     * @param deserializationEnv Deseriaization context.
+     * @param runtimeType Runtime type.
+     * @return Instance of a type for this item.
+     */
+    @Override
+    public final T deserialize(JsonParser jsonReader, DeserializationContext deserializationEnv, Type runtimeType) {
+        JsonbUnmarshaller unmarshalContext = (JsonbUnmarshaller) deserializationEnv;
+        deserializeContainer((JsonbCursor) jsonReader, unmarshalContext);
+        return getInstance((JsonbUnmarshaller) deserializationEnv);
+    }
+
 }

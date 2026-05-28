@@ -17,16 +17,14 @@ abstract class CustomizationBase implements SerializationCustomization, Componen
 
     private final boolean nillable;
 
+
     /**
-     * Copies properties from builder an creates immutable instance.
+     * Serializer wrapper with resolved generic info.
      *
-     * @param builder not null
+     * @return serializer wrapper
      */
-    public CustomizationBase(CustomizationBuilder builder) {
-        this.nillable = builder.isNillable();
-        this.adapterBinding = builder.getAdapterInfo();
-        this.serializerBinding = builder.getSerializerBinding();
-        this.deserializerBinding = builder.getDeserializerBinding();
+    public SerializerBinding getSerializerBinding() {
+        return serializerBinding;
     }
 
     /**
@@ -42,12 +40,24 @@ abstract class CustomizationBase implements SerializationCustomization, Componen
     }
 
     /**
-     * Returns true if <i>nillable</i> customization is present.
+     * Deserializer wrapper with resolved generic info.
      *
-     * @return True if <i>nillable</i> customization is present.
+     * @return deserializer wrapper
      */
-    public boolean isNillable() {
-        return nillable;
+    public JsonbDeserializerBinding getDeserializerBinding() {
+        return deserializerBinding;
+    }
+
+    /**
+     * Copies properties from builder an creates immutable instance.
+     *
+     * @param builder not null
+     */
+    public CustomizationBase(CustomizationBuilder builder) {
+        this.nillable = builder.isNillable();
+        this.adapterBinding = builder.getAdapterInfo();
+        this.serializerBinding = builder.getSerializerBinding();
+        this.deserializerBinding = builder.getDeserializerBinding();
     }
 
     /**
@@ -60,22 +70,12 @@ abstract class CustomizationBase implements SerializationCustomization, Componen
     }
 
     /**
-     * Serializer wrapper with resolved generic info.
+     * Returns true if <i>nillable</i> customization is present.
      *
-     * @return serializer wrapper
+     * @return True if <i>nillable</i> customization is present.
      */
-    public SerializerBinding getSerializerBinding() {
-        return serializerBinding;
+    public boolean isNillable() {
+        return nillable;
     }
-
-    /**
-     * Deserializer wrapper with resolved generic info.
-     *
-     * @return deserializer wrapper
-     */
-    public JsonbDeserializerBinding getDeserializerBinding() {
-        return deserializerBinding;
-    }
-
 
 }

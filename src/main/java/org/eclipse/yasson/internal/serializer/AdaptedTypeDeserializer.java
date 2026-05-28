@@ -41,35 +41,6 @@ public class AdaptedTypeDeserializer<A, T> implements CurrentItemWrapper<T>, Jso
     private final BaseContainerDeserializer<?> containerDeserializer;
 
     /**
-     * Creates decoration instance wrapping real adapted object item.
-     *
-     * @param bindingDescriptor components type info
-     * @param containerDeserializer wrapper item to get instance from
-     */
-    public AdaptedTypeDeserializer(AdapterBindingDescriptor bindingDescriptor, BaseContainerDeserializer<?> containerDeserializer) {
-        this.bindingDescriptor = bindingDescriptor;
-        this.containerDeserializer = containerDeserializer;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CurrentItemWrapper<?> getWrapper() {
-        return containerDeserializer;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        if (targetDeserializer instanceof BaseContainerDeserializer) {
-            return ((BaseContainerDeserializer) targetDeserializer).getRuntimeType();
-        }
-        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + targetDeserializer));
-    }
-
-    /**
      * Sets adapted item.
      *
      * @param targetDeserializer Adapted item to set.
@@ -89,4 +60,34 @@ public class AdaptedTypeDeserializer<A, T> implements CurrentItemWrapper<T>, Jso
             throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.ADAPTER_EXCEPTION, bindingDescriptor.getBindingType(), bindingDescriptor.getToType(), bindingDescriptor.getAdapter().getClass()), ex);
         }
     }
+
+    @Override
+    public Type getRuntimeType() {
+        if (targetDeserializer instanceof BaseContainerDeserializer) {
+            return ((BaseContainerDeserializer) targetDeserializer).getRuntimeType();
+        }
+        throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, "Deserialization propagation is not allowed for:" + targetDeserializer));
+    }
+
+    @Override
+    public CurrentItemWrapper<?> getWrapper() {
+        return containerDeserializer;
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates decoration instance wrapping real adapted object item.
+     *
+     * @param bindingDescriptor components type info
+     * @param containerDeserializer wrapper item to get instance from
+     */
+    public AdaptedTypeDeserializer(AdapterBindingDescriptor bindingDescriptor, BaseContainerDeserializer<?> containerDeserializer) {
+        this.bindingDescriptor = bindingDescriptor;
+        this.containerDeserializer = containerDeserializer;
+    }
+
 }

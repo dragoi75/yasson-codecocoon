@@ -32,29 +32,14 @@ public class UserDeserializerFactory<T> extends BaseContainerDeserializer<T> {
 
     private T parsedValue;
 
-    /**
-     * Create instance of current item with its builder.
-     * Contains user provided component for custom deserialization.
-     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
-     * in wrong position after returning from deserializerBinding.
-     *
-     * @param valueFactory {@link JsonValueDeserializerBuilder} used to build this instance
-     * @param bindingEntry Deserializer.
-     */
-    protected UserDeserializerFactory(JsonValueDeserializerBuilder valueFactory, JsonbDeserializerBinding<?> bindingEntry) {
-        super(valueFactory);
-        this.bindingEntry = bindingEntry;
+    @Override
+    protected void deserializeNextValue(JsonParser parser, JsonbUnmarshaller context) {
+        throw new UnsupportedOperationException("Not supported for user deserializer");
     }
 
     @Override
     public void addResult(Object result) {
         //ignore internal deserialize() call in custom deserializer
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getInstance(JsonbUnmarshaller unmarshaller) {
-        return parsedValue;
     }
 
     @SuppressWarnings("unchecked")
@@ -70,11 +55,6 @@ public class UserDeserializerFactory<T> extends BaseContainerDeserializer<T> {
         }
     }
 
-    @Override
-    protected void deserializeNextValue(JsonParser parser, JsonbUnmarshaller context) {
-        throw new UnsupportedOperationException("Not supported for user deserializer");
-    }
-
     /**
      * Don't move anywhere in case of user deserializer.
      */
@@ -82,4 +62,25 @@ public class UserDeserializerFactory<T> extends BaseContainerDeserializer<T> {
     protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor cursor) {
         return cursor.getCurrentLevel();
     }
+
+    /**
+     * Create instance of current item with its builder.
+     * Contains user provided component for custom deserialization.
+     * Decorates calls to JsonParser, with validation logic so user can't left parser cursor
+     * in wrong position after returning from deserializerBinding.
+     *
+     * @param valueFactory {@link JsonValueDeserializerBuilder} used to build this instance
+     * @param bindingEntry Deserializer.
+     */
+    protected UserDeserializerFactory(JsonValueDeserializerBuilder valueFactory, JsonbDeserializerBinding<?> bindingEntry) {
+        super(valueFactory);
+        this.bindingEntry = bindingEntry;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T getInstance(JsonbUnmarshaller unmarshaller) {
+        return parsedValue;
+    }
+
 }

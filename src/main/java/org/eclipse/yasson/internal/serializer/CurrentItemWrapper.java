@@ -24,17 +24,17 @@ import org.eclipse.yasson.internal.model.ClassDescriptor;
 public interface CurrentItemWrapper<T> extends RuntimeTypeInfo {
 
     /**
-     * Class model containing property for this item.
-     *
-     * @return Class model.
-     */
-    ClassDescriptor getClassModel();
-
-    /**
      * Item wrapper. Null only in case of a root item.
      *
      * @return Wrapper item of this item.
      */
     CurrentItemWrapper<?> getWrapper();
+
+    /**
+     * Class model containing property for this item.
+     *
+     * @return Class model.
+     */
+    ClassDescriptor getClassModel();
 
 }

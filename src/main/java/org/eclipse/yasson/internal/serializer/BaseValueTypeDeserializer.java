@@ -34,6 +34,24 @@ public abstract class BaseValueTypeDeserializer<T> implements JsonbDeserializer<
     private final SerializationCustomization serializationConfig;
 
     /**
+     * Returns customization of object
+     *
+     * @return object customization
+     */
+    public SerializationCustomization getCustomization() {
+        return serializationConfig;
+    }
+
+    /**
+     * Type of a property or creator parameter which is deserialized.
+     *
+     * @return property type.
+     */
+    protected Class<T> getPropertyType() {
+        return valueClass;
+    }
+
+    /**
      * Creates a new instance.
      *
      * @param valueClass Class to work with.
@@ -42,6 +60,18 @@ public abstract class BaseValueTypeDeserializer<T> implements JsonbDeserializer<
     public BaseValueTypeDeserializer(Class<T> valueClass, SerializationCustomization serializationConfig) {
         this.valueClass = valueClass;
         this.serializationConfig = serializationConfig;
+    }
+
+    /**
+     * Convert string value to object.
+     *
+     * @param jsonText Json value.
+     * @param jsonbAdapter Unmarshaller instance.
+     * @param runtimeType Runtime type.
+     * @return Deserialized object.
+     */
+    protected T deserializeValue(String jsonText, JsonbUnmarshaller jsonbAdapter, Type runtimeType) {
+        throw new UnsupportedOperationException("Operation not supported in " + getClass());
     }
 
     /**
@@ -63,33 +93,4 @@ public abstract class BaseValueTypeDeserializer<T> implements JsonbDeserializer<
         return deserializeValue(rawText, jsonbAdapter, runtimeType);
     }
 
-    /**
-     * Convert string value to object.
-     *
-     * @param jsonText Json value.
-     * @param jsonbAdapter Unmarshaller instance.
-     * @param runtimeType Runtime type.
-     * @return Deserialized object.
-     */
-    protected T deserializeValue(String jsonText, JsonbUnmarshaller jsonbAdapter, Type runtimeType) {
-        throw new UnsupportedOperationException("Operation not supported in " + getClass());
-    }
-
-    /**
-     * Returns customization of object
-     *
-     * @return object customization
-     */
-    public SerializationCustomization getCustomization() {
-        return serializationConfig;
-    }
-
-    /**
-     * Type of a property or creator parameter which is deserialized.
-     *
-     * @return property type.
-     */
-    protected Class<T> getPropertyType() {
-        return valueClass;
-    }
 }

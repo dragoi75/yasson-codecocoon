@@ -48,17 +48,17 @@ public class JsonbDateTimeFormatter {
 
     private final String languageTag;
 
+    public boolean isDefault() {
+        return JsonbDateFormat.DEFAULT_FORMAT.equals(pattern);
+    }
+
     /**
-     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
+     * Locale to use with formatter.
      *
-     * @param timestampFormatter Reused time formatter.
-     * @param pattern Format in string.
-     * @param languageTag Locale in string.
+     * @return Locale.
      */
-    public JsonbDateTimeFormatter(DateTimeFormatter timestampFormatter, String pattern, String languageTag) {
-        this.timestampFormatter = timestampFormatter;
-        this.pattern = pattern;
-        this.languageTag = languageTag;
+    public String getLocale() {
+        return languageTag;
     }
 
     /**
@@ -75,15 +75,6 @@ public class JsonbDateTimeFormatter {
     }
 
     /**
-     * Creates an instance with cached instance of {@link DateTimeFormatter}.
-     *
-     * @return Formatter instance.
-     */
-    public DateTimeFormatter getDateTimeFormatter() {
-        return timestampFormatter;
-    }
-
-    /**
      * Format string to be used either by formatter.
      * Needed for formatting {@link java.util.Date} with {@link java.text.SimpleDateFormat},
      * which is not threadsafe.
@@ -94,20 +85,30 @@ public class JsonbDateTimeFormatter {
         return pattern;
     }
 
-    /**
-     * Locale to use with formatter.
-     *
-     * @return Locale.
-     */
-    public String getLocale() {
-        return languageTag;
-    }
-
     public static JsonbDateTimeFormatter getDefault() {
         return STANDARD_JSONB_DATE_TIME_FORMATTER;
     }
 
-    public boolean isDefault() {
-        return JsonbDateFormat.DEFAULT_FORMAT.equals(pattern);
+    /**
+     * Creates an instance with cached {@link DateTimeFormatter}, format and locale.
+     *
+     * @param timestampFormatter Reused time formatter.
+     * @param pattern Format in string.
+     * @param languageTag Locale in string.
+     */
+    public JsonbDateTimeFormatter(DateTimeFormatter timestampFormatter, String pattern, String languageTag) {
+        this.timestampFormatter = timestampFormatter;
+        this.pattern = pattern;
+        this.languageTag = languageTag;
     }
+
+    /**
+     * Creates an instance with cached instance of {@link DateTimeFormatter}.
+     *
+     * @return Formatter instance.
+     */
+    public DateTimeFormatter getDateTimeFormatter() {
+        return timestampFormatter;
+    }
+
 }

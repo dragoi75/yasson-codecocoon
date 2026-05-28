@@ -13,6 +13,11 @@ public class SetWithSetter extends SetValueCommand {
 
     private final Method method;
 
+    @Override
+    void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException {
+        method.invoke(object, value);
+    }
+
     /**
      * Create instance
      * @param method not null
@@ -22,8 +27,4 @@ public class SetWithSetter extends SetValueCommand {
         this.method = method;
     }
 
-    @Override
-    void internalSetValue(Object object, Object value) throws IllegalAccessException, InvocationTargetException {
-        method.invoke(object, value);
-    }
 }

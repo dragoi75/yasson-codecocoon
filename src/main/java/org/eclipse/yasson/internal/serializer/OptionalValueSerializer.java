@@ -39,41 +39,18 @@ public class OptionalValueSerializer<T extends Optional<?>> implements CurrentIt
 
     private final Type elementType;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializationFactory Builder to initialize the instance.
-     */
-    public OptionalValueSerializer(SerializationBuilder serializationFactory) {
-        this.currentItemRef = serializationFactory.getWrapper();
-        this.serializationConfig = serializationFactory.getCustomization();
-        this.elementType = resolveOptionalElementType(serializationFactory.getRuntimeType());
+    @SuppressWarnings("unchecked")
+    private <T> void delegateToSerializer(JsonbSerializer<?> valueAdapter, T value, JsonGenerator jsonWriter, SerializationContext serializationState) {
+        ((JsonbSerializer<T>) valueAdapter).serialize(value, jsonWriter, serializationState);
     }
 
-    private Type resolveOptionalElementType(Type actualType) {
-        if (actualType instanceof ParameterizedType) {
-            return ((ParameterizedType) actualType).getActualTypeArguments()[0];
-        }
-        return Object.class;
-    }
-
-    @Override
-    public ClassDescriptor getClassModel() {
-        return null;
+    public SerializationCustomization getCustomization() {
+        return serializationConfig;
     }
 
     @Override
     public CurrentItemWrapper<?> getWrapper() {
         return currentItemRef;
-    }
-
-    @Override
-    public Type getRuntimeType() {
-        return elementType;
-    }
-
-    public SerializationCustomization getCustomization() {
-        return serializationConfig;
     }
 
     @Override
@@ -91,8 +68,32 @@ public class OptionalValueSerializer<T extends Optional<?>> implements CurrentIt
         delegateToSerializer(valueAdapter, presentValue, jsonWriter, serializationContext);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> void delegateToSerializer(JsonbSerializer<?> valueAdapter, T value, JsonGenerator jsonWriter, SerializationContext serializationState) {
-        ((JsonbSerializer<T>) valueAdapter).serialize(value, jsonWriter, serializationState);
+    @Override
+    public Type getRuntimeType() {
+        return elementType;
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializationFactory Builder to initialize the instance.
+     */
+    public OptionalValueSerializer(SerializationBuilder serializationFactory) {
+        this.currentItemRef = serializationFactory.getWrapper();
+        this.serializationConfig = serializationFactory.getCustomization();
+        this.elementType = resolveOptionalElementType(serializationFactory.getRuntimeType());
+    }
+
+    @Override
+    public ClassDescriptor getClassModel() {
+        return null;
+    }
+
+    private Type resolveOptionalElementType(Type actualType) {
+        if (actualType instanceof ParameterizedType) {
+            return ((ParameterizedType) actualType).getActualTypeArguments()[0];
+        }
+        return Object.class;
+    }
+
 }

@@ -30,6 +30,18 @@ import java.util.Base64;
  */
 public class ByteArrayBase64Serializer extends ConfigurableValueTypeSerializer<byte[]> {
 
+    private Base64.Encoder getEncoder(String strategy) {
+        switch (strategy) {
+            case BinaryDataStrategy.BASE_64:
+                return Base64.getEncoder();
+            case BinaryDataStrategy.BASE_64_URL:
+                return Base64.getUrlEncoder();
+            default:
+                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR,
+                        "Invalid strategy: " + strategy));
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -44,15 +56,4 @@ public class ByteArrayBase64Serializer extends ConfigurableValueTypeSerializer<b
         generator.write(getEncoder(marshaller.getJsonbContext().getConfigProperties().getBinaryDataStrategy()).encodeToString(obj));
     }
 
-    private Base64.Encoder getEncoder(String strategy) {
-        switch (strategy) {
-            case BinaryDataStrategy.BASE_64:
-                return Base64.getEncoder();
-            case BinaryDataStrategy.BASE_64_URL:
-                return Base64.getUrlEncoder();
-            default:
-                throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR,
-                        "Invalid strategy: " + strategy));
-        }
-    }
 }

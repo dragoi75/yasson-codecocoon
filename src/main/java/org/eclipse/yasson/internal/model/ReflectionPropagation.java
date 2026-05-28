@@ -25,24 +25,14 @@ public class ReflectionPropagation extends PropertyValuePropagation {
 
     private SetValueCommand setValueCommand;
 
-    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
-        super(property, strategy);
+    @Override
+    Object getValue(Object object) {
+        return getValueCommand.getValue(object);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void acceptMethod(Method method, OperationMode mode) {
-        switch (mode) {
-            case GET:
-                getValueCommand = new GetFromGetter(method);
-                break;
-            case SET:
-                setValueCommand = new SetWithSetter(method);
-                break;
-            default: throw new IllegalStateException("Unknown mode");
-        }
+    void setValue(Object object, Object value) {
+        setValueCommand.setValue(object, value);
     }
 
     /**
@@ -61,13 +51,24 @@ public class ReflectionPropagation extends PropertyValuePropagation {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    void setValue(Object object, Object value) {
-        setValueCommand.setValue(object, value);
+    protected void acceptMethod(Method method, OperationMode mode) {
+        switch (mode) {
+            case GET:
+                getValueCommand = new GetFromGetter(method);
+                break;
+            case SET:
+                setValueCommand = new SetWithSetter(method);
+                break;
+            default: throw new IllegalStateException("Unknown mode");
+        }
     }
 
-    @Override
-    Object getValue(Object object) {
-        return getValueCommand.getValue(object);
+    public ReflectionPropagation(Property property, PropertyVisibilityStrategy strategy) {
+        super(property, strategy);
     }
+
 }

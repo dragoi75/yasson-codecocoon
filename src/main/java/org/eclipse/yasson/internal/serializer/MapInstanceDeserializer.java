@@ -44,6 +44,23 @@ public class MapInstanceDeserializer<T extends Map<?,?>> extends BaseContainerDe
 
     private final T valueObject;
 
+    @SuppressWarnings("unchecked")
+    private <V> void putEntry(String entryName, V entryObj) {
+        ((Map<String, V>) getInstance(null)).put(entryName, entryObj);
+    }
+
+    @Override
+    protected void deserializeNextValue(JsonParser tokenReader, JsonbUnmarshaller unmarshalHelper) {
+        final JsonbDeserializer<?> valueHandler = createCollectionOrMapItemDeserializer(valueRuntimeType, unmarshalHelper.getJsonbContext());
+        addResult(valueHandler.deserialize(tokenReader, unmarshalHelper, valueRuntimeType));
+    }
+
+    @Override
+    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor tokenReader) {
+        tokenReader.moveTo(JsonParser.Event.START_OBJECT);
+        return tokenReader.getCurrentLevel();
+    }
+
     /**
      * Create instance of current item with its builder.
      *
@@ -57,13 +74,6 @@ public class MapInstanceDeserializer<T extends Map<?,?>> extends BaseContainerDe
                 : Object.class;
 
         this.valueObject = createMapInstance(deserializerFactory);
-    }
-
-    @SuppressWarnings("unchecked")
-    private T createMapInstance(JsonValueDeserializerBuilder deserializerFactory) {
-        Class<?> concreteClass = ReflectiveTypeUtils.getRawType(getRuntimeType());
-        return concreteClass.isInterface() ? (T) getMapImpl(concreteClass, deserializerFactory)
-                : (T) deserializerFactory.getJsonbContext().getInstanceCreator().createInstance(concreteClass);
     }
 
     private Map getMapImpl(Class interfaceClass, JsonValueDeserializerBuilder deserializerFactory) {
@@ -82,25 +92,16 @@ public class MapInstanceDeserializer<T extends Map<?,?>> extends BaseContainerDe
         return valueObject;
     }
 
+    @SuppressWarnings("unchecked")
+    private T createMapInstance(JsonValueDeserializerBuilder deserializerFactory) {
+        Class<?> concreteClass = ReflectiveTypeUtils.getRawType(getRuntimeType());
+        return concreteClass.isInterface() ? (T) getMapImpl(concreteClass, deserializerFactory)
+                : (T) deserializerFactory.getJsonbContext().getInstanceCreator().createInstance(concreteClass);
+    }
+
     @Override
     public void addResult(Object outputValue) {
         putEntry(parserContext.getLastKeyName(), nullToOptionalEmpty(valueRuntimeType, outputValue));
     }
 
-    @SuppressWarnings("unchecked")
-    private <V> void putEntry(String entryName, V entryObj) {
-        ((Map<String, V>) getInstance(null)).put(entryName, entryObj);
-    }
-
-    @Override
-    protected void deserializeNextValue(JsonParser tokenReader, JsonbUnmarshaller unmarshalHelper) {
-        final JsonbDeserializer<?> valueHandler = createCollectionOrMapItemDeserializer(valueRuntimeType, unmarshalHelper.getJsonbContext());
-        addResult(valueHandler.deserialize(tokenReader, unmarshalHelper, valueRuntimeType));
-    }
-
-    @Override
-    protected JsonbStreamingParser.LevelParseContext moveToFirstToken(JsonbCursor tokenReader) {
-        tokenReader.moveTo(JsonParser.Event.START_OBJECT);
-        return tokenReader.getCurrentLevel();
-    }
 }

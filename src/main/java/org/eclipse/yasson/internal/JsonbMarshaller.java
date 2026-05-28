@@ -43,63 +43,17 @@ public class JsonbMarshaller extends ProcessingEnvironment implements Serializat
 
     private final Type resolvedType;
 
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbRuntime Current context.
-     * @param rootType Type of root object.
-     */
-    public JsonbMarshaller(JsonbRuntimeContext jsonbRuntime, Type rootType) {
-        super(jsonbRuntime);
-        this.resolvedType = rootType;
-    }
-
-    /**
-     * Creates Marshaller for generation to String.
-     *
-     * @param jsonbRuntime Current context.
-     */
-    public JsonbMarshaller(JsonbRuntimeContext jsonbRuntime) {
-        super(jsonbRuntime);
-        this.resolvedType = null;
-    }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     *
-     * @param value object to marshall
-     * @param generator generator to use
-     * @param shouldClose if generator should be closed
-     */
-    public void marshal(Object value, JsonGenerator generator, boolean shouldClose) {
-        try {
-            serializeRootValue(value, generator);
-        } catch (JsonbException jsonbException) {
-            JSONB_MARSHALLER_LOG.severe(jsonbException.getMessage());
-            throw jsonbException;
-        } catch (Exception jsonbException) {
-            JSONB_MARSHALLER_LOG.severe(jsonbException.getMessage());
-            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, jsonbException.getMessage()), jsonbException);
-        } finally {
-            try {
-                if (shouldClose) {
-                    generator.close();
-                }
-            } catch (JsonGenerationException generationException) {
-                JSONB_MARSHALLER_LOG.severe(generationException.getMessage());
-            }
+    private JsonbSerializer<?> getRootSerializer(Class<?> rootClass) {
+        final ContainerSerializerFactory serializerFactory = getMappingContext().getSerializerProvider(rootClass);
+        if (null != serializerFactory) {
+            return serializerFactory.createSerializer(new JsonbPropertyDescriptor().setRuntimeType(resolvedType));
         }
-    }
-
-    /**
-     * Marshals given object to provided Writer or OutputStream.
-     * Closes the generator on completion.
-     *
-     * @param value object to marshall
-     * @param generator generator to use
-     */
-    public void marshal(Object value, JsonGenerator generator) {
-        marshal(value, generator, true);
+        SerializationBuilder serializationBuilder = new SerializationBuilder(jsonbContext).setObjectClass(rootClass).setType(resolvedType);
+        if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClass)) {
+            ClassDescriptor classDescriptor = getMappingContext().getOrCreateClassModel(rootClass);
+            serializationBuilder.setCustomization(classDescriptor.getCustomization());
+        }
+        return serializationBuilder.buildSerializer();
     }
 
     /**
@@ -111,6 +65,16 @@ public class JsonbMarshaller extends ProcessingEnvironment implements Serializat
      */
     public void marshalWithoutClose(Object value, JsonGenerator generator) {
         marshal(value, generator, false);
+    }
+
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbRuntime Current context.
+     */
+    public JsonbMarshaller(JsonbRuntimeContext jsonbRuntime) {
+        super(jsonbRuntime);
+        this.resolvedType = null;
     }
 
     @Override
@@ -143,16 +107,53 @@ public class JsonbMarshaller extends ProcessingEnvironment implements Serializat
         resolvedSerializer.serialize(rootValue, jsonGen, this);
     }
 
-    private JsonbSerializer<?> getRootSerializer(Class<?> rootClass) {
-        final ContainerSerializerFactory serializerFactory = getMappingContext().getSerializerProvider(rootClass);
-        if (null != serializerFactory) {
-            return serializerFactory.createSerializer(new JsonbPropertyDescriptor().setRuntimeType(resolvedType));
-        }
-        SerializationBuilder serializationBuilder = new SerializationBuilder(jsonbContext).setObjectClass(rootClass).setType(resolvedType);
-        if (!DefaultSerializerRegistry.getInstance().isKnownType(rootClass)) {
-            ClassDescriptor classDescriptor = getMappingContext().getOrCreateClassModel(rootClass);
-            serializationBuilder.setCustomization(classDescriptor.getCustomization());
-        }
-        return serializationBuilder.buildSerializer();
+    /**
+     * Creates Marshaller for generation to String.
+     *
+     * @param jsonbRuntime Current context.
+     * @param rootType Type of root object.
+     */
+    public JsonbMarshaller(JsonbRuntimeContext jsonbRuntime, Type rootType) {
+        super(jsonbRuntime);
+        this.resolvedType = rootType;
     }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     * Closes the generator on completion.
+     *
+     * @param value object to marshall
+     * @param generator generator to use
+     */
+    public void marshal(Object value, JsonGenerator generator) {
+        marshal(value, generator, true);
+    }
+
+    /**
+     * Marshals given object to provided Writer or OutputStream.
+     *
+     * @param value object to marshall
+     * @param generator generator to use
+     * @param shouldClose if generator should be closed
+     */
+    public void marshal(Object value, JsonGenerator generator, boolean shouldClose) {
+        try {
+            serializeRootValue(value, generator);
+        } catch (JsonbException jsonbException) {
+            JSONB_MARSHALLER_LOG.severe(jsonbException.getMessage());
+            throw jsonbException;
+        } catch (Exception jsonbException) {
+            JSONB_MARSHALLER_LOG.severe(jsonbException.getMessage());
+            throw new JsonbException(ResourceBundleMessages.getMessage(MessageConstants.INTERNAL_ERROR, jsonbException.getMessage()), jsonbException);
+        } finally {
+            try {
+                if (shouldClose) {
+                    generator.close();
+                }
+            } catch (JsonGenerationException generationException) {
+                JSONB_MARSHALLER_LOG.severe(generationException.getMessage());
+            }
+        }
+    }
+
 }

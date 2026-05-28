@@ -26,15 +26,6 @@ import java.util.OptionalLong;
  */
 public class OptionalLongSerializer extends ConfigurableValueTypeSerializer<OptionalLong> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializationSettings Model customization.
-     */
-    public OptionalLongSerializer(SerializationCustomization serializationSettings) {
-        super(serializationSettings);
-    }
-
     @Override
     protected void serializeValue(OptionalLong optionalLong, JsonGenerator jsonWriter, JsonbMarshaller marshaller) {
         if (!optionalLong.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalLongSerializer extends ConfigurableValueTypeSerializer<Opti
             jsonWriter.write(optionalLong.getAsLong());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializationSettings Model customization.
+     */
+    public OptionalLongSerializer(SerializationCustomization serializationSettings) {
+        super(serializationSettings);
+    }
+
 }

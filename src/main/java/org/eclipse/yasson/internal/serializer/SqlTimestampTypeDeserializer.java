@@ -30,20 +30,9 @@ public class SqlTimestampTypeDeserializer extends AbstractDateTimeDeserializer<T
 
     private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC);
 
-    /**
-     * Creates an instance.
-     *
-     * @param customization Model customization.
-     */
-    public SqlTimestampTypeDeserializer(SerializationCustomization customization) {
-        super(Timestamp.class, customization);
-    }
-
-    /**
-     * No arg constructor in order to make usable in {@link javax.json.bind.annotation.JsonbTypeDeserializer}.
-     */
-    public SqlTimestampTypeDeserializer() {
-        super(Timestamp.class, null);
+    private Instant getInstant(TemporalAccessor parsed) {
+        LocalDateTime local = LocalDateTime.from(parsed);
+        return local.atZone(ZoneId.of("UTC")).toInstant();
     }
 
     @Override
@@ -63,9 +52,20 @@ public class SqlTimestampTypeDeserializer extends AbstractDateTimeDeserializer<T
         return Timestamp.from(getInstant(parsed));
     }
 
-    private Instant getInstant(TemporalAccessor parsed) {
-        LocalDateTime local = LocalDateTime.from(parsed);
-        return local.atZone(ZoneId.of("UTC")).toInstant();
+    /**
+     * Creates an instance.
+     *
+     * @param customization Model customization.
+     */
+    public SqlTimestampTypeDeserializer(SerializationCustomization customization) {
+        super(Timestamp.class, customization);
     }
-    
+
+    /**
+     * No arg constructor in order to make usable in {@link javax.json.bind.annotation.JsonbTypeDeserializer}.
+     */
+    public SqlTimestampTypeDeserializer() {
+        super(Timestamp.class, null);
+    }
+
 }

@@ -26,15 +26,6 @@ import java.util.OptionalDouble;
  */
 public class OptionalDoubleSerializer extends ConfigurableValueTypeSerializer<OptionalDouble> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param serializationConfig Model customization.
-     */
-    public OptionalDoubleSerializer(SerializationCustomization serializationConfig) {
-        super(serializationConfig);
-    }
-
     @Override
     protected void serializeValue(OptionalDouble optionalDoubleValue, JsonGenerator jsonWriter, JsonbMarshaller marshaller) {
         if (!optionalDoubleValue.isPresent()) {
@@ -45,4 +36,14 @@ public class OptionalDoubleSerializer extends ConfigurableValueTypeSerializer<Op
             jsonWriter.write(optionalDoubleValue.getAsDouble());
         }
     }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param serializationConfig Model customization.
+     */
+    public OptionalDoubleSerializer(SerializationCustomization serializationConfig) {
+        super(serializationConfig);
+    }
+
 }

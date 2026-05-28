@@ -43,12 +43,6 @@ public class ClassMappingContext {
 
         private JsonbRuntimeContext jsonbRuntime;
 
-        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser descriptorParser, JsonbRuntimeContext jsonbRuntime) {
-            this.parentDescriptor = parentDescriptor;
-            this.descriptorParser = descriptorParser;
-            this.jsonbRuntime = jsonbRuntime;
-        }
-
         @Override
         public ClassDescriptor apply(Class targetClass) {
             final JsonbAnnotatedElement<Class<?>> annotatedClassElement = jsonbRuntime.getAnnotationIntrospector().collectAnnotations(targetClass);
@@ -57,6 +51,13 @@ public class ClassMappingContext {
             descriptorParser.parseProperties(createdClassDescriptor, annotatedClassElement);
             return createdClassDescriptor;
         }
+
+        public ClassModelParserFunction(ClassDescriptor parentDescriptor, ClassParser descriptorParser, JsonbRuntimeContext jsonbRuntime) {
+            this.parentDescriptor = parentDescriptor;
+            this.descriptorParser = descriptorParser;
+            this.jsonbRuntime = jsonbRuntime;
+        }
+
     }
 
     private final JsonbRuntimeContext jsonbRuntime;
@@ -68,14 +69,33 @@ public class ClassMappingContext {
     private final ClassParser descriptorParser;
 
     /**
-     * Create mapping context which is scoped to jsonb runtime.
+     * Gets serializer provider for given class.
      *
-     * @param jsonbRuntime Context. Required.
+     * @param targetType Class to get serializer provider for.
+     * @return Serializer provider.
      */
-    public ClassMappingContext(JsonbRuntimeContext jsonbRuntime) {
-        Objects.requireNonNull(jsonbRuntime);
-        this.jsonbRuntime = jsonbRuntime;
-        this.descriptorParser = new ClassParser(jsonbRuntime);
+    public ContainerSerializerFactory getSerializerProvider(Class<?> targetType) {
+        return serializerFactoryMap.get(targetType);
+    }
+
+    /**
+     * Search for class model, without parsing if not found.
+     *
+     * @param targetType Class to search by or parse, not null.
+     * @return Model of a class if found.
+     */
+    public ClassDescriptor getClassModel(Class<?> targetType) {
+        return classModelMap.get(targetType);
+    }
+
+    /**
+     * Adds given serializer provider for given class.
+     *
+     * @param targetType Class to add serializer provider for.
+     * @param containerFactory Serializer provider to add.
+     */
+    public void registerSerializerProvider(Class<?> targetType, ContainerSerializerFactory containerFactory) {
+        serializerFactoryMap.putIfAbsent(targetType, containerFactory);
     }
 
     /**
@@ -138,32 +158,14 @@ public class ClassMappingContext {
     }
 
     /**
-     * Search for class model, without parsing if not found.
+     * Create mapping context which is scoped to jsonb runtime.
      *
-     * @param targetType Class to search by or parse, not null.
-     * @return Model of a class if found.
+     * @param jsonbRuntime Context. Required.
      */
-    public ClassDescriptor getClassModel(Class<?> targetType) {
-        return classModelMap.get(targetType);
+    public ClassMappingContext(JsonbRuntimeContext jsonbRuntime) {
+        Objects.requireNonNull(jsonbRuntime);
+        this.jsonbRuntime = jsonbRuntime;
+        this.descriptorParser = new ClassParser(jsonbRuntime);
     }
 
-    /**
-     * Gets serializer provider for given class.
-     *
-     * @param targetType Class to get serializer provider for.
-     * @return Serializer provider.
-     */
-    public ContainerSerializerFactory getSerializerProvider(Class<?> targetType) {
-        return serializerFactoryMap.get(targetType);
-    }
-
-    /**
-     * Adds given serializer provider for given class.
-     *
-     * @param targetType Class to add serializer provider for.
-     * @param containerFactory Serializer provider to add.
-     */
-    public void registerSerializerProvider(Class<?> targetType, ContainerSerializerFactory containerFactory) {
-        serializerFactoryMap.putIfAbsent(targetType, containerFactory);
-    }
 }

@@ -27,10 +27,6 @@ public class ShortArrayDeserializerImpl extends AbstractArrayDeserializer<short[
 
     private final List<Short> shortList = new ArrayList<>();
 
-    protected ShortArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
-        super(deserializerFactory);
-    }
-
     @Override
     protected List<?> getItems() {
         return shortList;
@@ -47,4 +43,9 @@ public class ShortArrayDeserializerImpl extends AbstractArrayDeserializer<short[
         }
         return shorts;
     }
+
+    protected ShortArrayDeserializerImpl(JsonValueDeserializerBuilder deserializerFactory) {
+        super(deserializerFactory);
+    }
+
 }
